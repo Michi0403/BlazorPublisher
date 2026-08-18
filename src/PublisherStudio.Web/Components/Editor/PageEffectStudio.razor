@@ -140,10 +140,27 @@
 }
 
 @code {
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the value is visible applies to the page effect studio state.
+    /// </summary>
+    /// <value>The visible value exposed by <see cref="PageEffectStudio"/>.</value>
     [Parameter] public bool Visible { get; set; }
+    /// <summary>
+    /// Gets or sets the state value that forms part of the page effect studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The state value exposed by <see cref="PageEffectStudio"/>.</value>
     [Parameter, EditorRequired] public EditorStateService State { get; set; } = default!;
+    /// <summary>
+    /// Gets or sets the closed value that forms part of the page effect studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The closed value exposed by <see cref="PageEffectStudio"/>.</value>
     [Parameter] public EventCallback Closed { get; set; }
 
+    /// <summary>
+    /// Performs close for <see cref="PageEffectStudio"/>, keeping the operation consistent with the state and invariants of the surrounding page effect studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task Close() {
         try
         {
@@ -156,6 +173,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs change page color for <see cref="PageEffectStudio"/>, keeping the operation consistent with the state and invariants of the surrounding page effect studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the page effect studio operation and used when producing its result.</param>
     private void ChangePageColor(ChangeEventArgs args) {
         try
         {
@@ -167,6 +188,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets transparent for <see cref="PageEffectStudio"/>, keeping the operation consistent with the state and invariants of the surrounding page effect studio workflow.
+    /// </summary>
     private void SetTransparent() {
         try
         {
@@ -179,6 +203,10 @@
         }
     }
 
+    /// <summary>
+    /// Adds effect for <see cref="PageEffectStudio"/>, keeping the operation consistent with the state and invariants of the surrounding page effect studio workflow.
+    /// </summary>
+    /// <param name="kind">Kind value supplied to the page effect studio operation and used when producing its result.</param>
     private void AddEffect(PublicationPageEffectKind kind) {
         try
         {
@@ -207,6 +235,10 @@
         }
     }
 
+    /// <summary>
+    /// Removes effect for <see cref="PageEffectStudio"/>, keeping the operation consistent with the state and invariants of the surrounding page effect studio workflow.
+    /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
     private void RemoveEffect(Guid id) {
         try
         {
@@ -219,6 +251,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs update for <see cref="PageEffectStudio"/>, keeping the operation consistent with the state and invariants of the surrounding page effect studio workflow.
+    /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="action">Action value supplied to the page effect studio operation and used when producing its result.</param>
     private void Update(Guid id, Action<PublicationPageEffectLayer> action) {
         try
         {
@@ -235,6 +272,12 @@
         }
     }
 
+    /// <summary>
+    /// Updates text for <see cref="PageEffectStudio"/>, keeping the operation consistent with the state and invariants of the surrounding page effect studio workflow.
+    /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="args">Args value supplied to the page effect studio operation and used when producing its result.</param>
+    /// <param name="update">Update value supplied to the page effect studio operation and used when producing its result.</param>
     private void UpdateText(Guid id, ChangeEventArgs args, Action<PublicationPageEffectLayer, string> update) {
         try
         {
@@ -247,6 +290,12 @@
         }
     }
 
+    /// <summary>
+    /// Updates bool for <see cref="PageEffectStudio"/>, keeping the operation consistent with the state and invariants of the surrounding page effect studio workflow.
+    /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="args">Args value supplied to the page effect studio operation and used when producing its result.</param>
+    /// <param name="update">Update value supplied to the page effect studio operation and used when producing its result.</param>
     private void UpdateBool(Guid id, ChangeEventArgs args, Action<PublicationPageEffectLayer, bool> update) {
         try
         {
@@ -259,6 +308,14 @@
         }
     }
 
+    /// <summary>
+    /// Updates double for <see cref="PageEffectStudio"/>, keeping the operation consistent with the state and invariants of the surrounding page effect studio workflow.
+    /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="args">Args value supplied to the page effect studio operation and used when producing its result.</param>
+    /// <param name="minimum">Minimum value supplied to the page effect studio operation and used when producing its result.</param>
+    /// <param name="maximum">Maximum value supplied to the page effect studio operation and used when producing its result.</param>
+    /// <param name="update">Update value supplied to the page effect studio operation and used when producing its result.</param>
     private void UpdateDouble(Guid id, ChangeEventArgs args, double minimum, double maximum, Action<PublicationPageEffectLayer, double> update)
     {
         try
@@ -274,6 +331,14 @@
         }
     }
 
+    /// <summary>
+    /// Updates int for <see cref="PageEffectStudio"/>, keeping the operation consistent with the state and invariants of the surrounding page effect studio workflow.
+    /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="args">Args value supplied to the page effect studio operation and used when producing its result.</param>
+    /// <param name="minimum">Minimum value supplied to the page effect studio operation and used when producing its result.</param>
+    /// <param name="maximum">Maximum value supplied to the page effect studio operation and used when producing its result.</param>
+    /// <param name="update">Update value supplied to the page effect studio operation and used when producing its result.</param>
     private void UpdateInt(Guid id, ChangeEventArgs args, int minimum, int maximum, Action<PublicationPageEffectLayer, int> update)
     {
         try
@@ -289,6 +354,11 @@
         }
     }
 
+    /// <summary>
+    /// Updates placement for <see cref="PageEffectStudio"/>, keeping the operation consistent with the state and invariants of the surrounding page effect studio workflow.
+    /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="args">Args value supplied to the page effect studio operation and used when producing its result.</param>
     private void UpdatePlacement(Guid id, ChangeEventArgs args) {
         try
         {
@@ -300,6 +370,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Updates kind for <see cref="PageEffectStudio"/>, keeping the operation consistent with the state and invariants of the surrounding page effect studio workflow.
+    /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="args">Args value supplied to the page effect studio operation and used when producing its result.</param>
     private void UpdateKind(Guid id, ChangeEventArgs args) {
         try
         {
@@ -311,6 +386,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Updates blend mode for <see cref="PageEffectStudio"/>, keeping the operation consistent with the state and invariants of the surrounding page effect studio workflow.
+    /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="args">Args value supplied to the page effect studio operation and used when producing its result.</param>
     private void UpdateBlendMode(Guid id, ChangeEventArgs args) {
         try
         {
@@ -322,6 +402,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Updates easing for <see cref="PageEffectStudio"/>, keeping the operation consistent with the state and invariants of the surrounding page effect studio workflow.
+    /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="args">Args value supplied to the page effect studio operation and used when producing its result.</param>
     private void UpdateEasing(Guid id, ChangeEventArgs args) {
         try
         {
@@ -334,12 +419,24 @@
         }
     }
 
+    /// <summary>
+    /// Updates enum for <see cref="PageEffectStudio"/>, keeping the operation consistent with the state and invariants of the surrounding page effect studio workflow.
+    /// </summary>
+    /// <typeparam name="T">Type used for t values handled by <see cref="PageEffectStudio"/>.</typeparam>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="args">Args value supplied to the page effect studio operation and used when producing its result.</param>
+    /// <param name="update">Update value supplied to the page effect studio operation and used when producing its result.</param>
     private void UpdateEnum<T>(Guid id, ChangeEventArgs args, Action<PublicationPageEffectLayer, T> update) where T : struct, Enum
     {
         if (Enum.TryParse<T>(args.Value?.ToString(), true, out var value)) Update(id, effect => update(effect, value));
     }
 
 
+    /// <summary>
+    /// Performs safe update for <see cref="PageEffectStudio"/>, keeping the operation consistent with the state and invariants of the surrounding page effect studio workflow.
+    /// </summary>
+    /// <param name="operation">Operation value supplied to the page effect studio operation and used when producing its result.</param>
+    /// <param name="update">Update value supplied to the page effect studio operation and used when producing its result.</param>
     private void SafeUpdate(string operation, Action update)
     {
         try
@@ -362,6 +459,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs safe color for <see cref="PageEffectStudio"/>, keeping the operation consistent with the state and invariants of the surrounding page effect studio workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the page effect studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string SafeColor(string? value) {
         try
         {
@@ -373,6 +475,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs inv for <see cref="PageEffectStudio"/>, keeping the operation consistent with the state and invariants of the surrounding page effect studio workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the page effect studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Inv(double value) {
         try
         {
@@ -384,4 +491,5 @@
             throw;
         }
     }
+
 }

@@ -296,26 +296,95 @@
 }
 
 @code {
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the value is visible applies to the data visual editor state.
+    /// </summary>
+    /// <value>The visible value exposed by <see cref="DataVisualEditor"/>.</value>
     [Parameter] public bool Visible { get; set; }
+    /// <summary>
+    /// Gets or sets the state value that forms part of the data visual editor state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The state value exposed by <see cref="DataVisualEditor"/>.</value>
     [Parameter, EditorRequired] public EditorStateService State { get; set; } = default!;
+    /// <summary>
+    /// Gets or sets the saved value that forms part of the data visual editor state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The saved value exposed by <see cref="DataVisualEditor"/>.</value>
     [Parameter] public EventCallback Saved { get; set; }
+    /// <summary>
+    /// Gets or sets the cancelled value that forms part of the data visual editor state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The cancelled value exposed by <see cref="DataVisualEditor"/>.</value>
     [Parameter] public EventCallback Cancelled { get; set; }
+    /// <summary>
+    /// Gets or sets the manage data requested value that forms part of the data visual editor state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The manage data requested value exposed by <see cref="DataVisualEditor"/>.</value>
     [Parameter] public EventCallback ManageDataRequested { get; set; }
 
+    /// <summary>
+    /// Stores the internal visual context menu state used by <see cref="DataVisualEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private DxContextMenu _visualContextMenu = default!;
+    /// <summary>
+    /// Stores the internal was visible state used by <see cref="DataVisualEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _wasVisible;
+    /// <summary>
+    /// Stores the internal target identifier state used by <see cref="DataVisualEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private Guid? _targetId;
+    /// <summary>
+    /// Stores the internal draft state used by <see cref="DataVisualEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private DataVisualElement? _draft;
+    /// <summary>
+    /// Gets the current data value that forms part of the data visual editor state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The current data value exposed by <see cref="DataVisualEditor"/>.</value>
     private PublicationDataObject? CurrentData => _draft is null ? null : State.Document.DataObjects.FirstOrDefault(data => data.Id == _draft.DataObjectId);
+    /// <summary>
+    /// Gets the columns collection maintained or exposed by this data visual editor instance for downstream processing.
+    /// </summary>
+    /// <value>The columns value exposed by <see cref="DataVisualEditor"/>.</value>
     private IReadOnlyList<PublicationDataColumn> Columns => DataService.ResolveColumns(CurrentData);
+    /// <summary>
+    /// Gets the measure columns collection maintained or exposed by this data visual editor instance for downstream processing.
+    /// </summary>
+    /// <value>The measure columns value exposed by <see cref="DataVisualEditor"/>.</value>
     private IReadOnlyList<PublicationDataColumn> MeasureColumns => NumericColumns.Count > 0 ? NumericColumns : Columns;
+    /// <summary>
+    /// Gets the numeric columns collection maintained or exposed by this data visual editor instance for downstream processing.
+    /// </summary>
+    /// <value>The numeric columns value exposed by <see cref="DataVisualEditor"/>.</value>
     private IReadOnlyList<PublicationDataColumn> NumericColumns => Columns
         .Where(column => column.ValueKind is PublicationDataValueKind.Number or PublicationDataValueKind.Boolean)
         .ToArray();
+    /// <summary>
+    /// Gets a value indicating whether allows multiple value fields applies to the data visual editor state.
+    /// </summary>
+    /// <value>The allows multiple value fields value exposed by <see cref="DataVisualEditor"/>.</value>
     private bool AllowsMultipleValueFields => _draft?.VisualKind is DataVisualKind.CartesianChart or DataVisualKind.PolarChart or DataVisualKind.BarGauge or DataVisualKind.CircularGauge or DataVisualKind.LinearGauge;
+    /// <summary>
+    /// Gets a value indicating whether aggregation applies to the data visual editor state.
+    /// </summary>
+    /// <value>The supports aggregation value exposed by <see cref="DataVisualEditor"/>.</value>
     private bool SupportsAggregation => _draft?.VisualKind is DataVisualKind.CartesianChart or DataVisualKind.PieChart or DataVisualKind.PolarChart or DataVisualKind.Sparkline or DataVisualKind.RangeSelector or DataVisualKind.Funnel or DataVisualKind.Pyramid;
+    /// <summary>
+    /// Gets the mapping advice value that forms part of the data visual editor state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The mapping advice value exposed by <see cref="DataVisualEditor"/>.</value>
     private string MappingAdvice => BuildMappingAdvice();
+    /// <summary>
+    /// Gets a value indicating whether save applies to the data visual editor state.
+    /// </summary>
+    /// <value>The can save value exposed by <see cref="DataVisualEditor"/>.</value>
     private bool CanSave => _draft is not null && CurrentData is not null && ValidateFields(_draft);
+    /// <summary>
+    /// Gets the validation text value that forms part of the data visual editor state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The validation text value exposed by <see cref="DataVisualEditor"/>.</value>
     private string ValidationText => CurrentData is null
         ? "Choose or create a data object."
         : _draft is not null && !ValidateFields(_draft)
@@ -324,6 +393,9 @@
                 ? "This visual uses an embedded snapshot and the configured web binding."
                 : "The visual uses publication data stored in the document.";
 
+    /// <summary>
+    /// Handles the parameters set lifecycle or event notification for <see cref="DataVisualEditor"/>, updating the state required by the surrounding workflow.
+    /// </summary>
     protected override void OnParametersSet()
     {
         try
@@ -352,6 +424,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs save for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task Save()
     {
         try
@@ -373,6 +449,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs show visual context menu for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the data visual editor operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task ShowVisualContextMenu(MouseEventArgs args) {
         try
         {
@@ -384,6 +465,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Determines whether cel for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task Cancel() {
         try
         {
@@ -395,6 +480,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request manage for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestManage() {
         try
         {
@@ -406,6 +495,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs refresh for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task Refresh()
     {
         try
@@ -421,6 +514,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets kind for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
+    /// <param name="kind">Kind value supplied to the data visual editor operation and used when producing its result.</param>
     private void SetKind(DataVisualKind kind)
     {
         try
@@ -439,6 +536,9 @@
         }
     }
 
+    /// <summary>
+    /// Sets cartesian chart for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
     private void SetCartesianChart() {
         try
         {
@@ -450,6 +550,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets pie chart for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
     private void SetPieChart() {
         try
         {
@@ -461,6 +564,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets polar chart for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
     private void SetPolarChart() {
         try
         {
@@ -472,6 +578,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets sparkline for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
     private void SetSparkline() {
         try
         {
@@ -483,6 +592,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets bar gauge for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
     private void SetBarGauge() {
         try
         {
@@ -494,6 +606,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets circular gauge for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
     private void SetCircularGauge() {
         try
         {
@@ -505,6 +620,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets linear gauge for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
     private void SetLinearGauge() {
         try
         {
@@ -516,6 +634,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets range selector for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
     private void SetRangeSelector() {
         try
         {
@@ -527,6 +648,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets sankey for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
     private void SetSankey() {
         try
         {
@@ -538,6 +662,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets funnel for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
     private void SetFunnel() {
         try
         {
@@ -549,6 +676,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets pyramid for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
     private void SetPyramid() {
         try
         {
@@ -560,6 +690,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets tree map for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
     private void SetTreeMap() {
         try
         {
@@ -571,6 +704,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets data table for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
     private void SetDataTable() {
         try
         {
@@ -582,6 +718,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets kpi progress for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
     private void SetKpiProgress() {
         try
         {
@@ -594,6 +733,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs change data object for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the data visual editor operation and used when producing its result.</param>
     private void ChangeDataObject(ChangeEventArgs args)
     {
         try
@@ -610,6 +753,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs toggle value field for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
+    /// <param name="field">Field value supplied to the data visual editor operation and used when producing its result.</param>
+    /// <param name="args">Args value supplied to the data visual editor operation and used when producing its result.</param>
     private void ToggleValueField(string field, ChangeEventArgs args)
     {
         try
@@ -629,6 +777,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs change title for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the data visual editor operation and used when producing its result.</param>
     private void ChangeTitle(ChangeEventArgs args) {
         try
         {
@@ -640,6 +792,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change argument field for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the data visual editor operation and used when producing its result.</param>
     private void ChangeArgumentField(ChangeEventArgs args) {
         try
         {
@@ -651,6 +807,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change series field for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the data visual editor operation and used when producing its result.</param>
     private void ChangeSeriesField(ChangeEventArgs args) {
         try
         {
@@ -662,6 +822,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change argument mode for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the data visual editor operation and used when producing its result.</param>
     private void ChangeArgumentMode(ChangeEventArgs args) {
         try
         {
@@ -673,6 +837,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change aggregation mode for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the data visual editor operation and used when producing its result.</param>
     private void ChangeAggregationMode(ChangeEventArgs args) {
         try
         {
@@ -684,6 +852,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change sort mode for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the data visual editor operation and used when producing its result.</param>
     private void ChangeSortMode(ChangeEventArgs args) {
         try
         {
@@ -695,6 +867,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change low value field for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the data visual editor operation and used when producing its result.</param>
     private void ChangeLowValueField(ChangeEventArgs args) {
         try
         {
@@ -706,6 +882,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change high value field for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the data visual editor operation and used when producing its result.</param>
     private void ChangeHighValueField(ChangeEventArgs args) {
         try
         {
@@ -717,6 +897,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change open value field for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the data visual editor operation and used when producing its result.</param>
     private void ChangeOpenValueField(ChangeEventArgs args) {
         try
         {
@@ -728,6 +912,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change close value field for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the data visual editor operation and used when producing its result.</param>
     private void ChangeCloseValueField(ChangeEventArgs args) {
         try
         {
@@ -739,6 +927,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change size field for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the data visual editor operation and used when producing its result.</param>
     private void ChangeSizeField(ChangeEventArgs args) {
         try
         {
@@ -750,6 +942,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change target field for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the data visual editor operation and used when producing its result.</param>
     private void ChangeTargetField(ChangeEventArgs args) {
         try
         {
@@ -761,6 +957,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change parent field for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the data visual editor operation and used when producing its result.</param>
     private void ChangeParentField(ChangeEventArgs args) {
         try
         {
@@ -772,6 +972,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change cartesian style for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the data visual editor operation and used when producing its result.</param>
     private void ChangeCartesianStyle(ChangeEventArgs args) {
         try
         {
@@ -783,6 +987,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change pie style for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the data visual editor operation and used when producing its result.</param>
     private void ChangePieStyle(ChangeEventArgs args) {
         try
         {
@@ -794,6 +1002,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change polar style for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the data visual editor operation and used when producing its result.</param>
     private void ChangePolarStyle(ChangeEventArgs args) {
         try
         {
@@ -805,6 +1017,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change sparkline style for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the data visual editor operation and used when producing its result.</param>
     private void ChangeSparklineStyle(ChangeEventArgs args) {
         try
         {
@@ -816,6 +1032,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change minimum for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the data visual editor operation and used when producing its result.</param>
     private void ChangeMinimum(ChangeEventArgs args) {
         try
         {
@@ -827,6 +1047,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change maximum for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the data visual editor operation and used when producing its result.</param>
     private void ChangeMaximum(ChangeEventArgs args) {
         try
         {
@@ -838,6 +1062,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change row limit for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the data visual editor operation and used when producing its result.</param>
     private void ChangeRowLimit(ChangeEventArgs args) {
         try
         {
@@ -849,6 +1077,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle title for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the data visual editor operation and used when producing its result.</param>
     private void ToggleTitle(ChangeEventArgs args) {
         try
         {
@@ -860,6 +1092,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle legend for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the data visual editor operation and used when producing its result.</param>
     private void ToggleLegend(ChangeEventArgs args) {
         try
         {
@@ -871,6 +1107,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle labels for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the data visual editor operation and used when producing its result.</param>
     private void ToggleLabels(ChangeEventArgs args) {
         try
         {
@@ -882,6 +1122,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle filter row for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the data visual editor operation and used when producing its result.</param>
     private void ToggleFilterRow(ChangeEventArgs args) {
         try
         {
@@ -894,6 +1138,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs toggle title menu for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
     private void ToggleTitleMenu() {
         try
         {
@@ -905,6 +1152,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle legend menu for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
     private void ToggleLegendMenu() {
         try
         {
@@ -916,6 +1166,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle labels menu for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
     private void ToggleLabelsMenu() {
         try
         {
@@ -927,6 +1180,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle filter row menu for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
     private void ToggleFilterRowMenu() {
         try
         {
@@ -938,6 +1194,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs reset visual options for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
     private void ResetVisualOptions()
     {
         try
@@ -962,6 +1221,12 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs checked text for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
+    /// <param name="selected">Value indicating whether selected should apply to this operation.</param>
+    /// <param name="text">Text value supplied to the data visual editor operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string CheckedText(bool selected, string text) {
         try
         {
@@ -974,6 +1239,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs clone for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
+    /// <param name="source">Source value supplied to the data visual editor operation and used when producing its result.</param>
+    /// <returns>The data visual element produced by the operation.</returns>
     private DataVisualElement Clone(DataVisualElement source)
     {
         try
@@ -994,6 +1264,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs copy settings for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
+    /// <param name="source">Source value supplied to the data visual editor operation and used when producing its result.</param>
+    /// <param name="target">Target value supplied to the data visual editor operation and used when producing its result.</param>
     private void CopySettings(DataVisualElement source, DataVisualElement target)
     {
         try
@@ -1017,6 +1292,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs kind icon for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
+    /// <param name="kind">Kind value supplied to the data visual editor operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string KindIcon(DataVisualKind kind) {
         try
         {
@@ -1035,6 +1315,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs kind name for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
+    /// <param name="kind">Kind value supplied to the data visual editor operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string KindName(DataVisualKind kind) {
         try
         {
@@ -1046,6 +1331,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs kind description for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
+    /// <param name="kind">Kind value supplied to the data visual editor operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string KindDescription(DataVisualKind kind) {
         try
         {
@@ -1074,6 +1364,15 @@
         }
     }
 
+    /// <summary>
+    /// Performs field select for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
+    /// <param name="label">Label value supplied to the data visual editor operation and used when producing its result.</param>
+    /// <param name="value">Value value supplied to the data visual editor operation and used when producing its result.</param>
+    /// <param name="changed">Changed value supplied to the data visual editor operation and used when producing its result.</param>
+    /// <param name="columns">Publication data column dependency used by the data visual editor workflow to provide the corresponding application capability.</param>
+    /// <param name="allowNone">Value indicating whether allow none should apply to this operation.</param>
+    /// <returns>The render fragment produced by the operation.</returns>
     private RenderFragment FieldSelect(string label, string value, Action<ChangeEventArgs> changed, IReadOnlyList<PublicationDataColumn> columns, bool allowNone = false) {
         try
         {
@@ -1103,6 +1402,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs auto map fields for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
     private void AutoMapFields()
     {
         try
@@ -1169,6 +1471,10 @@
         }
     }
 
+    /// <summary>
+    /// Builds mapping advice for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
+    /// <returns>The string produced by the operation.</returns>
     private string BuildMappingAdvice()
     {
         try
@@ -1201,6 +1507,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs aggregation label for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
+    /// <param name="mode">Mode value supplied to the data visual editor operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string AggregationLabel(DataVisualAggregationMode mode) {
         try
         {
@@ -1220,6 +1531,9 @@
         }
     }
 
+    /// <summary>
+    /// Ensures special fields for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
     private void EnsureSpecialFields()
     {
         try
@@ -1243,6 +1557,11 @@
         }
     }
 
+    /// <summary>
+    /// Validates fields for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
+    /// <param name="item">Item value supplied to the data visual editor operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool ValidateFields(DataVisualElement item)
     {
         try
@@ -1267,6 +1586,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs friendly for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the data visual editor operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Friendly(string value) {
         try
         {
@@ -1278,6 +1602,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs checked for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the data visual editor operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool Checked(ChangeEventArgs args) {
         try
         {
@@ -1289,6 +1618,12 @@
             throw;
         }
     }
+    /// <summary>
+    /// Attempts to double for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the data visual editor operation and used when producing its result.</param>
+    /// <param name="result">Result value supplied to the data visual editor operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool TryDouble(object? value, out double result) {
         try
         {
@@ -1300,6 +1635,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs inv for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the data visual editor operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Inv(double value) {
         try
         {
@@ -1311,4 +1651,5 @@
             throw;
         }
     }
+
 }

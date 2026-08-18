@@ -33,12 +33,41 @@
 </div>
 
 @code {
+
+    /// <summary>
+    /// Gets or sets the item value that forms part of the video media view state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The item value exposed by <see cref="VideoMediaView"/>.</value>
     [Parameter, EditorRequired] public VideoElement Item { get; set; } = default!;
 
+    /// <summary>
+    /// Gets the stable runtime key used to identify or correlate this video media view instance with related application state.
+    /// </summary>
+    /// <value>The runtime key value exposed by <see cref="VideoMediaView"/>.</value>
     private string RuntimeKey => $"publication-video-{Item.Id:N}";
+    /// <summary>
+    /// Gets the stable video identifier used to identify or correlate this video media view instance with related application state.
+    /// </summary>
+    /// <value>The video identifier value exposed by <see cref="VideoMediaView"/>.</value>
     private string VideoId => $"publication-video-source-{Item.Id:N}";
+    /// <summary>
+    /// Gets the stable canvas identifier used to identify or correlate this video media view instance with related application state.
+    /// </summary>
+    /// <value>The canvas identifier value exposed by <see cref="VideoMediaView"/>.</value>
     private string CanvasId => $"publication-video-effects-{Item.Id:N}";
+    /// <summary>
+    /// Tracks whether the browser video-effects runtime has installed this media instance; static prerender instances remain false.
+    /// </summary>
+    private bool _browserAttached;
+    /// <summary>
+    /// Gets the poster value that forms part of the video media view state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The poster value exposed by <see cref="VideoMediaView"/>.</value>
     private string Poster => Item.EffectiveSegments.FirstOrDefault()?.PosterDataUrl is { Length: > 0 } poster ? poster : Item.PosterDataUrl;
+    /// <summary>
+    /// Gets the fit mode value that forms part of the video media view state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The fit mode value exposed by <see cref="VideoMediaView"/>.</value>
     private string FitMode => Item.FitMode switch
     {
         PublicationVideoFitMode.Contain => "contain",
@@ -46,6 +75,11 @@
         _ => "cover"
     };
 
+    /// <summary>
+    /// Handles the after render async lifecycle or event notification for <see cref="VideoMediaView"/>, updating the state required by the surrounding workflow.
+    /// </summary>
+    /// <param name="firstRender">Value indicating whether first render should apply to this operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         try
@@ -60,6 +94,7 @@
                     forceCanvas = segment.VideoLayers.Any(LayerNeedsCanvas),
                     layers = segment.VideoLayers.Select(LayerPayload).ToArray()
                 }).ConfigureAwait(true);
+                _browserAttached = true;
             }
             catch { }
     
@@ -71,6 +106,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs layer needs canvas for <see cref="VideoMediaView"/>, keeping the operation consistent with the state and invariants of the surrounding video media view workflow.
+    /// </summary>
+    /// <param name="layer">Layer value supplied to the video media view operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool LayerNeedsCanvas(VideoEffectLayer layer) {
         try
         {
@@ -84,6 +124,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs layer payload for <see cref="VideoMediaView"/>, keeping the operation consistent with the state and invariants of the surrounding video media view workflow.
+    /// </summary>
+    /// <param name="layer">Layer value supplied to the video media view operation and used when producing its result.</param>
+    /// <returns>The object produced by the operation.</returns>
     private object LayerPayload(VideoEffectLayer layer) {
         try
         {
@@ -136,12 +181,20 @@
         }
     }
 
+    /// <summary>
+    /// Releases resources owned by <see cref="VideoMediaView"/> and leaves the video media view workflow in a safely disposed state.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     public async ValueTask DisposeAsync()
     {
         try
         {
-            try { await JS.InvokeVoidAsync("publisherVideoEffects.dispose", RuntimeKey).ConfigureAwait(true); }
-            catch { }
+            if (_browserAttached)
+            {
+                try { await JS.InvokeVoidAsync("publisherVideoEffects.dispose", RuntimeKey).ConfigureAwait(true); }
+                catch { }
+                finally { _browserAttached = false; }
+            }
     
         }
         catch (Exception __componentMethodException)
@@ -151,6 +204,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs time for <see cref="VideoMediaView"/>, keeping the operation consistent with the state and invariants of the surrounding video media view workflow.
+    /// </summary>
+    /// <param name="seconds">Seconds value supplied to the video media view operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Time(double seconds) {
         try
         {
@@ -162,6 +220,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs inv for <see cref="VideoMediaView"/>, keeping the operation consistent with the state and invariants of the surrounding video media view workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the video media view operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Inv(double value) {
         try
         {
@@ -173,4 +236,5 @@
             throw;
         }
     }
+
 }

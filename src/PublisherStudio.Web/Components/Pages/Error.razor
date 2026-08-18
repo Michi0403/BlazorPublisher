@@ -8,6 +8,10 @@
 </div>
 
 @code {
+
+    /// <summary>
+    /// Handles the initialized lifecycle or event notification for <see cref="Error"/>, updating the state required by the surrounding workflow.
+    /// </summary>
     protected override void OnInitialized()
     {
         try
@@ -22,4 +26,5 @@
             throw;
         }
     }
+
 }

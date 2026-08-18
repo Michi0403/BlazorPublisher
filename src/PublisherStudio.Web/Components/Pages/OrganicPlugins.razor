@@ -1,5 +1,5 @@
-@page "/organic-plugins"
 @rendermode InteractiveServer
+@page "/organic-plugins"
 @using System.Text.Json
 @implements IDisposable
 @inject ILocalGptDiscoveryActivationService DiscoveryActivation
@@ -421,27 +421,92 @@
 </main>
 
 @code {
+
+    /// <summary>
+    /// Stores the in-memory peers collection maintained internally by <see cref="OrganicPlugins"/> for its current workflow state.
+    /// </summary>
     private IReadOnlyList<OrganicPeerAdvertisement> _peers = [];
+    /// <summary>
+    /// Stores the in-memory capabilities collection maintained internally by <see cref="OrganicPlugins"/> for its current workflow state.
+    /// </summary>
     private IReadOnlyList<OrganicCapabilityDescriptor> _capabilities = [];
+    /// <summary>
+    /// Stores the in-memory permissions collection maintained internally by <see cref="OrganicPlugins"/> for its current workflow state.
+    /// </summary>
     private IReadOnlyList<OrganicPermissionRule> _permissions = [];
+    /// <summary>
+    /// Stores the in-memory work collection maintained internally by <see cref="OrganicPlugins"/> for its current workflow state.
+    /// </summary>
     private IReadOnlyList<OrganicPluginWorkItem> _work = [];
+    /// <summary>
+    /// Stores the in-memory results collection maintained internally by <see cref="OrganicPlugins"/> for its current workflow state.
+    /// </summary>
     private IReadOnlyList<OrganicPluginWorkItem> _results = [];
+    /// <summary>
+    /// Stores the in-memory text proposals collection maintained internally by <see cref="OrganicPlugins"/> for its current workflow state.
+    /// </summary>
     private IReadOnlyList<OrganicTextInsertionProposal> _textProposals = [];
+    /// <summary>
+    /// Stores the in-memory screen reader sessions collection maintained internally by <see cref="OrganicPlugins"/> for its current workflow state.
+    /// </summary>
     private IReadOnlyList<RecurringScreenReaderSession> _screenReaderSessions = [];
+    /// <summary>
+    /// Stores the internal screen reader selector state used by <see cref="OrganicPlugins"/> while executing its surrounding workflow.
+    /// </summary>
     private string _screenReaderSelector = "body";
+    /// <summary>
+    /// Stores the internal screen reader prompt state used by <see cref="OrganicPlugins"/> while executing its surrounding workflow.
+    /// </summary>
     private string _screenReaderPrompt = "Describe meaningful screen changes and suggest the next safe action.";
+    /// <summary>
+    /// Stores the internal screen reader interval seconds state used by <see cref="OrganicPlugins"/> while executing its surrounding workflow.
+    /// </summary>
     private int _screenReaderIntervalSeconds = 15;
+    /// <summary>
+    /// Stores the internal text generation target state used by <see cref="OrganicPlugins"/> while executing its surrounding workflow.
+    /// </summary>
     private string _textGenerationTarget = "PublisherStudio text component";
+    /// <summary>
+    /// Stores the internal text generation prompt state used by <see cref="OrganicPlugins"/> while executing its surrounding workflow.
+    /// </summary>
     private string _textGenerationPrompt = string.Empty;
+    /// <summary>
+    /// Stores the internal text generation team key state used by <see cref="OrganicPlugins"/> while executing its surrounding workflow.
+    /// </summary>
     private string _textGenerationTeamKey = "general";
+    /// <summary>
+    /// Stores the internal AI assist profile state used by <see cref="OrganicPlugins"/> while executing its surrounding workflow.
+    /// </summary>
     private string _aiAssistProfile = "auto";
+    /// <summary>
+    /// Stores the internal council request state used by <see cref="OrganicPlugins"/> while executing its surrounding workflow.
+    /// </summary>
     private OrganicCouncilPromptRequest _councilRequest = null!;
+    /// <summary>
+    /// Stores the internal permission state used by <see cref="OrganicPlugins"/> while executing its surrounding workflow.
+    /// </summary>
     private OrganicPermissionRule _permission = null!;
+    /// <summary>
+    /// Stores the internal round trip status state used by <see cref="OrganicPlugins"/> while executing its surrounding workflow.
+    /// </summary>
     private string _roundTripStatus = string.Empty;
+    /// <summary>
+    /// Stores the internal browser automation enabled state used by <see cref="OrganicPlugins"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _browserAutomationEnabled;
+    /// <summary>
+    /// Stores the internal automation state loaded state used by <see cref="OrganicPlugins"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _automationStateLoaded;
+    /// <summary>
+    /// Defines the discovery owner constant used by <see cref="OrganicPlugins"/> so callers and internal logic share the same stable value.
+    /// </summary>
     private const string DiscoveryOwner = ILocalGptDiscoveryActivationService.FrontendConnectionWorkflowOwner;
 
+    /// <summary>
+    /// Handles the initialized async lifecycle or event notification for <see cref="OrganicPlugins"/>, updating the state required by the surrounding workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     protected override async Task OnInitializedAsync()
     {
         try
@@ -466,6 +531,11 @@
         }
     }
 
+    /// <summary>
+    /// Handles the after render async lifecycle or event notification for <see cref="OrganicPlugins"/>, updating the state required by the surrounding workflow.
+    /// </summary>
+    /// <param name="firstRender">Value indicating whether first render should apply to this operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         try
@@ -484,15 +554,31 @@
         }
     }
 
+    /// <summary>
+    /// Gets a value indicating whether run council applies to the organic plugins state.
+    /// </summary>
+    /// <value>The can run council value exposed by <see cref="OrganicPlugins"/>.</value>
     private bool CanRunCouncil => Connection.State.IsLinked && Connection.State.HasCapability("council.run");
+    /// <summary>
+    /// Gets a value indicating whether generate text proposal applies to the organic plugins state.
+    /// </summary>
+    /// <value>The can generate text proposal value exposed by <see cref="OrganicPlugins"/>.</value>
     private bool CanGenerateTextProposal => CanRunCouncil
         && _capabilities.Any(item => item.IsEnabled && item.IsOnline && string.Equals(item.Key, "publisher.text.insert.propose", StringComparison.OrdinalIgnoreCase))
         && !string.IsNullOrWhiteSpace(_textGenerationPrompt)
         && !string.IsNullOrWhiteSpace(_textGenerationTarget);
+    /// <summary>
+    /// Gets a value indicating whether use screen reader applies to the organic plugins state.
+    /// </summary>
+    /// <value>The can use screen reader value exposed by <see cref="OrganicPlugins"/>.</value>
     private bool CanUseScreenReader => Connection.State.IsConnected && Connection.State.IsLinked
         && Connection.State.HasCapability("localgpt.screenreader.help")
         && _capabilities.Any(item => item.IsEnabled && item.IsOnline && string.Equals(item.Key, "publisher.screen.capture", StringComparison.OrdinalIgnoreCase));
 
+    /// <summary>
+    /// Gets the council teams collection maintained or exposed by this organic plugins instance for downstream processing.
+    /// </summary>
+    /// <value>The council teams value exposed by <see cref="OrganicPlugins"/>.</value>
     private IReadOnlyList<(string Key, string Name)> CouncilTeams
     {
         get
@@ -515,6 +601,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs synchronize discovery activation for <see cref="OrganicPlugins"/>, keeping the operation consistent with the state and invariants of the surrounding organic plugins workflow.
+    /// </summary>
     private void SynchronizeDiscoveryActivation()
     {
         try
@@ -531,6 +620,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs back to publisher for <see cref="OrganicPlugins"/>, keeping the operation consistent with the state and invariants of the surrounding organic plugins workflow.
+    /// </summary>
     private void BackToPublisher() {
         try
         {
@@ -543,6 +635,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs refresh for <see cref="OrganicPlugins"/>, keeping the operation consistent with the state and invariants of the surrounding organic plugins workflow.
+    /// </summary>
     private void Refresh()
     {
         try
@@ -568,6 +663,9 @@
         }
     }
 
+    /// <summary>
+    /// Handles the service changed lifecycle or event notification for <see cref="OrganicPlugins"/>, updating the state required by the surrounding workflow.
+    /// </summary>
     private void OnServiceChanged()
     {
         try
@@ -589,6 +687,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs connect for <see cref="OrganicPlugins"/>, keeping the operation consistent with the state and invariants of the surrounding organic plugins workflow.
+    /// </summary>
+    /// <param name="peerId">Identifier of the peer to use for this operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ConnectAsync(string peerId)
     {
         try
@@ -618,6 +721,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs run round trip test for <see cref="OrganicPlugins"/>, keeping the operation consistent with the state and invariants of the surrounding organic plugins workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task RunRoundTripTestAsync()
     {
         try
@@ -656,6 +763,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs toggle browser automation for <see cref="OrganicPlugins"/>, keeping the operation consistent with the state and invariants of the surrounding organic plugins workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ToggleBrowserAutomationAsync()
     {
         try
@@ -682,6 +793,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs disconnect for <see cref="OrganicPlugins"/>, keeping the operation consistent with the state and invariants of the surrounding organic plugins workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task DisconnectAsync()
     {
         try
@@ -703,6 +818,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs send council for <see cref="OrganicPlugins"/>, keeping the operation consistent with the state and invariants of the surrounding organic plugins workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task SendCouncilAsync()
     {
         try
@@ -735,6 +854,10 @@
         }
     }
 
+    /// <summary>
+    /// Generates text proposal for <see cref="OrganicPlugins"/>, keeping the operation consistent with the state and invariants of the surrounding organic plugins workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task GenerateTextProposalAsync()
     {
         try
@@ -833,6 +956,7 @@
     /// <summary>
     /// Resolves the simple AI Assist profile to an advertised LocalGPT team while preserving the explicit team override as a fallback.
     /// </summary>
+    /// <returns>The string produced by the operation.</returns>
     private string ResolveAiAssistTeamKey()
     {
         try
@@ -873,6 +997,7 @@
     /// <summary>
     /// Builds the PublisherStudio capabilities that may help the selected AI Assist profile without requiring unavailable routes.
     /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     private List<string> ResolveAiAssistCapabilities()
     {
         try
@@ -910,6 +1035,10 @@
         }
     }
 
+    /// <summary>
+    /// Starts screen reader for <see cref="OrganicPlugins"/>, keeping the operation consistent with the state and invariants of the surrounding organic plugins workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task StartScreenReaderAsync()
     {
         try
@@ -935,6 +1064,11 @@
         }
     }
 
+    /// <summary>
+    /// Stops screen reader for <see cref="OrganicPlugins"/>, keeping the operation consistent with the state and invariants of the surrounding organic plugins workflow.
+    /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task StopScreenReaderAsync(Guid id)
     {
         try
@@ -951,6 +1085,9 @@
         }
     }
 
+    /// <summary>
+    /// Persists permission for <see cref="OrganicPlugins"/>, keeping the operation consistent with the state and invariants of the surrounding organic plugins workflow.
+    /// </summary>
     private void SavePermission()
     {
         try
@@ -976,6 +1113,10 @@
         }
     }
 
+    /// <summary>
+    /// Deletes permission for <see cref="OrganicPlugins"/>, keeping the operation consistent with the state and invariants of the surrounding organic plugins workflow.
+    /// </summary>
+    /// <param name="rule">Rule value supplied to the organic plugins operation and used when producing its result.</param>
     private void DeletePermission(OrganicPermissionRule rule)
     {
         try
@@ -991,6 +1132,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs approve for <see cref="OrganicPlugins"/>, keeping the operation consistent with the state and invariants of the surrounding organic plugins workflow.
+    /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ApproveAsync(Guid id)
     {
         try
@@ -1009,6 +1155,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs decline for <see cref="OrganicPlugins"/>, keeping the operation consistent with the state and invariants of the surrounding organic plugins workflow.
+    /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task DeclineAsync(Guid id)
     {
         try
@@ -1027,6 +1178,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs new permission for <see cref="OrganicPlugins"/>, keeping the operation consistent with the state and invariants of the surrounding organic plugins workflow.
+    /// </summary>
+    /// <param name="peerId">Identifier of the peer to use for this operation.</param>
+    /// <returns>The organic permission rule produced by the operation.</returns>
     private OrganicPermissionRule NewPermission(string peerId) {
         try
         {
@@ -1048,6 +1204,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs new council request for <see cref="OrganicPlugins"/>, keeping the operation consistent with the state and invariants of the surrounding organic plugins workflow.
+    /// </summary>
+    /// <param name="team">Team value supplied to the organic plugins operation and used when producing its result.</param>
+    /// <returns>The organic council prompt request produced by the operation.</returns>
     private OrganicCouncilPromptRequest NewCouncilRequest(string team) {
         try
         {
@@ -1070,6 +1231,9 @@
         }
     }
 
+    /// <summary>
+    /// Releases resources owned by <see cref="OrganicPlugins"/> and leaves the organic plugins workflow in a safely disposed state.
+    /// </summary>
     public void Dispose()
     {
         try
@@ -1088,4 +1252,5 @@
             throw;
         }
     }
+
 }

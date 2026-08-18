@@ -253,23 +253,48 @@
 </div>
 
 @code {
+
+    /// <summary>
+    /// Gets or sets the state value that forms part of the animation panel state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The state value exposed by <see cref="AnimationPanel"/>.</value>
     [Parameter, EditorRequired] public EditorStateService State { get; set; } = default!;
 
+    /// <summary>
+    /// Stores the internal selected animation identifier state used by <see cref="AnimationPanel"/> while executing its surrounding workflow.
+    /// </summary>
     private Guid? _selectedAnimationId;
+    /// <summary>
+    /// Stores the internal last element identifier state used by <see cref="AnimationPanel"/> while executing its surrounding workflow.
+    /// </summary>
     private Guid? _lastElementId;
+    /// <summary>
+    /// Stores the internal direction values state used by <see cref="AnimationPanel"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly PublicationAnimationDirection[] DirectionValues =
     [PublicationAnimationDirection.Left, PublicationAnimationDirection.Right, PublicationAnimationDirection.Up, PublicationAnimationDirection.Down];
 
+    /// <summary>
+    /// Gets the timeline collection maintained or exposed by this animation panel instance for downstream processing.
+    /// </summary>
+    /// <value>The timeline value exposed by <see cref="AnimationPanel"/>.</value>
     private List<(PublicationElement Element, PublicationAnimation Animation)> Timeline => State.CurrentPage.Elements
         .SelectMany(element => element.Animations.Select(animation => (Element: element, Animation: animation)))
         .OrderBy(item => item.Animation.Order)
         .ToList();
 
+    /// <summary>
+    /// Gets the selected animation value that forms part of the animation panel state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The selected animation value exposed by <see cref="AnimationPanel"/>.</value>
     private PublicationAnimation? SelectedAnimation => Timeline
         .Where(item => item.Animation.Id == _selectedAnimationId)
         .Select(item => item.Animation)
         .FirstOrDefault();
 
+    /// <summary>
+    /// Handles the parameters set lifecycle or event notification for <see cref="AnimationPanel"/>, updating the state required by the surrounding workflow.
+    /// </summary>
     protected override void OnParametersSet()
     {
         try
@@ -286,6 +311,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs select animation for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <param name="elementId">Identifier of the element to use for this operation.</param>
+    /// <param name="animationId">Identifier of the animation to use for this operation.</param>
     private void SelectAnimation(Guid elementId, Guid animationId)
     {
         try
@@ -302,6 +332,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs add for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <param name="effect">Effect value supplied to the animation panel operation and used when producing its result.</param>
+    /// <param name="phase">Phase value supplied to the animation panel operation and used when producing its result.</param>
     private void Add(PublicationAnimationEffect effect, PublicationAnimationPhase phase)
     {
         try
@@ -317,6 +352,9 @@
         }
     }
 
+    /// <summary>
+    /// Adds fade in for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
     private void AddFadeIn() {
         try
         {
@@ -328,6 +366,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds fly in for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
     private void AddFlyIn() {
         try
         {
@@ -339,6 +380,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds zoom in for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
     private void AddZoomIn() {
         try
         {
@@ -350,6 +394,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds wipe in for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
     private void AddWipeIn() {
         try
         {
@@ -361,6 +408,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds pulse for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
     private void AddPulse() {
         try
         {
@@ -372,6 +422,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds spin for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
     private void AddSpin() {
         try
         {
@@ -383,6 +436,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds move for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
     private void AddMove() {
         try
         {
@@ -394,6 +450,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds fade out for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
     private void AddFadeOut() {
         try
         {
@@ -405,6 +464,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds play media for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
     private void AddPlayMedia() {
         try
         {
@@ -416,6 +478,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds pause media for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
     private void AddPauseMedia() {
         try
         {
@@ -427,6 +492,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds stop media for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
     private void AddStopMedia() {
         try
         {
@@ -439,6 +507,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs move earlier for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
     private void MoveEarlier() {
         try
         {
@@ -450,6 +521,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs move later for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
     private void MoveLater() {
         try
         {
@@ -461,6 +535,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Deletes animation for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
     private void DeleteAnimation()
     {
         try
@@ -477,6 +554,10 @@
         }
     }
 
+    /// <summary>
+    /// Previews page for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task PreviewPage() {
         try
         {
@@ -488,6 +569,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Previews object for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task PreviewObject() {
         try
         {
@@ -499,6 +584,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Previews selected step for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task PreviewSelectedStep() {
         try
         {
@@ -512,6 +601,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Stops preview for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task StopPreview() {
         try
         {
@@ -524,6 +617,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs change transition kind for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the animation panel operation and used when producing its result.</param>
     private void ChangeTransitionKind(ChangeEventArgs args) {
         try
         {
@@ -535,6 +632,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change transition direction for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the animation panel operation and used when producing its result.</param>
     private void ChangeTransitionDirection(ChangeEventArgs args) {
         try
         {
@@ -546,6 +647,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change transition easing for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the animation panel operation and used when producing its result.</param>
     private void ChangeTransitionEasing(ChangeEventArgs args) {
         try
         {
@@ -557,6 +662,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change transition duration for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the animation panel operation and used when producing its result.</param>
     private void ChangeTransitionDuration(ChangeEventArgs args) {
         try
         {
@@ -568,6 +677,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle advance on click for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the animation panel operation and used when producing its result.</param>
     private void ToggleAdvanceOnClick(ChangeEventArgs args) {
         try
         {
@@ -579,6 +692,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle auto advance for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the animation panel operation and used when producing its result.</param>
     private void ToggleAutoAdvance(ChangeEventArgs args) {
         try
         {
@@ -590,6 +707,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change auto advance seconds for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the animation panel operation and used when producing its result.</param>
     private void ChangeAutoAdvanceSeconds(ChangeEventArgs args) {
         try
         {
@@ -602,6 +723,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs change animation name for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the animation panel operation and used when producing its result.</param>
     private void ChangeAnimationName(ChangeEventArgs args) {
         try
         {
@@ -613,6 +738,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change animation phase for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the animation panel operation and used when producing its result.</param>
     private void ChangeAnimationPhase(ChangeEventArgs args)
     {
         try
@@ -631,6 +760,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change animation effect for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the animation panel operation and used when producing its result.</param>
     private void ChangeAnimationEffect(ChangeEventArgs args) {
         try
         {
@@ -642,6 +775,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change animation trigger for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the animation panel operation and used when producing its result.</param>
     private void ChangeAnimationTrigger(ChangeEventArgs args) {
         try
         {
@@ -653,6 +790,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change animation easing for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the animation panel operation and used when producing its result.</param>
     private void ChangeAnimationEasing(ChangeEventArgs args) {
         try
         {
@@ -664,6 +805,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change animation direction for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the animation panel operation and used when producing its result.</param>
     private void ChangeAnimationDirection(ChangeEventArgs args) {
         try
         {
@@ -675,6 +820,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change animation duration for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the animation panel operation and used when producing its result.</param>
     private void ChangeAnimationDuration(ChangeEventArgs args) {
         try
         {
@@ -686,6 +835,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change animation delay for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the animation panel operation and used when producing its result.</param>
     private void ChangeAnimationDelay(ChangeEventArgs args) {
         try
         {
@@ -697,6 +850,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change animation distance for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the animation panel operation and used when producing its result.</param>
     private void ChangeAnimationDistance(ChangeEventArgs args) {
         try
         {
@@ -708,6 +865,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change animation scale for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the animation panel operation and used when producing its result.</param>
     private void ChangeAnimationScale(ChangeEventArgs args) {
         try
         {
@@ -719,6 +880,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change animation rotation for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the animation panel operation and used when producing its result.</param>
     private void ChangeAnimationRotation(ChangeEventArgs args) {
         try
         {
@@ -730,6 +895,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change animation repeat for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the animation panel operation and used when producing its result.</param>
     private void ChangeAnimationRepeat(ChangeEventArgs args) {
         try
         {
@@ -741,6 +910,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle animation auto reverse for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the animation panel operation and used when producing its result.</param>
     private void ToggleAnimationAutoReverse(ChangeEventArgs args) {
         try
         {
@@ -752,6 +925,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs end live edit for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <param name="_">_ value supplied to the animation panel operation and used when producing its result.</param>
     private void EndLiveEdit(ChangeEventArgs _) {
         try
         {
@@ -764,6 +941,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs toggle hidden at presentation start for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the animation panel operation and used when producing its result.</param>
     private void ToggleHiddenAtPresentationStart(ChangeEventArgs args)
     {
         try
@@ -779,6 +960,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs change interaction action for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the animation panel operation and used when producing its result.</param>
     private void ChangeInteractionAction(ChangeEventArgs args)
     {
         try
@@ -806,6 +991,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change interaction page for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the animation panel operation and used when producing its result.</param>
     private void ChangeInteractionPage(ChangeEventArgs args) {
         try
         {
@@ -817,6 +1006,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change interaction element for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the animation panel operation and used when producing its result.</param>
     private void ChangeInteractionElement(ChangeEventArgs args) {
         try
         {
@@ -828,6 +1021,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change interaction URL for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the animation panel operation and used when producing its result.</param>
     private void ChangeInteractionUrl(ChangeEventArgs args) {
         try
         {
@@ -839,6 +1036,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle interaction new window for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the animation panel operation and used when producing its result.</param>
     private void ToggleInteractionNewWindow(ChangeEventArgs args) {
         try
         {
@@ -851,6 +1052,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs toggle start automatically for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the animation panel operation and used when producing its result.</param>
     private void ToggleStartAutomatically(ChangeEventArgs args) {
         try
         {
@@ -862,6 +1067,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle loop presentation for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the animation panel operation and used when producing its result.</param>
     private void ToggleLoopPresentation(ChangeEventArgs args) {
         try
         {
@@ -873,6 +1082,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle show controls for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the animation panel operation and used when producing its result.</param>
     private void ToggleShowControls(ChangeEventArgs args) {
         try
         {
@@ -884,6 +1097,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets playback for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <param name="update">Update value supplied to the animation panel operation and used when producing its result.</param>
     private void SetPlayback(Action<PublicationPlaybackSettings> update)
     {
         try
@@ -900,6 +1117,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs update for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <param name="change">Change value supplied to the animation panel operation and used when producing its result.</param>
     private void Update(Action<PublicationAnimation> change) {
         try
         {
@@ -911,6 +1132,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Updates live for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <param name="key">Key value supplied to the animation panel operation and used when producing its result.</param>
+    /// <param name="change">Change value supplied to the animation panel operation and used when producing its result.</param>
     private void UpdateLive(string key, Action<PublicationAnimation> change) {
         try
         {
@@ -923,6 +1149,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs bool copy for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the animation panel operation and used when producing its result.</param>
+    /// <returns>The publication playback settings produced by the operation.</returns>
     private PublicationPlaybackSettings BoolCopy(PublicationPlaybackSettings value) {
         try
         {
@@ -940,6 +1171,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs effects for for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <param name="phase">Phase value supplied to the animation panel operation and used when producing its result.</param>
+    /// <returns>The publication animation effect produced by the operation.</returns>
     private PublicationAnimationEffect[] EffectsFor(PublicationAnimationPhase phase)
     {
         try
@@ -963,6 +1199,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs uses direction for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the animation panel operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool UsesDirection(PublicationAnimationEffect value) {
         try
         {
@@ -974,6 +1215,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs uses distance for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the animation panel operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool UsesDistance(PublicationAnimationEffect value) {
         try
         {
@@ -985,6 +1231,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs uses scale for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the animation panel operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool UsesScale(PublicationAnimationEffect value) {
         try
         {
@@ -996,6 +1247,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs uses rotation for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the animation panel operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool UsesRotation(PublicationAnimationEffect value) {
         try
         {
@@ -1007,6 +1263,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Determines whether media animation effect for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the animation panel operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool IsMediaAnimationEffect(PublicationAnimationEffect value) {
         try
         {
@@ -1018,6 +1279,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs trigger name for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the animation panel operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string TriggerName(PublicationAnimationTrigger value) {
         try
         {
@@ -1035,6 +1301,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs trigger glyph for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the animation panel operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string TriggerGlyph(PublicationAnimationTrigger value) {
         try
         {
@@ -1052,6 +1323,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs interaction targets for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <param name="selected">Selected value supplied to the animation panel operation and used when producing its result.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private IEnumerable<PublicationElement> InteractionTargets(PublicationElement selected)
     {
         try
@@ -1066,6 +1342,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Determines whether media interaction for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the animation panel operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool IsMediaInteraction(PublicationInteractionAction value) {
         try
         {
@@ -1079,6 +1360,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs interaction name for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the animation panel operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string InteractionName(PublicationInteractionAction value) {
         try
         {
@@ -1104,6 +1390,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs kind glyph for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <param name="item">Item value supplied to the animation panel operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string KindGlyph(PublicationElement item) {
         try
         {
@@ -1129,6 +1420,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs friendly for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the animation panel operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Friendly(string value) {
         try
         {
@@ -1140,6 +1436,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs seconds for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the animation panel operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Seconds(double value) {
         try
         {
@@ -1151,6 +1452,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs inv for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the animation panel operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Inv(double value) {
         try
         {
@@ -1162,6 +1468,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs text for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the animation panel operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Text(ChangeEventArgs args) {
         try
         {
@@ -1173,6 +1484,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs bool for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the animation panel operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool Bool(ChangeEventArgs args) {
         try
         {
@@ -1184,6 +1500,12 @@
             throw;
         }
     }
+    /// <summary>
+    /// Attempts to double for <see cref="AnimationPanel"/>, keeping the operation consistent with the state and invariants of the surrounding animation panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the animation panel operation and used when producing its result.</param>
+    /// <param name="value">Value value supplied to the animation panel operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool TryDouble(ChangeEventArgs args, out double value) {
         try
         {
@@ -1195,4 +1517,5 @@
             throw;
         }
     }
+
 }

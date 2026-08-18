@@ -901,112 +901,442 @@
 <InputFile id="media-studio-project-media-input" class="hidden-file-input" accept="video/*,audio/*,image/*" multiple OnChange="RelinkVideoProjectMedia" />
 
 @code {
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the value is visible applies to the media studio state.
+    /// </summary>
+    /// <value>The visible value exposed by <see cref="MediaStudio"/>.</value>
     [Parameter] public bool Visible { get; set; }
+    /// <summary>
+    /// Gets or sets the stable session identifier used to identify or correlate this media studio instance with related application state.
+    /// </summary>
+    /// <value>The session identifier value exposed by <see cref="MediaStudio"/>.</value>
     [Parameter] public Guid SessionId { get; set; }
+    /// <summary>
+    /// Gets or sets the kind value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The kind value exposed by <see cref="MediaStudio"/>.</value>
     [Parameter] public PublicationElementKind Kind { get; set; } = PublicationElementKind.Audio;
+    /// <summary>
+    /// Gets or sets the initial media value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The initial media value exposed by <see cref="MediaStudio"/>.</value>
     [Parameter] public PublicationMediaElement? InitialMedia { get; set; }
+    /// <summary>
+    /// Gets or sets the initial inserted segment value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The initial inserted segment value exposed by <see cref="MediaStudio"/>.</value>
     [Parameter] public PublicationMediaSegment? InitialInsertedSegment { get; set; }
+    /// <summary>
+    /// Gets or sets a value indicating whether editing existing applies to the media studio state.
+    /// </summary>
+    /// <value>The editing existing value exposed by <see cref="MediaStudio"/>.</value>
     [Parameter] public bool EditingExisting { get; set; }
+    /// <summary>
+    /// Gets or sets the saved value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The saved value exposed by <see cref="MediaStudio"/>.</value>
     [Parameter] public EventCallback<MediaEditorResult> Saved { get; set; }
+    /// <summary>
+    /// Gets or sets the send to media converter value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The send to media converter value exposed by <see cref="MediaStudio"/>.</value>
     [Parameter] public EventCallback<MediaConversionInsertRequest> SendToMediaConverter { get; set; }
+    /// <summary>
+    /// Gets or sets the insert layer into mainframe value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The insert layer into mainframe value exposed by <see cref="MediaStudio"/>.</value>
     [Parameter] public EventCallback<VideoLayerMainframeInsertRequest> InsertLayerIntoMainframe { get; set; }
+    /// <summary>
+    /// Gets or sets the cancelled value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The cancelled value exposed by <see cref="MediaStudio"/>.</value>
     [Parameter] public EventCallback Cancelled { get; set; }
 
+    /// <summary>
+    /// Stores the internal self state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private DotNetObjectReference<MediaStudio>? _self;
+    /// <summary>
+    /// Stores the internal media context menu state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private DxContextMenu _mediaContextMenu = default!;
+    /// <summary>
+    /// Stores the JavaScript object reference dependency used by <see cref="MediaStudio"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private IJSObjectReference? _module;
+    /// <summary>
+    /// Stores the internal loaded session state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private Guid _loadedSession;
+    /// <summary>
+    /// Stores the internal initialized session state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private Guid _initializedSession;
+    /// <summary>
+    /// Stores the internal recording recovery attempted session state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private Guid _recordingRecoveryAttemptedSession;
+    /// <summary>
+    /// Stores the internal name state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private string _name = "Audio";
+    /// <summary>
+    /// Stores the internal data URL state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private string _dataUrl = string.Empty;
+    /// <summary>
+    /// Stores the internal MIME type state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private string _mimeType = string.Empty;
+    /// <summary>
+    /// Stores the internal poster data URL state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private string _posterDataUrl = string.Empty;
+    /// <summary>
+    /// Stores the internal preview asset identifier state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private Guid _previewAssetId = Guid.NewGuid();
+    /// <summary>
+    /// Stores the internal preview source state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private string _previewSource = string.Empty;
+    /// <summary>
+    /// Stores the internal duration state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private double _duration;
+    /// <summary>
+    /// Stores the internal trim start state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private double _trimStart;
+    /// <summary>
+    /// Stores the internal trim end state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private double _trimEnd;
+    /// <summary>
+    /// Stores the internal volume state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private double _volume = 1;
+    /// <summary>
+    /// Stores the internal playback rate state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private double _playbackRate = 1;
+    /// <summary>
+    /// Stores the internal fade in state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private double _fadeIn;
+    /// <summary>
+    /// Stores the internal fade out state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private double _fadeOut;
+    /// <summary>
+    /// Stores the internal video fit mode state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private PublicationVideoFitMode _videoFitMode = PublicationVideoFitMode.Stretch;
+    /// <summary>
+    /// Stores the internal muted state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _muted;
+    /// <summary>
+    /// Stores the internal loop state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _loop;
+    /// <summary>
+    /// Stores the internal auto play state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _autoPlay = true;
+    /// <summary>
+    /// Stores the internal recording state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _recording;
+    /// <summary>
+    /// Stores the internal recording stopping state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _recordingStopping;
+    /// <summary>
+    /// Stores the internal rendering video export state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _renderingVideoExport;
+    /// <summary>
+    /// Stores the internal recording adaptive quality state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _recordingAdaptiveQuality = true;
+    /// <summary>
+    /// Stores the internal recording adaptive profile state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private string _recordingAdaptiveProfile = "quality";
+    /// <summary>
+    /// Stores the internal recording adapt video state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _recordingAdaptVideo = true;
+    /// <summary>
+    /// Stores the internal recording adapt audio state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _recordingAdaptAudio = true;
+    /// <summary>
+    /// Stores the internal recording use browser capability probe state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _recordingUseBrowserCapabilityProbe = true;
+    /// <summary>
+    /// Stores the internal recording preserve native resolution state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _recordingPreserveNativeResolution = true;
+    /// <summary>
+    /// Stores the internal recording allow frame rate reduction state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _recordingAllowFrameRateReduction = true;
+    /// <summary>
+    /// Stores the internal recording allow resolution reduction state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _recordingAllowResolutionReduction;
+    /// <summary>
+    /// Stores the internal recording size mode state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private string _recordingSizeMode = "source";
+    /// <summary>
+    /// Stores the internal recording custom width state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private int _recordingCustomWidth;
+    /// <summary>
+    /// Stores the internal recording custom height state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private int _recordingCustomHeight;
+    /// <summary>
+    /// Stores the internal recording frame rate state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private int _recordingFrameRate;
+    /// <summary>
+    /// Stores the internal recording video bitrate kbps state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private int _recordingVideoBitrateKbps;
+    /// <summary>
+    /// Stores the internal recording audio bitrate kbps state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private int _recordingAudioBitrateKbps;
+    /// <summary>
+    /// Stores the internal recording codec preference state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private string _recordingCodecPreference = "auto";
+    /// <summary>
+    /// Stores the internal saving state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _saving;
+    /// <summary>
+    /// Stores the internal embedding state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _embedding;
+    /// <summary>
+    /// Stores the internal embedding progress state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private double _embeddingProgress;
+    /// <summary>
+    /// Stores the internal has retained recording state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _hasRetainedRecording;
+    /// <summary>
+    /// Stores the internal retained recording size bytes state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private long _retainedRecordingSizeBytes;
+    /// <summary>
+    /// Stores the internal retained recording file name state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private string _retainedRecordingFileName = string.Empty;
+    /// <summary>
+    /// Stores the internal retained recording object URL state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private string _retainedRecordingObjectUrl = string.Empty;
+    /// <summary>
+    /// Stores the internal playback trigger state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private PublicationMediaPlaybackTrigger _playbackTrigger = PublicationMediaPlaybackTrigger.OnPageEnter;
+    /// <summary>
+    /// Stores the in-memory waveform collection maintained internally by <see cref="MediaStudio"/> for its current workflow state.
+    /// </summary>
     private List<double> _waveform = [];
+    /// <summary>
+    /// Stores the internal error state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private string? _error;
+    /// <summary>
+    /// Stores the internal warning state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private string? _warning;
+    /// <summary>
+    /// Stores the internal disposed state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _disposed;
+    /// <summary>
+    /// Stores the internal recording buffer state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private StringBuilder? _recordingBuffer;
+    /// <summary>
+    /// Stores the internal recording identifier state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private string? _recordingId;
+    /// <summary>
+    /// Stores the internal recording expected chunks state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private int _recordingExpectedChunks;
+    /// <summary>
+    /// Stores the internal recording next chunk state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private int _recordingNextChunk;
+    /// <summary>
+    /// Stores the internal recording expected bytes state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private long _recordingExpectedBytes;
+    /// <summary>
+    /// Stores the in-memory segments collection maintained internally by <see cref="MediaStudio"/> for its current workflow state.
+    /// </summary>
     private readonly List<PublicationMediaSegment> _segments = [];
+    /// <summary>
+    /// Stores the internal selected segment identifier state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private Guid? _selectedSegmentId;
+    /// <summary>
+    /// Stores the internal clip clipboard state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private PublicationMediaSegment? _clipClipboard;
+    /// <summary>
+    /// Stores the internal mouse mode state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private MediaStudioMouseMode _mouseMode = MediaStudioMouseMode.SelectSection;
+    /// <summary>
+    /// Stores the internal playhead state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private double _playhead;
+    /// <summary>
+    /// Stores the in-memory frame clip polygon collection maintained internally by <see cref="MediaStudio"/> for its current workflow state.
+    /// </summary>
     private readonly List<MediaFramePoint> _frameClipPolygon = [];
+    /// <summary>
+    /// Stores the in-memory morph clip polygon collection maintained internally by <see cref="MediaStudio"/> for its current workflow state.
+    /// </summary>
     private readonly List<MediaFramePoint> _morphClipPolygon = [];
+    /// <summary>
+    /// Stores the in-memory frame draft collection maintained internally by <see cref="MediaStudio"/> for its current workflow state.
+    /// </summary>
     private readonly List<MediaFramePoint> _frameDraft = [];
+    /// <summary>
+    /// Stores the in-memory frame clipboard collection maintained internally by <see cref="MediaStudio"/> for its current workflow state.
+    /// </summary>
     private readonly List<MediaFramePoint> _frameClipboard = [];
+    /// <summary>
+    /// Stores the internal frame region editing state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _frameRegionEditing;
+    /// <summary>
+    /// Stores the internal editing morph region state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _editingMorphRegion;
+    /// <summary>
+    /// Stores the internal selected frame point index state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private int? _selectedFramePointIndex;
+    /// <summary>
+    /// Stores the internal auto create selection layers state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _autoCreateSelectionLayers = true;
+    /// <summary>
+    /// Stores the internal selected video layer identifier state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private Guid? _selectedVideoLayerId;
+    /// <summary>
+    /// Stores the internal selected video filter identifier state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private Guid? _selectedVideoFilterId;
+    /// <summary>
+    /// Stores the internal selected cut section identifier state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private Guid? _selectedCutSectionId;
+    /// <summary>
+    /// Stores the internal new video filter kind state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private VideoEffectFilterKind _newVideoFilterKind = VideoEffectFilterKind.ChromaKey;
+    /// <summary>
+    /// Stores the internal video selection is point state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _videoSelectionIsPoint;
+    /// <summary>
+    /// Stores the internal video selection point seconds state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private double _videoSelectionPointSeconds;
+    /// <summary>
+    /// Stores the internal video selection start seconds state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private double _videoSelectionStartSeconds;
+    /// <summary>
+    /// Stores the internal video selection end seconds state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private double _videoSelectionEndSeconds;
+    /// <summary>
+    /// Stores the internal video selection user committed state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _videoSelectionUserCommitted;
+    /// <summary>
+    /// Stores the internal pending insert segment state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private PublicationMediaSegment? _pendingInsertSegment;
+    /// <summary>
+    /// Stores the internal pending insert source seconds state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private double _pendingInsertSourceSeconds;
+    /// <summary>
+    /// Stores the internal pending insert minimum source seconds state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private double _pendingInsertMinimumSourceSeconds;
+    /// <summary>
+    /// Stores the internal pending insert maximum source seconds state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private double _pendingInsertMaximumSourceSeconds;
+    /// <summary>
+    /// Stores the internal pending insert timeline seconds state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private double? _pendingInsertTimelineSeconds;
+    /// <summary>
+    /// Stores the internal pending drop source seconds state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private double? _pendingDropSourceSeconds;
+    /// <summary>
+    /// Stores the internal pending drop timeline seconds state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private double? _pendingDropTimelineSeconds;
+    /// <summary>
+    /// Stores the internal pending drop is point state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _pendingDropIsPoint;
+    /// <summary>
+    /// Stores the internal video project state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private VideoProjectDocument? _videoProject;
+    /// <summary>
+    /// Stores the internal active project track identifier state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private Guid _activeProjectTrackId;
+    /// <summary>
+    /// Stores the in-memory video project issues collection maintained internally by <see cref="MediaStudio"/> for its current workflow state.
+    /// </summary>
     private List<InterchangeIssue> _videoProjectIssues = [];
 
+    /// <summary>
+    /// Gets a value indicating whether video applies to the media studio state.
+    /// </summary>
+    /// <value>The is video value exposed by <see cref="MediaStudio"/>.</value>
     private bool IsVideo => Kind == PublicationElementKind.Video;
+    /// <summary>
+    /// Gets a value indicating whether retained recording applies to the media studio state.
+    /// </summary>
+    /// <value>The has retained recording value exposed by <see cref="MediaStudio"/>.</value>
     private bool HasRetainedRecording => _hasRetainedRecording && _retainedRecordingSizeBytes > 0;
+    /// <summary>
+    /// Gets the recording policy value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The recording policy value exposed by <see cref="MediaStudio"/>.</value>
     private PublisherMediaSessionDefaultsPolicy RecordingPolicy => RuntimePolicy.MediaSessionDefaults;
+    /// <summary>
+    /// Gets the recording target width value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The recording target width value exposed by <see cref="MediaStudio"/>.</value>
     private int RecordingTargetWidth => _recordingSizeMode switch
     {
         "master" => RecordingPolicy.MasterWidth,
@@ -1014,6 +1344,10 @@
         "custom" => _recordingCustomWidth,
         _ => 0
     };
+    /// <summary>
+    /// Gets the recording target height value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The recording target height value exposed by <see cref="MediaStudio"/>.</value>
     private int RecordingTargetHeight => _recordingSizeMode switch
     {
         "master" => RecordingPolicy.MasterHeight,
@@ -1021,6 +1355,10 @@
         "custom" => _recordingCustomHeight,
         _ => 0
     };
+    /// <summary>
+    /// Gets the recording size summary value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The recording size summary value exposed by <see cref="MediaStudio"/>.</value>
     private string RecordingSizeSummary => _recordingSizeMode switch
     {
         "master" => $"{LT("Streaming master")} · {RecordingPolicy.MasterWidth} × {RecordingPolicy.MasterHeight}",
@@ -1028,56 +1366,200 @@
         "custom" => $"{LT("Custom")} · {_recordingCustomWidth} × {_recordingCustomHeight}",
         _ => LT("Source/native")
     };
+    /// <summary>
+    /// Gets a value indicating whether video project applies to the media studio state.
+    /// </summary>
+    /// <value>The has video project value exposed by <see cref="MediaStudio"/>.</value>
     private bool HasVideoProject => IsVideo && _videoProject is { Tracks.Count: > 0 };
+    /// <summary>
+    /// Gets the project video tracks collection maintained or exposed by this media studio instance for downstream processing.
+    /// </summary>
+    /// <value>The project video tracks value exposed by <see cref="MediaStudio"/>.</value>
     private IReadOnlyList<MediaTimelineTrack> ProjectVideoTracks => _videoProject?.Tracks
         .Where(track => track.Kind == MediaTimelineTrackKind.Video)
         .OrderBy(track => track.Order)
         .ToList() ?? [];
+    /// <summary>
+    /// Gets the video project missing media count that quantifies the associated media studio data.
+    /// </summary>
+    /// <value>The video project missing media count value exposed by <see cref="MediaStudio"/>.</value>
     private int VideoProjectMissingMediaCount => _videoProject?.Tracks
         .SelectMany(track => track.Segments)
         .Count(segment => !segment.IsGap && string.IsNullOrWhiteSpace(segment.DataUrl) && segment.SourceReference.Missing) ?? 0;
+    /// <summary>
+    /// Gets the video project title value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The video project title value exposed by <see cref="MediaStudio"/>.</value>
     private string VideoProjectTitle => _videoProject?.Name ?? "Video project";
+    /// <summary>
+    /// Gets the video project format summary value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The video project format summary value exposed by <see cref="MediaStudio"/>.</value>
     private string VideoProjectFormatSummary => _videoProject is null
         ? string.Empty
         : string.IsNullOrWhiteSpace(_videoProject.SourceFormatVersion)
             ? _videoProject.SourceFormat
             : $"{_videoProject.SourceFormat} {_videoProject.SourceFormatVersion}";
+    /// <summary>
+    /// Gets the video project canvas summary value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The video project canvas summary value exposed by <see cref="MediaStudio"/>.</value>
     private string VideoProjectCanvasSummary => _videoProject is null
         ? string.Empty
         : $"{_videoProject.Width} × {_videoProject.Height} · {_videoProject.FrameRate:0.###} fps";
+    /// <summary>
+    /// Gets the video project track summary value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The video project track summary value exposed by <see cref="MediaStudio"/>.</value>
     private string VideoProjectTrackSummary => _videoProject is null
         ? string.Empty
         : $"{_videoProject.Tracks.Count} track{(_videoProject.Tracks.Count == 1 ? string.Empty : "s")} · {_videoProject.Transitions.Count} transition{(_videoProject.Transitions.Count == 1 ? string.Empty : "s")}";
+    /// <summary>
+    /// Gets the video project missing summary value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The video project missing summary value exposed by <see cref="MediaStudio"/>.</value>
     private string VideoProjectMissingSummary => VideoProjectMissingMediaCount == 0
         ? "All referenced media linked"
         : $"{VideoProjectMissingMediaCount} missing media reference{(VideoProjectMissingMediaCount == 1 ? string.Empty : "s")}";
+    /// <summary>
+    /// Gets the selected segment value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The selected segment value exposed by <see cref="MediaStudio"/>.</value>
     private PublicationMediaSegment? SelectedSegment => _segments.FirstOrDefault(segment => segment.Id == _selectedSegmentId);
+    /// <summary>
+    /// Gets the selected video layers collection maintained or exposed by this media studio instance for downstream processing.
+    /// </summary>
+    /// <value>The selected video layers value exposed by <see cref="MediaStudio"/>.</value>
     private IReadOnlyList<VideoEffectLayer> SelectedVideoLayers => SelectedSegment?.VideoLayers ?? [];
+    /// <summary>
+    /// Gets the selected video layer value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The selected video layer value exposed by <see cref="MediaStudio"/>.</value>
     private VideoEffectLayer? SelectedVideoLayer => SelectedSegment?.VideoLayers.FirstOrDefault(layer => layer.Id == _selectedVideoLayerId);
+    /// <summary>
+    /// Gets the selected video filters collection maintained or exposed by this media studio instance for downstream processing.
+    /// </summary>
+    /// <value>The selected video filters value exposed by <see cref="MediaStudio"/>.</value>
     private IReadOnlyList<VideoEffectFilter> SelectedVideoFilters => SelectedVideoLayer?.Filters ?? [];
+    /// <summary>
+    /// Gets the selected video filter value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The selected video filter value exposed by <see cref="MediaStudio"/>.</value>
     private VideoEffectFilter? SelectedVideoFilter => SelectedVideoLayer?.Filters.FirstOrDefault(filter => filter.Id == _selectedVideoFilterId);
+    /// <summary>
+    /// Gets the selected cut sections collection maintained or exposed by this media studio instance for downstream processing.
+    /// </summary>
+    /// <value>The selected cut sections value exposed by <see cref="MediaStudio"/>.</value>
     private IReadOnlyList<MediaTemporalSection> SelectedCutSections => SelectedSegment?.CutSections ?? [];
+    /// <summary>
+    /// Gets the selected cut section value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The selected cut section value exposed by <see cref="MediaStudio"/>.</value>
     private MediaTemporalSection? SelectedCutSection => SelectedSegment?.CutSections.FirstOrDefault(section => section.Id == _selectedCutSectionId);
+    /// <summary>
+    /// Gets the selected segment index value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The selected segment index value exposed by <see cref="MediaStudio"/>.</value>
     private int SelectedSegmentIndex => _selectedSegmentId is Guid id ? _segments.FindIndex(segment => segment.Id == id) : -1;
+    /// <summary>
+    /// Gets a value indicating whether selected segment applies to the media studio state.
+    /// </summary>
+    /// <value>The has selected segment value exposed by <see cref="MediaStudio"/>.</value>
     private bool HasSelectedSegment => SelectedSegment is not null;
+    /// <summary>
+    /// Gets a value indicating whether source applies to the media studio state.
+    /// </summary>
+    /// <value>The has source value exposed by <see cref="MediaStudio"/>.</value>
     private bool HasSource => (_segments.Count > 0 || !string.IsNullOrWhiteSpace(_dataUrl) || HasRetainedRecording || HasVideoProject) && (_duration > 0 || _segments.Count > 0 || HasVideoProject);
+    /// <summary>
+    /// Gets a value indicating whether paste section applies to the media studio state.
+    /// </summary>
+    /// <value>The can paste section value exposed by <see cref="MediaStudio"/>.</value>
     private bool CanPasteSection => _clipClipboard is not null;
+    /// <summary>
+    /// Gets a value indicating whether delete section applies to the media studio state.
+    /// </summary>
+    /// <value>The can delete section value exposed by <see cref="MediaStudio"/>.</value>
     private bool CanDeleteSection => _segments.Count > 0 && HasSelectedSegment;
+    /// <summary>
+    /// Gets a value indicating whether add cut line applies to the media studio state.
+    /// </summary>
+    /// <value>The can add cut line value exposed by <see cref="MediaStudio"/>.</value>
     private bool CanAddCutLine => HasSource && _segments.Count > 0;
+    /// <summary>
+    /// Gets a value indicating whether remove cut line applies to the media studio state.
+    /// </summary>
+    /// <value>The can remove cut line value exposed by <see cref="MediaStudio"/>.</value>
     private bool CanRemoveCutLine => SelectedSegmentIndex > 0 && TimelineEdits.CanMergeBoundary(_segments, SelectedSegmentIndex);
+    /// <summary>
+    /// Gets a value indicating whether cut video selection applies to the media studio state.
+    /// </summary>
+    /// <value>The can cut video selection value exposed by <see cref="MediaStudio"/>.</value>
     private bool CanCutVideoSelection => IsVideo && HasSelectedSegment && (_videoSelectionIsPoint || VideoSelectionEnd - VideoSelectionStart >= .01);
+    /// <summary>
+    /// Gets a value indicating whether use video selection as trim applies to the media studio state.
+    /// </summary>
+    /// <value>The can use video selection as trim value exposed by <see cref="MediaStudio"/>.</value>
     private bool CanUseVideoSelectionAsTrim => IsVideo && HasSelectedSegment && !_videoSelectionIsPoint && VideoSelectionEnd - VideoSelectionStart >= .01;
+    /// <summary>
+    /// Gets a value indicating whether copy video selection applies to the media studio state.
+    /// </summary>
+    /// <value>The can copy video selection value exposed by <see cref="MediaStudio"/>.</value>
     private bool CanCopyVideoSelection => CanUseVideoSelectionAsTrim;
+    /// <summary>
+    /// Gets a value indicating whether save cut section applies to the media studio state.
+    /// </summary>
+    /// <value>The can save cut section value exposed by <see cref="MediaStudio"/>.</value>
     private bool CanSaveCutSection => IsVideo && HasSelectedSegment && !_videoSelectionIsPoint && VideoSelectionEnd - VideoSelectionStart >= .01;
+    /// <summary>
+    /// Gets a value indicating whether apply selection to layer applies to the media studio state.
+    /// </summary>
+    /// <value>The can apply selection to layer value exposed by <see cref="MediaStudio"/>.</value>
     private bool CanApplySelectionToLayer => CanSaveCutSection && SelectedVideoLayer is not null;
+    /// <summary>
+    /// Gets the selected video layer index value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The selected video layer index value exposed by <see cref="MediaStudio"/>.</value>
     private int SelectedVideoLayerIndex => SelectedSegment?.VideoLayers.FindIndex(layer => layer.Id == _selectedVideoLayerId) ?? -1;
+    /// <summary>
+    /// Gets a value indicating whether move video layer up applies to the media studio state.
+    /// </summary>
+    /// <value>The can move video layer up value exposed by <see cref="MediaStudio"/>.</value>
     private bool CanMoveVideoLayerUp => SelectedVideoLayerIndex >= 0 && SelectedVideoLayerIndex < (SelectedSegment?.VideoLayers.Count ?? 0) - 1;
+    /// <summary>
+    /// Gets a value indicating whether move video layer down applies to the media studio state.
+    /// </summary>
+    /// <value>The can move video layer down value exposed by <see cref="MediaStudio"/>.</value>
     private bool CanMoveVideoLayerDown => SelectedVideoLayerIndex > 0;
+    /// <summary>
+    /// Gets a value indicating whether delete video layer applies to the media studio state.
+    /// </summary>
+    /// <value>The can delete video layer value exposed by <see cref="MediaStudio"/>.</value>
     private bool CanDeleteVideoLayer => SelectedVideoLayer is not null && (SelectedSegment?.VideoLayers.Count ?? 0) > 1;
+    /// <summary>
+    /// Gets the selected video filter index value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The selected video filter index value exposed by <see cref="MediaStudio"/>.</value>
     private int SelectedVideoFilterIndex => SelectedVideoLayer?.Filters.FindIndex(filter => filter.Id == _selectedVideoFilterId) ?? -1;
+    /// <summary>
+    /// Gets a value indicating whether move video filter up applies to the media studio state.
+    /// </summary>
+    /// <value>The can move video filter up value exposed by <see cref="MediaStudio"/>.</value>
     private bool CanMoveVideoFilterUp => SelectedVideoFilterIndex >= 0 && SelectedVideoFilterIndex < (SelectedVideoLayer?.Filters.Count ?? 0) - 1;
+    /// <summary>
+    /// Gets a value indicating whether move video filter down applies to the media studio state.
+    /// </summary>
+    /// <value>The can move video filter down value exposed by <see cref="MediaStudio"/>.</value>
     private bool CanMoveVideoFilterDown => SelectedVideoFilterIndex > 0;
+    /// <summary>
+    /// Gets the sequence duration value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The sequence duration value exposed by <see cref="MediaStudio"/>.</value>
     private double SequenceDuration => Math.Max(.01, TimelineEdits.TimelineLength(_segments, _playbackRate));
+    /// <summary>
+    /// Gets the cut boundary positions collection maintained or exposed by this media studio instance for downstream processing.
+    /// </summary>
+    /// <value>The cut boundary positions value exposed by <see cref="MediaStudio"/>.</value>
     private IEnumerable<double> CutBoundaryPositions
     {
         get
@@ -1086,45 +1568,157 @@
                 yield return TimelineEdits.SegmentTimelineStart(_segments, index, _playbackRate);
         }
     }
+    /// <summary>
+    /// Gets the stored active frame points collection maintained or exposed by this media studio instance for downstream processing.
+    /// </summary>
+    /// <value>The stored active frame points value exposed by <see cref="MediaStudio"/>.</value>
     private List<MediaFramePoint> StoredActiveFramePoints => _editingMorphRegion ? _morphClipPolygon : _frameClipPolygon;
+    /// <summary>
+    /// Gets the active frame points collection maintained or exposed by this media studio instance for downstream processing.
+    /// </summary>
+    /// <value>The active frame points value exposed by <see cref="MediaStudio"/>.</value>
     private IReadOnlyList<MediaFramePoint> ActiveFramePoints => _frameRegionEditing ? _frameDraft : StoredActiveFramePoints;
+    /// <summary>
+    /// Gets the selected frame point value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The selected frame point value exposed by <see cref="MediaStudio"/>.</value>
     private MediaFramePoint? SelectedFramePoint => _selectedFramePointIndex is int index && index >= 0 && index < ActiveFramePoints.Count ? ActiveFramePoints[index] : null;
+    /// <summary>
+    /// Gets a value indicating whether frame region applies to the media studio state.
+    /// </summary>
+    /// <value>The has frame region value exposed by <see cref="MediaStudio"/>.</value>
     private bool HasFrameRegion => _frameClipPolygon.Count >= 3;
+    /// <summary>
+    /// Gets a value indicating whether morph region applies to the media studio state.
+    /// </summary>
+    /// <value>The has morph region value exposed by <see cref="MediaStudio"/>.</value>
     private bool HasMorphRegion => _morphClipPolygon.Count >= 3;
+    /// <summary>
+    /// Gets a value indicating whether active frame region inverted applies to the media studio state.
+    /// </summary>
+    /// <value>The active frame region inverted value exposed by <see cref="MediaStudio"/>.</value>
     private bool ActiveFrameRegionInverted => _editingMorphRegion
         ? SelectedVideoLayer?.MorphRegion?.Inverted == true
         : SelectedVideoLayer?.Region?.Inverted == true;
+    /// <summary>
+    /// Gets the active frame region name value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The active frame region name value exposed by <see cref="MediaStudio"/>.</value>
     private string ActiveFrameRegionName => _editingMorphRegion ? "morph target" : "source region";
+    /// <summary>
+    /// Gets a value indicating whether finish frame region applies to the media studio state.
+    /// </summary>
+    /// <value>The can finish frame region value exposed by <see cref="MediaStudio"/>.</value>
     private bool CanFinishFrameRegion => _frameRegionEditing && _frameDraft.Count >= 3;
+    /// <summary>
+    /// Gets a value indicating whether paste frame region applies to the media studio state.
+    /// </summary>
+    /// <value>The can paste frame region value exposed by <see cref="MediaStudio"/>.</value>
     private bool CanPasteFrameRegion => _frameClipboard.Count >= 3;
+    /// <summary>
+    /// Gets a value indicating whether create selection layer applies to the media studio state.
+    /// </summary>
+    /// <value>The can create selection layer value exposed by <see cref="MediaStudio"/>.</value>
     private bool CanCreateSelectionLayer => CanSaveCutSection;
+    /// <summary>
+    /// Gets a value indicating whether insert layer into mainframe applies to the media studio state.
+    /// </summary>
+    /// <value>The can insert layer into mainframe value exposed by <see cref="MediaStudio"/>.</value>
     private bool CanInsertLayerIntoMainframe => SelectedVideoLayer is { Kind: VideoEffectLayerKind.Blob3D };
+    /// <summary>
+    /// Gets the video selection start value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The video selection start value exposed by <see cref="MediaStudio"/>.</value>
     private double VideoSelectionStart => _videoSelectionIsPoint ? _videoSelectionPointSeconds : _videoSelectionStartSeconds;
+    /// <summary>
+    /// Gets the video selection end value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The video selection end value exposed by <see cref="MediaStudio"/>.</value>
     private double VideoSelectionEnd => _videoSelectionIsPoint ? _videoSelectionPointSeconds : _videoSelectionEndSeconds;
+    /// <summary>
+    /// Gets the video selection label value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The video selection label value exposed by <see cref="MediaStudio"/>.</value>
     private string VideoSelectionLabel => _videoSelectionIsPoint ? LT("Timestamp") : LT("Range");
+    /// <summary>
+    /// Gets the video selection readout value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The video selection readout value exposed by <see cref="MediaStudio"/>.</value>
     private string VideoSelectionReadout => _videoSelectionIsPoint
         ? $"/ {Time(_duration)}"
         : $"— {Time(VideoSelectionEnd)} / {Time(_duration)}";
+    /// <summary>
+    /// Gets the video selection timeline start value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The video selection timeline start value exposed by <see cref="MediaStudio"/>.</value>
     private double VideoSelectionTimelineStart => SourcePositionToTimeline(VideoSelectionStart);
+    /// <summary>
+    /// Gets the video selection timeline end value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The video selection timeline end value exposed by <see cref="MediaStudio"/>.</value>
     private double VideoSelectionTimelineEnd => SourcePositionToTimeline(VideoSelectionEnd);
+    /// <summary>
+    /// Gets the video selection detailed summary value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The video selection detailed summary value exposed by <see cref="MediaStudio"/>.</value>
     private string VideoSelectionDetailedSummary => _videoSelectionIsPoint
         ? $"Source timestamp {Time(VideoSelectionStart)} · project timestamp {Time(VideoSelectionTimelineStart)}"
         : $"Source {Time(VideoSelectionStart)} — {Time(VideoSelectionEnd)} · project {Time(VideoSelectionTimelineStart)} — {Time(VideoSelectionTimelineEnd)} · {Time(VideoSelectionEnd - VideoSelectionStart)} selected";
+    /// <summary>
+    /// Gets the video or audio selection title value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The video or audio selection title value exposed by <see cref="MediaStudio"/>.</value>
     private string VideoOrAudioSelectionTitle => IsVideo && _videoSelectionIsPoint ? LT("Selected timestamp") : LT("Selected range");
+    /// <summary>
+    /// Gets the video or audio selection summary value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The video or audio selection summary value exposed by <see cref="MediaStudio"/>.</value>
     private string VideoOrAudioSelectionSummary => IsVideo && _videoSelectionIsPoint
         ? $"{SelectedClipName} · {Time(_videoSelectionPointSeconds)} / {Time(_duration)}"
         : IsVideo
             ? $"{SelectedClipName} · {Time(VideoSelectionStart)} — {Time(VideoSelectionEnd)} / {Time(_duration)}"
             : $"{Time(_trimStart)} — {Time(_trimEnd)} / {Time(_duration)}";
+    /// <summary>
+    /// Gets the selected clip name value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The selected clip name value exposed by <see cref="MediaStudio"/>.</value>
     private string SelectedClipName => SelectedSegment?.Name ?? (IsVideo ? LT("No selected video clip") : LT("No selected audio clip"));
+    /// <summary>
+    /// Gets the send to converter menu text value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The send to converter menu text value exposed by <see cref="MediaStudio"/>.</value>
     private string SendToConverterMenuText => IsVideo ? LT("Send selected clip/range to Media Converter") : LT("Send selected audio clip to Media Converter");
+    /// <summary>
+    /// Gets the selected segment timeline start value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The selected segment timeline start value exposed by <see cref="MediaStudio"/>.</value>
     private double SelectedSegmentTimelineStart => SelectedSegmentIndex >= 0
         ? TimelineEdits.SegmentTimelineStart(_segments, SelectedSegmentIndex, _playbackRate)
         : 0;
+    /// <summary>
+    /// Gets the selected segment source start value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The selected segment source start value exposed by <see cref="MediaStudio"/>.</value>
     private double SelectedSegmentSourceStart => SelectedSegment?.TrimStartSeconds ?? 0;
+    /// <summary>
+    /// Gets the selected segment source end value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The selected segment source end value exposed by <see cref="MediaStudio"/>.</value>
     private double SelectedSegmentSourceEnd => SelectedSegment?.EffectiveTrimEndSeconds ?? 0;
+    /// <summary>
+    /// Gets the selected segment effective rate value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The selected segment effective rate value exposed by <see cref="MediaStudio"/>.</value>
     private double SelectedSegmentEffectiveRate => Math.Max(.0001, Math.Max(.1, _playbackRate) * Math.Max(.0001, Math.Abs(SelectedSegment?.Speed ?? 1)));
+    /// <summary>
+    /// Gets a value indicating whether pending insert has range applies to the media studio state.
+    /// </summary>
+    /// <value>The pending insert has range value exposed by <see cref="MediaStudio"/>.</value>
     private bool PendingInsertHasRange => _pendingInsertMaximumSourceSeconds - _pendingInsertMinimumSourceSeconds > .01;
+    /// <summary>
+    /// Gets the video time overlay style value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The video time overlay style value exposed by <see cref="MediaStudio"/>.</value>
     private string VideoTimeOverlayStyle
     {
         get
@@ -1138,6 +1732,10 @@
             return $"--video-time-start:{Percent(start)};--video-time-end:{Percent(end)};--video-time-playhead:{Percent(point)};";
         }
     }
+    /// <summary>
+    /// Gets the video sequence selection style value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The video sequence selection style value exposed by <see cref="MediaStudio"/>.</value>
     private string VideoSequenceSelectionStyle
     {
         get
@@ -1154,16 +1752,44 @@
             return $"left:{Percent(start / sequenceDuration)};width:{Percent(Math.Max(0, end - start) / sequenceDuration)}";
         }
     }
+    /// <summary>
+    /// Gets the video sequence selection start style value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The video sequence selection start style value exposed by <see cref="MediaStudio"/>.</value>
     private string VideoSequenceSelectionStartStyle => $"left:{Percent(VideoSelectionTimelineStart / Math.Max(.01, SequenceDuration))}";
+    /// <summary>
+    /// Gets the video sequence selection end style value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The video sequence selection end style value exposed by <see cref="MediaStudio"/>.</value>
     private string VideoSequenceSelectionEndStyle => $"left:{Percent(VideoSelectionTimelineEnd / Math.Max(.01, SequenceDuration))}";
+    /// <summary>
+    /// Gets the video sequence selection title value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The video sequence selection title value exposed by <see cref="MediaStudio"/>.</value>
     private string VideoSequenceSelectionTitle => _videoSelectionIsPoint
         ? $"{SelectedClipName}: timestamp {Time(VideoSelectionStart)}"
         : $"{SelectedClipName}: selected {Time(VideoSelectionStart)} — {Time(VideoSelectionEnd)}";
+    /// <summary>
+    /// Gets the frame polyline points value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The frame polyline points value exposed by <see cref="MediaStudio"/>.</value>
     private string FramePolylinePoints => string.Join(" ", ActiveFramePoints.Select(point => $"{Inv(point.X * 1000)},{Inv(point.Y * 1000)}"));
+    /// <summary>
+    /// Gets the frame polygon points value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The frame polygon points value exposed by <see cref="MediaStudio"/>.</value>
     private string FramePolygonPoints => FramePolylinePoints;
+    /// <summary>
+    /// Gets the frame dim path used by this media studio instance to locate the associated file-system resource.
+    /// </summary>
+    /// <value>The frame dim path value exposed by <see cref="MediaStudio"/>.</value>
     private string FrameDimPath => ActiveFramePoints.Count >= 3
         ? $"M 0 0 H 1000 V 1000 H 0 Z M {string.Join(" L ", ActiveFramePoints.Select(point => $"{Inv(point.X * 1000)} {Inv(point.Y * 1000)}"))} Z"
         : "M 0 0 H 1000 V 1000 H 0 Z";
+    /// <summary>
+    /// Gets the video preview style value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The video preview style value exposed by <see cref="MediaStudio"/>.</value>
     private string VideoPreviewStyle
     {
         get
@@ -1177,6 +1803,11 @@
             return $"object-fit:{fit};";
         }
     }
+    /// <summary>
+    /// Performs lt for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="text">Text value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string LT(string text) {
         try
         {
@@ -1189,6 +1820,10 @@
         }
     }
 
+    /// <summary>
+    /// Gets the mouse mode label value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The mouse mode label value exposed by <see cref="MediaStudio"/>.</value>
     private string MouseModeLabel => LT(_mouseMode switch
     {
         MediaStudioMouseMode.SelectSection => "Select time",
@@ -1197,6 +1832,10 @@
         MediaStudioMouseMode.FrameRegion => "Frame region",
         _ => "Select time"
     });
+    /// <summary>
+    /// Gets the video canvas mode help value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The video canvas mode help value exposed by <see cref="MediaStudio"/>.</value>
     private string VideoCanvasModeHelp => LT(_mouseMode switch
     {
         MediaStudioMouseMode.PlacePlayhead => "Click or drag to scrub the selected clip",
@@ -1204,12 +1843,32 @@
         MediaStudioMouseMode.FrameRegion => "Click frame vertices; Enter or double-click applies",
         _ => "Click for one timestamp; drag for a selected range"
     });
+    /// <summary>
+    /// Gets the selected section summary value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The selected section summary value exposed by <see cref="MediaStudio"/>.</value>
     private string SelectedSectionSummary => SelectedSegment is { } segment
         ? $"{segment.Name} · {Time(segment.SourceLengthSeconds / Math.Max(.1, _playbackRate))}"
         : LT("None");
+    /// <summary>
+    /// Gets the import menu text value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The import menu text value exposed by <see cref="MediaStudio"/>.</value>
     private string ImportMenuText => IsVideo ? LT("Import video…") : LT("Import audio…");
+    /// <summary>
+    /// Gets the accept value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The accept value exposed by <see cref="MediaStudio"/>.</value>
     private string Accept => IsVideo ? "video/mp4,video/webm,video/ogg,video/quicktime" : "audio/mpeg,audio/wav,audio/ogg,audio/webm,audio/mp4,audio/aac,audio/flac";
+    /// <summary>
+    /// Gets the MIME label value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The MIME label value exposed by <see cref="MediaStudio"/>.</value>
     private string MimeLabel => string.IsNullOrWhiteSpace(_mimeType) ? (IsVideo ? LT("Video") : LT("Audio")) : _mimeType;
+    /// <summary>
+    /// Gets the source status value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The source status value exposed by <see cref="MediaStudio"/>.</value>
     private string SourceStatus => _renderingVideoExport
         ? LT("Rendering effects to video…")
         : _recordingStopping
@@ -1221,18 +1880,53 @@
             : HasRetainedRecording
                 ? $"{LT("Recording ready")} · {FormatBytes(_retainedRecordingSizeBytes)} · {LT("download protected")}"
                 : HasSource ? $"{LT("Ready")} · {Time(_trimEnd - _trimStart)} {LT("selected")}" : LT("No source");
+    /// <summary>
+    /// Gets the apply button text value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The apply button text value exposed by <see cref="MediaStudio"/>.</value>
     private string ApplyButtonText => _embedding ? $"{LT("Embedding")} {_embeddingProgress:0}%" : _saving ? LT("Applying…") : EditingExisting ? LT("Apply media") : LT("Insert media");
+    /// <summary>
+    /// Gets the footer status value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The footer status value exposed by <see cref="MediaStudio"/>.</value>
     private string FooterStatus => _error ?? _warning ??
         (HasRetainedRecording
             ? $"{MimeLabel} · {Time(_duration)} · {FormatBytes(_retainedRecordingSizeBytes)} · {LT("available to download")}"
             : HasSource ? $"{MimeLabel} · {Time(_duration)}" : LT("Import or record a source to begin."));
+    /// <summary>
+    /// Gets the display waveform collection maintained or exposed by this media studio instance for downstream processing.
+    /// </summary>
+    /// <value>The display waveform value exposed by <see cref="MediaStudio"/>.</value>
     private IEnumerable<double> DisplayWaveform => _waveform.Count > 0 ? _waveform : Enumerable.Repeat(.22, 64);
+    /// <summary>
+    /// Gets the max fade value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The max fade value exposed by <see cref="MediaStudio"/>.</value>
     private double MaxFade => Math.Max(.05, Math.Min(10, (_trimEnd - _trimStart) / Math.Max(.25, _playbackRate) / 2));
+    /// <summary>
+    /// Gets the range selector end value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The range selector end value exposed by <see cref="MediaStudio"/>.</value>
     private double RangeSelectorEnd => Math.Max(.01, double.IsFinite(_duration) ? _duration : 0);
+    /// <summary>
+    /// Gets the range selector min range value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The range selector min range value exposed by <see cref="MediaStudio"/>.</value>
     private double RangeSelectorMinRange => Math.Min(.05, RangeSelectorEnd);
+    /// <summary>
+    /// Gets the major tick value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The major tick value exposed by <see cref="MediaStudio"/>.</value>
     private double MajorTick => _duration switch { <= 10 => 1, <= 30 => 5, <= 120 => 10, <= 600 => 60, _ => 300 };
+    /// <summary>
+    /// Gets the minor tick value that forms part of the media studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The minor tick value exposed by <see cref="MediaStudio"/>.</value>
     private double MinorTick => Math.Max(.1, MajorTick / 5);
 
+    /// <summary>
+    /// Handles the parameters set lifecycle or event notification for <see cref="MediaStudio"/>, updating the state required by the surrounding workflow.
+    /// </summary>
     protected override void OnParametersSet()
     {
         try
@@ -1385,6 +2079,11 @@
         }
     }
 
+    /// <summary>
+    /// Handles the after render async lifecycle or event notification for <see cref="MediaStudio"/>, updating the state required by the surrounding workflow.
+    /// </summary>
+    /// <param name="firstRender">Value indicating whether first render should apply to this operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         try
@@ -1505,12 +2204,16 @@
         }
     }
 
+    /// <summary>
+    /// Ensures media module for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <returns>The ijs object reference produced by the operation.</returns>
     private async Task<IJSObjectReference> EnsureMediaModuleAsync()
     {
         try
         {
             if (_disposed) throw new ObjectDisposedException(nameof(MediaStudio));
-            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=2.8.7").ConfigureAwait(true);
+            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=2.8.8").ConfigureAwait(true);
             _self ??= DotNetObjectReference.Create(this);
             if (SessionId != Guid.Empty)
             {
@@ -1543,6 +2246,12 @@
         }
     }
 
+    /// <summary>
+    /// Builds video effect configuration for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="outputWidth">Output width value supplied to the media studio operation and used when producing its result.</param>
+    /// <param name="outputHeight">Output height value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>The object produced by the operation.</returns>
     private object BuildVideoEffectConfiguration(int outputWidth = 0, int outputHeight = 0) {
         try
         {
@@ -1568,6 +2277,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs sync video effects for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="module">Javascript object reference dependency used by the media studio workflow to provide the corresponding application capability.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task SyncVideoEffectsAsync(IJSObjectReference? module = null)
     {
         try
@@ -1584,6 +2298,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs video layer payload for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="layers">Video effect layer dependency used by the media studio workflow to provide the corresponding application capability.</param>
+    /// <returns>The object produced by the operation.</returns>
     private object[] VideoLayerPayload(IEnumerable<VideoEffectLayer> layers) {
         try
         {
@@ -1651,6 +2370,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs commit selected segment for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="refreshVideoEffects">Value indicating whether refresh video effects should apply to this operation.</param>
     private void CommitSelectedSegment(bool refreshVideoEffects = false)
     {
         try
@@ -1699,6 +2422,12 @@
         }
     }
 
+    /// <summary>
+    /// Performs select segment for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="seek">Value indicating whether seek should apply to this operation.</param>
+    /// <param name="forceReload">Value indicating whether force reload should apply to this operation.</param>
     private void SelectSegment(Guid id, bool seek = true, bool forceReload = false)
     {
         try
@@ -1743,6 +2472,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs select timeline segment for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task SelectTimelineSegment(Guid id)
     {
         try
@@ -1761,6 +2495,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs clear selected segment fields for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void ClearSelectedSegmentFields()
     {
         try
@@ -1796,6 +2533,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs current fields as segment for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <returns>The publication media segment produced by the operation.</returns>
     private PublicationMediaSegment CurrentFieldsAsSegment()
     {
         try
@@ -1830,6 +2571,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs replace or add current segment for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void ReplaceOrAddCurrentSegment()
     {
         try
@@ -1856,6 +2600,12 @@
         }
     }
 
+    /// <summary>
+    /// Performs distance for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="first">First value supplied to the media studio operation and used when producing its result.</param>
+    /// <param name="second">Second value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     private double Distance(MediaFramePoint first, MediaFramePoint second)
     {
         try
@@ -1872,6 +2622,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs clone frame points for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="points">Media frame point dependency used by the media studio workflow to provide the corresponding application capability.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private List<MediaFramePoint> CloneFramePoints(IEnumerable<MediaFramePoint>? points) {
         try
         {
@@ -1888,6 +2643,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs frame clip CSS for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="points">Media frame point dependency used by the media studio workflow to provide the corresponding application capability.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string FrameClipCss(IReadOnlyList<MediaFramePoint> points) {
         try
         {
@@ -1900,6 +2660,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs percent for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Percent(double value) {
         try
         {
@@ -1912,6 +2677,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs segment style for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="segment">Segment value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string SegmentStyle(PublicationMediaSegment segment)
     {
         try
@@ -1930,6 +2700,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs segment title for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="segment">Segment value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string SegmentTitle(PublicationMediaSegment segment)
     {
         try
@@ -1955,6 +2730,11 @@
         }
     }
 
+    /// <summary>
+    /// Determines whether playable segment for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="segment">Segment value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool IsPlayableSegment(PublicationMediaSegment segment) {
         try
         {
@@ -1967,6 +2747,12 @@
         }
     }
 
+    /// <summary>
+    /// Performs mouse mode text for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="mode">Mode value supplied to the media studio operation and used when producing its result.</param>
+    /// <param name="label">Label value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string MouseModeText(MediaStudioMouseMode mode, string label) {
         try
         {
@@ -1978,6 +2764,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs select section mode for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void SelectSectionMode() {
         try
         {
@@ -1989,6 +2778,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs place playhead mode for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void PlacePlayheadMode() {
         try
         {
@@ -2000,6 +2792,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds cut line mode for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void AddCutLineMode() {
         try
         {
@@ -2011,6 +2806,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs frame region mode for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void FrameRegionMode() {
         try
         {
@@ -2022,6 +2820,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change video canvas mouse mode for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media studio operation and used when producing its result.</param>
     private void ChangeVideoCanvasMouseMode(ChangeEventArgs args)
     {
         try
@@ -2037,6 +2839,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets mouse mode for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="mode">Mode value supplied to the media studio operation and used when producing its result.</param>
     private void SetMouseMode(MediaStudioMouseMode mode)
     {
         try
@@ -2054,6 +2860,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs timeline pointer down for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task TimelinePointerDown(PointerEventArgs args)
     {
         try
@@ -2071,6 +2882,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs show timeline context menu for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ShowTimelineContextMenu(MouseEventArgs args)
     {
         try
@@ -2091,6 +2907,12 @@
         }
     }
 
+    /// <summary>
+    /// Performs activate timeline position for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="ratio">Ratio value supplied to the media studio operation and used when producing its result.</param>
+    /// <param name="allowCut">Value indicating whether allow cut should apply to this operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ActivateTimelinePosition(double ratio, bool allowCut)
     {
         try
@@ -2115,6 +2937,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs seek selected at playhead for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task SeekSelectedAtPlayheadAsync()
     {
         try
@@ -2137,6 +2963,9 @@
         }
     }
 
+    /// <summary>
+    /// Adds cut line at playhead for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void AddCutLineAtPlayhead()
     {
         try
@@ -2153,6 +2982,9 @@
         }
     }
 
+    /// <summary>
+    /// Removes cut line for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void RemoveCutLine()
     {
         try
@@ -2171,6 +3003,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs copy selected section for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void CopySelectedSection()
     {
         try
@@ -2186,6 +3021,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs copy video selection for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void CopyVideoSelection()
     {
         try
@@ -2207,6 +3045,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs use video selection as trim for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void UseVideoSelectionAsTrim()
     {
         try
@@ -2229,6 +3070,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs cut video selection for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void CutVideoSelection()
     {
         try
@@ -2265,6 +3109,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs paste section for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void PasteSection()
     {
         try
@@ -2285,6 +3132,9 @@
         }
     }
 
+    /// <summary>
+    /// Deletes selected section for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void DeleteSelectedSection()
     {
         try
@@ -2313,6 +3163,10 @@
         }
     }
 
+    /// <summary>
+    /// Opens insert media picker for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task OpenInsertMediaPicker()
     {
         try
@@ -2338,6 +3192,14 @@
         }
     }
 
+    /// <summary>
+    /// Performs video time selection committed for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="startSeconds">Start seconds value supplied to the media studio operation and used when producing its result.</param>
+    /// <param name="endSeconds">End seconds value supplied to the media studio operation and used when producing its result.</param>
+    /// <param name="pointSelection">Value indicating whether point selection should apply to this operation.</param>
+    /// <param name="sourceDurationSeconds">Source duration seconds value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     [JSInvokable]
     public Task VideoTimeSelectionCommitted(double startSeconds, double endSeconds, bool pointSelection, double sourceDurationSeconds)
     {
@@ -2361,6 +3223,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs video source duration resolved for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="durationSeconds">Duration seconds value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     [JSInvokable]
     public async Task VideoSourceDurationResolved(double durationSeconds)
     {
@@ -2383,6 +3250,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs video playhead committed for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="sourceSeconds">Source seconds value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     [JSInvokable]
     public async Task VideoPlayheadCommitted(double sourceSeconds)
     {
@@ -2403,6 +3275,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs video cutline committed for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="sourceSeconds">Source seconds value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     [JSInvokable]
     public async Task VideoCutlineCommitted(double sourceSeconds)
     {
@@ -2423,6 +3300,12 @@
         }
     }
 
+    /// <summary>
+    /// Performs media studio drop insertion point selected for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="sourceSeconds">Source seconds value supplied to the media studio operation and used when producing its result.</param>
+    /// <param name="pointSelection">Value indicating whether point selection should apply to this operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     [JSInvokable]
     public Task MediaStudioDropInsertionPointSelected(double sourceSeconds, bool pointSelection)
     {
@@ -2447,6 +3330,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs media studio drop timeline point selected for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="timelineSeconds">Timeline seconds value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     [JSInvokable]
     public Task MediaStudioDropTimelinePointSelected(double timelineSeconds)
     {
@@ -2468,6 +3356,12 @@
         }
     }
 
+    /// <summary>
+    /// Performs media studio timeline segment dropped for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="segmentId">Identifier of the segment to use for this operation.</param>
+    /// <param name="timelineSeconds">Timeline seconds value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     [JSInvokable]
     public async Task MediaStudioTimelineSegmentDropped(string segmentId, double timelineSeconds)
     {
@@ -2493,6 +3387,10 @@
     }
 
     /// <summary>Reorders a Video Studio effect layer from the shared drag-and-drop layer stack.</summary>
+    /// <param name="draggedId">Identifier of the dragged to use for this operation.</param>
+    /// <param name="targetId">Identifier of the target to use for this operation.</param>
+    /// <param name="placeAfter">Value indicating whether place after should apply to this operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     [JSInvokable]
     public async Task MediaStudioVideoLayerDropped(string draggedId, string targetId, bool placeAfter)
     {
@@ -2519,6 +3417,10 @@
     }
 
     /// <summary>Reorders one filter inside the selected Video Studio effect layer through drag and drop.</summary>
+    /// <param name="draggedId">Identifier of the dragged to use for this operation.</param>
+    /// <param name="targetId">Identifier of the target to use for this operation.</param>
+    /// <param name="placeAfter">Value indicating whether place after should apply to this operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     [JSInvokable]
     public async Task MediaStudioVideoFilterDropped(string draggedId, string targetId, bool placeAfter)
     {
@@ -2544,6 +3446,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs source position to timeline for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="sourceSeconds">Source seconds value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     private double SourcePositionToTimeline(double sourceSeconds)
     {
         try
@@ -2566,6 +3473,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs prepare pending insert for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="segment">Segment value supplied to the media studio operation and used when producing its result.</param>
     private void PreparePendingInsert(PublicationMediaSegment segment)
     {
         try
@@ -2612,6 +3523,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs change pending insert position for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media studio operation and used when producing its result.</param>
     private void ChangePendingInsertPosition(ChangeEventArgs args)
     {
         try
@@ -2630,6 +3545,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs confirm pending insert for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void ConfirmPendingInsert()
     {
         try
@@ -2655,6 +3573,9 @@
         }
     }
 
+    /// <summary>
+    /// Determines whether cel pending insert for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void CancelPendingInsert()
     {
         try
@@ -2671,6 +3592,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs clear pending insert for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void ClearPendingInsert()
     {
         try
@@ -2692,6 +3616,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs begin frame region for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void BeginFrameRegion() {
         try
         {
@@ -2704,6 +3631,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs begin morph region for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void BeginMorphRegion() {
         try
         {
@@ -2716,6 +3646,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs begin active frame region for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="editMorph">Value indicating whether edit morph should apply to this operation.</param>
     private void BeginActiveFrameRegion(bool editMorph)
     {
         try
@@ -2740,6 +3674,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs frame overlay pointer down for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task FrameOverlayPointerDown(PointerEventArgs args)
     {
         try
@@ -2769,6 +3708,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs finish frame region for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task FinishFrameRegion()
     {
         try
@@ -2798,6 +3741,9 @@
         }
     }
 
+    /// <summary>
+    /// Determines whether cel frame region for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void CancelFrameRegion()
     {
         try
@@ -2815,6 +3761,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs clear frame region for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void ClearFrameRegion()
     {
         try
@@ -2838,6 +3787,9 @@
         }
     }
 
+    /// <summary>
+    /// Removes last frame point for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void RemoveLastFramePoint()
     {
         try
@@ -2854,6 +3806,9 @@
         }
     }
 
+    /// <summary>
+    /// Removes selected frame point for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void RemoveSelectedFramePoint()
     {
         try
@@ -2879,6 +3834,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs copy frame region for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void CopyFrameRegion()
     {
         try
@@ -2896,6 +3854,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs paste frame region for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void PasteFrameRegion()
     {
         try
@@ -2920,6 +3881,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs clone temporal section for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="section">Section value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>The media temporal section produced by the operation.</returns>
     private MediaTemporalSection CloneTemporalSection(MediaTemporalSection section) {
         try
         {
@@ -2939,6 +3905,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs video cut section style for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="section">Section value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string VideoCutSectionStyle(MediaTemporalSection section)
     {
         try
@@ -2958,6 +3929,9 @@
         }
     }
 
+    /// <summary>
+    /// Persists selected range as cut section for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void SaveSelectedRangeAsCutSection()
     {
         try
@@ -2985,6 +3959,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs select cut section for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
     private void SelectCutSection(Guid id)
     {
         try
@@ -3000,6 +3978,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs use selected cut section for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void UseSelectedCutSection()
     {
         try
@@ -3020,6 +4001,9 @@
         }
     }
 
+    /// <summary>
+    /// Removes selected cut section for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void RemoveSelectedCutSection()
     {
         try
@@ -3043,6 +4027,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs select initial video layer for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="segment">Segment value supplied to the media studio operation and used when producing its result.</param>
     private void SelectInitialVideoLayer(PublicationMediaSegment segment)
     {
         try
@@ -3076,6 +4064,9 @@
         }
     }
 
+    /// <summary>
+    /// Loads frame region from selected layer for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void LoadFrameRegionFromSelectedLayer()
     {
         try
@@ -3098,6 +4089,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs commit frame region to selected layer for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void CommitFrameRegionToSelectedLayer()
     {
         try
@@ -3117,6 +4111,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs select video layer for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
     private void SelectVideoLayer(Guid id)
     {
         try
@@ -3136,6 +4134,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs toggle auto create selection layers for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media studio operation and used when producing its result.</param>
     private void ToggleAutoCreateSelectionLayers(ChangeEventArgs args) {
         try
         {
@@ -3148,6 +4150,9 @@
         }
     }
 
+    /// <summary>
+    /// Creates selection layer for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void CreateSelectionLayer() {
         try
         {
@@ -3160,6 +4165,12 @@
         }
     }
 
+    /// <summary>
+    /// Creates or reuse selection layer for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="forceNew">Value indicating whether force new should apply to this operation.</param>
+    /// <param name="announce">Value indicating whether announce should apply to this operation.</param>
+    /// <returns>The video effect layer produced by the operation.</returns>
     private VideoEffectLayer? CreateOrReuseSelectionLayer(bool forceNew, bool announce)
     {
         try
@@ -3205,6 +4216,9 @@
         }
     }
 
+    /// <summary>
+    /// Adds video layer for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void AddVideoLayer()
     {
         try
@@ -3234,6 +4248,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs duplicate video layer for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void DuplicateVideoLayer()
     {
         try
@@ -3262,6 +4279,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs move video layer up for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void MoveVideoLayerUp() {
         try
         {
@@ -3273,6 +4293,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs move video layer down for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void MoveVideoLayerDown() {
         try
         {
@@ -3284,6 +4307,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs move selected video layer for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="offset">Offset value supplied to the media studio operation and used when producing its result.</param>
     private void MoveSelectedVideoLayer(int offset)
     {
         try
@@ -3306,6 +4333,9 @@
         }
     }
 
+    /// <summary>
+    /// Deletes video layer for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void DeleteVideoLayer()
     {
         try
@@ -3330,6 +4360,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs toggle video layer visibility for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
     private void ToggleVideoLayerVisibility(Guid id)
     {
         try
@@ -3347,6 +4381,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs change video layer name for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media studio operation and used when producing its result.</param>
     private void ChangeVideoLayerName(ChangeEventArgs args)
     {
         try
@@ -3363,6 +4401,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs change video layer opacity for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media studio operation and used when producing its result.</param>
     private void ChangeVideoLayerOpacity(ChangeEventArgs args)
     {
         try
@@ -3379,6 +4421,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs change video layer blend mode for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media studio operation and used when producing its result.</param>
     private void ChangeVideoLayerBlendMode(ChangeEventArgs args)
     {
         try
@@ -3395,6 +4441,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs change video layer kind for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media studio operation and used when producing its result.</param>
     private void ChangeVideoLayerKind(ChangeEventArgs args)
     {
         try
@@ -3437,6 +4487,9 @@
         }
     }
 
+    /// <summary>
+    /// Converts selected layer to blob for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void ConvertSelectedLayerToBlob()
     {
         try
@@ -3467,6 +4520,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs default blob region for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     private List<MediaFramePoint> DefaultBlobRegion() {
         try
         {
@@ -3482,6 +4539,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs toggle video layer morph for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media studio operation and used when producing its result.</param>
     private void ToggleVideoLayerMorph(ChangeEventArgs args)
     {
         try
@@ -3499,6 +4560,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs toggle video layer morph animation for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media studio operation and used when producing its result.</param>
     private void ToggleVideoLayerMorphAnimation(ChangeEventArgs args)
     {
         try
@@ -3515,6 +4580,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs change video layer morph amount for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media studio operation and used when producing its result.</param>
     private void ChangeVideoLayerMorphAmount(ChangeEventArgs args) {
         try
         {
@@ -3526,6 +4595,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change video layer animation speed for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media studio operation and used when producing its result.</param>
     private void ChangeVideoLayerAnimationSpeed(ChangeEventArgs args) {
         try
         {
@@ -3537,6 +4610,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change video layer depth for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media studio operation and used when producing its result.</param>
     private void ChangeVideoLayerDepth(ChangeEventArgs args) {
         try
         {
@@ -3548,6 +4625,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change video layer roundness for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media studio operation and used when producing its result.</param>
     private void ChangeVideoLayerRoundness(ChangeEventArgs args) {
         try
         {
@@ -3560,6 +4641,12 @@
         }
     }
 
+    /// <summary>
+    /// Performs change selected video layer number for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media studio operation and used when producing its result.</param>
+    /// <param name="assign">Assign value supplied to the media studio operation and used when producing its result.</param>
+    /// <param name="refreshScad">Value indicating whether refresh OpenSCAD should apply to this operation.</param>
     private void ChangeSelectedVideoLayerNumber(ChangeEventArgs args, Action<VideoEffectLayer, double> assign, bool refreshScad)
     {
         try
@@ -3577,6 +4664,9 @@
         }
     }
 
+    /// <summary>
+    /// Refreshes selected layer open OpenSCAD for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void RefreshSelectedLayerOpenScad() {
         try
         {
@@ -3589,6 +4679,10 @@
         }
     }
 
+    /// <summary>
+    /// Refreshes selected layer open OpenSCAD for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="commit">Value indicating whether commit should apply to this operation.</param>
     private void RefreshSelectedLayerOpenScad(bool commit)
     {
         try
@@ -3606,6 +4700,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs insert selected layer into mainframe for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task InsertSelectedLayerIntoMainframe()
     {
         try
@@ -3625,6 +4723,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs toggle video layer temporal range for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media studio operation and used when producing its result.</param>
     private void ToggleVideoLayerTemporalRange(ChangeEventArgs args)
     {
         try
@@ -3646,6 +4748,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs change video layer temporal start for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media studio operation and used when producing its result.</param>
     private void ChangeVideoLayerTemporalStart(ChangeEventArgs args)
     {
         try
@@ -3663,6 +4769,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs change video layer temporal end for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media studio operation and used when producing its result.</param>
     private void ChangeVideoLayerTemporalEnd(ChangeEventArgs args)
     {
         try
@@ -3680,6 +4790,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs use selection for video layer time for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void UseSelectionForVideoLayerTime() {
         try
         {
@@ -3692,6 +4805,9 @@
         }
     }
 
+    /// <summary>
+    /// Applies selection to selected video layer for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void ApplySelectionToSelectedVideoLayer()
     {
         try
@@ -3715,6 +4831,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs change new video filter kind for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media studio operation and used when producing its result.</param>
     private void ChangeNewVideoFilterKind(ChangeEventArgs args)
     {
         try
@@ -3729,6 +4849,9 @@
         }
     }
 
+    /// <summary>
+    /// Adds selected video filter for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void AddSelectedVideoFilter() {
         try
         {
@@ -3740,6 +4863,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds chroma key filter for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void AddChromaKeyFilter() {
         try
         {
@@ -3751,6 +4877,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds vignette filter for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void AddVignetteFilter() {
         try
         {
@@ -3762,6 +4891,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds blur filter for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void AddBlurFilter() {
         try
         {
@@ -3773,6 +4905,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds grain filter for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void AddGrainFilter() {
         try
         {
@@ -3784,6 +4919,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds color adjustment filters for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void AddColorAdjustmentFilters()
     {
         try
@@ -3805,6 +4943,10 @@
         }
     }
 
+    /// <summary>
+    /// Adds video filter for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="kind">Kind value supplied to the media studio operation and used when producing its result.</param>
     private void AddVideoFilter(VideoEffectFilterKind kind)
     {
         try
@@ -3824,6 +4966,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs select video filter for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
     private void SelectVideoFilter(Guid id)
     {
         try
@@ -3838,6 +4984,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs toggle video filter for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
     private void ToggleVideoFilter(Guid id)
     {
         try
@@ -3855,6 +5005,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs change video filter name for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media studio operation and used when producing its result.</param>
     private void ChangeVideoFilterName(ChangeEventArgs args)
     {
         try
@@ -3871,6 +5025,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs change video filter color for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media studio operation and used when producing its result.</param>
     private void ChangeVideoFilterColor(ChangeEventArgs args)
     {
         try
@@ -3888,6 +5046,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs change video filter amount for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media studio operation and used when producing its result.</param>
     private void ChangeVideoFilterAmount(ChangeEventArgs args) {
         try
         {
@@ -3899,6 +5061,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change video filter secondary amount for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media studio operation and used when producing its result.</param>
     private void ChangeVideoFilterSecondaryAmount(ChangeEventArgs args) {
         try
         {
@@ -3910,6 +5076,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change video filter tertiary amount for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media studio operation and used when producing its result.</param>
     private void ChangeVideoFilterTertiaryAmount(ChangeEventArgs args) {
         try
         {
@@ -3921,6 +5091,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change video filter residual opacity for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media studio operation and used when producing its result.</param>
     private void ChangeVideoFilterResidualOpacity(ChangeEventArgs args) {
         try
         {
@@ -3933,6 +5107,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs change selected video filter number for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media studio operation and used when producing its result.</param>
+    /// <param name="assign">Assign value supplied to the media studio operation and used when producing its result.</param>
     private void ChangeSelectedVideoFilterNumber(ChangeEventArgs args, Action<VideoEffectFilter, double> assign)
     {
         try
@@ -3949,6 +5128,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs move video filter up for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void MoveVideoFilterUp() {
         try
         {
@@ -3960,6 +5142,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs move video filter down for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void MoveVideoFilterDown() {
         try
         {
@@ -3971,6 +5156,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs move selected video filter for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="offset">Offset value supplied to the media studio operation and used when producing its result.</param>
     private void MoveSelectedVideoFilter(int offset)
     {
         try
@@ -3992,6 +5181,9 @@
         }
     }
 
+    /// <summary>
+    /// Removes selected video filter for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void RemoveSelectedVideoFilter()
     {
         try
@@ -4013,6 +5205,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs video layer kind name for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="kind">Kind value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string VideoLayerKindName(VideoEffectLayerKind kind) {
         try
         {
@@ -4030,6 +5227,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs HTML support label for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="support">Support value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string HtmlSupportLabel(PublicationHtmlExportSupport support) {
         try
         {
@@ -4047,6 +5249,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs HTML support CSS for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="support">Support value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string HtmlSupportCss(PublicationHtmlExportSupport support) {
         try
         {
@@ -4064,6 +5271,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs video layer summary for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="layer">Layer value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string VideoLayerSummary(VideoEffectLayer layer)
     {
         try
@@ -4081,6 +5293,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs video blend mode name for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="mode">Mode value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string VideoBlendModeName(VideoEffectBlendMode mode) {
         try
         {
@@ -4101,6 +5318,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs video filter kind name for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="kind">Kind value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string VideoFilterKindName(VideoEffectFilterKind kind) {
         try
         {
@@ -4119,6 +5341,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs video filter summary for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="filter">Filter value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string VideoFilterSummary(VideoEffectFilter filter) {
         try
         {
@@ -4138,6 +5365,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs video filter amount label for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="kind">Kind value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string VideoFilterAmountLabel(VideoEffectFilterKind kind) {
         try
         {
@@ -4157,6 +5389,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs video filter minimum for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="kind">Kind value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     private double VideoFilterMinimum(VideoEffectFilterKind kind) {
         try
         {
@@ -4168,6 +5405,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs video filter maximum for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="kind">Kind value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     private double VideoFilterMaximum(VideoEffectFilterKind kind) {
         try
         {
@@ -4185,6 +5427,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs video filter step for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="kind">Kind value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     private double VideoFilterStep(VideoEffectFilterKind kind) {
         try
         {
@@ -4202,6 +5449,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs toggle frame region inverted for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media studio operation and used when producing its result.</param>
     private void ToggleFrameRegionInverted(ChangeEventArgs args)
     {
         try
@@ -4222,6 +5473,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs change selected frame point x for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media studio operation and used when producing its result.</param>
     private void ChangeSelectedFramePointX(ChangeEventArgs args) {
         try
         {
@@ -4233,6 +5488,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change selected frame point y for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media studio operation and used when producing its result.</param>
     private void ChangeSelectedFramePointY(ChangeEventArgs args) {
         try
         {
@@ -4245,6 +5504,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs change selected frame point for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media studio operation and used when producing its result.</param>
+    /// <param name="changeX">Value indicating whether change x should apply to this operation.</param>
     private void ChangeSelectedFramePoint(ChangeEventArgs args, bool changeX)
     {
         try
@@ -4269,6 +5533,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs video frame point selected for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="pointIndex">Point index value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     [JSInvokable]
     public Task VideoFramePointSelected(int pointIndex)
     {
@@ -4287,6 +5556,13 @@
         }
     }
 
+    /// <summary>
+    /// Performs video frame point committed for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="pointIndex">Point index value supplied to the media studio operation and used when producing its result.</param>
+    /// <param name="x">X value supplied to the media studio operation and used when producing its result.</param>
+    /// <param name="y">Y value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     [JSInvokable]
     public Task VideoFramePointCommitted(int pointIndex, double x, double y)
     {
@@ -4314,6 +5590,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs media studio shortcut requested for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="command">Command value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     [JSInvokable]
     public Task MediaStudioShortcutRequested(string command)
     {
@@ -4354,6 +5635,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs show media context menu for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ShowMediaContextMenu(MouseEventArgs args)
     {
         try
@@ -4367,6 +5653,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets trim start at playhead for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task SetTrimStartAtPlayhead()
     {
         try
@@ -4382,6 +5672,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets trim end at playhead for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task SetTrimEndAtPlayhead()
     {
         try
@@ -4397,6 +5691,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs reset trim for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void ResetTrim()
     {
         try
@@ -4416,6 +5713,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle muted from menu for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void ToggleMutedFromMenu() {
         try
         {
@@ -4427,6 +5727,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle loop from menu for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void ToggleLoopFromMenu() {
         try
         {
@@ -4439,6 +5742,10 @@
         }
     }
 
+    /// <summary>
+    /// Opens video project picker for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task OpenVideoProjectPicker()
     {
         try
@@ -4465,6 +5772,10 @@
         }
     }
 
+    /// <summary>
+    /// Opens video project media picker for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task OpenVideoProjectMediaPicker()
     {
         try
@@ -4491,6 +5802,11 @@
         }
     }
 
+    /// <summary>
+    /// Loads video project for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Input file change event args dependency used by the media studio workflow to provide the corresponding application capability.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task LoadVideoProject(InputFileChangeEventArgs args)
     {
         try
@@ -4527,6 +5843,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs relink video project media for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Input file change event args dependency used by the media studio workflow to provide the corresponding application capability.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task RelinkVideoProjectMedia(InputFileChangeEventArgs args)
     {
         try
@@ -4586,6 +5907,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs change project track for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ChangeProjectTrack(ChangeEventArgs args)
     {
         try
@@ -4603,6 +5929,10 @@
         }
     }
 
+    /// <summary>
+    /// Loads project track for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="trackId">Identifier of the track to use for this operation.</param>
     private void LoadProjectTrack(Guid trackId)
     {
         try
@@ -4638,6 +5968,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs commit project track for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void CommitProjectTrack()
     {
         try
@@ -4654,6 +5987,11 @@
         }
     }
 
+    /// <summary>
+    /// Resolves active project track identifier for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="project">Project value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>The GUID produced by the operation.</returns>
     private Guid ResolveActiveProjectTrackId(VideoProjectDocument project)
     {
         try
@@ -4672,6 +6010,12 @@
         }
     }
 
+    /// <summary>
+    /// Performs matches project media for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="segment">Segment value supplied to the media studio operation and used when producing its result.</param>
+    /// <param name="selectedFileName">Selected file name value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool MatchesProjectMedia(PublicationMediaSegment segment, string selectedFileName)
     {
         try
@@ -4701,6 +6045,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs project reference file name for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string ProjectReferenceFileName(string value)
     {
         try
@@ -4720,6 +6069,12 @@
         }
     }
 
+    /// <summary>
+    /// Resolves project media MIME type for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="fileName">File name value supplied to the media studio operation and used when producing its result.</param>
+    /// <param name="declaredMimeType">Declared mime type value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string ResolveProjectMediaMimeType(string fileName, string? declaredMimeType)
     {
         try
@@ -4751,6 +6106,10 @@
         }
     }
 
+    /// <summary>
+    /// Opens media picker for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task OpenMediaPicker()
     {
         try
@@ -4776,6 +6135,11 @@
         }
     }
 
+    /// <summary>
+    /// Loads file for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Input file change event args dependency used by the media studio workflow to provide the corresponding application capability.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task LoadFile(InputFileChangeEventArgs args)
     {
         try
@@ -4812,6 +6176,11 @@
         }
     }
 
+    /// <summary>
+    /// Loads inserted file for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Input file change event args dependency used by the media studio workflow to provide the corresponding application capability.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task LoadInsertedFile(InputFileChangeEventArgs args)
     {
         try
@@ -4849,6 +6218,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs media studio file drop rejected for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="message">Message value supplied to the media studio operation and used when producing its result.</param>
     [JSInvokable]
     public void MediaStudioFileDropRejected(string? message)
     {
@@ -4867,6 +6240,11 @@
         }
     }
 
+    /// <summary>
+    /// Reads media file for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="file">Browser file dependency used by the media studio workflow to provide the corresponding application capability.</param>
+    /// <returns>The publication media segment produced by the operation.</returns>
     private async Task<PublicationMediaSegment> ReadMediaFileAsync(IBrowserFile file)
     {
         try
@@ -4935,6 +6313,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs inspect source for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task InspectSource()
     {
         try
@@ -4970,6 +6352,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs record camera for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RecordCamera() {
         try
         {
@@ -4981,6 +6367,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs record screen for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RecordScreen() {
         try
         {
@@ -4992,6 +6382,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs record microphone for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RecordMicrophone() {
         try
         {
@@ -5004,6 +6398,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs change recording quality mode for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media studio operation and used when producing its result.</param>
     private void ChangeRecordingQualityMode(ChangeEventArgs args)
     {
         try
@@ -5018,6 +6416,11 @@
         }
     }
 
+    /// <summary>
+    /// Normalizes adaptive profile for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string NormalizeAdaptiveProfile(string? value)
     {
         try
@@ -5033,6 +6436,11 @@
         }
     }
 
+    /// <summary>
+    /// Normalizes recording codec preference for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string NormalizeRecordingCodecPreference(string? value)
     {
         try
@@ -5048,6 +6456,10 @@
         }
     }
 
+    /// <summary>
+    /// Builds browser recording options for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <returns>The object produced by the operation.</returns>
     private object BuildBrowserRecordingOptions()
     {
         try
@@ -5125,6 +6537,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs render effects to video for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task RenderEffectsToVideo()
     {
         try
@@ -5171,6 +6587,10 @@
         }
     }
 
+    /// <summary>
+    /// Determines whether cel rendered video export for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task CancelRenderedVideoExport()
     {
         try
@@ -5197,6 +6617,16 @@
         }
     }
 
+    /// <summary>
+    /// Performs rendered video export ready for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="fileName">File name value supplied to the media studio operation and used when producing its result.</param>
+    /// <param name="mimeType">Mime type value supplied to the media studio operation and used when producing its result.</param>
+    /// <param name="sizeBytes">Size bytes value supplied to the media studio operation and used when producing its result.</param>
+    /// <param name="width">Width value supplied to the media studio operation and used when producing its result.</param>
+    /// <param name="height">Height value supplied to the media studio operation and used when producing its result.</param>
+    /// <param name="durationSeconds">Duration seconds value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     [JSInvokable]
     public async Task RenderedVideoExportReady(string fileName, string mimeType, long sizeBytes, int width, int height, double durationSeconds)
     {
@@ -5215,6 +6645,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs rendered video export failed for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="message">Message value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     [JSInvokable]
     public async Task RenderedVideoExportFailed(string message)
     {
@@ -5233,6 +6668,11 @@
         }
     }
 
+    /// <summary>
+    /// Starts recording for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="source">Source value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task StartRecording(string source)
     {
         try
@@ -5290,6 +6730,10 @@
         }
     }
 
+    /// <summary>
+    /// Stops recording for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task StopRecording()
     {
         try
@@ -5349,6 +6793,10 @@
         }
     }
 
+    /// <summary>
+    /// Generates tone for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task GenerateTone()
     {
         try
@@ -5377,6 +6825,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs clear retained recording state for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void ClearRetainedRecordingState()
     {
         try
@@ -5396,6 +6847,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs media recording cleared for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     [JSInvokable]
     public Task MediaRecordingCleared()
     {
@@ -5422,6 +6877,10 @@
         }
     }
 
+    /// <summary>
+    /// Applies retained recording info for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="info">Info value supplied to the media studio operation and used when producing its result.</param>
     private void ApplyRetainedRecordingInfo(RetainedMediaRecordingInfo info)
     {
         try
@@ -5459,6 +6918,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs media recording ready for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="info">Info value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     [JSInvokable]
     public async Task MediaRecordingReady(RetainedMediaRecordingInfo info)
     {
@@ -5497,6 +6961,7 @@
     /// available for download, editing, insertion, or replacement.
     /// </summary>
     /// <param name="info">The enriched retained-recording metadata for the current browser Blob.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     [JSInvokable]
     public async Task MediaRecordingMetadataReady(RetainedMediaRecordingInfo info)
     {
@@ -5560,6 +7025,14 @@
         }
     }
 
+    /// <summary>
+    /// Performs begin media recording transfer for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="transferId">Identifier of the transfer to use for this operation.</param>
+    /// <param name="mimeType">Mime type value supplied to the media studio operation and used when producing its result.</param>
+    /// <param name="totalBytes">Total bytes value supplied to the media studio operation and used when producing its result.</param>
+    /// <param name="chunkCount">Chunk count value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     [JSInvokable]
     public bool BeginMediaRecordingTransfer(string transferId, string mimeType, long totalBytes, int chunkCount)
     {
@@ -5587,6 +7060,13 @@
         }
     }
 
+    /// <summary>
+    /// Performs append media recording chunk for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="transferId">Identifier of the transfer to use for this operation.</param>
+    /// <param name="chunkIndex">Chunk index value supplied to the media studio operation and used when producing its result.</param>
+    /// <param name="chunk">Chunk value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     [JSInvokable]
     public bool AppendMediaRecordingChunk(string transferId, int chunkIndex, string chunk)
     {
@@ -5606,6 +7086,12 @@
         }
     }
 
+    /// <summary>
+    /// Performs media recording transfer progress for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="transferredBytes">Transferred bytes value supplied to the media studio operation and used when producing its result.</param>
+    /// <param name="totalBytes">Total bytes value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     [JSInvokable]
     public Task MediaRecordingTransferProgress(long transferredBytes, long totalBytes)
     {
@@ -5623,6 +7109,11 @@
         }
     }
 
+    /// <summary>
+    /// Completes media recording transfer for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="transferId">Identifier of the transfer to use for this operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     [JSInvokable]
     public async Task CompleteMediaRecordingTransfer(string transferId)
     {
@@ -5653,6 +7144,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs media recording failed for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="message">Message value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     [JSInvokable]
     public Task MediaRecordingFailed(string message)
     {
@@ -5690,6 +7186,9 @@
         }
     }
 
+    /// <summary>
+    /// Refreshes preview source for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void RefreshPreviewSource()
     {
         try
@@ -5711,6 +7210,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs play selection for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task PlaySelection()
     {
         try
@@ -5737,6 +7240,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs pause preview for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task PausePreview()
     {
         try
@@ -5755,6 +7262,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs seek start for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task SeekStart()
     {
         try
@@ -5770,6 +7281,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs trim range changed for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media studio operation and used when producing its result.</param>
     private void TrimRangeChanged(RangeSelectorValueChangedEventArgs args)
     {
         try
@@ -5792,6 +7307,12 @@
         }
     }
 
+    /// <summary>
+    /// Attempts to range value for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the media studio operation and used when producing its result.</param>
+    /// <param name="number">Number value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool TryRangeValue(object? value, out double number)
     {
         try
@@ -5814,6 +7335,13 @@
         }
     }
 
+    /// <summary>
+    /// Normalizes trim range for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="start">Start value supplied to the media studio operation and used when producing its result.</param>
+    /// <param name="end">End value supplied to the media studio operation and used when producing its result.</param>
+    /// <param name="duration">Duration value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>The double start double end produced by the operation.</returns>
     private (double Start, double End) NormalizeTrimRange(double start, double end, double duration)
     {
         var safeDuration = double.IsFinite(duration) ? Math.Max(0, duration) : 0;
@@ -5828,6 +7356,11 @@
         return (safeStart, safeEnd);
     }
 
+    /// <summary>
+    /// Performs segment has explicit temporal selection for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="segment">Segment value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool SegmentHasExplicitTemporalSelection(PublicationMediaSegment segment)
     {
         try
@@ -5845,6 +7378,12 @@
         }
     }
 
+    /// <summary>
+    /// Performs reconcile video duration for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="durationSeconds">Duration seconds value supplied to the media studio operation and used when producing its result.</param>
+    /// <param name="preserveCurrentSelection">Value indicating whether preserve current selection should apply to this operation.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool ReconcileVideoDuration(double durationSeconds, bool preserveCurrentSelection)
     {
         try
@@ -5888,6 +7427,11 @@
         }
     }
 
+    /// <summary>
+    /// Determines whether interrupted playback exception for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="exception">Exception value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool IsInterruptedPlaybackException(JSException exception)
     {
         try
@@ -5905,6 +7449,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs queue video effects refresh for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void QueueVideoEffectsRefresh()
     {
         try
@@ -5935,6 +7482,12 @@
         }
     }
 
+    /// <summary>
+    /// Sets video selection range for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="start">Start value supplied to the media studio operation and used when producing its result.</param>
+    /// <param name="end">End value supplied to the media studio operation and used when producing its result.</param>
+    /// <param name="pointSelection">Value indicating whether point selection should apply to this operation.</param>
     private void SetVideoSelectionRange(double start, double end, bool pointSelection)
     {
         try
@@ -5969,6 +7522,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs seek video selection start for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task SeekVideoSelectionStartAsync()
     {
         try
@@ -5990,6 +7547,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs change video selection mode for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ChangeVideoSelectionMode(ChangeEventArgs args)
     {
         try
@@ -6024,6 +7586,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs change video selection start for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ChangeVideoSelectionStart(ChangeEventArgs args)
     {
         try
@@ -6043,6 +7610,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs change video selection end for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ChangeVideoSelectionEnd(ChangeEventArgs args)
     {
         try
@@ -6062,6 +7634,11 @@
         }
     }
 
+    /// <summary>
+    /// Sets video fit mode for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="mode">Mode value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task SetVideoFitModeAsync(PublicationVideoFitMode mode)
     {
         try
@@ -6084,6 +7661,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs video fit contain for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task VideoFitContain() {
         try
         {
@@ -6095,6 +7676,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs video fit cover for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task VideoFitCover() {
         try
         {
@@ -6106,6 +7691,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs video fit stretch for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task VideoFitStretch() {
         try
         {
@@ -6117,6 +7706,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change video fit mode for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ChangeVideoFitMode(ChangeEventArgs args)
     {
         try
@@ -6131,6 +7725,12 @@
         }
     }
 
+    /// <summary>
+    /// Performs video fit mode text for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="mode">Mode value supplied to the media studio operation and used when producing its result.</param>
+    /// <param name="label">Label value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string VideoFitModeText(PublicationVideoFitMode mode, string label) {
         try
         {
@@ -6142,6 +7742,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs video fit mode name for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="mode">Mode value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string VideoFitModeName(PublicationVideoFitMode mode) {
         try
         {
@@ -6159,6 +7764,12 @@
         }
     }
 
+    /// <summary>
+    /// Applies trim range for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="start">Start value supplied to the media studio operation and used when producing its result.</param>
+    /// <param name="end">End value supplied to the media studio operation and used when producing its result.</param>
+    /// <param name="commit">Value indicating whether commit should apply to this operation.</param>
     private void ApplyTrimRange(double start, double end, bool commit = true)
     {
         try
@@ -6179,6 +7790,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs change name for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media studio operation and used when producing its result.</param>
     private void ChangeName(ChangeEventArgs args) {
         try
         {
@@ -6190,6 +7805,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change trim start for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media studio operation and used when producing its result.</param>
     private void ChangeTrimStart(ChangeEventArgs args) {
         try
         {
@@ -6201,6 +7820,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change trim end for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media studio operation and used when producing its result.</param>
     private void ChangeTrimEnd(ChangeEventArgs args) {
         try
         {
@@ -6212,6 +7835,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change playback rate for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media studio operation and used when producing its result.</param>
     private void ChangePlaybackRate(ChangeEventArgs args) {
         try
         {
@@ -6223,6 +7850,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change volume for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media studio operation and used when producing its result.</param>
     private void ChangeVolume(ChangeEventArgs args) {
         try
         {
@@ -6234,6 +7865,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change fade in for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media studio operation and used when producing its result.</param>
     private void ChangeFadeIn(ChangeEventArgs args) {
         try
         {
@@ -6245,6 +7880,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change fade out for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media studio operation and used when producing its result.</param>
     private void ChangeFadeOut(ChangeEventArgs args) {
         try
         {
@@ -6256,6 +7895,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle muted for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media studio operation and used when producing its result.</param>
     private void ToggleMuted(ChangeEventArgs args) {
         try
         {
@@ -6267,6 +7910,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle loop for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media studio operation and used when producing its result.</param>
     private void ToggleLoop(ChangeEventArgs args) {
         try
         {
@@ -6278,6 +7925,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle auto play for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media studio operation and used when producing its result.</param>
     private void ToggleAutoPlay(ChangeEventArgs args) {
         try
         {
@@ -6289,6 +7940,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change playback trigger for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media studio operation and used when producing its result.</param>
     private void ChangePlaybackTrigger(ChangeEventArgs args) {
         try
         {
@@ -6300,6 +7955,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs clamp fades for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
     private void ClampFades() {
         try
         {
@@ -6312,6 +7970,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs send selected media to converter for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task SendSelectedMediaToConverter()
     {
         try
@@ -6373,6 +8035,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs download recording for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task DownloadRecording()
     {
         try
@@ -6403,6 +8069,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs save for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task Save()
     {
         try
@@ -6528,6 +8198,10 @@
         }
     }
 
+    /// <summary>
+    /// Determines whether cel for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task Cancel()
     {
         try
@@ -6557,6 +8231,13 @@
         }
     }
 
+    /// <summary>
+    /// Creates tone data URL for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="durationSeconds">Duration seconds value supplied to the media studio operation and used when producing its result.</param>
+    /// <param name="frequency">Frequency value supplied to the media studio operation and used when producing its result.</param>
+    /// <param name="volume">Volume value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string CreateToneDataUrl(double durationSeconds, double frequency, double volume)
     {
         try
@@ -6599,6 +8280,13 @@
         }
     }
 
+    /// <summary>
+    /// Resolves imported MIME type for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="fileName">File name value supplied to the media studio operation and used when producing its result.</param>
+    /// <param name="declaredMimeType">Declared mime type value supplied to the media studio operation and used when producing its result.</param>
+    /// <param name="video">Value indicating whether video should apply to this operation.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string ResolveImportedMimeType(string fileName, string? declaredMimeType, bool video)
     {
         try
@@ -6631,6 +8319,12 @@
         }
     }
 
+    /// <summary>
+    /// Normalizes MIME type for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="mimeType">Mime type value supplied to the media studio operation and used when producing its result.</param>
+    /// <param name="fallback">Fallback value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string NormalizeMimeType(string? mimeType, string fallback)
     {
         try
@@ -6648,6 +8342,12 @@
         }
     }
 
+    /// <summary>
+    /// Normalizes media data URL for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="dataUrl">Data url value supplied to the media studio operation and used when producing its result.</param>
+    /// <param name="fallbackMimeType">Fallback mime type value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string NormalizeMediaDataUrl(string? dataUrl, string fallbackMimeType)
     {
         try
@@ -6668,6 +8368,12 @@
         }
     }
 
+    /// <summary>
+    /// Performs recording name for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="mimeType">Mime type value supplied to the media studio operation and used when producing its result.</param>
+    /// <param name="isVideo">Value indicating whether is video should apply to this operation.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string RecordingName(string mimeType, bool isVideo)
     {
         try
@@ -6689,6 +8395,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs playback trigger name for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string PlaybackTriggerName(PublicationMediaPlaybackTrigger value) {
         try
         {
@@ -6705,6 +8416,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs wave height for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string WaveHeight(double value) {
         try
         {
@@ -6716,6 +8432,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs time for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Time(double value) {
         try
         {
@@ -6727,6 +8448,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs inv for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Inv(double value) {
         try
         {
@@ -6738,6 +8464,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs text for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Text(ChangeEventArgs args) {
         try
         {
@@ -6749,6 +8480,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs bool for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool Bool(ChangeEventArgs args) {
         try
         {
@@ -6760,6 +8496,12 @@
             throw;
         }
     }
+    /// <summary>
+    /// Attempts to double for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media studio operation and used when producing its result.</param>
+    /// <param name="value">Value value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool TryDouble(ChangeEventArgs args, out double value) {
         try
         {
@@ -6771,6 +8513,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs format bytes for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
+    /// </summary>
+    /// <param name="bytes">Bytes value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string FormatBytes(long bytes)
     {
         try
@@ -6794,40 +8541,119 @@
         }
     }
 
+    /// <summary>
+    /// Represents browser media recording state exchanged or persisted by the surrounding application workflow, with each member describing one part of that state.
+    /// </summary>
     public sealed class BrowserMediaRecordingState
     {
-        /// <summary>Gets or sets whether the browser MediaRecorder is actively capturing.</summary>
+        /// <summary>
+        /// Gets or sets a value indicating whether recording applies to the browser media recording state.
+        /// </summary>
         /// <value><see langword="true"/> while capture is active; otherwise <see langword="false"/>.</value>
         public bool IsRecording { get; set; }
         /// <summary>Gets or sets whether Stop was requested and browser Blob finalization is still running.</summary>
         /// <value><see langword="true"/> while the completed Blob is being finalized; otherwise <see langword="false"/>.</value>
         public bool IsFinalizing { get; set; }
+        /// <summary>
+        /// Gets or sets the retained recording value that forms part of the browser media recording state consumed or produced by the surrounding workflow.
+        /// </summary>
+        /// <value>The retained recording value exposed by <see cref="BrowserMediaRecordingState"/>.</value>
         public RetainedMediaRecordingInfo? RetainedRecording { get; set; }
+        /// <summary>
+        /// Gets or sets the finalization error value that forms part of the browser media recording state consumed or produced by the surrounding workflow.
+        /// </summary>
+        /// <value>The finalization error value exposed by <see cref="BrowserMediaRecordingState"/>.</value>
         public string FinalizationError { get; set; } = string.Empty;
     }
 
+    /// <summary>
+    /// Represents a retained media recording info helper type nested within <see cref="MediaStudio"/>, grouping the state or behavior used only by that containing workflow.
+    /// </summary>
     public sealed class RetainedMediaRecordingInfo
     {
+        /// <summary>
+        /// Gets or sets the object URL that identifies the network or application endpoint associated with this retained media recording info state.
+        /// </summary>
+        /// <value>The object URL value exposed by <see cref="RetainedMediaRecordingInfo"/>.</value>
         public string ObjectUrl { get; set; } = string.Empty;
+        /// <summary>
+        /// Gets or sets the MIME type value that forms part of the retained media recording info state consumed or produced by the surrounding workflow.
+        /// </summary>
+        /// <value>The MIME type value exposed by <see cref="RetainedMediaRecordingInfo"/>.</value>
         public string MimeType { get; set; } = string.Empty;
+        /// <summary>
+        /// Gets or sets the file name used by this retained media recording info instance to locate the associated file-system resource.
+        /// </summary>
+        /// <value>The file name value exposed by <see cref="RetainedMediaRecordingInfo"/>.</value>
         public string FileName { get; set; } = string.Empty;
+        /// <summary>
+        /// Gets or sets the size bytes value that forms part of the retained media recording info state consumed or produced by the surrounding workflow.
+        /// </summary>
+        /// <value>The size bytes value exposed by <see cref="RetainedMediaRecordingInfo"/>.</value>
         public long SizeBytes { get; set; }
+        /// <summary>
+        /// Gets or sets the duration seconds value that forms part of the retained media recording info state consumed or produced by the surrounding workflow.
+        /// </summary>
+        /// <value>The duration seconds value exposed by <see cref="RetainedMediaRecordingInfo"/>.</value>
         public double DurationSeconds { get; set; }
+        /// <summary>
+        /// Gets or sets the waveform samples collection maintained or exposed by this retained media recording info instance for downstream processing.
+        /// </summary>
+        /// <value>The waveform samples value exposed by <see cref="RetainedMediaRecordingInfo"/>.</value>
         public List<double> WaveformSamples { get; set; } = [];
+        /// <summary>
+        /// Gets or sets the poster data URL that identifies the network or application endpoint associated with this retained media recording info state.
+        /// </summary>
+        /// <value>The poster data URL value exposed by <see cref="RetainedMediaRecordingInfo"/>.</value>
         public string PosterDataUrl { get; set; } = string.Empty;
+        /// <summary>
+        /// Gets or sets the metadata warning value that forms part of the retained media recording info state consumed or produced by the surrounding workflow.
+        /// </summary>
+        /// <value>The metadata warning value exposed by <see cref="RetainedMediaRecordingInfo"/>.</value>
         public string MetadataWarning { get; set; } = string.Empty;
     }
 
+    /// <summary>
+    /// Represents a media recording start info helper type nested within <see cref="MediaStudio"/>, grouping the state or behavior used only by that containing workflow.
+    /// </summary>
     private sealed class MediaRecordingStartInfo
     {
+        /// <summary>
+        /// Gets or sets the MIME type value that forms part of the media recording start info state consumed or produced by the surrounding workflow.
+        /// </summary>
+        /// <value>The MIME type value exposed by <see cref="MediaRecordingStartInfo"/>.</value>
         public string MimeType { get; set; } = string.Empty;
+        /// <summary>
+        /// Gets or sets the width value that forms part of the media recording start info state consumed or produced by the surrounding workflow.
+        /// </summary>
+        /// <value>The width value exposed by <see cref="MediaRecordingStartInfo"/>.</value>
         public int Width { get; set; }
+        /// <summary>
+        /// Gets or sets the height value that forms part of the media recording start info state consumed or produced by the surrounding workflow.
+        /// </summary>
+        /// <value>The height value exposed by <see cref="MediaRecordingStartInfo"/>.</value>
         public int Height { get; set; }
+        /// <summary>
+        /// Gets or sets the frame rate value that forms part of the media recording start info state consumed or produced by the surrounding workflow.
+        /// </summary>
+        /// <value>The frame rate value exposed by <see cref="MediaRecordingStartInfo"/>.</value>
         public double FrameRate { get; set; }
+        /// <summary>
+        /// Gets or sets the video bits per second value that forms part of the media recording start info state consumed or produced by the surrounding workflow.
+        /// </summary>
+        /// <value>The video bits per second value exposed by <see cref="MediaRecordingStartInfo"/>.</value>
         public int VideoBitsPerSecond { get; set; }
+        /// <summary>
+        /// Gets or sets the audio bits per second value that forms part of the media recording start info state consumed or produced by the surrounding workflow.
+        /// </summary>
+        /// <value>The audio bits per second value exposed by <see cref="MediaRecordingStartInfo"/>.</value>
         public int AudioBitsPerSecond { get; set; }
     }
 
+    /// <summary>
+    /// Releases resources owned by <see cref="MediaStudio"/> and leaves the media studio workflow in a safely disposed state.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     public async ValueTask DisposeAsync()
     {
         try
@@ -6863,4 +8689,5 @@
             throw;
         }
     }
+
 }

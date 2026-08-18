@@ -659,60 +659,238 @@
 </DxContextMenu>
 
 @code {
+
+    /// <summary>
+    /// Gets or sets the state value that forms part of the page surface state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The state value exposed by <see cref="PageSurface"/>.</value>
     [Parameter, EditorRequired] public EditorStateService State { get; set; } = default!;
+    /// <summary>
+    /// Gets or sets a value indicating whether selection visuals enabled applies to the page surface state.
+    /// </summary>
+    /// <value>The selection visuals enabled value exposed by <see cref="PageSurface"/>.</value>
     [Parameter] public bool SelectionVisualsEnabled { get; set; } = true;
+    /// <summary>
+    /// Gets or sets a value indicating whether interaction enabled applies to the page surface state.
+    /// </summary>
+    /// <value>The interaction enabled value exposed by <see cref="PageSurface"/>.</value>
     [Parameter] public bool InteractionEnabled { get; set; } = true;
+    /// <summary>
+    /// Gets or sets the edit text requested value that forms part of the page surface state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The edit text requested value exposed by <see cref="PageSurface"/>.</value>
     [Parameter] public EventCallback<Guid> EditTextRequested { get; set; }
+    /// <summary>
+    /// Gets or sets the request picture value that forms part of the page surface state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The request picture value exposed by <see cref="PageSurface"/>.</value>
     [Parameter] public EventCallback RequestPicture { get; set; }
+    /// <summary>
+    /// Gets or sets the request replace picture value that forms part of the page surface state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The request replace picture value exposed by <see cref="PageSurface"/>.</value>
     [Parameter] public EventCallback RequestReplacePicture { get; set; }
+    /// <summary>
+    /// Gets or sets the request create picture value that forms part of the page surface state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The request create picture value exposed by <see cref="PageSurface"/>.</value>
     [Parameter] public EventCallback RequestCreatePicture { get; set; }
+    /// <summary>
+    /// Gets or sets the request edit picture value that forms part of the page surface state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The request edit picture value exposed by <see cref="PageSurface"/>.</value>
     [Parameter] public EventCallback RequestEditPicture { get; set; }
+    /// <summary>
+    /// Gets or sets the request insert spreadsheet value that forms part of the page surface state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The request insert spreadsheet value exposed by <see cref="PageSurface"/>.</value>
     [Parameter] public EventCallback RequestInsertSpreadsheet { get; set; }
+    /// <summary>
+    /// Gets or sets the request create spreadsheet value that forms part of the page surface state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The request create spreadsheet value exposed by <see cref="PageSurface"/>.</value>
     [Parameter] public EventCallback RequestCreateSpreadsheet { get; set; }
+    /// <summary>
+    /// Gets or sets the request edit spreadsheet value that forms part of the page surface state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The request edit spreadsheet value exposed by <see cref="PageSurface"/>.</value>
     [Parameter] public EventCallback RequestEditSpreadsheet { get; set; }
+    /// <summary>
+    /// Gets or sets the request download spreadsheet value that forms part of the page surface state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The request download spreadsheet value exposed by <see cref="PageSurface"/>.</value>
     [Parameter] public EventCallback RequestDownloadSpreadsheet { get; set; }
+    /// <summary>
+    /// Gets or sets the request insert data visual value that forms part of the page surface state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The request insert data visual value exposed by <see cref="PageSurface"/>.</value>
     [Parameter] public EventCallback<DataVisualKind> RequestInsertDataVisual { get; set; }
+    /// <summary>
+    /// Gets or sets the request edit data visual value that forms part of the page surface state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The request edit data visual value exposed by <see cref="PageSurface"/>.</value>
     [Parameter] public EventCallback RequestEditDataVisual { get; set; }
+    /// <summary>
+    /// Gets or sets the request manage data value that forms part of the page surface state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The request manage data value exposed by <see cref="PageSurface"/>.</value>
     [Parameter] public EventCallback RequestManageData { get; set; }
+    /// <summary>
+    /// Gets or sets the request insert component value that forms part of the page surface state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The request insert component value exposed by <see cref="PageSurface"/>.</value>
     [Parameter] public EventCallback<PublicationComponentKind> RequestInsertComponent { get; set; }
+    /// <summary>
+    /// Gets or sets the request edit component value that forms part of the page surface state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The request edit component value exposed by <see cref="PageSurface"/>.</value>
     [Parameter] public EventCallback RequestEditComponent { get; set; }
+    /// <summary>
+    /// Gets or sets the request insert video value that forms part of the page surface state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The request insert video value exposed by <see cref="PageSurface"/>.</value>
     [Parameter] public EventCallback RequestInsertVideo { get; set; }
+    /// <summary>
+    /// Gets or sets the request insert audio value that forms part of the page surface state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The request insert audio value exposed by <see cref="PageSurface"/>.</value>
     [Parameter] public EventCallback RequestInsertAudio { get; set; }
+    /// <summary>
+    /// Gets or sets the request create video value that forms part of the page surface state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The request create video value exposed by <see cref="PageSurface"/>.</value>
     [Parameter] public EventCallback RequestCreateVideo { get; set; }
+    /// <summary>
+    /// Gets or sets the request create audio value that forms part of the page surface state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The request create audio value exposed by <see cref="PageSurface"/>.</value>
     [Parameter] public EventCallback RequestCreateAudio { get; set; }
+    /// <summary>
+    /// Gets or sets the request edit media value that forms part of the page surface state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The request edit media value exposed by <see cref="PageSurface"/>.</value>
     [Parameter] public EventCallback RequestEditMedia { get; set; }
+    /// <summary>
+    /// Gets or sets the request insert barcode value that forms part of the page surface state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The request insert barcode value exposed by <see cref="PageSurface"/>.</value>
     [Parameter] public EventCallback RequestInsertBarcode { get; set; }
+    /// <summary>
+    /// Gets or sets the request edit barcode value that forms part of the page surface state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The request edit barcode value exposed by <see cref="PageSurface"/>.</value>
     [Parameter] public EventCallback RequestEditBarcode { get; set; }
+    /// <summary>
+    /// Gets or sets the request insert panel value that forms part of the page surface state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The request insert panel value exposed by <see cref="PageSurface"/>.</value>
     [Parameter] public EventCallback RequestInsertPanel { get; set; }
+    /// <summary>
+    /// Gets or sets the request insert HTML embed value that forms part of the page surface state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The request insert HTML embed value exposed by <see cref="PageSurface"/>.</value>
     [Parameter] public EventCallback RequestInsertHtmlEmbed { get; set; }
+    /// <summary>
+    /// Gets or sets the request edit panel value that forms part of the page surface state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The request edit panel value exposed by <see cref="PageSurface"/>.</value>
     [Parameter] public EventCallback RequestEditPanel { get; set; }
+    /// <summary>
+    /// Gets or sets a value indicating whether timeline visible applies to the page surface state.
+    /// </summary>
+    /// <value>The timeline visible value exposed by <see cref="PageSurface"/>.</value>
     [Parameter] public bool TimelineVisible { get; set; }
+    /// <summary>
+    /// Gets or sets the request toggle timeline value that forms part of the page surface state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The request toggle timeline value exposed by <see cref="PageSurface"/>.</value>
     [Parameter] public EventCallback RequestToggleTimeline { get; set; }
+    /// <summary>
+    /// Gets or sets the request canvas insert value that forms part of the page surface state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The request canvas insert value exposed by <see cref="PageSurface"/>.</value>
     [Parameter] public EventCallback<CanvasInsertRequest> RequestCanvasInsert { get; set; }
+    /// <summary>
+    /// Gets or sets the request external file drop value that forms part of the page surface state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The request external file drop value exposed by <see cref="PageSurface"/>.</value>
     [Parameter] public EventCallback<ExternalFileDropRequest> RequestExternalFileDrop { get; set; }
+    /// <summary>
+    /// Gets or sets the request external drop error value that forms part of the page surface state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The request external drop error value exposed by <see cref="PageSurface"/>.</value>
     [Parameter] public EventCallback<string> RequestExternalDropError { get; set; }
 
+    /// <summary>
+    /// Gets the timeline command text value that forms part of the page surface state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The timeline command text value exposed by <see cref="PageSurface"/>.</value>
     private string TimelineCommandText => TimelineVisible ? "✓ Timeline pane" : "Timeline pane";
 
+    /// <summary>
+    /// Stores the internal context menu state used by <see cref="PageSurface"/> while executing its surrounding workflow.
+    /// </summary>
     private DxContextMenu _contextMenu = default!;
+    /// <summary>
+    /// Stores the JavaScript object reference dependency used by <see cref="PageSurface"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private IJSObjectReference? _module;
+    /// <summary>
+    /// Stores the internal self state used by <see cref="PageSurface"/> while executing its surrounding workflow.
+    /// </summary>
     private DotNetObjectReference<PageSurface>? _self;
+    /// <summary>
+    /// Stores the internal disposed state used by <see cref="PageSurface"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _disposed;
+    /// <summary>
+    /// Stores the internal canvas initialization in progress state used by <see cref="PageSurface"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _canvasInitializationInProgress;
+    /// <summary>
+    /// Stores the internal canvas initialization key state used by <see cref="PageSurface"/> while executing its surrounding workflow.
+    /// </summary>
     private string? _canvasInitializationKey;
+    /// <summary>
+    /// Stores the internal data visual layout key state used by <see cref="PageSurface"/> while executing its surrounding workflow.
+    /// </summary>
     private string? _dataVisualLayoutKey;
+    /// <summary>
+    /// Stores the internal context port x state used by <see cref="PageSurface"/> while executing its surrounding workflow.
+    /// </summary>
     private double _contextPortX = .5;
+    /// <summary>
+    /// Stores the internal context port y state used by <see cref="PageSurface"/> while executing its surrounding workflow.
+    /// </summary>
     private double _contextPortY = .5;
+    /// <summary>
+    /// Stores the internal handles state used by <see cref="PageSurface"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly string[] Handles = ["nw", "n", "ne", "e", "se", "s", "sw", "w"];
+    /// <summary>
+    /// Stores the internal connector anchors state used by <see cref="PageSurface"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly ConnectorAnchor[] ConnectorAnchors =
     [
         ConnectorAnchor.TopLeft, ConnectorAnchor.Top, ConnectorAnchor.TopRight, ConnectorAnchor.Right,
         ConnectorAnchor.BottomRight, ConnectorAnchor.Bottom, ConnectorAnchor.BottomLeft, ConnectorAnchor.Left
     ];
+    /// <summary>
+    /// Gets the pixels per mm value that forms part of the page surface state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The pixels per mm value exposed by <see cref="PageSurface"/>.</value>
     private double PixelsPerMm => RuntimePolicy.BasePixelsPerMillimeter * State.Document.Zoom;
+    /// <summary>
+    /// Gets the canvas zoom mode class value that forms part of the page surface state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The canvas zoom mode class value exposed by <see cref="PageSurface"/>.</value>
     private string CanvasZoomModeClass => State.Document.View.CanvasZoomMode == PublicationCanvasZoomMode.Transform
         ? "zoom-mode-transform"
         : "zoom-mode-css";
+    /// <summary>
+    /// Gets the unit label value that forms part of the page surface state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The unit label value exposed by <see cref="PageSurface"/>.</value>
     private string UnitLabel => State.Document.View.RulerUnit switch
     {
         MeasurementUnit.Millimeter => "mm",
@@ -722,7 +900,15 @@
         _ => "mm"
     };
 
+    /// <summary>
+    /// Gets a value indicating whether map component selected applies to the page surface state.
+    /// </summary>
+    /// <value>The is map component selected value exposed by <see cref="PageSurface"/>.</value>
     private bool IsMapComponentSelected => State.SelectedElement is DevExtremeComponentElement { ComponentKind: PublicationComponentKind.Map or PublicationComponentKind.VectorMap };
+    /// <summary>
+    /// Gets the pointer state text value that forms part of the page surface state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The pointer state text value exposed by <see cref="PageSurface"/>.</value>
     private string PointerStateText => State.ConnectorTool != ConnectorToolKind.None
         ? State.ConnectorTool switch
         {
@@ -737,6 +923,10 @@
         : State.HasMultipleSelection ? $"Move {State.SelectedElements.Count} objects"
         : IsMapComponentSelected ? "Move map object"
         : "Select / move";
+    /// <summary>
+    /// Gets the connector tool title value that forms part of the page surface state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The connector tool title value exposed by <see cref="PageSurface"/>.</value>
     private string ConnectorToolTitle => State.ConnectorTool switch
     {
         ConnectorToolKind.Arrow => "Arrow connector",
@@ -744,12 +934,24 @@
         ConnectorToolKind.SignalArrow => "Signal arrow",
         _ => "Connector"
     };
+    /// <summary>
+    /// Gets the connector tool hint value that forms part of the page surface state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The connector tool hint value exposed by <see cref="PageSurface"/>.</value>
     private string ConnectorToolHint => State.ConnectorTool is ConnectorToolKind.SignalConnector or ConnectorToolKind.SignalArrow
         ? "Drag from any object port or empty canvas point to another port or canvas point. Signal actions work offline in exported HTML. Press Esc to stop."
         : "Drag from a round object port to another port. Press Esc to stop.";
 
+    /// <summary>
+    /// Gets a value indicating whether reset pointer state applies to the page surface state.
+    /// </summary>
+    /// <value>The can reset pointer state value exposed by <see cref="PageSurface"/>.</value>
     private bool CanResetPointerState => State.ConnectorTool != ConnectorToolKind.None || State.CropMode || State.ContentPanMode;
 
+    /// <summary>
+    /// Gets the page style value that forms part of the page surface state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The page style value exposed by <see cref="PageSurface"/>.</value>
     private string PageStyle
     {
         get
@@ -762,6 +964,11 @@
         }
     }
 
+    /// <summary>
+    /// Handles the after render async lifecycle or event notification for <see cref="PageSurface"/>, updating the state required by the surrounding workflow.
+    /// </summary>
+    /// <param name="firstRender">Value indicating whether first render should apply to this operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         try
@@ -858,6 +1065,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs fit page for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     public async Task FitPageAsync()
     {
         try
@@ -878,6 +1089,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs select element for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="additive">Value indicating whether additive should apply to this operation.</param>
     [JSInvokable] public void SelectElement(string id, bool additive = false) {
         try
         {
@@ -889,6 +1105,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs clear selection from canvas for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     [JSInvokable] public void ClearSelectionFromCanvas() {
         try
         {
@@ -900,6 +1119,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs navigate to page for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="target">Target value supplied to the page surface operation and used when producing its result.</param>
     [JSInvokable]
     public void NavigateToPage(string target)
     {
@@ -918,6 +1141,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets selection from canvas for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="ids">Identifiers value supplied to the page surface operation and used when producing its result.</param>
     [JSInvokable]
     public void SetSelectionFromCanvas(string[]? ids)
     {
@@ -934,6 +1161,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs activate element for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     [JSInvokable]
     public Task ActivateElement(string id)
     {
@@ -953,6 +1185,17 @@
         }
     }
 
+    /// <summary>
+    /// Opens element context menu for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="clientX">Client x value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="clientY">Client y value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="pageX">Page x value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="pageY">Page y value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="screenX">Screen x value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="screenY">Screen y value supplied to the page surface operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     [JSInvokable]
     public async Task OpenElementContextMenu(string id, double clientX, double clientY, double pageX, double pageY, double screenX, double screenY)
     {
@@ -984,6 +1227,13 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs commit move for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="x">X value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="y">Y value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="movingIds">Moving identifiers value supplied to the page surface operation and used when producing its result.</param>
     [JSInvokable]
     public void CommitMove(string id, double x, double y, string[]? movingIds = null)
     {
@@ -1003,6 +1253,14 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs commit bounds for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="x">X value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="y">Y value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="width">Width value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="height">Height value supplied to the page surface operation and used when producing its result.</param>
     [JSInvokable] public void CommitBounds(string id, double x, double y, double width, double height) {
         try
         {
@@ -1014,6 +1272,13 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs commit crop for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="cropX">Crop x value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="cropY">Crop y value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="cropScale">Crop scale value supplied to the page surface operation and used when producing its result.</param>
     [JSInvokable] public void CommitCrop(string id, double cropX, double cropY, double cropScale) {
         try
         {
@@ -1025,6 +1290,13 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs commit content viewport for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="offsetX">Offset x value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="offsetY">Offset y value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="scale">Scale value supplied to the page surface operation and used when producing its result.</param>
     [JSInvokable] public void CommitContentViewport(string id, double offsetX, double offsetY, double scale) {
         try
         {
@@ -1036,6 +1308,13 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs commit map viewport for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="longitude">Longitude value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="latitude">Latitude value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="zoom">Zoom value supplied to the page surface operation and used when producing its result.</param>
     [JSInvokable] public void CommitMapViewport(string id, double longitude, double latitude, double zoom) {
         try
         {
@@ -1047,6 +1326,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds guide at for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="orientation">Orientation value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="positionMm">Position mm value supplied to the page surface operation and used when producing its result.</param>
     [JSInvokable] public void AddGuideAt(string orientation, double positionMm) {
         try
         {
@@ -1058,6 +1342,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs commit guide for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="positionMm">Position mm value supplied to the page surface operation and used when producing its result.</param>
     [JSInvokable] public void CommitGuide(string id, double positionMm) {
         try
         {
@@ -1069,6 +1358,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Deletes guide for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
     [JSInvokable] public void DeleteGuide(string id) {
         try
         {
@@ -1080,6 +1373,14 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs commit connector for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="sourceId">Identifier of the source to use for this operation.</param>
+    /// <param name="sourceAnchor">Source anchor value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="targetId">Identifier of the target to use for this operation.</param>
+    /// <param name="targetAnchor">Target anchor value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="tool">Tool value supplied to the page surface operation and used when producing its result.</param>
     [JSInvokable] public void CommitConnector(string sourceId, string sourceAnchor, string targetId, string targetAnchor, string tool)
     {
         try
@@ -1096,6 +1397,13 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs reconnect connector for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="connectorId">Identifier of the connector to use for this operation.</param>
+    /// <param name="endpoint">Endpoint value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="elementId">Identifier of the element to use for this operation.</param>
+    /// <param name="anchor">Anchor value supplied to the page surface operation and used when producing its result.</param>
     [JSInvokable] public void ReconnectConnector(string connectorId, string endpoint, string elementId, string anchor)
     {
         try
@@ -1111,6 +1419,20 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs commit signal connector for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="sourceKind">Source kind value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="sourceId">Identifier of the source to use for this operation.</param>
+    /// <param name="sourceAnchor">Source anchor value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="sourceX">Source x value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="sourceY">Source y value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="targetKind">Target kind value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="targetId">Identifier of the target to use for this operation.</param>
+    /// <param name="targetAnchor">Target anchor value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="targetX">Target x value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="targetY">Target y value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="tool">Tool value supplied to the page surface operation and used when producing its result.</param>
     [JSInvokable]
     public void CommitSignalConnector(string sourceKind, string sourceId, string sourceAnchor, double sourceX, double sourceY,
         string targetKind, string targetId, string targetAnchor, double targetX, double targetY, string tool)
@@ -1130,6 +1452,16 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs reconnect signal connector for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="connectorId">Identifier of the connector to use for this operation.</param>
+    /// <param name="endpoint">Endpoint value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="kind">Kind value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="elementId">Identifier of the element to use for this operation.</param>
+    /// <param name="anchor">Anchor value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="x">X value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="y">Y value supplied to the page surface operation and used when producing its result.</param>
     [JSInvokable]
     public void ReconnectSignalConnector(string connectorId, string endpoint, string kind, string elementId, string anchor, double x, double y)
     {
@@ -1146,6 +1478,16 @@
             throw;
         }
     }
+    /// <summary>
+    /// Attempts to connector endpoint for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="kind">Kind value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="elementId">Identifier of the element to use for this operation.</param>
+    /// <param name="anchor">Anchor value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="x">X value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="y">Y value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="endpoint">Endpoint value supplied to the page surface operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool TryConnectorEndpoint(string kind, string elementId, string anchor, double x, double y, out ConnectorEndpoint endpoint)
     {
         try
@@ -1168,6 +1510,28 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs commit connector advanced for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="sourceKind">Source kind value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="sourceId">Identifier of the source to use for this operation.</param>
+    /// <param name="sourceAnchor">Source anchor value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="sourcePortId">Identifier of the source port to use for this operation.</param>
+    /// <param name="sourceCreatePort">Value indicating whether source create port should apply to this operation.</param>
+    /// <param name="sourceRelativeX">Source relative x value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="sourceRelativeY">Source relative y value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="sourceX">Source x value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="sourceY">Source y value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="targetKind">Target kind value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="targetId">Identifier of the target to use for this operation.</param>
+    /// <param name="targetAnchor">Target anchor value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="targetPortId">Identifier of the target port to use for this operation.</param>
+    /// <param name="targetCreatePort">Value indicating whether target create port should apply to this operation.</param>
+    /// <param name="targetRelativeX">Target relative x value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="targetRelativeY">Target relative y value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="targetX">Target x value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="targetY">Target y value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="tool">Tool value supplied to the page surface operation and used when producing its result.</param>
     [JSInvokable]
     public void CommitConnectorAdvanced(
         string sourceKind, string sourceId, string sourceAnchor, string sourcePortId, bool sourceCreatePort, double sourceRelativeX, double sourceRelativeY, double sourceX, double sourceY,
@@ -1190,6 +1554,20 @@
         }
     }
 
+    /// <summary>
+    /// Performs reconnect connector advanced for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="connectorId">Identifier of the connector to use for this operation.</param>
+    /// <param name="endpoint">Endpoint value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="kind">Kind value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="elementId">Identifier of the element to use for this operation.</param>
+    /// <param name="anchor">Anchor value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="portId">Identifier of the port to use for this operation.</param>
+    /// <param name="createPort">Value indicating whether create port should apply to this operation.</param>
+    /// <param name="relativeX">Relative x value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="relativeY">Relative y value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="x">X value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="y">Y value supplied to the page surface operation and used when producing its result.</param>
     [JSInvokable]
     public void ReconnectConnectorAdvanced(
         string connectorId, string endpoint,
@@ -1209,6 +1587,13 @@
         }
     }
 
+    /// <summary>
+    /// Performs commit connector control for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="connectorId">Identifier of the connector to use for this operation.</param>
+    /// <param name="controlIndex">Control index value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="x">X value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="y">Y value supplied to the page surface operation and used when producing its result.</param>
     [JSInvokable]
     public void CommitConnectorControl(string connectorId, int controlIndex, double x, double y)
     {
@@ -1224,6 +1609,14 @@
         }
     }
 
+    /// <summary>
+    /// Performs commit connector route for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="connectorId">Identifier of the connector to use for this operation.</param>
+    /// <param name="control1X">Control1 x value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="control1Y">Control1 y value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="control2X">Control2 x value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="control2Y">Control2 y value supplied to the page surface operation and used when producing its result.</param>
     [JSInvokable]
     public void CommitConnectorRoute(string connectorId, double control1X, double control1Y, double control2X, double control2Y)
     {
@@ -1239,6 +1632,21 @@
         }
     }
 
+    /// <summary>
+    /// Attempts to connector endpoint advanced for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="kind">Kind value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="elementId">Identifier of the element to use for this operation.</param>
+    /// <param name="anchor">Anchor value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="portId">Identifier of the port to use for this operation.</param>
+    /// <param name="createPort">Value indicating whether create port should apply to this operation.</param>
+    /// <param name="relativeX">Relative x value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="relativeY">Relative y value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="x">X value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="y">Y value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="endpoint">Endpoint value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="pendingPort">Pending port value supplied to the page surface operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool TryConnectorEndpointAdvanced(
         string kind, string elementId, string anchor, string portId, bool createPort, double relativeX, double relativeY, double x, double y,
         out ConnectorEndpoint endpoint, out PublicationConnectorPort? pendingPort)
@@ -1277,6 +1685,9 @@
         }
     }
 
+    /// <summary>
+    /// Determines whether cel active tool for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     [JSInvokable] public void CancelActiveTool() {
         try
         {
@@ -1288,6 +1699,13 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs drop insert for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="kind">Kind value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="x">X value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="y">Y value supplied to the page surface operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     [JSInvokable] public Task DropInsert(string kind, double x, double y) {
         try
         {
@@ -1299,6 +1717,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets insertion point for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="x">X value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="y">Y value supplied to the page surface operation and used when producing its result.</param>
     [JSInvokable] public void SetInsertionPoint(double x, double y) {
         try
         {
@@ -1310,6 +1733,24 @@
             throw;
         }
     }
+    /// <summary>
+    /// Completes external file drop for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="assetId">Identifier of the asset to use for this operation.</param>
+    /// <param name="kind">Kind value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="name">Name value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="mimeType">Mime type value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="size">Size value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="durationSeconds">Duration seconds value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="pixelWidth">Pixel width value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="pixelHeight">Pixel height value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="x">X value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="y">Y value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="targetElementId">Identifier of the target element to use for this operation.</param>
+    /// <param name="targetElementKind">Target element kind value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="targetX">Target x value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="targetY">Target y value supplied to the page surface operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     [JSInvokable]
     public Task CompleteExternalFileDrop(string assetId, string kind, string name, string mimeType, long size,
         double durationSeconds, int pixelWidth, int pixelHeight, double x, double y,
@@ -1331,6 +1772,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs external file drop failed for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="message">Message value supplied to the page surface operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     [JSInvokable] public Task ExternalFileDropFailed(string message) {
         try
         {
@@ -1342,6 +1788,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs keyboard copy for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     [JSInvokable] public void KeyboardCopy() {
         try
         {
@@ -1353,6 +1802,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs keyboard cut for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     [JSInvokable] public void KeyboardCut() {
         try
         {
@@ -1364,6 +1816,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs keyboard paste for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     [JSInvokable] public void KeyboardPaste() {
         try
         {
@@ -1375,6 +1830,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs keyboard duplicate for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     [JSInvokable] public void KeyboardDuplicate() {
         try
         {
@@ -1386,6 +1844,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs keyboard delete for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     [JSInvokable] public void KeyboardDelete() {
         try
         {
@@ -1397,6 +1858,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs keyboard select all for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     [JSInvokable] public void KeyboardSelectAll() {
         try
         {
@@ -1408,6 +1872,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs keyboard group for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     [JSInvokable] public void KeyboardGroup() {
         try
         {
@@ -1419,6 +1886,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs keyboard ungroup for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     [JSInvokable] public void KeyboardUngroup() {
         try
         {
@@ -1430,6 +1900,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs keyboard undo for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     [JSInvokable] public void KeyboardUndo() {
         try
         {
@@ -1441,6 +1914,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs keyboard redo for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     [JSInvokable] public void KeyboardRedo() {
         try
         {
@@ -1452,6 +1928,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs keyboard nudge for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="dx">Devexpress value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="dy">Dy value supplied to the page surface operation and used when producing its result.</param>
     [JSInvokable] public void KeyboardNudge(double dx, double dy) {
         try
         {
@@ -1463,6 +1944,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs keyboard layer move for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="command">Command value supplied to the page surface operation and used when producing its result.</param>
     [JSInvokable]
     public void KeyboardLayerMove(string command)
     {
@@ -1483,6 +1968,12 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs report canvas interaction error for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="operation">Operation value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="message">Message value supplied to the page surface operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     [JSInvokable]
     public Task ReportCanvasInteractionError(string operation, string message)
     {
@@ -1502,6 +1993,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs reset pointer state for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void ResetPointerState() {
         try
         {
@@ -1514,6 +2008,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs element designer help for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="element">Element value supplied to the page surface operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string ElementDesignerHelp(PublicationElement element) {
         try
         {
@@ -1541,6 +2040,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs double click for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="element">Element value supplied to the page surface operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task DoubleClick(PublicationElement element)
     {
         try
@@ -1564,6 +2068,12 @@
         }
     }
 
+    /// <summary>
+    /// Performs show element context menu for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="element">Element value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="args">Args value supplied to the page surface operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ShowElementContextMenu(PublicationElement element, MouseEventArgs args)
     {
         try
@@ -1595,6 +2105,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs show page context menu for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the page surface operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ShowPageContextMenu(MouseEventArgs args)
     {
         try
@@ -1612,6 +2127,9 @@
         }
     }
 
+    /// <summary>
+    /// Adds connector port here for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void AddConnectorPortHere()
     {
         try
@@ -1626,6 +2144,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds connector port at center for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void AddConnectorPortAtCenter()
     {
         try
@@ -1640,6 +2161,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs reset selected connector route for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void ResetSelectedConnectorRoute()
     {
         try
@@ -1654,6 +2178,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs edit selected story for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task EditSelectedStory() {
         try
         {
@@ -1665,6 +2193,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs replace selected picture for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task ReplaceSelectedPicture() {
         try
         {
@@ -1676,6 +2208,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs insert picture for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task InsertPicture() {
         try
         {
@@ -1687,6 +2223,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Creates picture for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task CreatePicture() {
         try
         {
@@ -1698,6 +2238,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs edit selected picture for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task EditSelectedPicture() {
         try
         {
@@ -1709,6 +2253,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs insert spreadsheet for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task InsertSpreadsheet() {
         try
         {
@@ -1720,6 +2268,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Creates spreadsheet for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task CreateSpreadsheet() {
         try
         {
@@ -1731,6 +2283,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs edit selected spreadsheet for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task EditSelectedSpreadsheet() {
         try
         {
@@ -1742,6 +2298,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs download selected spreadsheet for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task DownloadSelectedSpreadsheet() {
         try
         {
@@ -1753,6 +2313,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle spreadsheet grid lines for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void ToggleSpreadsheetGridLines()
     {
         try
@@ -1767,6 +2330,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle spreadsheet sheet name for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void ToggleSpreadsheetSheetName()
     {
         try
@@ -1781,6 +2347,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets text fit for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="mode">Mode value supplied to the page surface operation and used when producing its result.</param>
     private void SetTextFit(PublicationContentFitMode mode)
     {
         try
@@ -1795,6 +2365,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs text fit clip for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void TextFitClip() {
         try
         {
@@ -1806,6 +2379,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs text fit whole for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void TextFitWhole() {
         try
         {
@@ -1817,6 +2393,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs text fit fill for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void TextFitFill() {
         try
         {
@@ -1828,6 +2407,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs text fit stretch for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void TextFitStretch() {
         try
         {
@@ -1839,6 +2421,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets spreadsheet fit for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="mode">Mode value supplied to the page surface operation and used when producing its result.</param>
     private void SetSpreadsheetFit(PublicationContentFitMode mode)
     {
         try
@@ -1853,6 +2439,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs spreadsheet fit clip for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void SpreadsheetFitClip() {
         try
         {
@@ -1864,6 +2453,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs spreadsheet fit whole for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void SpreadsheetFitWhole() {
         try
         {
@@ -1875,6 +2467,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs spreadsheet fit fill for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void SpreadsheetFitFill() {
         try
         {
@@ -1886,6 +2481,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs spreadsheet fit stretch for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void SpreadsheetFitStretch() {
         try
         {
@@ -1897,6 +2495,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs edit selected data visual for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task EditSelectedDataVisual() {
         try
         {
@@ -1908,6 +2510,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs edit selected component for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task EditSelectedComponent() {
         try
         {
@@ -1919,6 +2525,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs component page scope for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void ComponentPageScope() {
         try
         {
@@ -1930,6 +2539,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs component document scope for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void ComponentDocumentScope() {
         try
         {
@@ -1941,6 +2553,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets selected component scope for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="scope">Scope value supplied to the page surface operation and used when producing its result.</param>
     private void SetSelectedComponentScope(PublicationComponentScope scope) {
         try
         {
@@ -1952,6 +2568,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs insert component grid for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task InsertComponentGrid() {
         try
         {
@@ -1963,6 +2583,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs insert component tree list for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task InsertComponentTreeList() {
         try
         {
@@ -1974,6 +2598,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs insert component scheduler for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task InsertComponentScheduler() {
         try
         {
@@ -1985,6 +2613,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs insert component form for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task InsertComponentForm() {
         try
         {
@@ -1996,6 +2628,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs insert component menu for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task InsertComponentMenu() {
         try
         {
@@ -2007,6 +2643,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs insert component pivot grid for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task InsertComponentPivotGrid() {
         try
         {
@@ -2018,6 +2658,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs insert component button for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task InsertComponentButton() {
         try
         {
@@ -2029,6 +2673,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs manage data for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task ManageData() {
         try
         {
@@ -2040,6 +2688,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs insert video for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task InsertVideo() {
         try
         {
@@ -2051,6 +2703,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs insert audio for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task InsertAudio() {
         try
         {
@@ -2062,6 +2718,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Creates video for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task CreateVideo() {
         try
         {
@@ -2073,6 +2733,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Creates audio for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task CreateAudio() {
         try
         {
@@ -2084,6 +2748,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs activate selected live source for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task ActivateSelectedLiveSource() {
         try
         {
@@ -2097,6 +2765,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs activate live source for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="liveSource">Live source value supplied to the page surface operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ActivateLiveSource(LiveSourceElement liveSource)
     {
         try
@@ -2111,6 +2784,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Updates selected live source for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="update">Update value supplied to the page surface operation and used when producing its result.</param>
     private void UpdateSelectedLiveSource(Action<LiveSourceElement> update)
     {
         try
@@ -2124,6 +2801,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets selected live source kind for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="kind">Kind value supplied to the page surface operation and used when producing its result.</param>
     private void SetSelectedLiveSourceKind(PublicationLiveSourceKind kind) {
         try
         {
@@ -2135,6 +2816,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs live source camera for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void LiveSourceCamera() {
         try
         {
@@ -2146,6 +2830,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs live source screen for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void LiveSourceScreen() {
         try
         {
@@ -2157,6 +2844,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs live source window for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void LiveSourceWindow() {
         try
         {
@@ -2168,6 +2858,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs live source browser tab for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void LiveSourceBrowserTab() {
         try
         {
@@ -2179,6 +2872,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs live source capture device for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void LiveSourceCaptureDevice() {
         try
         {
@@ -2190,6 +2886,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs live source microphone for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void LiveSourceMicrophone() {
         try
         {
@@ -2201,6 +2900,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs live source system audio for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void LiveSourceSystemAudio() {
         try
         {
@@ -2212,6 +2914,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs live source application audio for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void LiveSourceApplicationAudio() {
         try
         {
@@ -2223,6 +2928,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs live source network media for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void LiveSourceNetworkMedia() {
         try
         {
@@ -2234,6 +2942,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs live source now playing for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void LiveSourceNowPlaying() {
         try
         {
@@ -2245,6 +2956,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle live source audio for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void ToggleLiveSourceAudio() {
         try
         {
@@ -2256,6 +2970,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle live source muted for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void ToggleLiveSourceMuted() {
         try
         {
@@ -2267,6 +2984,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets selected live source fit for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="fit">Fit value supplied to the page surface operation and used when producing its result.</param>
     private void SetSelectedLiveSourceFit(PublicationLiveSourceFitMode fit) {
         try
         {
@@ -2278,6 +2999,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs live source fit contain for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void LiveSourceFitContain() {
         try
         {
@@ -2289,6 +3013,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs live source fit cover for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void LiveSourceFitCover() {
         try
         {
@@ -2300,6 +3027,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs live source fit stretch for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void LiveSourceFitStretch() {
         try
         {
@@ -2312,6 +3042,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs edit selected media for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task EditSelectedMedia() {
         try
         {
@@ -2323,6 +3057,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs insert barcode for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task InsertBarcode() {
         try
         {
@@ -2334,6 +3072,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs edit selected barcode for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task EditSelectedBarcode() {
         try
         {
@@ -2345,6 +3087,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs insert panel for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task InsertPanel() {
         try
         {
@@ -2356,6 +3102,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs insert HTML embed for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task InsertHtmlEmbed() {
         try
         {
@@ -2367,6 +3117,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs edit selected panel for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task EditSelectedPanel() {
         try
         {
@@ -2378,6 +3132,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle timeline for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task ToggleTimeline() {
         try
         {
@@ -2389,6 +3147,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs play selected media for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task PlaySelectedMedia() {
         try
         {
@@ -2402,6 +3164,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs pause selected media for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task PauseSelectedMedia() {
         try
         {
@@ -2415,6 +3181,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Updates selected media for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="update">Update value supplied to the page surface operation and used when producing its result.</param>
     private void UpdateSelectedMedia(Action<PublicationMediaElement> update)
     {
         try
@@ -2428,6 +3198,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle media muted for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void ToggleMediaMuted() {
         try
         {
@@ -2439,6 +3212,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle media loop for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void ToggleMediaLoop() {
         try
         {
@@ -2450,6 +3226,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle media auto play for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void ToggleMediaAutoPlay() {
         try
         {
@@ -2461,6 +3240,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs media on page enter for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void MediaOnPageEnter() {
         try
         {
@@ -2472,6 +3254,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs media on click for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void MediaOnClick() {
         try
         {
@@ -2483,6 +3268,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs media with animation for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void MediaWithAnimation() {
         try
         {
@@ -2494,6 +3282,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs insert chart for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task InsertChart() {
         try
         {
@@ -2505,6 +3297,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs insert pie for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task InsertPie() {
         try
         {
@@ -2516,6 +3312,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs insert polar for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task InsertPolar() {
         try
         {
@@ -2527,6 +3327,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs insert sparkline for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task InsertSparkline() {
         try
         {
@@ -2538,6 +3342,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs insert bar gauge for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task InsertBarGauge() {
         try
         {
@@ -2549,6 +3357,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs insert circular gauge for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task InsertCircularGauge() {
         try
         {
@@ -2560,6 +3372,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs insert linear gauge for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task InsertLinearGauge() {
         try
         {
@@ -2571,6 +3387,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs insert range selector for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task InsertRangeSelector() {
         try
         {
@@ -2582,6 +3402,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs insert sankey for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task InsertSankey() {
         try
         {
@@ -2593,6 +3417,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs insert funnel for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task InsertFunnel() {
         try
         {
@@ -2604,6 +3432,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs insert pyramid for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task InsertPyramid() {
         try
         {
@@ -2615,6 +3447,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs insert tree map for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task InsertTreeMap() {
         try
         {
@@ -2626,6 +3462,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs insert data table for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task InsertDataTable() {
         try
         {
@@ -2637,6 +3477,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs insert kpi for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task InsertKpi() {
         try
         {
@@ -2648,6 +3492,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Refreshes data for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task RefreshData()
     {
         try
@@ -2681,6 +3529,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change selected data visual kind for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="kind">Kind value supplied to the page surface operation and used when producing its result.</param>
     private void ChangeSelectedDataVisualKind(DataVisualKind kind)
     {
         try
@@ -2700,6 +3552,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle data visual title for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void ToggleDataVisualTitle() {
         try
         {
@@ -2711,6 +3566,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle data visual legend for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void ToggleDataVisualLegend() {
         try
         {
@@ -2722,6 +3580,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle data visual labels for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void ToggleDataVisualLabels() {
         try
         {
@@ -2733,6 +3594,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle data visual filter row for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void ToggleDataVisualFilterRow() {
         try
         {
@@ -2744,6 +3608,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs selected visual chart for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void SelectedVisualChart() {
         try
         {
@@ -2755,6 +3622,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs selected visual pie for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void SelectedVisualPie() {
         try
         {
@@ -2766,6 +3636,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs selected visual polar for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void SelectedVisualPolar() {
         try
         {
@@ -2777,6 +3650,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs selected visual sparkline for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void SelectedVisualSparkline() {
         try
         {
@@ -2788,6 +3664,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs selected visual bar gauge for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void SelectedVisualBarGauge() {
         try
         {
@@ -2799,6 +3678,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs selected visual circular gauge for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void SelectedVisualCircularGauge() {
         try
         {
@@ -2810,6 +3692,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs selected visual linear gauge for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void SelectedVisualLinearGauge() {
         try
         {
@@ -2821,6 +3706,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs selected visual range selector for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void SelectedVisualRangeSelector() {
         try
         {
@@ -2832,6 +3720,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs selected visual sankey for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void SelectedVisualSankey() {
         try
         {
@@ -2843,6 +3734,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs selected visual funnel for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void SelectedVisualFunnel() {
         try
         {
@@ -2854,6 +3748,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs selected visual pyramid for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void SelectedVisualPyramid() {
         try
         {
@@ -2865,6 +3762,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs selected visual tree map for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void SelectedVisualTreeMap() {
         try
         {
@@ -2876,6 +3776,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs selected visual data table for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void SelectedVisualDataTable() {
         try
         {
@@ -2887,6 +3790,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs selected visual kpi for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void SelectedVisualKpi() {
         try
         {
@@ -2898,6 +3804,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Updates selected data visual for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="update">Update value supplied to the page surface operation and used when producing its result.</param>
     private void UpdateSelectedDataVisual(Action<DataVisualElement> update)
     {
         try
@@ -2911,6 +3821,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change selected shape for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="shape">Shape value supplied to the page surface operation and used when producing its result.</param>
     private void ChangeSelectedShape(PublicationShape shape)
     {
         try
@@ -2924,6 +3838,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs selected shape rectangle for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void SelectedShapeRectangle() {
         try
         {
@@ -2935,6 +3852,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs selected shape rounded rectangle for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void SelectedShapeRoundedRectangle() {
         try
         {
@@ -2946,6 +3866,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs selected shape ellipse for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void SelectedShapeEllipse() {
         try
         {
@@ -2957,6 +3880,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs selected shape line for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void SelectedShapeLine() {
         try
         {
@@ -2968,6 +3894,12 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs checked text for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="selected">Value indicating whether selected should apply to this operation.</param>
+    /// <param name="text">Text value supplied to the page surface operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string CheckedText(bool selected, string text) {
         try
         {
@@ -2979,6 +3911,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs shape menu name for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="shape">Shape value supplied to the page surface operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string ShapeMenuName(PublicationShape shape) {
         try
         {
@@ -2990,6 +3927,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Normalizes angle for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the page surface operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     private double NormalizeAngle(double value) {
         try
         {
@@ -3001,6 +3943,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs data visual menu name for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="kind">Kind value supplied to the page surface operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string DataVisualMenuName(DataVisualKind kind) {
         try
         {
@@ -3028,6 +3975,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle crop for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void ToggleCrop() {
         try
         {
@@ -3039,6 +3989,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle content pan for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void ToggleContentPan() {
         try
         {
@@ -3050,6 +4003,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle map mouse mode for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void ToggleMapMouseMode() {
         try
         {
@@ -3061,6 +4017,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs use map object mode for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void UseMapObjectMode() {
         try
         {
@@ -3072,6 +4031,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs use map content mode for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void UseMapContentMode() {
         try
         {
@@ -3083,6 +4045,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs reset content viewport for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void ResetContentViewport() {
         try
         {
@@ -3094,6 +4059,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets text frame for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="update">Update value supplied to the page surface operation and used when producing its result.</param>
     private void SetTextFrame(Action<TextFrameElement> update)
     {
         try
@@ -3107,6 +4076,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs text frame no fill for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void TextFrameNoFill() {
         try
         {
@@ -3118,6 +4090,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs text frame white fill for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void TextFrameWhiteFill() {
         try
         {
@@ -3129,6 +4104,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs picture fit for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void PictureFit() {
         try
         {
@@ -3140,6 +4118,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs picture fill for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void PictureFill() {
         try
         {
@@ -3151,6 +4132,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs rotate picture left for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void RotatePictureLeft() {
         try
         {
@@ -3162,6 +4146,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs rotate picture right for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void RotatePictureRight() {
         try
         {
@@ -3173,6 +4160,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs flip picture horizontal for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void FlipPictureHorizontal() {
         try
         {
@@ -3184,6 +4174,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs flip picture vertical for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void FlipPictureVertical() {
         try
         {
@@ -3195,6 +4188,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds fade in animation for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void AddFadeInAnimation() {
         try
         {
@@ -3206,6 +4202,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds fly in animation for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void AddFlyInAnimation() {
         try
         {
@@ -3217,6 +4216,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds float in animation for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void AddFloatInAnimation() {
         try
         {
@@ -3228,6 +4230,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds zoom in animation for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void AddZoomInAnimation() {
         try
         {
@@ -3239,6 +4244,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds wipe in animation for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void AddWipeInAnimation() {
         try
         {
@@ -3250,6 +4258,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds bounce in animation for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void AddBounceInAnimation() {
         try
         {
@@ -3261,6 +4272,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds pulse animation for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void AddPulseAnimation() {
         try
         {
@@ -3272,6 +4286,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds spin animation for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void AddSpinAnimation() {
         try
         {
@@ -3283,6 +4300,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds shake animation for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void AddShakeAnimation() {
         try
         {
@@ -3294,6 +4314,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds grow shrink animation for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void AddGrowShrinkAnimation() {
         try
         {
@@ -3305,6 +4328,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds bounce animation for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void AddBounceAnimation() {
         try
         {
@@ -3316,6 +4342,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds move animation for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void AddMoveAnimation() {
         try
         {
@@ -3327,6 +4356,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds fade out animation for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void AddFadeOutAnimation() {
         try
         {
@@ -3338,6 +4370,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds fly out animation for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void AddFlyOutAnimation() {
         try
         {
@@ -3349,6 +4384,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds zoom out animation for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void AddZoomOutAnimation() {
         try
         {
@@ -3360,6 +4398,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds wipe out animation for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void AddWipeOutAnimation() {
         try
         {
@@ -3371,6 +4412,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds play media animation for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void AddPlayMediaAnimation() {
         try
         {
@@ -3382,6 +4426,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds pause media animation for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void AddPauseMediaAnimation() {
         try
         {
@@ -3393,6 +4440,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds stop media animation for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void AddStopMediaAnimation() {
         try
         {
@@ -3404,6 +4454,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs clear selected animations for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void ClearSelectedAnimations() {
         try
         {
@@ -3415,6 +4468,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Previews selected animations for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task PreviewSelectedAnimations() {
         try
         {
@@ -3428,6 +4485,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Previews page animations for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task PreviewPageAnimations() {
         try
         {
@@ -3439,6 +4500,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets transition for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="kind">Kind value supplied to the page surface operation and used when producing its result.</param>
     private void SetTransition(PublicationPageTransitionKind kind) {
         try
         {
@@ -3450,6 +4515,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs transition none for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void TransitionNone() {
         try
         {
@@ -3461,6 +4529,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs transition fade for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void TransitionFade() {
         try
         {
@@ -3472,6 +4543,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs transition push for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void TransitionPush() {
         try
         {
@@ -3483,6 +4557,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs transition wipe for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void TransitionWipe() {
         try
         {
@@ -3494,6 +4571,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs transition zoom for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void TransitionZoom() {
         try
         {
@@ -3505,6 +4585,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs transition flip for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void TransitionFlip() {
         try
         {
@@ -3517,6 +4600,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs copy for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void Copy() {
         try
         {
@@ -3528,6 +4614,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs paste for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void Paste() {
         try
         {
@@ -3539,6 +4628,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs duplicate for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void Duplicate() {
         try
         {
@@ -3550,6 +4642,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs group selected for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void GroupSelected() {
         try
         {
@@ -3561,6 +4656,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs ungroup selected for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void UngroupSelected() {
         try
         {
@@ -3572,6 +4670,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs delete for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void Delete() {
         try
         {
@@ -3583,6 +4684,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs bring to front for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void BringToFront() {
         try
         {
@@ -3594,6 +4698,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs bring forward for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void BringForward() {
         try
         {
@@ -3605,6 +4712,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs send backward for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void SendBackward() {
         try
         {
@@ -3616,6 +4726,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs send to back for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void SendToBack() {
         try
         {
@@ -3627,6 +4740,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs align left for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void AlignLeft() {
         try
         {
@@ -3638,6 +4754,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs align center for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void AlignCenter() {
         try
         {
@@ -3649,6 +4768,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs align right for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void AlignRight() {
         try
         {
@@ -3660,6 +4782,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs align top for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void AlignTop() {
         try
         {
@@ -3671,6 +4796,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs align middle for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void AlignMiddle() {
         try
         {
@@ -3682,6 +4810,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs align bottom for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void AlignBottom() {
         try
         {
@@ -3693,6 +4824,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle lock for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void ToggleLock() {
         try
         {
@@ -3704,6 +4838,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle visibility for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void ToggleVisibility() {
         try
         {
@@ -3715,6 +4852,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds text for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void AddText() {
         try
         {
@@ -3726,6 +4866,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds word art for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void AddWordArt() {
         try
         {
@@ -3737,6 +4880,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds rectangle for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void AddRectangle() {
         try
         {
@@ -3748,6 +4894,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds rounded rectangle for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void AddRoundedRectangle() {
         try
         {
@@ -3759,6 +4908,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds ellipse for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void AddEllipse() {
         try
         {
@@ -3770,6 +4922,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds line for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void AddLine() {
         try
         {
@@ -3781,6 +4936,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Starts connector for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void StartConnector() {
         try
         {
@@ -3792,6 +4950,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Starts arrow connector for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void StartArrowConnector() {
         try
         {
@@ -3803,6 +4964,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Starts signal connector for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void StartSignalConnector() {
         try
         {
@@ -3814,6 +4978,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Starts signal arrow for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void StartSignalArrow() {
         try
         {
@@ -3825,6 +4992,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds page for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void AddPage() {
         try
         {
@@ -3836,6 +5006,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs duplicate page for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void DuplicatePage() {
         try
         {
@@ -3847,6 +5020,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Deletes page for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void DeletePage() {
         try
         {
@@ -3858,6 +5034,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs cycle ruler unit for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void CycleRulerUnit() {
         try
         {
@@ -3870,6 +5049,10 @@
         }
     }
 
+    /// <summary>
+    /// Sets connector for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="update">Update value supplied to the page surface operation and used when producing its result.</param>
     private void SetConnector(Action<ConnectorElement> update) {
         try
         {
@@ -3881,6 +5064,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs word art custom path for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void WordArtCustomPath()
     {
         try
@@ -3900,6 +5086,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs word art reverse path for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void WordArtReversePath()
     {
         try
@@ -3919,6 +5108,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs connector straight for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void ConnectorStraight() {
         try
         {
@@ -3930,6 +5122,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs connector elbow for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void ConnectorElbow() {
         try
         {
@@ -3941,6 +5136,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs connector curved for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void ConnectorCurved() {
         try
         {
@@ -3952,6 +5150,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs connector arrow end for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void ConnectorArrowEnd() {
         try
         {
@@ -3963,6 +5164,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs connector no arrow for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void ConnectorNoArrow() {
         try
         {
@@ -3975,6 +5179,10 @@
         }
     }
 
+    /// <summary>
+    /// Sets image for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="update">Update value supplied to the page surface operation and used when producing its result.</param>
     private void SetImage(Action<ImageFrameElement> update) {
         try
         {
@@ -3987,6 +5195,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs reset picture for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
     private void ResetPicture()
     {
         try
@@ -4007,6 +5218,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs picture filter for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="image">Image frame element dependency used by the page surface workflow to provide the corresponding application capability.</param>
+    /// <returns>The render fragment produced by the operation.</returns>
     private RenderFragment PictureFilter(ImageFrameElement image) {
         try
         {
@@ -4063,6 +5279,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs word art for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="item">Item value supplied to the page surface operation and used when producing its result.</param>
+    /// <returns>The render fragment produced by the operation.</returns>
     private RenderFragment WordArt(WordArtElement item) {
         try
         {
@@ -4105,6 +5326,18 @@
         }
     }
 
+    /// <summary>
+    /// Adds word art text for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="builder">Builder value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="sequence">Sequence value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="item">Item value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="pathId">Identifier of the path to use for this operation.</param>
+    /// <param name="fill">Fill value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="dx">Devexpress value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="dy">Dy value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="outline">Outline value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="main">Value indicating whether main should apply to this operation.</param>
     private void AddWordArtText(RenderTreeBuilder builder, ref int sequence, WordArtElement item, string pathId, string fill, double dx, double dy, double outline, bool main)
     {
         try
@@ -4151,6 +5384,12 @@
     }
 
 
+    /// <summary>
+    /// Performs connector marker definition for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="connector">Connector value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="start">Value indicating whether start should apply to this operation.</param>
+    /// <returns>The render fragment produced by the operation.</returns>
     private RenderFragment ConnectorMarkerDefinition(ConnectorElement connector, bool start) {
         try
         {
@@ -4186,6 +5425,12 @@
         }
     }
 
+    /// <summary>
+    /// Performs marker identifier for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="connector">Connector value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="start">Value indicating whether start should apply to this operation.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string MarkerId(ConnectorElement connector, bool start) {
         try
         {
@@ -4197,6 +5442,12 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs marker URL for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="connector">Connector value supplied to the page surface operation and used when producing its result.</param>
+    /// <param name="start">Value indicating whether start should apply to this operation.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string MarkerUrl(ConnectorElement connector, bool start)
     {
         try
@@ -4211,6 +5462,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs anchor CSS for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="anchor">Anchor value supplied to the page surface operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string AnchorCss(ConnectorAnchor anchor) {
         try
         {
@@ -4223,6 +5479,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs video fit for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="mode">Mode value supplied to the page surface operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string VideoFit(PublicationVideoFitMode mode) {
         try
         {
@@ -4239,6 +5500,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs audio samples for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="audio">Audio value supplied to the page surface operation and used when producing its result.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private IEnumerable<double> AudioSamples(AudioElement audio) {
         try
         {
@@ -4252,6 +5518,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs wave height for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="sample">Sample value supplied to the page surface operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string WaveHeight(double sample) {
         try
         {
@@ -4263,6 +5534,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs time for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="seconds">Seconds value supplied to the page surface operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Time(double seconds) {
         try
         {
@@ -4275,6 +5551,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs element style for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="element">Element value supplied to the page surface operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string ElementStyle(PublicationElement element) {
         try
         {
@@ -4286,6 +5567,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs element content style for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="element">Element value supplied to the page surface operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string ElementContentStyle(PublicationElement element) {
         try
         {
@@ -4297,6 +5583,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs element zoom compatibility class for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="element">Element value supplied to the page surface operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string ElementZoomCompatibilityClass(PublicationElement element) {
         try
         {
@@ -4310,6 +5601,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs element zoom strategy for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="element">Element value supplied to the page surface operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string ElementZoomStrategy(PublicationElement element) {
         try
         {
@@ -4323,6 +5619,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs shape style for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="shape">Shape value supplied to the page surface operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string ShapeStyle(ShapeElement shape) {
         try
         {
@@ -4337,6 +5638,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs image frame style for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="image">Image frame element dependency used by the page surface workflow to provide the corresponding application capability.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string ImageFrameStyle(ImageFrameElement image)
     {
         try
@@ -4353,6 +5659,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs image style for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="image">Image frame element dependency used by the page surface workflow to provide the corresponding application capability.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string ImageStyle(ImageFrameElement image)
     {
         try
@@ -4371,6 +5682,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs picture filter identifier for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="image">Image frame element dependency used by the page surface workflow to provide the corresponding application capability.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string PictureFilterId(ImageFrameElement image) {
         try
         {
@@ -4382,6 +5698,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs blend mode for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="mode">Image blend mode dependency used by the page surface workflow to provide the corresponding application capability.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string BlendMode(ImageBlendMode mode) {
         try
         {
@@ -4393,6 +5714,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs word art path for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="warp">Warp value supplied to the page surface operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string WordArtPath(WordArtWarp warp) {
         try
         {
@@ -4411,6 +5737,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs guide style for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="guide">Guide value supplied to the page surface operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string GuideStyle(GuideLine guide) {
         try
         {
@@ -4422,6 +5753,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs media source for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="media">Media value supplied to the page surface operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string MediaSource(PublicationMediaElement media) {
         try
         {
@@ -4433,6 +5769,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs media segment source for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="segment">Segment value supplied to the page surface operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string MediaSegmentSource(PublicationMediaSegment segment) {
         try
         {
@@ -4444,6 +5785,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs media poster for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="video">Video value supplied to the page surface operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string MediaPoster(VideoElement video) {
         try
         {
@@ -4457,6 +5803,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs video media style for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="video">Video value supplied to the page surface operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string VideoMediaStyle(VideoElement video)
     {
         try
@@ -4473,6 +5824,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs frame clip path for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="points">Media frame point dependency used by the page surface workflow to provide the corresponding application capability.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string FrameClipPath(IEnumerable<MediaFramePoint> points) {
         try
         {
@@ -4484,6 +5840,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs mm for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="mm">Mm value supplied to the page surface operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Mm(double mm) {
         try
         {
@@ -4495,6 +5856,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs content mm for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="mm">Mm value supplied to the page surface operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string ContentMm(double mm) {
         try
         {
@@ -4506,6 +5872,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs inv for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the page surface operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Inv(double value) {
         try
         {
@@ -4517,6 +5888,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs nullable inv for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the page surface operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string NullableInv(double? value) {
         try
         {
@@ -4528,6 +5904,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs percent for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the page surface operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Percent(double value) {
         try
         {
@@ -4539,6 +5920,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs px for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="px">Px value supplied to the page surface operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Px(double px) {
         try
         {
@@ -4551,6 +5937,10 @@
         }
     }
 
+    /// <summary>
+    /// Releases resources owned by <see cref="PageSurface"/> and leaves the page surface workflow in a safely disposed state.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     public async ValueTask DisposeAsync()
     {
         try
@@ -4586,6 +5976,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs story background for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
+    /// </summary>
+    /// <param name="text">Text value supplied to the page surface operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string StoryBackground(TextFrameElement text) {
         try
         {
@@ -4599,6 +5994,7 @@
             throw;
         }
     }
+
 
 
 }

@@ -126,36 +126,129 @@
 }
 
 @code {
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the value is visible applies to the spreadsheet editor state.
+    /// </summary>
+    /// <value>The visible value exposed by <see cref="SpreadsheetEditor"/>.</value>
     [Parameter] public bool Visible { get; set; }
+    /// <summary>
+    /// Gets or sets the stable session identifier used to identify or correlate this spreadsheet editor instance with related application state.
+    /// </summary>
+    /// <value>The session identifier value exposed by <see cref="SpreadsheetEditor"/>.</value>
     [Parameter] public Guid SessionId { get; set; }
+    /// <summary>
+    /// Gets or sets the file name used by this spreadsheet editor instance to locate the associated file-system resource.
+    /// </summary>
+    /// <value>The file name value exposed by <see cref="SpreadsheetEditor"/>.</value>
     [Parameter] public string FileName { get; set; } = "Spreadsheet.xlsx";
+    /// <summary>
+    /// Gets or sets the saved value that forms part of the spreadsheet editor state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The saved value exposed by <see cref="SpreadsheetEditor"/>.</value>
     [Parameter] public EventCallback<SpreadsheetEditorResult> Saved { get; set; }
+    /// <summary>
+    /// Gets or sets the data object created value that forms part of the spreadsheet editor state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The data object created value exposed by <see cref="SpreadsheetEditor"/>.</value>
     [Parameter] public EventCallback<SpreadsheetDataObjectResult> DataObjectCreated { get; set; }
+    /// <summary>
+    /// Gets or sets the cancelled value that forms part of the spreadsheet editor state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The cancelled value exposed by <see cref="SpreadsheetEditor"/>.</value>
     [Parameter] public EventCallback Cancelled { get; set; }
 
+    /// <summary>
+    /// Stores the JavaScript object reference dependency used by <see cref="SpreadsheetEditor"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private IJSObjectReference? _module;
+    /// <summary>
+    /// Stores the internal self state used by <see cref="SpreadsheetEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private DotNetObjectReference<SpreadsheetEditor>? _self;
+    /// <summary>
+    /// Stores the internal initialized session state used by <see cref="SpreadsheetEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private Guid _initializedSession;
+    /// <summary>
+    /// Stores the internal registered session state used by <see cref="SpreadsheetEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private Guid _registeredSession;
+    /// <summary>
+    /// Stores the internal ready state used by <see cref="SpreadsheetEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _ready;
+    /// <summary>
+    /// Stores the internal saving state used by <see cref="SpreadsheetEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _saving;
+    /// <summary>
+    /// Stores the internal opening state used by <see cref="SpreadsheetEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _opening;
+    /// <summary>
+    /// Stores the internal error state used by <see cref="SpreadsheetEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private string? _error;
+    /// <summary>
+    /// Stores the internal data selection state used by <see cref="SpreadsheetEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private SpreadsheetDataSelection? _dataSelection;
+    /// <summary>
+    /// Stores the internal data object name state used by <see cref="SpreadsheetEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private string _dataObjectName = "Spreadsheet Data";
+    /// <summary>
+    /// Stores the internal selection first row headers state used by <see cref="SpreadsheetEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _selectionFirstRowHeaders = true;
+    /// <summary>
+    /// Stores the in-memory selection column names collection maintained internally by <see cref="SpreadsheetEditor"/> for its current workflow state.
+    /// </summary>
     private List<string> _selectionColumnNames = [];
+    /// <summary>
+    /// Stores the in-memory selection inferred kinds collection maintained internally by <see cref="SpreadsheetEditor"/> for its current workflow state.
+    /// </summary>
     private List<PublicationDataValueKind> _selectionInferredKinds = [];
+    /// <summary>
+    /// Stores the in-memory selection column type keys collection maintained internally by <see cref="SpreadsheetEditor"/> for its current workflow state.
+    /// </summary>
     private List<string> _selectionColumnTypeKeys = [];
+    /// <summary>
+    /// Stores the internal selection error state used by <see cref="SpreadsheetEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private string? _selectionError;
+    /// <summary>
+    /// Gets the stable frame identifier used to identify or correlate this spreadsheet editor instance with related application state.
+    /// </summary>
+    /// <value>The frame identifier value exposed by <see cref="SpreadsheetEditor"/>.</value>
     private string FrameId => $"spreadsheet-frame-{SessionId:N}";
+    /// <summary>
+    /// Gets the editor URL that identifies the network or application endpoint associated with this spreadsheet editor state.
+    /// </summary>
+    /// <value>The editor URL value exposed by <see cref="SpreadsheetEditor"/>.</value>
     private string EditorUrl => $"/spreadsheet/editor/{SessionId:D}";
+    /// <summary>
+    /// Gets the selection column count that quantifies the associated spreadsheet editor data.
+    /// </summary>
+    /// <value>The selection column count value exposed by <see cref="SpreadsheetEditor"/>.</value>
     private int SelectionColumnCount => _dataSelection?.Rows.Count > 0 ? _dataSelection.Rows.Max(row => row.Count) : 0;
+    /// <summary>
+    /// Gets the selection data row count that quantifies the associated spreadsheet editor data.
+    /// </summary>
+    /// <value>The selection data row count value exposed by <see cref="SpreadsheetEditor"/>.</value>
     private int SelectionDataRowCount => Math.Max(0, (_dataSelection?.Rows.Count ?? 0) - (_selectionFirstRowHeaders ? 1 : 0));
+    /// <summary>
+    /// Gets the selection preview rows collection maintained or exposed by this spreadsheet editor instance for downstream processing.
+    /// </summary>
+    /// <value>The selection preview rows value exposed by <see cref="SpreadsheetEditor"/>.</value>
     private IEnumerable<List<string>> SelectionPreviewRows => (_dataSelection?.Rows ?? new List<List<string>>())
         .Skip(_selectionFirstRowHeaders ? 1 : 0)
         .Take(8);
 
+    /// <summary>
+    /// Handles the parameters set lifecycle or event notification for <see cref="SpreadsheetEditor"/>, updating the state required by the surrounding workflow.
+    /// </summary>
     protected override void OnParametersSet()
     {
         try
@@ -186,6 +279,11 @@
         }
     }
 
+    /// <summary>
+    /// Handles the after render async lifecycle or event notification for <see cref="SpreadsheetEditor"/>, updating the state required by the surrounding workflow.
+    /// </summary>
+    /// <param name="firstRender">Value indicating whether first render should apply to this operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         try
@@ -227,6 +325,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs apply for <see cref="SpreadsheetEditor"/>, keeping the operation consistent with the state and invariants of the surrounding spreadsheet editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task Apply() {
         try
         {
@@ -239,6 +341,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs download for <see cref="SpreadsheetEditor"/>, keeping the operation consistent with the state and invariants of the surrounding spreadsheet editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task Download() {
         try
         {
@@ -251,6 +357,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs request data object for <see cref="SpreadsheetEditor"/>, keeping the operation consistent with the state and invariants of the surrounding spreadsheet editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task RequestDataObject()
     {
         try
@@ -268,6 +378,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs request save for <see cref="SpreadsheetEditor"/>, keeping the operation consistent with the state and invariants of the surrounding spreadsheet editor workflow.
+    /// </summary>
+    /// <param name="intent">Intent value supplied to the spreadsheet editor operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task RequestSave(string intent)
     {
         try
@@ -298,6 +413,10 @@
         }
     }
 
+    /// <summary>
+    /// Determines whether cel for <see cref="SpreadsheetEditor"/>, keeping the operation consistent with the state and invariants of the surrounding spreadsheet editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task Cancel()
     {
         try
@@ -313,6 +432,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs spreadsheet opening for <see cref="SpreadsheetEditor"/>, keeping the operation consistent with the state and invariants of the surrounding spreadsheet editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     [JSInvokable]
     public Task SpreadsheetOpening() {
         try
@@ -331,6 +454,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs spreadsheet ready for <see cref="SpreadsheetEditor"/>, keeping the operation consistent with the state and invariants of the surrounding spreadsheet editor workflow.
+    /// </summary>
+    /// <param name="fileName">File name value supplied to the spreadsheet editor operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     [JSInvokable]
     public Task SpreadsheetReady(string? fileName) {
         try
@@ -351,6 +479,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs spreadsheet saved for <see cref="SpreadsheetEditor"/>, keeping the operation consistent with the state and invariants of the surrounding spreadsheet editor workflow.
+    /// </summary>
+    /// <param name="intent">Intent value supplied to the spreadsheet editor operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     [JSInvokable]
     public Task SpreadsheetSaved(string intent) {
         try
@@ -378,6 +511,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs spreadsheet data selection received for <see cref="SpreadsheetEditor"/>, keeping the operation consistent with the state and invariants of the surrounding spreadsheet editor workflow.
+    /// </summary>
+    /// <param name="selection">Selection value supplied to the spreadsheet editor operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     [JSInvokable]
     public Task SpreadsheetDataSelectionReceived(SpreadsheetDataSelection selection) {
         try
@@ -407,6 +545,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs toggle selection headers for <see cref="SpreadsheetEditor"/>, keeping the operation consistent with the state and invariants of the surrounding spreadsheet editor workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the spreadsheet editor operation and used when producing its result.</param>
     private void ToggleSelectionHeaders(ChangeEventArgs args)
     {
         try
@@ -423,6 +565,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs change data object name for <see cref="SpreadsheetEditor"/>, keeping the operation consistent with the state and invariants of the surrounding spreadsheet editor workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the spreadsheet editor operation and used when producing its result.</param>
     private void ChangeDataObjectName(ChangeEventArgs args) {
         try
         {
@@ -435,6 +581,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs change selection column name for <see cref="SpreadsheetEditor"/>, keeping the operation consistent with the state and invariants of the surrounding spreadsheet editor workflow.
+    /// </summary>
+    /// <param name="index">Index value supplied to the spreadsheet editor operation and used when producing its result.</param>
+    /// <param name="args">Args value supplied to the spreadsheet editor operation and used when producing its result.</param>
     private void ChangeSelectionColumnName(int index, ChangeEventArgs args)
     {
         try
@@ -451,6 +602,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs change selection column type for <see cref="SpreadsheetEditor"/>, keeping the operation consistent with the state and invariants of the surrounding spreadsheet editor workflow.
+    /// </summary>
+    /// <param name="index">Index value supplied to the spreadsheet editor operation and used when producing its result.</param>
+    /// <param name="args">Args value supplied to the spreadsheet editor operation and used when producing its result.</param>
     private void ChangeSelectionColumnType(int index, ChangeEventArgs args)
     {
         try
@@ -468,6 +624,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs effective selection kind for <see cref="SpreadsheetEditor"/>, keeping the operation consistent with the state and invariants of the surrounding spreadsheet editor workflow.
+    /// </summary>
+    /// <param name="index">Index value supplied to the spreadsheet editor operation and used when producing its result.</param>
+    /// <returns>The publication data value kind produced by the operation.</returns>
     private PublicationDataValueKind EffectiveSelectionKind(int index)
         {
         try
@@ -483,6 +644,10 @@
         }
     }
 
+    /// <summary>
+    /// Creates data object for <see cref="SpreadsheetEditor"/>, keeping the operation consistent with the state and invariants of the surrounding spreadsheet editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task CreateDataObject()
     {
         try
@@ -535,6 +700,9 @@
         }
     }
 
+    /// <summary>
+    /// Determines whether cel data object for <see cref="SpreadsheetEditor"/>, keeping the operation consistent with the state and invariants of the surrounding spreadsheet editor workflow.
+    /// </summary>
     private void CancelDataObject() {
         try
         {
@@ -547,6 +715,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs reset data selection for <see cref="SpreadsheetEditor"/>, keeping the operation consistent with the state and invariants of the surrounding spreadsheet editor workflow.
+    /// </summary>
     private void ResetDataSelection()
     {
         try
@@ -567,6 +738,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs rebuild selection column names for <see cref="SpreadsheetEditor"/>, keeping the operation consistent with the state and invariants of the surrounding spreadsheet editor workflow.
+    /// </summary>
     private void RebuildSelectionColumnNames()
     {
         try
@@ -590,6 +764,12 @@
         }
     }
 
+    /// <summary>
+    /// Builds selection data object for <see cref="SpreadsheetEditor"/>, keeping the operation consistent with the state and invariants of the surrounding spreadsheet editor workflow.
+    /// </summary>
+    /// <param name="schema">Publication data column dependency used by the spreadsheet editor workflow to provide the corresponding application capability.</param>
+    /// <param name="normalizedRows">String dependency used by the spreadsheet editor workflow to provide the corresponding application capability.</param>
+    /// <returns>The publication data object produced by the operation.</returns>
     private PublicationDataObject BuildSelectionDataObject(IReadOnlyList<PublicationDataColumn>? schema = null, IReadOnlyList<List<string>>? normalizedRows = null)
     {
         try
@@ -622,6 +802,10 @@
         }
     }
 
+    /// <summary>
+    /// Gets the selection validation value that forms part of the spreadsheet editor state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The selection validation value exposed by <see cref="SpreadsheetEditor"/>.</value>
     private PublicationDataValidationResult SelectionValidation
     {
         get
@@ -636,6 +820,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs validation CSS for <see cref="SpreadsheetEditor"/>, keeping the operation consistent with the state and invariants of the surrounding spreadsheet editor workflow.
+    /// </summary>
+    /// <param name="severity">Severity value supplied to the spreadsheet editor operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string ValidationCss(PublicationDataValidationSeverity severity) {
         try
         {
@@ -647,6 +836,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs validation icon for <see cref="SpreadsheetEditor"/>, keeping the operation consistent with the state and invariants of the surrounding spreadsheet editor workflow.
+    /// </summary>
+    /// <param name="severity">Severity value supplied to the spreadsheet editor operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string ValidationIcon(PublicationDataValidationSeverity severity) {
         try
         {
@@ -665,6 +859,11 @@
     }
 
 
+    /// <summary>
+    /// Performs display selection column name for <see cref="SpreadsheetEditor"/>, keeping the operation consistent with the state and invariants of the surrounding spreadsheet editor workflow.
+    /// </summary>
+    /// <param name="index">Index value supplied to the spreadsheet editor operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string DisplaySelectionColumnName(int index)
         {
         try
@@ -680,6 +879,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs looks like headers for <see cref="SpreadsheetEditor"/>, keeping the operation consistent with the state and invariants of the surrounding spreadsheet editor workflow.
+    /// </summary>
+    /// <param name="rows">String dependency used by the spreadsheet editor workflow to provide the corresponding application capability.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool LooksLikeHeaders(IReadOnlyList<List<string>> rows)
     {
         try
@@ -700,6 +904,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs spreadsheet failed for <see cref="SpreadsheetEditor"/>, keeping the operation consistent with the state and invariants of the surrounding spreadsheet editor workflow.
+    /// </summary>
+    /// <param name="message">Message value supplied to the spreadsheet editor operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     [JSInvokable]
     public Task SpreadsheetFailed(string message) {
         try
@@ -719,6 +928,10 @@
         }
     }
 
+    /// <summary>
+    /// Releases resources owned by <see cref="SpreadsheetEditor"/> and leaves the spreadsheet editor workflow in a safely disposed state.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     public async ValueTask DisposeAsync()
     {
         try
@@ -742,5 +955,6 @@
             throw;
         }
     }
+
 }
 

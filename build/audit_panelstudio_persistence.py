@@ -49,7 +49,7 @@ req(JS,'await (binding.invokeQueue || Promise.resolve());','browser queue wait')
 req(JS,'flushPanelStudioInteractions(element) { try { return flushPanelStudioInteractions(element);','window.publisherStudio queue flush wrapper')
 
 for rel,directive in [
-    ('Components/Pages/Editor.razor','@rendermode @(new InteractiveServerRenderMode(prerender: true))'),
+    ('Components/Pages/Editor.razor','@rendermode InteractiveServer'),
     ('Components/Pages/Help.razor','@rendermode InteractiveServer'),
     ('Components/Pages/Localization.razor','@rendermode InteractiveServer'),
     ('Components/Pages/OrganicPlugins.razor','@rendermode InteractiveServer'),

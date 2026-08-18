@@ -3,13 +3,34 @@
 
 @inject ILogger<WebDataRefreshHost> Logger
 @code {
+
+    /// <summary>
+    /// Gets or sets the state value that forms part of the web data refresh host state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The state value exposed by <see cref="WebDataRefreshHost"/>.</value>
     [Parameter, EditorRequired] public EditorStateService State { get; set; } = default!;
 
+    /// <summary>
+    /// Stores the cancellation source used by <see cref="WebDataRefreshHost"/> to stop its current background or asynchronous operation.
+    /// </summary>
     private readonly CancellationTokenSource _cancellation = new();
+    /// <summary>
+    /// Stores the internal loop state used by <see cref="WebDataRefreshHost"/> while executing its surrounding workflow.
+    /// </summary>
     private Task? _loop;
+    /// <summary>
+    /// Stores the internal refreshing state used by <see cref="WebDataRefreshHost"/> while executing its surrounding workflow.
+    /// </summary>
     private int _refreshing;
+    /// <summary>
+    /// Stores the internal observed document identifier state used by <see cref="WebDataRefreshHost"/> while executing its surrounding workflow.
+    /// </summary>
     private Guid _observedDocumentId;
 
+    /// <summary>
+    /// Handles the after render lifecycle or event notification for <see cref="WebDataRefreshHost"/>, updating the state required by the surrounding workflow.
+    /// </summary>
+    /// <param name="firstRender">Value indicating whether first render should apply to this operation.</param>
     protected override void OnAfterRender(bool firstRender)
     {
         try
@@ -24,6 +45,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs run for <see cref="WebDataRefreshHost"/>, keeping the operation consistent with the state and invariants of the surrounding web data refresh host workflow.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task RunAsync(CancellationToken cancellationToken)
     {
         try
@@ -52,6 +78,12 @@
         }
     }
 
+    /// <summary>
+    /// Performs refresh for <see cref="WebDataRefreshHost"/>, keeping the operation consistent with the state and invariants of the surrounding web data refresh host workflow.
+    /// </summary>
+    /// <param name="onOpen">Value indicating whether on open should apply to this operation.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task RefreshAsync(bool onOpen, CancellationToken cancellationToken)
     {
         try
@@ -76,6 +108,10 @@
         }
     }
 
+    /// <summary>
+    /// Releases resources owned by <see cref="WebDataRefreshHost"/> and leaves the web data refresh host workflow in a safely disposed state.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     public async ValueTask DisposeAsync()
     {
         try
@@ -95,4 +131,5 @@
             throw;
         }
     }
+
 }

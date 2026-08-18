@@ -166,24 +166,97 @@
 </div>
 
 @code {
+
+    /// <summary>
+    /// Gets or sets the document value that forms part of the data visual view state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The document value exposed by <see cref="DataVisualView"/>.</value>
     [Parameter, EditorRequired] public PublicationDocument Document { get; set; } = default!;
+    /// <summary>
+    /// Gets or sets the item value that forms part of the data visual view state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The item value exposed by <see cref="DataVisualView"/>.</value>
     [Parameter, EditorRequired] public DataVisualElement Item { get; set; } = default!;
+    /// <summary>
+    /// Gets or sets the stable current page identifier used to identify or correlate this data visual view instance with related application state.
+    /// </summary>
+    /// <value>The current page identifier value exposed by <see cref="DataVisualView"/>.</value>
     [Parameter] public Guid CurrentPageId { get; set; }
 
+    /// <summary>
+    /// Gets the data object value that forms part of the data visual view state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The data object value exposed by <see cref="DataVisualView"/>.</value>
     private PublicationDataObject? DataObject => Document.DataObjects.FirstOrDefault(data => data.Id == Item.DataObjectId);
+    /// <summary>
+    /// Gets the columns collection maintained or exposed by this data visual view instance for downstream processing.
+    /// </summary>
+    /// <value>The columns value exposed by <see cref="DataVisualView"/>.</value>
     private IReadOnlyList<PublicationDataColumn> Columns => DataService.ResolveColumns(DataObject);
+    /// <summary>
+    /// Gets the chart points collection maintained or exposed by this data visual view instance for downstream processing.
+    /// </summary>
+    /// <value>The chart points value exposed by <see cref="DataVisualView"/>.</value>
     private IReadOnlyList<DataChartPoint> ChartPoints => DataService.BuildChartPoints(Document, Item, CurrentPageId);
+    /// <summary>
+    /// Gets the pie points collection maintained or exposed by this data visual view instance for downstream processing.
+    /// </summary>
+    /// <value>The pie points value exposed by <see cref="DataVisualView"/>.</value>
     private IReadOnlyList<DataPiePoint> PiePoints => DataService.BuildPiePoints(Document, Item, CurrentPageId);
+    /// <summary>
+    /// Gets the spark points collection maintained or exposed by this data visual view instance for downstream processing.
+    /// </summary>
+    /// <value>The spark points value exposed by <see cref="DataVisualView"/>.</value>
     private IReadOnlyList<DataSparkPoint> SparkPoints => DataService.BuildSparkPoints(Document, Item, CurrentPageId);
+    /// <summary>
+    /// Gets the polar points collection maintained or exposed by this data visual view instance for downstream processing.
+    /// </summary>
+    /// <value>The polar points value exposed by <see cref="DataVisualView"/>.</value>
     private IReadOnlyList<DataSparkPoint> PolarPoints => SparkPoints;
+    /// <summary>
+    /// Gets the grid columns collection maintained or exposed by this data visual view instance for downstream processing.
+    /// </summary>
+    /// <value>The grid columns value exposed by <see cref="DataVisualView"/>.</value>
     private IReadOnlyList<string> GridColumns => DataService.GridColumns(DataObject);
+    /// <summary>
+    /// Gets the grid rows collection maintained or exposed by this data visual view instance for downstream processing.
+    /// </summary>
+    /// <value>The grid rows value exposed by <see cref="DataVisualView"/>.</value>
     private IReadOnlyList<PublicationGridRow> GridRows => DataService.BuildGridRows(Document, Item, CurrentPageId);
+    /// <summary>
+    /// Gets the primary value field value that forms part of the data visual view state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The primary value field value exposed by <see cref="DataVisualView"/>.</value>
     private string PrimaryValueField => Item.ValueFields.FirstOrDefault() ?? string.Empty;
+    /// <summary>
+    /// Gets the gauge values value that forms part of the data visual view state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The gauge values value exposed by <see cref="DataVisualView"/>.</value>
     private double[] GaugeValues => ChartPoints.Select(point => point.Value).ToArray();
+    /// <summary>
+    /// Gets the kpi value value that forms part of the data visual view state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The kpi value value exposed by <see cref="DataVisualView"/>.</value>
     private double KpiValue => ChartPoints.FirstOrDefault()?.Value ?? 0;
+    /// <summary>
+    /// Gets the kpi label value that forms part of the data visual view state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The kpi label value exposed by <see cref="DataVisualView"/>.</value>
     private string KpiLabel => $"{KpiValue:0.##} / {Item.MaximumValue:0.##}";
+    /// <summary>
+    /// Gets the pie inner diameter value that forms part of the data visual view state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The pie inner diameter value exposed by <see cref="DataVisualView"/>.</value>
     private double PieInnerDiameter => Item.PieStyle == PieChartStyle.Doughnut ? .55 : 0;
+    /// <summary>
+    /// Gets a value indicating whether uses client visualization applies to the data visual view state.
+    /// </summary>
+    /// <value>The uses client visualization value exposed by <see cref="DataVisualView"/>.</value>
     private bool UsesClientVisualization => true;
+    /// <summary>
+    /// Gets the client config base64 value that forms part of the data visual view state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The client config base64 value exposed by <see cref="DataVisualView"/>.</value>
     private string ClientConfigBase64
     {
         get
@@ -194,6 +267,10 @@
             return Convert.ToBase64String(Encoding.UTF8.GetBytes(json));
         }
     }
+    /// <summary>
+    /// Gets the resolved chart series type value that forms part of the data visual view state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The resolved chart series type value exposed by <see cref="DataVisualView"/>.</value>
     private ChartSeriesType ResolvedChartSeriesType => Item.CartesianStyle switch
     {
         CartesianChartStyle.Line => ChartSeriesType.Line,
@@ -215,6 +292,10 @@
         CartesianChartStyle.FullStackedSplineArea => ChartSeriesType.FullStackedSplineArea,
         _ => ChartSeriesType.Bar
     };
+    /// <summary>
+    /// Gets the resolved sparkline type value that forms part of the data visual view state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The resolved sparkline type value exposed by <see cref="DataVisualView"/>.</value>
     private SparklineType ResolvedSparklineType => Item.SparklineStyle switch
     {
         SparklineChartStyle.Spline => SparklineType.Spline,
@@ -226,5 +307,10 @@
         SparklineChartStyle.WinLoss => SparklineType.WinLoss,
         _ => SparklineType.Line
     };
+    /// <summary>
+    /// Gets the container style value that forms part of the data visual view state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The container style value exposed by <see cref="DataVisualView"/>.</value>
     private string ContainerStyle => $"background:{Item.Background};border:{Item.BorderWidthMm.ToString("0.###", CultureInfo.InvariantCulture)}mm solid {Item.BorderColor}";
+
 }

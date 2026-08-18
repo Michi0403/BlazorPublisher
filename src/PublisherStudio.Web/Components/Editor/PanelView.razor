@@ -97,19 +97,59 @@
 </div>
 
 @code {
+
+    /// <summary>
+    /// Gets or sets the document value that forms part of the panel view state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The document value exposed by <see cref="PanelView"/>.</value>
     [Parameter, EditorRequired] public PublicationDocument Document { get; set; } = default!;
+    /// <summary>
+    /// Gets or sets the item value that forms part of the panel view state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The item value exposed by <see cref="PanelView"/>.</value>
     [Parameter, EditorRequired] public PanelElement Item { get; set; } = default!;
+    /// <summary>
+    /// Gets or sets the stable current page identifier used to identify or correlate this panel view instance with related application state.
+    /// </summary>
+    /// <value>The current page identifier value exposed by <see cref="PanelView"/>.</value>
     [Parameter] public Guid CurrentPageId { get; set; }
+    /// <summary>
+    /// Gets or sets a value indicating whether designer mode applies to the panel view state.
+    /// </summary>
+    /// <value>The designer mode value exposed by <see cref="PanelView"/>.</value>
     [Parameter] public bool DesignerMode { get; set; }
+    /// <summary>
+    /// Gets or sets a value indicating whether design preview only applies to the panel view state.
+    /// </summary>
+    /// <value>The design preview only value exposed by <see cref="PanelView"/>.</value>
     [Parameter] public bool DesignPreviewOnly { get; set; }
     /// <summary>Forces authored canvas coordinates even for responsive panels. Panel Studio uses this in Arrange mode so the live component DOM and selection hitboxes share exactly one geometry.</summary>
+    /// <value>The force canvas layout value exposed by <see cref="PanelView"/>.</value>
     [Parameter] public bool ForceCanvasLayout { get; set; }
     /// <summary>Optional authoring overlay rendered inside the exact viewport that owns panel element coordinates.</summary>
+    /// <value>The authoring overlay value exposed by <see cref="PanelView"/>.</value>
     [Parameter] public RenderFragment? AuthoringOverlay { get; set; }
 
+    /// <summary>
+    /// Gets the enabled views collection maintained or exposed by this panel view instance for downstream processing.
+    /// </summary>
+    /// <value>The enabled views value exposed by <see cref="PanelView"/>.</value>
     private IReadOnlyList<PublicationPanelView> EnabledViews => Item.Views.Where(view => view.Enabled).ToArray();
+    /// <summary>
+    /// Gets the stable active view identifier used to identify or correlate this panel view instance with related application state.
+    /// </summary>
+    /// <value>The active view identifier value exposed by <see cref="PanelView"/>.</value>
     private Guid ActiveViewId => Item.ActiveView?.Id ?? Item.Views.FirstOrDefault()?.Id ?? Guid.Empty;
+    /// <summary>
+    /// Gets the panel style value that forms part of the panel view state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The panel style value exposed by <see cref="PanelView"/>.</value>
     private string PanelStyle => $"background:{Item.Background};border:{Mm(Item.BorderWidthMm)} solid {Item.BorderColor};border-radius:{Mm(Item.CornerRadiusMm)};overflow:{(Item.ClipContent ? "hidden" : "visible")};--panel-canvas-width:{Inv(Item.CanvasWidth)};--panel-canvas-height:{Inv(Item.CanvasHeight)};--panel-canvas-aspect:{Inv(Math.Max(.01, Item.CanvasWidth / Math.Max(.01, Item.CanvasHeight)))}";
+    /// <summary>
+    /// Performs element style for <see cref="PanelView"/>, keeping the operation consistent with the state and invariants of the surrounding panel view workflow.
+    /// </summary>
+    /// <param name="element">Element value supplied to the panel view operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string ElementStyle(PublicationElement element)
     {
         try
@@ -133,6 +173,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs responsive element class for <see cref="PanelView"/>, keeping the operation consistent with the state and invariants of the surrounding panel view workflow.
+    /// </summary>
+    /// <param name="element">Element value supplied to the panel view operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string ResponsiveElementClass(PublicationElement element) {
         try
         {
@@ -151,6 +196,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs shape style for <see cref="PanelView"/>, keeping the operation consistent with the state and invariants of the surrounding panel view workflow.
+    /// </summary>
+    /// <param name="shape">Shape value supplied to the panel view operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string ShapeStyle(ShapeElement shape) {
         try
         {
@@ -164,6 +214,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs image frame style for <see cref="PanelView"/>, keeping the operation consistent with the state and invariants of the surrounding panel view workflow.
+    /// </summary>
+    /// <param name="image">Image frame element dependency used by the panel view workflow to provide the corresponding application capability.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string ImageFrameStyle(ImageFrameElement image) {
         try
         {
@@ -175,6 +230,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs image style for <see cref="PanelView"/>, keeping the operation consistent with the state and invariants of the surrounding panel view workflow.
+    /// </summary>
+    /// <param name="image">Image frame element dependency used by the panel view workflow to provide the corresponding application capability.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string ImageStyle(ImageFrameElement image)
     {
         try
@@ -190,6 +250,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs mm for <see cref="PanelView"/>, keeping the operation consistent with the state and invariants of the surrounding panel view workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the panel view operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Mm(double value) {
         try
         {
@@ -201,6 +266,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs inv for <see cref="PanelView"/>, keeping the operation consistent with the state and invariants of the surrounding panel view workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the panel view operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Inv(double value) {
         try
         {
@@ -212,4 +282,5 @@
             throw;
         }
     }
+
 }

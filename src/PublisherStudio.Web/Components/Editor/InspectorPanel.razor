@@ -975,41 +975,172 @@
 <InputFile id="wordart-video-fill-input" class="hidden-file-input" accept=".mp4,.m4v,.webm,.ogv,.ogg,.mov,video/mp4,video/x-m4v,video/webm,video/ogg,video/quicktime" OnChange="ImportWordArtVideo" />
 
 @code {
+
+    /// <summary>
+    /// Gets or sets the state value that forms part of the inspector panel state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The state value exposed by <see cref="InspectorPanel"/>.</value>
     [Parameter, EditorRequired] public EditorStateService State { get; set; } = default!;
+    /// <summary>
+    /// Gets or sets the on edit story value that forms part of the inspector panel state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on edit story value exposed by <see cref="InspectorPanel"/>.</value>
     [Parameter] public EventCallback OnEditStory { get; set; }
+    /// <summary>
+    /// Gets or sets the on replace picture value that forms part of the inspector panel state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on replace picture value exposed by <see cref="InspectorPanel"/>.</value>
     [Parameter] public EventCallback OnReplacePicture { get; set; }
+    /// <summary>
+    /// Gets or sets the on insert picture value that forms part of the inspector panel state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on insert picture value exposed by <see cref="InspectorPanel"/>.</value>
     [Parameter] public EventCallback OnInsertPicture { get; set; }
+    /// <summary>
+    /// Gets or sets the on create picture value that forms part of the inspector panel state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on create picture value exposed by <see cref="InspectorPanel"/>.</value>
     [Parameter] public EventCallback OnCreatePicture { get; set; }
+    /// <summary>
+    /// Gets or sets the on edit picture value that forms part of the inspector panel state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on edit picture value exposed by <see cref="InspectorPanel"/>.</value>
     [Parameter] public EventCallback OnEditPicture { get; set; }
+    /// <summary>
+    /// Gets or sets the on insert spreadsheet value that forms part of the inspector panel state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on insert spreadsheet value exposed by <see cref="InspectorPanel"/>.</value>
     [Parameter] public EventCallback OnInsertSpreadsheet { get; set; }
+    /// <summary>
+    /// Gets or sets the on create spreadsheet value that forms part of the inspector panel state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on create spreadsheet value exposed by <see cref="InspectorPanel"/>.</value>
     [Parameter] public EventCallback OnCreateSpreadsheet { get; set; }
+    /// <summary>
+    /// Gets or sets the on edit spreadsheet value that forms part of the inspector panel state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on edit spreadsheet value exposed by <see cref="InspectorPanel"/>.</value>
     [Parameter] public EventCallback OnEditSpreadsheet { get; set; }
+    /// <summary>
+    /// Gets or sets the on download spreadsheet value that forms part of the inspector panel state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on download spreadsheet value exposed by <see cref="InspectorPanel"/>.</value>
     [Parameter] public EventCallback OnDownloadSpreadsheet { get; set; }
+    /// <summary>
+    /// Gets or sets the on apply transparent color value that forms part of the inspector panel state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on apply transparent color value exposed by <see cref="InspectorPanel"/>.</value>
     [Parameter] public EventCallback OnApplyTransparentColor { get; set; }
+    /// <summary>
+    /// Gets or sets the on restore original picture value that forms part of the inspector panel state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on restore original picture value exposed by <see cref="InspectorPanel"/>.</value>
     [Parameter] public EventCallback OnRestoreOriginalPicture { get; set; }
+    /// <summary>
+    /// Gets or sets the on insert data visual value that forms part of the inspector panel state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on insert data visual value exposed by <see cref="InspectorPanel"/>.</value>
     [Parameter] public EventCallback<DataVisualKind> OnInsertDataVisual { get; set; }
+    /// <summary>
+    /// Gets or sets the on edit data visual value that forms part of the inspector panel state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on edit data visual value exposed by <see cref="InspectorPanel"/>.</value>
     [Parameter] public EventCallback OnEditDataVisual { get; set; }
+    /// <summary>
+    /// Gets or sets the on manage data value that forms part of the inspector panel state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on manage data value exposed by <see cref="InspectorPanel"/>.</value>
     [Parameter] public EventCallback OnManageData { get; set; }
+    /// <summary>
+    /// Gets or sets the on insert component value that forms part of the inspector panel state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on insert component value exposed by <see cref="InspectorPanel"/>.</value>
     [Parameter] public EventCallback<PublicationComponentKind> OnInsertComponent { get; set; }
+    /// <summary>
+    /// Gets or sets the on edit component value that forms part of the inspector panel state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on edit component value exposed by <see cref="InspectorPanel"/>.</value>
     [Parameter] public EventCallback OnEditComponent { get; set; }
+    /// <summary>
+    /// Gets or sets the on insert video value that forms part of the inspector panel state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on insert video value exposed by <see cref="InspectorPanel"/>.</value>
     [Parameter] public EventCallback OnInsertVideo { get; set; }
+    /// <summary>
+    /// Gets or sets the on insert audio value that forms part of the inspector panel state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on insert audio value exposed by <see cref="InspectorPanel"/>.</value>
     [Parameter] public EventCallback OnInsertAudio { get; set; }
+    /// <summary>
+    /// Gets or sets the on create video value that forms part of the inspector panel state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on create video value exposed by <see cref="InspectorPanel"/>.</value>
     [Parameter] public EventCallback OnCreateVideo { get; set; }
+    /// <summary>
+    /// Gets or sets the on create audio value that forms part of the inspector panel state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on create audio value exposed by <see cref="InspectorPanel"/>.</value>
     [Parameter] public EventCallback OnCreateAudio { get; set; }
+    /// <summary>
+    /// Gets or sets the on edit media value that forms part of the inspector panel state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on edit media value exposed by <see cref="InspectorPanel"/>.</value>
     [Parameter] public EventCallback OnEditMedia { get; set; }
+    /// <summary>
+    /// Gets or sets the on insert barcode value that forms part of the inspector panel state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on insert barcode value exposed by <see cref="InspectorPanel"/>.</value>
     [Parameter] public EventCallback OnInsertBarcode { get; set; }
+    /// <summary>
+    /// Gets or sets the on edit barcode value that forms part of the inspector panel state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on edit barcode value exposed by <see cref="InspectorPanel"/>.</value>
     [Parameter] public EventCallback OnEditBarcode { get; set; }
+    /// <summary>
+    /// Gets or sets the on insert panel value that forms part of the inspector panel state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on insert panel value exposed by <see cref="InspectorPanel"/>.</value>
     [Parameter] public EventCallback OnInsertPanel { get; set; }
+    /// <summary>
+    /// Gets or sets the on edit panel value that forms part of the inspector panel state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on edit panel value exposed by <see cref="InspectorPanel"/>.</value>
     [Parameter] public EventCallback OnEditPanel { get; set; }
+    /// <summary>
+    /// Gets or sets the on open media converter value that forms part of the inspector panel state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on open media converter value exposed by <see cref="InspectorPanel"/>.</value>
     [Parameter] public EventCallback OnOpenMediaConverter { get; set; }
 
+    /// <summary>
+    /// Stores the in-memory streaming device profiles collection maintained internally by <see cref="InspectorPanel"/> for its current workflow state.
+    /// </summary>
     private List<StreamingDeviceProfile> _streamingDeviceProfiles = [];
+    /// <summary>
+    /// Stores the internal streaming profiles loaded state used by <see cref="InspectorPanel"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _streamingProfilesLoaded;
+    /// <summary>
+    /// Stores the JavaScript object reference dependency used by <see cref="InspectorPanel"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private IJSObjectReference? _mediaModule;
+    /// <summary>
+    /// Stores the internal selected live effect layer identifier state used by <see cref="InspectorPanel"/> while executing its surrounding workflow.
+    /// </summary>
     private Guid? _selectedLiveEffectLayerId;
+    /// <summary>
+    /// Stores the internal selected live effect filter identifier state used by <see cref="InspectorPanel"/> while executing its surrounding workflow.
+    /// </summary>
     private Guid? _selectedLiveEffectFilterId;
+    /// <summary>
+    /// Stores the internal new live filter kind state used by <see cref="InspectorPanel"/> while executing its surrounding workflow.
+    /// </summary>
     private VideoEffectFilterKind _newLiveFilterKind = VideoEffectFilterKind.Grayscale;
 
+    /// <summary>
+    /// Handles the parameters set async lifecycle or event notification for <see cref="InspectorPanel"/>, updating the state required by the surrounding workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     protected override async Task OnParametersSetAsync()
     {
         try
@@ -1025,15 +1156,52 @@
         }
     }
 
+    /// <summary>
+    /// Stores the internal tab state used by <see cref="InspectorPanel"/> while executing its surrounding workflow.
+    /// </summary>
     private string _tab = "properties";
+    /// <summary>
+    /// Stores the internal layer context menu state used by <see cref="InspectorPanel"/> while executing its surrounding workflow.
+    /// </summary>
     private DxContextMenu _layerContextMenu = default!;
+    /// <summary>
+    /// Stores the internal context layer identifier state used by <see cref="InspectorPanel"/> while executing its surrounding workflow.
+    /// </summary>
     private Guid? _contextLayerId;
+    /// <summary>
+    /// Gets the context layer value that forms part of the inspector panel state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The context layer value exposed by <see cref="InspectorPanel"/>.</value>
     private PublicationElement? ContextLayer => _contextLayerId is Guid id ? State.CurrentPage.Elements.FirstOrDefault(item => item.Id == id) : null;
+    /// <summary>
+    /// Gets the properties tab class value that forms part of the inspector panel state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The properties tab class value exposed by <see cref="InspectorPanel"/>.</value>
     private string PropertiesTabClass => _tab == "properties" ? "active" : string.Empty;
+    /// <summary>
+    /// Gets the page tab class value that forms part of the inspector panel state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The page tab class value exposed by <see cref="InspectorPanel"/>.</value>
     private string PageTabClass => _tab == "page" ? "active" : string.Empty;
+    /// <summary>
+    /// Gets the layers tab class value that forms part of the inspector panel state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The layers tab class value exposed by <see cref="InspectorPanel"/>.</value>
     private string LayersTabClass => _tab == "layers" ? "active" : string.Empty;
+    /// <summary>
+    /// Gets the animations tab class value that forms part of the inspector panel state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The animations tab class value exposed by <see cref="InspectorPanel"/>.</value>
     private string AnimationsTabClass => _tab == "animations" ? "active" : string.Empty;
+    /// <summary>
+    /// Gets the stable current preset key used to identify or correlate this inspector panel instance with related application state.
+    /// </summary>
+    /// <value>The current preset key value exposed by <see cref="InspectorPanel"/>.</value>
     private string CurrentPresetKey => PagePresets.GetAll().FirstOrDefault(preset => Nearly(preset.WidthMm, State.CurrentPage.WidthMm) && Nearly(preset.HeightMm, State.CurrentPage.HeightMm))?.Key ?? "custom";
+    /// <summary>
+    /// Gets the page timeline content end value that forms part of the inspector panel state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The page timeline content end value exposed by <see cref="InspectorPanel"/>.</value>
     private double PageTimelineContentEnd => Math.Max(
         State.CurrentPage.Elements.SelectMany(item => item.Animations)
             .Select(item => State.EffectiveAnimationStart(item) + Math.Max(.05, item.DurationSeconds) * Math.Max(1, item.RepeatCount) * (item.AutoReverse ? 2 : 1))
@@ -1042,6 +1210,10 @@
             .Select(item => item.TimelineStartSeconds + item.TimelineLengthSeconds)
             .DefaultIfEmpty(0).Max());
 
+    /// <summary>
+    /// Performs request edit story for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestEditStory() {
         try
         {
@@ -1053,6 +1225,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request replace picture for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestReplacePicture() {
         try
         {
@@ -1064,6 +1240,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request insert picture for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestInsertPicture() {
         try
         {
@@ -1075,6 +1255,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request create picture for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestCreatePicture() {
         try
         {
@@ -1086,6 +1270,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request edit picture for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestEditPicture() {
         try
         {
@@ -1097,6 +1285,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request insert spreadsheet for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestInsertSpreadsheet() {
         try
         {
@@ -1108,6 +1300,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request create spreadsheet for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestCreateSpreadsheet() {
         try
         {
@@ -1119,6 +1315,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request edit spreadsheet for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestEditSpreadsheet() {
         try
         {
@@ -1130,6 +1330,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request download spreadsheet for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestDownloadSpreadsheet() {
         try
         {
@@ -1141,6 +1345,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request apply transparent color for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestApplyTransparentColor() {
         try
         {
@@ -1152,6 +1360,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request restore original picture for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestRestoreOriginalPicture() {
         try
         {
@@ -1163,6 +1375,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request edit data visual for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestEditDataVisual() {
         try
         {
@@ -1174,6 +1390,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request manage data for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestManageData() {
         try
         {
@@ -1185,6 +1405,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request insert video for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestInsertVideo() {
         try
         {
@@ -1196,6 +1420,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request insert audio for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestInsertAudio() {
         try
         {
@@ -1207,6 +1435,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request create video for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestCreateVideo() {
         try
         {
@@ -1218,6 +1450,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request create audio for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestCreateAudio() {
         try
         {
@@ -1229,6 +1465,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request edit media for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestEditMedia() {
         try
         {
@@ -1240,6 +1480,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request insert barcode for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestInsertBarcode() {
         try
         {
@@ -1251,6 +1495,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request edit barcode for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestEditBarcode() {
         try
         {
@@ -1262,6 +1510,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request insert panel for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestInsertPanel() {
         try
         {
@@ -1273,6 +1525,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request edit panel for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestEditPanel() {
         try
         {
@@ -1284,6 +1540,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request media converter for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestMediaConverter() {
         try
         {
@@ -1295,6 +1555,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs show properties for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
     private void ShowProperties() {
         try
         {
@@ -1306,6 +1569,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs show page for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
     private void ShowPage() {
         try
         {
@@ -1317,6 +1583,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs show layers for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
     private void ShowLayers() {
         try
         {
@@ -1328,6 +1597,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs show animations for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
     private void ShowAnimations() {
         try
         {
@@ -1339,6 +1611,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds text for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
     private void AddText() {
         try
         {
@@ -1350,6 +1625,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds word art for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
     private void AddWordArt() {
         try
         {
@@ -1361,6 +1639,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds rectangle for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
     private void AddRectangle() {
         try
         {
@@ -1372,6 +1653,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds chart for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AddChart() {
         try
         {
@@ -1383,6 +1668,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Starts connector for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
     private void StartConnector() {
         try
         {
@@ -1394,6 +1682,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs select layer for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="item">Item value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void SelectLayer(PublicationElement item, MouseEventArgs args) {
         try
         {
@@ -1406,6 +1699,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs toggle layer visibility for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="item">Item value supplied to the inspector panel operation and used when producing its result.</param>
     private void ToggleLayerVisibility(PublicationElement item)
     {
         try
@@ -1421,6 +1718,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs toggle layer lock for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="item">Item value supplied to the inspector panel operation and used when producing its result.</param>
     private void ToggleLayerLock(PublicationElement item)
     {
         try
@@ -1436,6 +1737,12 @@
         }
     }
 
+    /// <summary>
+    /// Performs show layer context menu for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="item">Item value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ShowLayerContextMenu(PublicationElement item, MouseEventArgs args)
     {
         try
@@ -1452,6 +1759,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs select context layer for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
     private void SelectContextLayer() {
         try
         {
@@ -1463,6 +1773,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs edit context media for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task EditContextMedia() {
         try
         {
@@ -1474,6 +1788,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs edit context spreadsheet for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task EditContextSpreadsheet() {
         try
         {
@@ -1485,6 +1803,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs download context spreadsheet for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task DownloadContextSpreadsheet() {
         try
         {
@@ -1496,6 +1818,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs edit context barcode for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task EditContextBarcode() {
         try
         {
@@ -1507,6 +1833,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs duplicate context layer for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
     private void DuplicateContextLayer() {
         try
         {
@@ -1518,6 +1847,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Deletes context layer for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
     private void DeleteContextLayer() {
         try
         {
@@ -1529,6 +1861,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs context bring to front for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
     private void ContextBringToFront() {
         try
         {
@@ -1540,6 +1875,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs context bring forward for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
     private void ContextBringForward() {
         try
         {
@@ -1551,6 +1889,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs context send backward for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
     private void ContextSendBackward() {
         try
         {
@@ -1562,6 +1903,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs context send to back for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
     private void ContextSendToBack() {
         try
         {
@@ -1573,6 +1917,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle context visibility for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
     private void ToggleContextVisibility() {
         try
         {
@@ -1584,6 +1931,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle context lock for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
     private void ToggleContextLock() {
         try
         {
@@ -1595,6 +1945,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle context media muted for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
     private void ToggleContextMediaMuted() {
         try
         {
@@ -1606,6 +1959,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle context media loop for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
     private void ToggleContextMediaLoop() {
         try
         {
@@ -1617,6 +1973,12 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs checked text for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="checkedValue">Value indicating whether checked value should apply to this operation.</param>
+    /// <param name="text">Text value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string CheckedText(bool checkedValue, string text) {
         try
         {
@@ -1629,6 +1991,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs kind icon CSS for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="item">Item value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string KindIconCss(PublicationElement item) {
         try
         {
@@ -1657,6 +2024,10 @@
         }
     }
 
+    /// <summary>
+    /// Updates media for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="update">Update value supplied to the inspector panel operation and used when producing its result.</param>
     private void UpdateMedia(Action<PublicationMediaElement> update)
     {
         try
@@ -1670,6 +2041,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change media timeline start for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeMediaTimelineStart(ChangeEventArgs args) {
         try
         {
@@ -1681,6 +2056,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change media playback rate for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeMediaPlaybackRate(ChangeEventArgs args) {
         try
         {
@@ -1692,6 +2071,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change media trim start for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeMediaTrimStart(ChangeEventArgs args) {
         try
         {
@@ -1703,6 +2086,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change media trim end for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeMediaTrimEnd(ChangeEventArgs args) {
         try
         {
@@ -1714,6 +2101,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change media trigger for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeMediaTrigger(ChangeEventArgs args) {
         try
         {
@@ -1725,6 +2116,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle media muted for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="_">_ value supplied to the inspector panel operation and used when producing its result.</param>
     private void ToggleMediaMuted(ChangeEventArgs _) {
         try
         {
@@ -1736,6 +2131,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle media loop for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="_">_ value supplied to the inspector panel operation and used when producing its result.</param>
     private void ToggleMediaLoop(ChangeEventArgs _) {
         try
         {
@@ -1747,6 +2146,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle media auto play for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="_">_ value supplied to the inspector panel operation and used when producing its result.</param>
     private void ToggleMediaAutoPlay(ChangeEventArgs _) {
         try
         {
@@ -1758,6 +2161,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change video fit for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeVideoFit(ChangeEventArgs args)
     {
         try
@@ -1776,6 +2183,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change text content fit for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeTextContentFit(ChangeEventArgs args) {
         try
         {
@@ -1787,6 +2198,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change spreadsheet content fit for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeSpreadsheetContentFit(ChangeEventArgs args) {
         try
         {
@@ -1798,6 +2213,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle video controls for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="_">_ value supplied to the inspector panel operation and used when producing its result.</param>
     private void ToggleVideoControls(ChangeEventArgs _) {
         try
         {
@@ -1809,6 +2228,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change audio display for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeAudioDisplay(ChangeEventArgs args) {
         try
         {
@@ -1820,6 +2243,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle audio controls for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="_">_ value supplied to the inspector panel operation and used when producing its result.</param>
     private void ToggleAudioControls(ChangeEventArgs _) {
         try
         {
@@ -1832,6 +2259,10 @@
         }
     }
 
+    /// <summary>
+    /// Refreshes streaming device profiles for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task RefreshStreamingDeviceProfiles()
     {
         try
@@ -1851,6 +2282,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs change live device profile for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeLiveDeviceProfile(ChangeEventArgs args)
     {
         try
@@ -1885,6 +2320,10 @@
         }
     }
 
+    /// <summary>
+    /// Updates live source for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="update">Update value supplied to the inspector panel operation and used when producing its result.</param>
     private void UpdateLiveSource(Action<LiveSourceElement> update)
     {
         try
@@ -1903,6 +2342,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change live source kind for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeLiveSourceKind(ChangeEventArgs args)
     {
         try
@@ -1917,6 +2360,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change live capture backend for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeLiveCaptureBackend(ChangeEventArgs args) {
         try
         {
@@ -1928,6 +2375,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change live native backend for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeLiveNativeBackend(ChangeEventArgs args) {
         try
         {
@@ -1939,6 +2390,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change live device identifier for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeLiveDeviceId(ChangeEventArgs args) {
         try
         {
@@ -1950,6 +2405,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change live audio device identifier for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeLiveAudioDeviceId(ChangeEventArgs args) {
         try
         {
@@ -1961,6 +2420,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change live application identifier for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeLiveApplicationId(ChangeEventArgs args) {
         try
         {
@@ -1972,6 +2435,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change live window title for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeLiveWindowTitle(ChangeEventArgs args) {
         try
         {
@@ -1983,6 +2450,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change live network URL for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeLiveNetworkUrl(ChangeEventArgs args) {
         try
         {
@@ -1994,6 +2465,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change now playing directory for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeNowPlayingDirectory(ChangeEventArgs args) {
         try
         {
@@ -2005,6 +2480,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change live fit for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeLiveFit(ChangeEventArgs args) {
         try
         {
@@ -2016,6 +2495,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change live capture width for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeLiveCaptureWidth(ChangeEventArgs args) {
         try
         {
@@ -2027,6 +2510,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change live capture height for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeLiveCaptureHeight(ChangeEventArgs args) {
         try
         {
@@ -2038,6 +2525,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change live capture frame rate for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeLiveCaptureFrameRate(ChangeEventArgs args) {
         try
         {
@@ -2049,6 +2540,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change live audio delay for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeLiveAudioDelay(ChangeEventArgs args) {
         try
         {
@@ -2060,6 +2555,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle live audio for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="_">_ value supplied to the inspector panel operation and used when producing its result.</param>
     private void ToggleLiveAudio(ChangeEventArgs _) {
         try
         {
@@ -2071,6 +2570,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle live muted for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="_">_ value supplied to the inspector panel operation and used when producing its result.</param>
     private void ToggleLiveMuted(ChangeEventArgs _) {
         try
         {
@@ -2082,6 +2585,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle live device timestamp for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="_">_ value supplied to the inspector panel operation and used when producing its result.</param>
     private void ToggleLiveDeviceTimestamp(ChangeEventArgs _) {
         try
         {
@@ -2093,6 +2600,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle live chroma for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="_">_ value supplied to the inspector panel operation and used when producing its result.</param>
     private void ToggleLiveChroma(ChangeEventArgs _) {
         try
         {
@@ -2105,6 +2616,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs live effect layers for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="source">Source value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private List<VideoEffectLayer> LiveEffectLayers(LiveSourceElement source) {
         try
         {
@@ -2119,6 +2635,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs selected live effect layer for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="source">Source value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <returns>The video effect layer produced by the operation.</returns>
     private VideoEffectLayer? SelectedLiveEffectLayer(LiveSourceElement source)
     {
         try
@@ -2134,6 +2655,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs selected live effect filter for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="source">Source value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <returns>The video effect filter produced by the operation.</returns>
     private VideoEffectFilter? SelectedLiveEffectFilter(LiveSourceElement source)
     {
         try
@@ -2150,6 +2676,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs select live effect layer for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
     private void SelectLiveEffectLayer(Guid id)
     {
         try
@@ -2166,6 +2696,9 @@
         }
     }
 
+    /// <summary>
+    /// Adds live effect layer for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
     private void AddLiveEffectLayer()
     {
         try
@@ -2188,6 +2721,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs duplicate live effect layer for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
     private void DuplicateLiveEffectLayer()
     {
         try
@@ -2218,6 +2754,12 @@
         }
     }
 
+    /// <summary>
+    /// Determines whether move live effect layer for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="source">Source value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <param name="offset">Offset value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool CanMoveLiveEffectLayer(LiveSourceElement source, int offset)
     {
         try
@@ -2236,6 +2778,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs move live effect layer up for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
     private void MoveLiveEffectLayerUp() {
         try
         {
@@ -2247,6 +2792,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs move live effect layer down for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
     private void MoveLiveEffectLayerDown() {
         try
         {
@@ -2258,6 +2806,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs move live effect layer for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="offset">Offset value supplied to the inspector panel operation and used when producing its result.</param>
     private void MoveLiveEffectLayer(int offset)
     {
         try
@@ -2285,6 +2837,9 @@
         }
     }
 
+    /// <summary>
+    /// Removes live effect layer for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
     private void RemoveLiveEffectLayer()
     {
         try
@@ -2307,6 +2862,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs toggle live effect layer for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
     private void ToggleLiveEffectLayer(Guid id) {
         try
         {
@@ -2323,6 +2882,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs change live effect layer name for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeLiveEffectLayerName(ChangeEventArgs args)
     {
         try
@@ -2338,6 +2901,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs change live effect layer opacity for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeLiveEffectLayerOpacity(ChangeEventArgs args)
     {
         try
@@ -2352,6 +2919,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs change live effect layer blend mode for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeLiveEffectLayerBlendMode(ChangeEventArgs args)
     {
         try
@@ -2366,6 +2937,10 @@
         }
     }
 
+    /// <summary>
+    /// Updates selected live effect layer for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="update">Update value supplied to the inspector panel operation and used when producing its result.</param>
     private void UpdateSelectedLiveEffectLayer(Action<VideoEffectLayer> update)
     {
         try
@@ -2386,6 +2961,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs change new live filter kind for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeNewLiveFilterKind(ChangeEventArgs args)
     {
         try
@@ -2400,6 +2979,9 @@
         }
     }
 
+    /// <summary>
+    /// Adds live effect filter for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
     private void AddLiveEffectFilter()
     {
         try
@@ -2423,6 +3005,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs select live effect filter for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
     private void SelectLiveEffectFilter(Guid id)
     {
         try
@@ -2438,6 +3024,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs toggle live effect filter for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
     private void ToggleLiveEffectFilter(Guid id) {
         try
         {
@@ -2450,6 +3040,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs change live effect filter name for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeLiveEffectFilterName(ChangeEventArgs args)
     {
         try
@@ -2465,6 +3059,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs change live effect filter color for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeLiveEffectFilterColor(ChangeEventArgs args)
     {
         try
@@ -2480,6 +3078,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs change live effect filter amount for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeLiveEffectFilterAmount(ChangeEventArgs args) {
         try
         {
@@ -2491,6 +3093,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change live effect filter secondary amount for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeLiveEffectFilterSecondaryAmount(ChangeEventArgs args) {
         try
         {
@@ -2502,6 +3108,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change live effect filter tertiary amount for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeLiveEffectFilterTertiaryAmount(ChangeEventArgs args) {
         try
         {
@@ -2513,6 +3123,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change live effect filter residual opacity for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeLiveEffectFilterResidualOpacity(ChangeEventArgs args) {
         try
         {
@@ -2525,6 +3139,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs change live effect filter number for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <param name="update">Update value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeLiveEffectFilterNumber(ChangeEventArgs args, Action<VideoEffectFilter, double> update)
     {
         try
@@ -2539,6 +3158,10 @@
         }
     }
 
+    /// <summary>
+    /// Updates selected live effect filter for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="update">Update value supplied to the inspector panel operation and used when producing its result.</param>
     private void UpdateSelectedLiveEffectFilter(Action<VideoEffectFilter> update)
     {
         try
@@ -2554,6 +3177,11 @@
         }
     }
 
+    /// <summary>
+    /// Updates selected live effect filter for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="filterId">Identifier of the filter to use for this operation.</param>
+    /// <param name="update">Update value supplied to the inspector panel operation and used when producing its result.</param>
     private void UpdateSelectedLiveEffectFilter(Guid filterId, Action<VideoEffectFilter> update)
     {
         try
@@ -2574,6 +3202,12 @@
         }
     }
 
+    /// <summary>
+    /// Determines whether move live effect filter for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="source">Source value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <param name="offset">Offset value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool CanMoveLiveEffectFilter(LiveSourceElement source, int offset)
     {
         try
@@ -2592,6 +3226,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs move live effect filter up for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
     private void MoveLiveEffectFilterUp() {
         try
         {
@@ -2603,6 +3240,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs move live effect filter down for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
     private void MoveLiveEffectFilterDown() {
         try
         {
@@ -2614,6 +3254,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs move live effect filter for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="offset">Offset value supplied to the inspector panel operation and used when producing its result.</param>
     private void MoveLiveEffectFilter(int offset)
     {
         try
@@ -2639,6 +3283,9 @@
         }
     }
 
+    /// <summary>
+    /// Removes live effect filter for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
     private void RemoveLiveEffectFilter()
     {
         try
@@ -2664,6 +3311,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs live filter kind name for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="kind">Kind value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string LiveFilterKindName(VideoEffectFilterKind kind) {
         try
         {
@@ -2682,6 +3334,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs live filter summary for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="filter">Filter value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string LiveFilterSummary(VideoEffectFilter filter) {
         try
         {
@@ -2701,6 +3358,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs live filter amount label for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="kind">Kind value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string LiveFilterAmountLabel(VideoEffectFilterKind kind) {
         try
         {
@@ -2719,6 +3381,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs live filter minimum for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="kind">Kind value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     private double LiveFilterMinimum(VideoEffectFilterKind kind) {
         try
         {
@@ -2730,6 +3397,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs live filter maximum for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="kind">Kind value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     private double LiveFilterMaximum(VideoEffectFilterKind kind) {
         try
         {
@@ -2747,6 +3419,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs live filter step for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="kind">Kind value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     private double LiveFilterStep(VideoEffectFilterKind kind) {
         try
         {
@@ -2764,6 +3441,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs endpoint name for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="endpoint">Endpoint value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string EndpointName(ConnectorEndpoint endpoint)
     {
         try
@@ -2781,6 +3463,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs signal target elements for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="connector">Connector value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private IEnumerable<PublicationElement> SignalTargetElements(ConnectorElement connector) {
         try
         {
@@ -2793,6 +3480,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs GUID text for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string GuidText(Guid? value) {
         try
         {
@@ -2804,6 +3496,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Parses GUID for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <returns>The GUID produced by the operation.</returns>
     private Guid? ParseGuid(ChangeEventArgs args) {
         try
         {
@@ -2816,6 +3513,10 @@
         }
     }
 
+    /// <summary>
+    /// Updates signal for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="update">Update value supplied to the inspector panel operation and used when producing its result.</param>
     private void UpdateSignal(Action<SignalConnectorSettings> update)
     {
         try
@@ -2831,6 +3532,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs toggle signal enabled for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ToggleSignalEnabled(ChangeEventArgs args) {
         try
         {
@@ -2842,6 +3547,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle signal line visible for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ToggleSignalLineVisible(ChangeEventArgs args) {
         try
         {
@@ -2853,6 +3562,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle signal loop for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ToggleSignalLoop(ChangeEventArgs args) {
         try
         {
@@ -2864,6 +3577,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle signal auto reverse for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ToggleSignalAutoReverse(ChangeEventArgs args) {
         try
         {
@@ -2875,6 +3592,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle signal restore motion for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ToggleSignalRestoreMotion(ChangeEventArgs args) {
         try
         {
@@ -2886,6 +3607,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change signal trigger for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeSignalTrigger(ChangeEventArgs args) {
         try
         {
@@ -2897,6 +3622,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change signal visual for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeSignalVisual(ChangeEventArgs args) {
         try
         {
@@ -2908,6 +3637,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change signal start gesture for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeSignalStartGesture(ChangeEventArgs args) {
         try
         {
@@ -2919,6 +3652,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change signal end gesture for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeSignalEndGesture(ChangeEventArgs args) {
         try
         {
@@ -2930,6 +3667,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change signal completion action for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeSignalCompletionAction(ChangeEventArgs args) {
         try
         {
@@ -2941,6 +3682,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change signal motion target for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeSignalMotionTarget(ChangeEventArgs args) {
         try
         {
@@ -2952,6 +3697,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change signal completion target for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeSignalCompletionTarget(ChangeEventArgs args) {
         try
         {
@@ -2963,6 +3712,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change signal next connector for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeSignalNextConnector(ChangeEventArgs args) {
         try
         {
@@ -2974,6 +3727,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change signal start selector for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeSignalStartSelector(ChangeEventArgs args) {
         try
         {
@@ -2985,6 +3742,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change signal end selector for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeSignalEndSelector(ChangeEventArgs args) {
         try
         {
@@ -2996,6 +3757,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change signal motion selector for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeSignalMotionSelector(ChangeEventArgs args) {
         try
         {
@@ -3007,6 +3772,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change signal completion selector for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeSignalCompletionSelector(ChangeEventArgs args) {
         try
         {
@@ -3018,6 +3787,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change signal completion value for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeSignalCompletionValue(ChangeEventArgs args) {
         try
         {
@@ -3029,6 +3802,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change signal delay for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeSignalDelay(ChangeEventArgs args) {
         try
         {
@@ -3040,6 +3817,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change signal duration for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeSignalDuration(ChangeEventArgs args) {
         try
         {
@@ -3051,6 +3832,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change signal repeat for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeSignalRepeat(ChangeEventArgs args) {
         try
         {
@@ -3062,6 +3847,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change signal move x for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeSignalMoveX(ChangeEventArgs args) {
         try
         {
@@ -3073,6 +3862,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change signal move y for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeSignalMoveY(ChangeEventArgs args) {
         try
         {
@@ -3084,6 +3877,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change signal scale for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeSignalScale(ChangeEventArgs args) {
         try
         {
@@ -3095,6 +3892,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change signal resize width for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeSignalResizeWidth(ChangeEventArgs args) {
         try
         {
@@ -3106,6 +3907,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change signal resize height for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeSignalResizeHeight(ChangeEventArgs args) {
         try
         {
@@ -3117,6 +3922,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change signal rotation for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeSignalRotation(ChangeEventArgs args) {
         try
         {
@@ -3128,6 +3937,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change signal opacity for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeSignalOpacity(ChangeEventArgs args) {
         try
         {
@@ -3139,6 +3952,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change signal completion duration for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeSignalCompletionDuration(ChangeEventArgs args) {
         try
         {
@@ -3150,6 +3967,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change signal start x for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeSignalStartX(ChangeEventArgs args) {
         try
         {
@@ -3161,6 +3982,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change signal start y for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeSignalStartY(ChangeEventArgs args) {
         try
         {
@@ -3172,6 +3997,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change signal end x for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeSignalEndX(ChangeEventArgs args) {
         try
         {
@@ -3183,6 +4012,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change signal end y for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeSignalEndY(ChangeEventArgs args) {
         try
         {
@@ -3195,6 +4028,10 @@
         }
     }
 
+    /// <summary>
+    /// Previews signal for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task PreviewSignal()
     {
         try
@@ -3210,6 +4047,13 @@
         }
     }
 
+    /// <summary>
+    /// Performs number field for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="label">Label value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <param name="value">Value value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <param name="field">Field value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <returns>The render fragment produced by the operation.</returns>
     private RenderFragment NumberField(string label, double value, string field) {
         try
         {
@@ -3234,6 +4078,16 @@
         }
     }
 
+    /// <summary>
+    /// Performs range field for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="label">Label value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <param name="value">Value value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <param name="min">Min value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <param name="max">Max value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <param name="step">Step value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <param name="field">Field value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <returns>The render fragment produced by the operation.</returns>
     private RenderFragment RangeField(string label, double value, double min, double max, double step, string field) {
         try
         {
@@ -3267,6 +4121,13 @@
         }
     }
 
+    /// <summary>
+    /// Performs color field for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="label">Label value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <param name="value">Value value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <param name="field">Field value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <returns>The render fragment produced by the operation.</returns>
     private RenderFragment ColorField(string label, string value, string field) {
         try
         {
@@ -3296,6 +4157,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs change page preset for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangePagePreset(ChangeEventArgs args)
     {
         try
@@ -3311,6 +4176,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs change page width for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangePageWidth(ChangeEventArgs args) {
         try
         {
@@ -3322,6 +4191,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change page height for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangePageHeight(ChangeEventArgs args) {
         try
         {
@@ -3333,6 +4206,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change page timeline duration for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangePageTimelineDuration(ChangeEventArgs args) {
         try
         {
@@ -3344,6 +4221,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs fit page timeline to content for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
     private void FitPageTimelineToContent() {
         try
         {
@@ -3355,6 +4235,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets ten second timeline for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
     private void SetTenSecondTimeline() {
         try
         {
@@ -3366,6 +4249,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs swap orientation for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
     private void SwapOrientation() {
         try
         {
@@ -3377,6 +4263,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change page background for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangePageBackground(ChangeEventArgs args) {
         try
         {
@@ -3388,6 +4278,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets transparent page for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
     private void SetTransparentPage() {
         try
         {
@@ -3399,6 +4292,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets white page for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
     private void SetWhitePage() {
         try
         {
@@ -3410,6 +4306,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change ruler unit for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeRulerUnit(ChangeEventArgs args) {
         try
         {
@@ -3421,6 +4321,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change grid spacing for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeGridSpacing(ChangeEventArgs args) {
         try
         {
@@ -3432,6 +4336,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change export DPI for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeExportDpi(ChangeEventArgs args) {
         try
         {
@@ -3443,6 +4351,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change raster jpeg quality for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeRasterJpegQuality(ChangeEventArgs args) {
         try
         {
@@ -3454,6 +4366,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle compress page archives for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ToggleCompressPageArchives(ChangeEventArgs args) {
         try
         {
@@ -3465,6 +4381,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle rulers for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ToggleRulers(ChangeEventArgs args) {
         try
         {
@@ -3476,6 +4396,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle grid for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ToggleGrid(ChangeEventArgs args) {
         try
         {
@@ -3487,6 +4411,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle guides for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ToggleGuides(ChangeEventArgs args) {
         try
         {
@@ -3498,6 +4426,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle snap grid for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ToggleSnapGrid(ChangeEventArgs args) {
         try
         {
@@ -3509,6 +4441,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle snap guides for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ToggleSnapGuides(ChangeEventArgs args) {
         try
         {
@@ -3520,6 +4456,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle snap page for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ToggleSnapPage(ChangeEventArgs args) {
         try
         {
@@ -3531,6 +4471,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle snap objects for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ToggleSnapObjects(ChangeEventArgs args) {
         try
         {
@@ -3542,6 +4486,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds vertical guide for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
     private void AddVerticalGuide() {
         try
         {
@@ -3553,6 +4500,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds horizontal guide for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
     private void AddHorizontalGuide() {
         try
         {
@@ -3564,6 +4514,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs clear guides for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
     private void ClearGuides() {
         try
         {
@@ -3575,6 +4528,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change name for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeName(ChangeEventArgs args) {
         try
         {
@@ -3586,6 +4543,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle visible for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ToggleVisible(ChangeEventArgs args) {
         try
         {
@@ -3597,6 +4558,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle locked for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ToggleLocked(ChangeEventArgs args) {
         try
         {
@@ -3608,6 +4573,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change alt text for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeAltText(ChangeEventArgs args) {
         try
         {
@@ -3619,6 +4588,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change image mask for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeImageMask(ChangeEventArgs args) {
         try
         {
@@ -3630,6 +4603,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change tint mode for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeTintMode(ChangeEventArgs args) {
         try
         {
@@ -3641,6 +4618,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change blend mode for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeBlendMode(ChangeEventArgs args) {
         try
         {
@@ -3652,6 +4633,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change data visual title for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeDataVisualTitle(ChangeEventArgs args) {
         try
         {
@@ -3663,6 +4648,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle data title for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ToggleDataTitle(ChangeEventArgs args) {
         try
         {
@@ -3674,6 +4663,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle data legend for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ToggleDataLegend(ChangeEventArgs args) {
         try
         {
@@ -3685,6 +4678,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle data labels for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ToggleDataLabels(ChangeEventArgs args) {
         try
         {
@@ -3696,6 +4693,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Refreshes data for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task RefreshData()
     {
         try
@@ -3720,6 +4721,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request edit component for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestEditComponent() {
         try
         {
@@ -3731,6 +4736,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds component data grid for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AddComponentDataGrid() {
         try
         {
@@ -3742,6 +4751,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle component title for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ToggleComponentTitle(ChangeEventArgs args)
     {
         try
@@ -3755,6 +4768,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle component scope for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ToggleComponentScope(ChangeEventArgs args)
     {
         try
@@ -3769,6 +4786,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs component source for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="component">Component value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string ComponentSource(DevExtremeComponentElement component) {
         try
         {
@@ -3786,6 +4808,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle spreadsheet grid lines for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="_">_ value supplied to the inspector panel operation and used when producing its result.</param>
     private void ToggleSpreadsheetGridLines(ChangeEventArgs _) {
         try
         {
@@ -3797,6 +4823,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle spreadsheet sheet name for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="_">_ value supplied to the inspector panel operation and used when producing its result.</param>
     private void ToggleSpreadsheetSheetName(ChangeEventArgs _) {
         try
         {
@@ -3808,6 +4838,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs data object name for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string DataObjectName(Guid id) {
         try
         {
@@ -3819,6 +4854,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs data visual description for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="item">Item value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string DataVisualDescription(DataVisualElement item) {
         try
         {
@@ -3846,6 +4886,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs friendly for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Friendly(string value) {
         try
         {
@@ -3858,6 +4903,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs change connector path for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeConnectorPath(ChangeEventArgs args) {
         try
         {
@@ -3869,6 +4918,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change connector dash for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeConnectorDash(ChangeEventArgs args) {
         try
         {
@@ -3880,6 +4933,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change connector start marker for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeConnectorStartMarker(ChangeEventArgs args) {
         try
         {
@@ -3891,6 +4948,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change connector end marker for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeConnectorEndMarker(ChangeEventArgs args) {
         try
         {
@@ -3903,6 +4964,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs toggle image shadow for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ToggleImageShadow(ChangeEventArgs args) {
         try
         {
@@ -3914,6 +4979,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle flip horizontal for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ToggleFlipHorizontal(ChangeEventArgs args) {
         try
         {
@@ -3925,6 +4994,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle flip vertical for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ToggleFlipVertical(ChangeEventArgs args) {
         try
         {
@@ -3936,6 +5009,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle crop for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
     private void ToggleCrop() {
         try
         {
@@ -3947,6 +5023,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs picture fit for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
     private void PictureFit() {
         try
         {
@@ -3958,6 +5037,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs picture fill for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
     private void PictureFill() {
         try
         {
@@ -3969,6 +5051,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Applies tint preset for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="color">Color value supplied to the inspector panel operation and used when producing its result.</param>
     private void ApplyTintPreset(string color) {
         try
         {
@@ -3980,6 +5066,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs tint blue for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
     private void TintBlue() {
         try
         {
@@ -3991,6 +5080,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs tint warm for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
     private void TintWarm() {
         try
         {
@@ -4002,6 +5094,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs tint green for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
     private void TintGreen() {
         try
         {
@@ -4013,6 +5108,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs clear tint for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
     private void ClearTint() {
         try
         {
@@ -4025,6 +5123,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs change word art text for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeWordArtText(ChangeEventArgs args) {
         try
         {
@@ -4036,6 +5138,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change word art font for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeWordArtFont(ChangeEventArgs args) {
         try
         {
@@ -4047,6 +5153,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change word art warp for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeWordArtWarp(ChangeEventArgs args)
     {
         try
@@ -4067,6 +5177,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs change word art path for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="points">Points value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeWordArtPath(List<WordArtPathPoint> points) {
         try
         {
@@ -4082,6 +5196,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle word art bold for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ToggleWordArtBold(ChangeEventArgs args) {
         try
         {
@@ -4093,6 +5211,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle word art italic for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ToggleWordArtItalic(ChangeEventArgs args) {
         try
         {
@@ -4104,6 +5226,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle word art shadow for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ToggleWordArtShadow(ChangeEventArgs args) {
         try
         {
@@ -4115,6 +5241,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle word art media loop for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ToggleWordArtMediaLoop(ChangeEventArgs args) {
         try
         {
@@ -4126,6 +5256,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change word art fill kind for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeWordArtFillKind(ChangeEventArgs args)
     {
         try
@@ -4144,6 +5278,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change word art media fit for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeWordArtMediaFit(ChangeEventArgs args)
     {
         try
@@ -4158,6 +5296,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request word art picture for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestWordArtPicture() {
         try
         {
@@ -4169,6 +5311,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request word art video for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestWordArtVideo() {
         try
         {
@@ -4180,6 +5326,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs clear word art media for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
     private void ClearWordArtMedia() {
         try
         {
@@ -4197,6 +5346,11 @@
         }
     }
 
+    /// <summary>
+    /// Imports word art picture for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Input file change event args dependency used by the inspector panel workflow to provide the corresponding application capability.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ImportWordArtPicture(InputFileChangeEventArgs args)
     {
         try
@@ -4232,6 +5386,11 @@
         }
     }
 
+    /// <summary>
+    /// Imports word art video for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Input file change event args dependency used by the inspector panel workflow to provide the corresponding application capability.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ImportWordArtVideo(InputFileChangeEventArgs args)
     {
         try
@@ -4249,7 +5408,7 @@
             var poster = string.Empty;
             try
             {
-                _mediaModule ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=2.8.7").ConfigureAwait(true);
+                _mediaModule ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=2.8.8").ConfigureAwait(true);
                 var localUrl = MediaAssets.RegisterBytes(inspectionId, bytes, mimeType);
                 try
                 {
@@ -4284,6 +5443,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs change color for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="field">Field value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeColor(string field, ChangeEventArgs args)
     {
         try
@@ -4325,6 +5489,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs change number for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="field">Field value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeNumber(string field, ChangeEventArgs args)
     {
         try
@@ -4354,6 +5523,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs change number live for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="field">Field value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeNumberLive(string field, ChangeEventArgs args)
     {
         try
@@ -4383,6 +5557,11 @@
         }
     }
 
+    /// <summary>
+    /// Determines whether media number field for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="field">Field value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool IsMediaNumberField(string field) {
         try
         {
@@ -4394,6 +5573,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs end live edit for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="_">_ value supplied to the inspector panel operation and used when producing its result.</param>
     private void EndLiveEdit(ChangeEventArgs _) {
         try
         {
@@ -4406,6 +5589,12 @@
         }
     }
 
+    /// <summary>
+    /// Applies number for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="element">Element value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <param name="field">Field value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <param name="value">Value value supplied to the inspector panel operation and used when producing its result.</param>
     private void ApplyNumber(PublicationElement element, string field, double value)
     {
         try
@@ -4506,6 +5695,10 @@
         }
     }
 
+    /// <summary>
+    /// Sets image for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="update">Update value supplied to the inspector panel operation and used when producing its result.</param>
     private void SetImage(Action<ImageFrameElement> update) {
         try
         {
@@ -4517,6 +5710,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets word art for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="update">Update value supplied to the inspector panel operation and used when producing its result.</param>
     private void SetWordArt(Action<WordArtElement> update) {
         try
         {
@@ -4528,6 +5725,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets data visual for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="update">Update value supplied to the inspector panel operation and used when producing its result.</param>
     private void SetDataVisual(Action<DataVisualElement> update) {
         try
         {
@@ -4540,6 +5741,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs reset picture for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
     private void ResetPicture()
     {
         try
@@ -4560,6 +5764,12 @@
         }
     }
 
+    /// <summary>
+    /// Performs picture MIME type for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="fileName">File name value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <param name="declared">Declared value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string PictureMimeType(string fileName, string? declared) {
         try
         {
@@ -4581,6 +5791,12 @@
         }
     }
 
+    /// <summary>
+    /// Performs video MIME type for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="fileName">File name value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <param name="declared">Declared value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string VideoMimeType(string fileName, string? declared) {
         try
         {
@@ -4601,6 +5817,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs lt for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="text">Text value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string LT(string text) {
         try
         {
@@ -4613,11 +5834,23 @@
         }
     }
 
+    /// <summary>
+    /// Gets the application culture value that forms part of the inspector panel state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The application culture value exposed by <see cref="InspectorPanel"/>.</value>
     private string ApplicationCulture => CultureInfo.CurrentUICulture.Name;
+    /// <summary>
+    /// Gets the publication culture value that forms part of the inspector panel state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The publication culture value exposed by <see cref="InspectorPanel"/>.</value>
     private string PublicationCulture => string.IsNullOrWhiteSpace(State.Document.ProjectSettings.Culture)
         ? ApplicationCulture
         : State.Document.ProjectSettings.Culture;
 
+    /// <summary>
+    /// Performs change application culture for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangeApplicationCulture(ChangeEventArgs args)
     {
         try
@@ -4635,6 +5868,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs change publication culture for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
     private void ChangePublicationCulture(ChangeEventArgs args)
     {
         try
@@ -4651,6 +5888,9 @@
         }
     }
 
+    /// <summary>
+    /// Opens translation editor for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
     private void OpenTranslationEditor() {
         try
         {
@@ -4663,6 +5903,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs culture label for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="culture">Culture value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string CultureLabel(string culture)
     {
         try
@@ -4682,6 +5927,12 @@
         }
     }
 
+    /// <summary>
+    /// Attempts to double for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <param name="value">Value value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool TryDouble(ChangeEventArgs args, out double value) {
         try
         {
@@ -4693,6 +5944,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Reads bool for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool ReadBool(ChangeEventArgs args) {
         try
         {
@@ -4704,6 +5960,12 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs nearly for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="left">Left value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <param name="right">Right value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool Nearly(double left, double right) {
         try
         {
@@ -4715,6 +5977,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs HTML support label for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="support">Support value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string HtmlSupportLabel(PublicationHtmlExportSupport support) {
         try
         {
@@ -4731,6 +5998,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs HTML support CSS for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="support">Support value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string HtmlSupportCss(PublicationHtmlExportSupport support) {
         try
         {
@@ -4747,6 +6019,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs time for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Time(double value) {
         try
         {
@@ -4758,6 +6035,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs inv for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Inv(double value) {
         try
         {
@@ -4769,6 +6051,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs usable color for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the inspector panel operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string UsableColor(string value) {
         try
         {
@@ -4781,6 +6068,10 @@
         }
     }
 
+    /// <summary>
+    /// Releases resources owned by <see cref="InspectorPanel"/> and leaves the inspector panel workflow in a safely disposed state.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     public async ValueTask DisposeAsync()
     {
         try
@@ -4798,4 +6089,5 @@
             throw;
         }
     }
+
 }

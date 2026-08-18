@@ -18,6 +18,16 @@
 </section>
 
 @code {
+
+    /// <summary>
+    /// Gets or sets the insert value that forms part of the panel library state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The insert value exposed by <see cref="PanelLibrary"/>.</value>
     [Parameter] public EventCallback<string> Insert { get; set; }
+    /// <summary>
+    /// Gets or sets the close value that forms part of the panel library state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The close value exposed by <see cref="PanelLibrary"/>.</value>
     [Parameter] public EventCallback Close { get; set; }
+
 }

@@ -216,50 +216,197 @@
 }
 
 @code {
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the value is visible applies to the story editor state.
+    /// </summary>
+    /// <value>The visible value exposed by <see cref="StoryEditor"/>.</value>
     [Parameter] public bool Visible { get; set; }
+    /// <summary>
+    /// Gets or sets the text frame value that forms part of the story editor state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The text frame value exposed by <see cref="StoryEditor"/>.</value>
     [Parameter] public TextFrameElement? TextFrame { get; set; }
+    /// <summary>
+    /// Gets or sets the publication name value that forms part of the story editor state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The publication name value exposed by <see cref="StoryEditor"/>.</value>
     [Parameter] public string PublicationName { get; set; } = "Publication";
+    /// <summary>
+    /// Gets or sets the page name value that forms part of the story editor state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The page name value exposed by <see cref="StoryEditor"/>.</value>
     [Parameter] public string PageName { get; set; } = "Page";
+    /// <summary>
+    /// Gets or sets the page number value that forms part of the story editor state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The page number value exposed by <see cref="StoryEditor"/>.</value>
     [Parameter] public int PageNumber { get; set; } = 1;
+    /// <summary>
+    /// Gets or sets the page count that quantifies the associated story editor data.
+    /// </summary>
+    /// <value>The page count value exposed by <see cref="StoryEditor"/>.</value>
     [Parameter] public int PageCount { get; set; } = 1;
+    /// <summary>
+    /// Gets or sets a value indicating whether open AI on show applies to the story editor state.
+    /// </summary>
+    /// <value>The open AI on show value exposed by <see cref="StoryEditor"/>.</value>
     [Parameter] public bool OpenAiOnShow { get; set; }
+    /// <summary>
+    /// Gets or sets the saved value that forms part of the story editor state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The saved value exposed by <see cref="StoryEditor"/>.</value>
     [Parameter] public EventCallback<(byte[] Content, string PreviewHtml, string DocumentBackground, StoryStorageFormat Format)> Saved { get; set; }
+    /// <summary>
+    /// Gets or sets the cancelled value that forms part of the story editor state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The cancelled value exposed by <see cref="StoryEditor"/>.</value>
     [Parameter] public EventCallback Cancelled { get; set; }
 
+    /// <summary>
+    /// Stores the internal rich edit state used by <see cref="StoryEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private DxRichEdit? _richEdit;
+    /// <summary>
+    /// Stores the internal self reference state used by <see cref="StoryEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private DotNetObjectReference<StoryEditor>? _selfReference;
+    /// <summary>
+    /// Stores the internal selection state used by <see cref="StoryEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private Selection _selection = default!;
+    /// <summary>
+    /// Stores the internal content state used by <see cref="StoryEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private byte[] _content = [];
+    /// <summary>
+    /// Stores the internal loaded identifier state used by <see cref="StoryEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private Guid? _loadedId;
+    /// <summary>
+    /// Stores the internal document format state used by <see cref="StoryEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private DocumentFormat _documentFormat = DocumentFormat.OpenXml;
+    /// <summary>
+    /// Stores the internal editor revision state used by <see cref="StoryEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private int _editorRevision;
+    /// <summary>
+    /// Stores the internal legacy conversion pending state used by <see cref="StoryEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _legacyConversionPending;
+    /// <summary>
+    /// Stores the internal upgrading legacy story state used by <see cref="StoryEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _upgradingLegacyStory;
+    /// <summary>
+    /// Stores the internal document load generation state used by <see cref="StoryEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private int _documentLoadGeneration;
+    /// <summary>
+    /// Stores the internal mail merge settings content state used by <see cref="StoryEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private RenderFragment? _mailMergeSettingsContent;
+    /// <summary>
+    /// Stores the internal error state used by <see cref="StoryEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private string? _error;
+    /// <summary>
+    /// Stores the in-memory field data collection maintained internally by <see cref="StoryEditor"/> for its current workflow state.
+    /// </summary>
     private IReadOnlyList<PublicationFieldRecord> _fieldData = [];
+    /// <summary>
+    /// Stores the internal story preview transfer identifier state used by <see cref="StoryEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private string? _storyPreviewTransferId;
+    /// <summary>
+    /// Stores the internal story preview buffer state used by <see cref="StoryEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly System.Text.StringBuilder _storyPreviewBuffer = new();
+    /// <summary>
+    /// Stores the internal story preview expected length state used by <see cref="StoryEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private int _storyPreviewExpectedLength;
+    /// <summary>
+    /// Stores the internal story preview expected chunks state used by <see cref="StoryEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private int _storyPreviewExpectedChunks;
+    /// <summary>
+    /// Stores the internal story preview next chunk state used by <see cref="StoryEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private int _storyPreviewNextChunk;
+    /// <summary>
+    /// Stores the internal story preview background state used by <see cref="StoryEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private string _storyPreviewBackground = "transparent";
+    /// <summary>
+    /// Stores the internal story preview result state used by <see cref="StoryEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private StoryPreviewResult? _storyPreviewResult;
+    /// <summary>
+    /// Stores the internal story preview transfer error state used by <see cref="StoryEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private string? _storyPreviewTransferError;
+    /// <summary>
+    /// Stores the internal code workspace visible state used by <see cref="StoryEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _codeWorkspaceVisible;
+    /// <summary>
+    /// Stores the internal code language identifier state used by <see cref="StoryEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private string _codeLanguageId = "csharp";
+    /// <summary>
+    /// Stores the internal code workspace text state used by <see cref="StoryEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private string _codeWorkspaceText = "// PublisherStudio code block";
+    /// <summary>
+    /// Stores the internal code indent size state used by <see cref="StoryEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private int _codeIndentSize = 4;
+    /// <summary>
+    /// Stores the in-memory code tokens collection maintained internally by <see cref="StoryEditor"/> for its current workflow state.
+    /// </summary>
     private IReadOnlyList<CodeTokenSpan> _codeTokens = [];
+    /// <summary>
+    /// Stores the internal AI story panel visible state used by <see cref="StoryEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _aiStoryPanelVisible;
+    /// <summary>
+    /// Stores the internal AI story prompt state used by <see cref="StoryEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private string _aiStoryPrompt = string.Empty;
+    /// <summary>
+    /// Stores the internal AI team key state used by <see cref="StoryEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private string _aiTeamKey = "general";
+    /// <summary>
+    /// Stores the in-memory AI proposals collection maintained internally by <see cref="StoryEditor"/> for its current workflow state.
+    /// </summary>
     private IReadOnlyList<OrganicTextInsertionProposal> _aiProposals = [];
+    /// <summary>
+    /// Gets the code workspace summary value that forms part of the story editor state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The code workspace summary value exposed by <see cref="StoryEditor"/>.</value>
     private string CodeWorkspaceSummary => $"{CodeLanguages.Get(_codeLanguageId).DisplayName} · {_codeTokens.Count} recognized token(s) · {_codeWorkspaceText.Length} character(s)";
+    /// <summary>
+    /// Gets a value indicating whether use AI council applies to the story editor state.
+    /// </summary>
+    /// <value>The can use AI council value exposed by <see cref="StoryEditor"/>.</value>
     private bool CanUseAiCouncil => LocalGptConnection.State.IsLinked && LocalGptConnection.State.HasCapability("council.run");
+    /// <summary>
+    /// Gets a value indicating whether send AI story request applies to the story editor state.
+    /// </summary>
+    /// <value>The can send AI story request value exposed by <see cref="StoryEditor"/>.</value>
     private bool CanSendAiStoryRequest => CanUseAiCouncil && !string.IsNullOrWhiteSpace(_aiStoryPrompt) && TextFrame is not null;
+    /// <summary>
+    /// Gets a value indicating whether selected story text applies to the story editor state.
+    /// </summary>
+    /// <value>The has selected story text value exposed by <see cref="StoryEditor"/>.</value>
     private bool HasSelectedStoryText => _selection?.Intervals is { Count: > 0 } && _selection.Intervals[0].Length > 0;
+    /// <summary>
+    /// Gets the AI council teams collection maintained or exposed by this story editor instance for downstream processing.
+    /// </summary>
+    /// <value>The AI council teams value exposed by <see cref="StoryEditor"/>.</value>
     private IReadOnlyList<(string Key, string Name)> AiCouncilTeams
     {
         get
@@ -281,14 +428,26 @@
             })).ToList();
         }
     }
+    /// <summary>
+    /// Gets the matching AI proposals collection maintained or exposed by this story editor instance for downstream processing.
+    /// </summary>
+    /// <value>The matching AI proposals value exposed by <see cref="StoryEditor"/>.</value>
     private IReadOnlyList<OrganicTextInsertionProposal> MatchingAiProposals => _aiProposals
         .Where(proposal => TextFrame is not null &&
             (string.Equals(proposal.Target, TextFrame.Name, StringComparison.OrdinalIgnoreCase)
              || string.Equals(proposal.Target, AiProposalTarget, StringComparison.OrdinalIgnoreCase)))
         .OrderByDescending(proposal => proposal.CreatedUtc)
         .ToList();
+    /// <summary>
+    /// Gets the AI proposal target value that forms part of the story editor state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The AI proposal target value exposed by <see cref="StoryEditor"/>.</value>
     private string AiProposalTarget => TextFrame is null ? "PublisherStudio story" : $"StoryEditor:{TextFrame.Id}:{TextFrame.Name}";
 
+    /// <summary>
+    /// Performs customize rich edit ribbon for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
+    /// <param name="ribbon">Ribbon dependency used by the story editor workflow to provide the corresponding application capability.</param>
     private void CustomizeRichEditRibbon(IRibbon ribbon)
     {
         try
@@ -318,6 +477,9 @@
         }
     }
 
+    /// <summary>
+    /// Handles the initialized lifecycle or event notification for <see cref="StoryEditor"/>, updating the state required by the surrounding workflow.
+    /// </summary>
     protected override void OnInitialized()
     {
         try
@@ -334,6 +496,9 @@
         }
     }
 
+    /// <summary>
+    /// Handles the parameters set lifecycle or event notification for <see cref="StoryEditor"/>, updating the state required by the surrounding workflow.
+    /// </summary>
     protected override void OnParametersSet()
     {
         try
@@ -391,6 +556,11 @@
         }
     }
 
+    /// <summary>
+    /// Handles the after render async lifecycle or event notification for <see cref="StoryEditor"/>, updating the state required by the surrounding workflow.
+    /// </summary>
+    /// <param name="firstRender">Value indicating whether first render should apply to this operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         try
@@ -416,6 +586,11 @@
         }
     }
 
+    /// <summary>
+    /// Handles document loaded for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
+    /// <param name="_">_ value supplied to the story editor operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task HandleDocumentLoaded(Document _)
     {
         try
@@ -439,6 +614,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs upgrade legacy story after load for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
+    /// <param name="generation">Generation value supplied to the story editor operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task UpgradeLegacyStoryAfterLoad(int generation)
     {
         try
@@ -500,6 +680,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs enable mail merge after load for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
+    /// <param name="generation">Generation value supplied to the story editor operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task EnableMailMergeAfterLoad(int generation)
     {
         try
@@ -528,6 +713,11 @@
         }
     }
 
+    /// <summary>
+    /// Determines whether current story load for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
+    /// <param name="generation">Generation value supplied to the story editor operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool IsCurrentStoryLoad(int generation) {
         try
         {
@@ -543,6 +733,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs safe state has changed for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task SafeStateHasChanged()
     {
         try
@@ -559,6 +753,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs apply for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task Apply()
     {
         try
@@ -593,6 +791,9 @@
         }
     }
 
+    /// <summary>
+    /// Opens AI story panel for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
     private void OpenAiStoryPanel()
     {
         try
@@ -608,6 +809,9 @@
         }
     }
 
+    /// <summary>
+    /// Closes AI story panel for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
     private void CloseAiStoryPanel() {
         try
         {
@@ -620,6 +824,9 @@
         }
     }
 
+    /// <summary>
+    /// Refreshes AI proposals for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
     private void RefreshAiProposals()
     {
         try
@@ -636,6 +843,9 @@
         }
     }
 
+    /// <summary>
+    /// Handles the organic state changed lifecycle or event notification for <see cref="StoryEditor"/>, updating the state required by the surrounding workflow.
+    /// </summary>
     private void OnOrganicStateChanged()
     {
         try
@@ -656,6 +866,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs AI proofread selection for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AiProofreadSelection() {
         try
         {
@@ -667,6 +881,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs AI shorten selection for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AiShortenSelection() {
         try
         {
@@ -678,6 +896,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs AI expand selection for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AiExpandSelection() {
         try
         {
@@ -689,6 +911,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs AI summarize selection for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AiSummarizeSelection() {
         try
         {
@@ -700,6 +926,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs AI explain selection for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AiExplainSelection() {
         try
         {
@@ -711,6 +941,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs AI professional selection for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AiProfessionalSelection() {
         try
         {
@@ -722,6 +956,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs AI friendly selection for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AiFriendlySelection() {
         try
         {
@@ -733,6 +971,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs AI translate selection for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AiTranslateSelection() {
         try
         {
@@ -745,6 +987,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs submit AI selection edit for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
+    /// <param name="instruction">Instruction value supplied to the story editor operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task SubmitAiSelectionEditAsync(string instruction)
     {
         try
@@ -795,6 +1042,11 @@
         }
     }
 
+    /// <summary>
+    /// Handles AI prompt key down for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the story editor operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task HandleAiPromptKeyDown(KeyboardEventArgs args)
     {
         try
@@ -810,6 +1062,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs request AI story for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task RequestAiStoryAsync()
     {
         try
@@ -871,6 +1127,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs insert AI proposal for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
+    /// <param name="proposal">Proposal value supplied to the story editor operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task InsertAiProposalAsync(OrganicTextInsertionProposal proposal)
     {
         try
@@ -899,6 +1160,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs replace selection with AI proposal for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
+    /// <param name="proposal">Proposal value supplied to the story editor operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ReplaceSelectionWithAiProposalAsync(OrganicTextInsertionProposal proposal)
     {
         try
@@ -930,6 +1196,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs dismiss AI proposal for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
+    /// <param name="proposalId">Identifier of the proposal to use for this operation.</param>
     private void DismissAiProposal(Guid proposalId)
     {
         try
@@ -947,6 +1217,10 @@
         }
     }
 
+    /// <summary>
+    /// Opens code workspace for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task OpenCodeWorkspace()
     {
         try
@@ -963,6 +1237,9 @@
         }
     }
 
+    /// <summary>
+    /// Closes code workspace for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
     private void CloseCodeWorkspace() {
         try
         {
@@ -975,6 +1252,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs format code workspace for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task FormatCodeWorkspace()
     {
         try
@@ -993,6 +1274,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs toggle code comments for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task ToggleCodeComments()
     {
         try
@@ -1011,6 +1296,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs analyze code workspace for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
     private void AnalyzeCodeWorkspace()
     {
         try
@@ -1025,6 +1313,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs insert code at caret for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task InsertCodeAtCaret()
     {
         try
@@ -1052,6 +1344,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs insert field for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
+    /// <param name="code">Code value supplied to the story editor operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task InsertField(string code)
     {
         try
@@ -1075,6 +1372,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs insert date field for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task InsertDateField() {
         try
         {
@@ -1086,6 +1387,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs insert time field for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task InsertTimeField() {
         try
         {
@@ -1097,6 +1402,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs insert page field for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task InsertPageField() {
         try
         {
@@ -1108,6 +1417,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs insert page count field for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task InsertPageCountField() {
         try
         {
@@ -1119,6 +1432,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs insert publication field for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task InsertPublicationField() {
         try
         {
@@ -1130,6 +1447,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs insert page name field for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task InsertPageNameField() {
         try
         {
@@ -1141,6 +1462,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs insert story name field for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task InsertStoryNameField() {
         try
         {
@@ -1153,6 +1478,10 @@
         }
     }
 
+    /// <summary>
+    /// Updates fields for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task UpdateFields()
     {
         try
@@ -1169,6 +1498,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs show field codes for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ShowFieldCodes()
     {
         try
@@ -1185,6 +1518,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs show field results for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ShowFieldResults()
     {
         try
@@ -1201,6 +1538,10 @@
         }
     }
 
+    /// <summary>
+    /// Exports docx for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task ExportDocx() {
         try
         {
@@ -1212,6 +1553,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Exports rtf for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task ExportRtf() {
         try
         {
@@ -1223,6 +1568,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Exports text for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task ExportText() {
         try
         {
@@ -1234,6 +1583,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Exports HTML for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task ExportHtml() {
         try
         {
@@ -1246,6 +1599,13 @@
         }
     }
 
+    /// <summary>
+    /// Exports story for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
+    /// <param name="format">Format value supplied to the story editor operation and used when producing its result.</param>
+    /// <param name="extension">Extension value supplied to the story editor operation and used when producing its result.</param>
+    /// <param name="mimeType">Mime type value supplied to the story editor operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ExportStory(DocumentFormat format, string extension, string mimeType)
     {
         try
@@ -1285,6 +1645,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs print story from client for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     [JSInvokable]
     public Task PrintStoryFromClient() {
         try
@@ -1298,6 +1662,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs print story for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task PrintStory()
     {
         try
@@ -1345,6 +1713,12 @@
         }
     }
 
+    /// <summary>
+    /// Performs prepare story preview for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
+    /// <param name="html">Html value supplied to the story editor operation and used when producing its result.</param>
+    /// <param name="preferredBackground">Preferred background value supplied to the story editor operation and used when producing its result.</param>
+    /// <returns>The story preview result produced by the operation.</returns>
     private async Task<StoryPreviewResult> PrepareStoryPreview(byte[] html, string? preferredBackground = null)
     {
         try
@@ -1389,6 +1763,14 @@
         }
     }
 
+    /// <summary>
+    /// Performs begin story preview transfer for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
+    /// <param name="transferId">Identifier of the transfer to use for this operation.</param>
+    /// <param name="totalLength">Total length value supplied to the story editor operation and used when producing its result.</param>
+    /// <param name="chunkCount">Chunk count value supplied to the story editor operation and used when producing its result.</param>
+    /// <param name="background">Background value supplied to the story editor operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     [JSInvokable]
     public bool BeginStoryPreviewTransfer(string transferId, int totalLength, int chunkCount, string background)
     {
@@ -1415,6 +1797,13 @@
         }
     }
 
+    /// <summary>
+    /// Performs append story preview chunk for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
+    /// <param name="transferId">Identifier of the transfer to use for this operation.</param>
+    /// <param name="chunkIndex">Chunk index value supplied to the story editor operation and used when producing its result.</param>
+    /// <param name="chunk">Chunk value supplied to the story editor operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     [JSInvokable]
     public bool AppendStoryPreviewChunk(string transferId, int chunkIndex, string chunk)
     {
@@ -1439,6 +1828,11 @@
         }
     }
 
+    /// <summary>
+    /// Completes story preview transfer for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
+    /// <param name="transferId">Identifier of the transfer to use for this operation.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     [JSInvokable]
     public bool CompleteStoryPreviewTransfer(string transferId)
     {
@@ -1467,6 +1861,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs reset story preview transfer for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
     private void ResetStoryPreviewTransfer()
     {
         try
@@ -1488,6 +1885,14 @@
         }
     }
 
+    /// <summary>
+    /// Performs standalone story HTML for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
+    /// <param name="prepared">Prepared value supplied to the story editor operation and used when producing its result.</param>
+    /// <param name="title">Title value supplied to the story editor operation and used when producing its result.</param>
+    /// <param name="pageLayout">Page layout value supplied to the story editor operation and used when producing its result.</param>
+    /// <param name="printPreview">Value indicating whether print preview should apply to this operation.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string StandaloneStoryHtml(
         StoryPreviewResult prepared,
         string title,
@@ -1789,6 +2194,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs CSS millimeters for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the story editor operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string CssMillimeters(double value) {
         try
         {
@@ -1801,6 +2211,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs format measurement for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the story editor operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string FormatMeasurement(double value) {
         try
         {
@@ -1813,6 +2228,11 @@
         }
     }
 
+    /// <summary>
+    /// Determines whether visible background for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the story editor operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool IsVisibleBackground(string? value)
     {
         try
@@ -1832,6 +2252,10 @@
         }
     }
 
+    /// <summary>
+    /// Determines whether cel for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task Cancel() {
         try
         {
@@ -1844,6 +2268,9 @@
         }
     }
 
+    /// <summary>
+    /// Releases resources owned by <see cref="StoryEditor"/> and leaves the story editor workflow in a safely disposed state.
+    /// </summary>
     public void Dispose()
     {
         try
@@ -1864,9 +2291,21 @@
         }
     }
 
+    /// <summary>
+    /// Represents the outcome of story preview, carrying the data and status produced by the corresponding application operation.
+    /// </summary>
     public sealed class StoryPreviewResult
     {
+        /// <summary>
+        /// Gets or sets the HTML value that forms part of the story preview state consumed or produced by the surrounding workflow.
+        /// </summary>
+        /// <value>The HTML value exposed by <see cref="StoryPreviewResult"/>.</value>
         public string Html { get; set; } = "<div class=\"publisher-story-document\"><p></p></div>";
+        /// <summary>
+        /// Gets or sets the background value that forms part of the story preview state consumed or produced by the surrounding workflow.
+        /// </summary>
+        /// <value>The background value exposed by <see cref="StoryPreviewResult"/>.</value>
         public string Background { get; set; } = "transparent";
     }
+
 }

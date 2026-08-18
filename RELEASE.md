@@ -1,7 +1,7 @@
-# PublisherStudio 2.8.7
+# PublisherStudio 2.8.8
 
-On-demand LocalGPT discovery, cancellation-noise removal, XML-documentation architecture enforcement, and PublisherStudio export-dialog contrast/style repair over the strict 2.8.6 architecture release.
+Source-only InteractiveServer prerender, prerender-safe JavaScript interop, and comprehensive Razor XML-documentation architecture release.
 
-See `CHANGELOG-v2.8.7-source.md` and `VALIDATION-v2.8.7-source.md` for the exact network-lifecycle, documentation, UI, and static-validation contracts.
+The routed PublisherStudio pages use `@rendermode InteractiveServer`, whose default is prerender enabled. Nested editor components inherit the owning page circuit rather than declaring competing render modes. Browser-only diagnostics remains an intentional non-prerendered island.
 
-The LocalGPT 1-Wire protocol remains `2.1.1`. No .NET build was run while preparing this source package.
+No .NET build/publish/pack was run while preparing this source archive.

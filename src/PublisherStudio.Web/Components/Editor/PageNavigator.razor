@@ -79,6 +79,12 @@
 </DxContextMenu>
 
 @code {
+
+    /// <summary>
+    /// Performs lt for <see cref="PageNavigator"/>, keeping the operation consistent with the state and invariants of the surrounding page navigator workflow.
+    /// </summary>
+    /// <param name="text">Text value supplied to the page navigator operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string LT(string text) {
         try
         {
@@ -91,16 +97,48 @@
         }
     }
 
+    /// <summary>
+    /// Gets or sets the state value that forms part of the page navigator state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The state value exposed by <see cref="PageNavigator"/>.</value>
     [Parameter, EditorRequired] public EditorStateService State { get; set; } = default!;
+    /// <summary>
+    /// Gets or sets a value indicating whether timeline visible applies to the page navigator state.
+    /// </summary>
+    /// <value>The timeline visible value exposed by <see cref="PageNavigator"/>.</value>
     [Parameter] public bool TimelineVisible { get; set; }
+    /// <summary>
+    /// Gets or sets the request toggle timeline value that forms part of the page navigator state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The request toggle timeline value exposed by <see cref="PageNavigator"/>.</value>
     [Parameter] public EventCallback RequestToggleTimeline { get; set; }
 
+    /// <summary>
+    /// Gets the timeline command text value that forms part of the page navigator state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The timeline command text value exposed by <see cref="PageNavigator"/>.</value>
     private string TimelineCommandText => TimelineVisible ? $"✓ {LT("Timeline pane")}" : LT("Timeline pane");
 
+    /// <summary>
+    /// Stores the internal page context menu state used by <see cref="PageNavigator"/> while executing its surrounding workflow.
+    /// </summary>
     private DxContextMenu _pageContextMenu = default!;
+    /// <summary>
+    /// Stores the internal context page identifier state used by <see cref="PageNavigator"/> while executing its surrounding workflow.
+    /// </summary>
     private Guid? _contextPageId;
+    /// <summary>
+    /// Gets the context page value that forms part of the page navigator state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The context page value exposed by <see cref="PageNavigator"/>.</value>
     private PublicationPage? ContextPage => _contextPageId is { } id ? State.Document.Pages.FirstOrDefault(page => page.Id == id) : null;
 
+    /// <summary>
+    /// Performs show page menu for <see cref="PageNavigator"/>, keeping the operation consistent with the state and invariants of the surrounding page navigator workflow.
+    /// </summary>
+    /// <param name="publicationPage">Publication page value supplied to the page navigator operation and used when producing its result.</param>
+    /// <param name="args">Args value supplied to the page navigator operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ShowPageMenu(PublicationPage publicationPage, MouseEventArgs args)
     {
         try
@@ -118,6 +156,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs show navigator menu for <see cref="PageNavigator"/>, keeping the operation consistent with the state and invariants of the surrounding page navigator workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the page navigator operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ShowNavigatorMenu(MouseEventArgs args)
     {
         try
@@ -134,6 +177,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs select context page for <see cref="PageNavigator"/>, keeping the operation consistent with the state and invariants of the surrounding page navigator workflow.
+    /// </summary>
     private void SelectContextPage()
     {
         try
@@ -148,6 +194,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs duplicate context page for <see cref="PageNavigator"/>, keeping the operation consistent with the state and invariants of the surrounding page navigator workflow.
+    /// </summary>
     private void DuplicateContextPage()
     {
         try
@@ -163,6 +212,9 @@
         }
     }
 
+    /// <summary>
+    /// Deletes context page for <see cref="PageNavigator"/>, keeping the operation consistent with the state and invariants of the surrounding page navigator workflow.
+    /// </summary>
     private void DeleteContextPage()
     {
         try
@@ -179,6 +231,9 @@
         }
     }
 
+    /// <summary>
+    /// Adds page for <see cref="PageNavigator"/>, keeping the operation consistent with the state and invariants of the surrounding page navigator workflow.
+    /// </summary>
     private void AddPage() {
         try
         {
@@ -190,6 +245,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle timeline for <see cref="PageNavigator"/>, keeping the operation consistent with the state and invariants of the surrounding page navigator workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task ToggleTimeline() {
         try
         {
@@ -201,6 +260,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs duplicate selected page for <see cref="PageNavigator"/>, keeping the operation consistent with the state and invariants of the surrounding page navigator workflow.
+    /// </summary>
     private void DuplicateSelectedPage() {
         try
         {
@@ -213,6 +275,10 @@
         }
     }
 
+    /// <summary>
+    /// Sets transition for <see cref="PageNavigator"/>, keeping the operation consistent with the state and invariants of the surrounding page navigator workflow.
+    /// </summary>
+    /// <param name="kind">Kind value supplied to the page navigator operation and used when producing its result.</param>
     private void SetTransition(PublicationPageTransitionKind kind)
     {
         try
@@ -228,6 +294,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs transition none for <see cref="PageNavigator"/>, keeping the operation consistent with the state and invariants of the surrounding page navigator workflow.
+    /// </summary>
     private void TransitionNone() {
         try
         {
@@ -239,6 +308,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs transition fade for <see cref="PageNavigator"/>, keeping the operation consistent with the state and invariants of the surrounding page navigator workflow.
+    /// </summary>
     private void TransitionFade() {
         try
         {
@@ -250,6 +322,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs transition push for <see cref="PageNavigator"/>, keeping the operation consistent with the state and invariants of the surrounding page navigator workflow.
+    /// </summary>
     private void TransitionPush() {
         try
         {
@@ -261,6 +336,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs transition wipe for <see cref="PageNavigator"/>, keeping the operation consistent with the state and invariants of the surrounding page navigator workflow.
+    /// </summary>
     private void TransitionWipe() {
         try
         {
@@ -272,6 +350,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs transition zoom for <see cref="PageNavigator"/>, keeping the operation consistent with the state and invariants of the surrounding page navigator workflow.
+    /// </summary>
     private void TransitionZoom() {
         try
         {
@@ -283,6 +364,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs transition flip for <see cref="PageNavigator"/>, keeping the operation consistent with the state and invariants of the surrounding page navigator workflow.
+    /// </summary>
     private void TransitionFlip() {
         try
         {
@@ -295,6 +379,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs fit timeline to content for <see cref="PageNavigator"/>, keeping the operation consistent with the state and invariants of the surrounding page navigator workflow.
+    /// </summary>
     private void FitTimelineToContent()
     {
         try
@@ -310,6 +397,9 @@
         }
     }
 
+    /// <summary>
+    /// Sets ten second timeline for <see cref="PageNavigator"/>, keeping the operation consistent with the state and invariants of the surrounding page navigator workflow.
+    /// </summary>
     private void SetTenSecondTimeline()
     {
         try
@@ -325,6 +415,10 @@
         }
     }
 
+    /// <summary>
+    /// Gets the timeline content end value that forms part of the page navigator state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The timeline content end value exposed by <see cref="PageNavigator"/>.</value>
     private double TimelineContentEnd => Math.Max(
         State.CurrentPage.Elements.SelectMany(item => item.Animations)
             .Select(item => State.EffectiveAnimationStart(item) + Math.Max(.05, item.DurationSeconds) * Math.Max(1, item.RepeatCount) * (item.AutoReverse ? 2 : 1))
@@ -333,6 +427,11 @@
             .Select(item => item.TimelineStartSeconds + item.TimelineLengthSeconds)
             .DefaultIfEmpty(0).Max());
 
+    /// <summary>
+    /// Performs transition text for <see cref="PageNavigator"/>, keeping the operation consistent with the state and invariants of the surrounding page navigator workflow.
+    /// </summary>
+    /// <param name="kind">Kind value supplied to the page navigator operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string TransitionText(PublicationPageTransitionKind kind) {
         try
         {
@@ -345,6 +444,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs transition name for <see cref="PageNavigator"/>, keeping the operation consistent with the state and invariants of the surrounding page navigator workflow.
+    /// </summary>
+    /// <param name="kind">Kind value supplied to the page navigator operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string TransitionName(PublicationPageTransitionKind kind) {
         try
         {
@@ -366,6 +470,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs mini page style for <see cref="PageNavigator"/>, keeping the operation consistent with the state and invariants of the surrounding page navigator workflow.
+    /// </summary>
+    /// <param name="page">Page value supplied to the page navigator operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string MiniPageStyle(PublicationPage page) {
         try
         {
@@ -377,6 +486,12 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs mini element style for <see cref="PageNavigator"/>, keeping the operation consistent with the state and invariants of the surrounding page navigator workflow.
+    /// </summary>
+    /// <param name="element">Element value supplied to the page navigator operation and used when producing its result.</param>
+    /// <param name="page">Page value supplied to the page navigator operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string MiniElementStyle(PublicationElement element, PublicationPage page) {
         try
         {
@@ -388,6 +503,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs inv for <see cref="PageNavigator"/>, keeping the operation consistent with the state and invariants of the surrounding page navigator workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the page navigator operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Inv(double value) {
         try
         {
@@ -399,4 +519,5 @@
             throw;
         }
     }
+
 }

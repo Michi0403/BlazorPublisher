@@ -91,20 +91,67 @@
 }
 
 @code {
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the value is visible applies to the barcode editor state.
+    /// </summary>
+    /// <value>The visible value exposed by <see cref="BarcodeEditor"/>.</value>
     [Parameter] public bool Visible { get; set; }
+    /// <summary>
+    /// Gets or sets the item value that forms part of the barcode editor state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The item value exposed by <see cref="BarcodeEditor"/>.</value>
     [Parameter] public BarcodeElement? Item { get; set; }
+    /// <summary>
+    /// Gets or sets the saved value that forms part of the barcode editor state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The saved value exposed by <see cref="BarcodeEditor"/>.</value>
     [Parameter] public EventCallback<BarcodeElement> Saved { get; set; }
+    /// <summary>
+    /// Gets or sets the cancelled value that forms part of the barcode editor state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The cancelled value exposed by <see cref="BarcodeEditor"/>.</value>
     [Parameter] public EventCallback Cancelled { get; set; }
+    /// <summary>
+    /// Stores the internal draft state used by <see cref="BarcodeEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly BarcodeElement _draft = new();
+    /// <summary>
+    /// Stores the internal loaded identifier state used by <see cref="BarcodeEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private Guid _loadedId;
+    /// <summary>
+    /// Stores the internal SVG state used by <see cref="BarcodeEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private string _svg = string.Empty;
+    /// <summary>
+    /// Stores the internal error state used by <see cref="BarcodeEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private string? _error;
+    /// <summary>
+    /// Stores the internal import info state used by <see cref="BarcodeEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private string? _importInfo;
+    /// <summary>
+    /// Stores the internal refresh state used by <see cref="BarcodeEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _refresh;
+    /// <summary>
+    /// Stores the internal generation request state used by <see cref="BarcodeEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private int _generationRequest;
+    /// <summary>
+    /// Stores the internal menu state used by <see cref="BarcodeEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private DxContextMenu _menu = default!;
+    /// <summary>
+    /// Stores the JavaScript object reference dependency used by <see cref="BarcodeEditor"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private IJSObjectReference? _module;
 
+    /// <summary>
+    /// Handles the parameters set lifecycle or event notification for <see cref="BarcodeEditor"/>, updating the state required by the surrounding workflow.
+    /// </summary>
     protected override void OnParametersSet()
     {
         try
@@ -124,6 +171,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Handles the after render async lifecycle or event notification for <see cref="BarcodeEditor"/>, updating the state required by the surrounding workflow.
+    /// </summary>
+    /// <param name="firstRender">Value indicating whether first render should apply to this operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         try
@@ -139,6 +191,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs generate for <see cref="BarcodeEditor"/>, keeping the operation consistent with the state and invariants of the surrounding barcode editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task Generate()
     {
         try
@@ -167,6 +223,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs queue for <see cref="BarcodeEditor"/>, keeping the operation consistent with the state and invariants of the surrounding barcode editor workflow.
+    /// </summary>
     private void Queue() {
         try
         {
@@ -178,6 +237,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Refreshes now for <see cref="BarcodeEditor"/>, keeping the operation consistent with the state and invariants of the surrounding barcode editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RefreshNow() {
         try
         {
@@ -189,6 +252,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs show context menu for <see cref="BarcodeEditor"/>, keeping the operation consistent with the state and invariants of the surrounding barcode editor workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the barcode editor operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task ShowContextMenu(MouseEventArgs args) {
         try
         {
@@ -200,6 +268,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs save for <see cref="BarcodeEditor"/>, keeping the operation consistent with the state and invariants of the surrounding barcode editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task Save() {
         try
         {
@@ -211,6 +283,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Determines whether cel for <see cref="BarcodeEditor"/>, keeping the operation consistent with the state and invariants of the surrounding barcode editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task Cancel() {
         try
         {
@@ -222,6 +298,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Imports value file for <see cref="BarcodeEditor"/>, keeping the operation consistent with the state and invariants of the surrounding barcode editor workflow.
+    /// </summary>
+    /// <param name="args">Input file change event args dependency used by the barcode editor workflow to provide the corresponding application capability.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ImportValueFile(InputFileChangeEventArgs args)
     {
         try
@@ -263,6 +344,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs first JSON scalar for <see cref="BarcodeEditor"/>, keeping the operation consistent with the state and invariants of the surrounding barcode editor workflow.
+    /// </summary>
+    /// <param name="source">Source value supplied to the barcode editor operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string FirstJsonScalar(string source)
     {
         try
@@ -278,6 +364,11 @@
         }
     }
 
+    /// <summary>
+    /// Finds JSON scalar for <see cref="BarcodeEditor"/>, keeping the operation consistent with the state and invariants of the surrounding barcode editor workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the barcode editor operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string? FindJsonScalar(JsonElement value)
     {
         try
@@ -299,6 +390,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs first XML scalar for <see cref="BarcodeEditor"/>, keeping the operation consistent with the state and invariants of the surrounding barcode editor workflow.
+    /// </summary>
+    /// <param name="source">Source value supplied to the barcode editor operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string FirstXmlScalar(string source)
     {
         try
@@ -315,6 +411,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs guess delimiter for <see cref="BarcodeEditor"/>, keeping the operation consistent with the state and invariants of the surrounding barcode editor workflow.
+    /// </summary>
+    /// <param name="source">Source value supplied to the barcode editor operation and used when producing its result.</param>
+    /// <returns>The char produced by the operation.</returns>
     private char GuessDelimiter(string source)
     {
         try
@@ -330,6 +431,12 @@
         }
     }
 
+    /// <summary>
+    /// Performs first delimited value for <see cref="BarcodeEditor"/>, keeping the operation consistent with the state and invariants of the surrounding barcode editor workflow.
+    /// </summary>
+    /// <param name="source">Source value supplied to the barcode editor operation and used when producing its result.</param>
+    /// <param name="delimiter">Delimiter value supplied to the barcode editor operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string FirstDelimitedValue(string source, char delimiter)
     {
         try
@@ -357,6 +464,12 @@
         }
     }
 
+    /// <summary>
+    /// Parses delimited line for <see cref="BarcodeEditor"/>, keeping the operation consistent with the state and invariants of the surrounding barcode editor workflow.
+    /// </summary>
+    /// <param name="line">Line value supplied to the barcode editor operation and used when producing its result.</param>
+    /// <param name="delimiter">Delimiter value supplied to the barcode editor operation and used when producing its result.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private List<string> ParseDelimitedLine(string line, char delimiter)
     {
         try
@@ -386,10 +499,22 @@
         }
     }
 
+    /// <summary>
+    /// Gets the transparency command text value that forms part of the barcode editor state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The transparency command text value exposed by <see cref="BarcodeEditor"/>.</value>
     private string TransparencyCommandText => _draft.TransparentBackground ? "Use solid background" : "Use transparent background";
+    /// <summary>
+    /// Gets the format summary value that forms part of the barcode editor state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The format summary value exposed by <see cref="BarcodeEditor"/>.</value>
     private string FormatSummary => _draft.Format == PublicationBarcodeFormat.QrCode
         ? $"QR Code · correction {_draft.ErrorCorrection} · {_draft.ModuleShape} · {(_draft.TransparentBackground ? "transparent" : "solid background")}"
         : $"{FormatName(_draft.Format)} · {_draft.ModuleShape} bars · {(_draft.TransparentBackground ? "transparent" : "solid background")}";
+    /// <summary>
+    /// Sets format for <see cref="BarcodeEditor"/>, keeping the operation consistent with the state and invariants of the surrounding barcode editor workflow.
+    /// </summary>
+    /// <param name="format">Format value supplied to the barcode editor operation and used when producing its result.</param>
     private void SetFormat(PublicationBarcodeFormat format)
     {
         try
@@ -408,6 +533,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets QR code for <see cref="BarcodeEditor"/>, keeping the operation consistent with the state and invariants of the surrounding barcode editor workflow.
+    /// </summary>
     private void SetQrCode() {
         try
         {
@@ -419,6 +547,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets code128 for <see cref="BarcodeEditor"/>, keeping the operation consistent with the state and invariants of the surrounding barcode editor workflow.
+    /// </summary>
     private void SetCode128() {
         try
         {
@@ -430,6 +561,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets code39 for <see cref="BarcodeEditor"/>, keeping the operation consistent with the state and invariants of the surrounding barcode editor workflow.
+    /// </summary>
     private void SetCode39() {
         try
         {
@@ -441,6 +575,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets ean13 for <see cref="BarcodeEditor"/>, keeping the operation consistent with the state and invariants of the surrounding barcode editor workflow.
+    /// </summary>
     private void SetEan13() {
         try
         {
@@ -452,6 +589,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets upc a for <see cref="BarcodeEditor"/>, keeping the operation consistent with the state and invariants of the surrounding barcode editor workflow.
+    /// </summary>
     private void SetUpcA() {
         try
         {
@@ -463,6 +603,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets itf14 for <see cref="BarcodeEditor"/>, keeping the operation consistent with the state and invariants of the surrounding barcode editor workflow.
+    /// </summary>
     private void SetItf14() {
         try
         {
@@ -474,6 +617,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets codabar for <see cref="BarcodeEditor"/>, keeping the operation consistent with the state and invariants of the surrounding barcode editor workflow.
+    /// </summary>
     private void SetCodabar() {
         try
         {
@@ -485,6 +631,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change format for <see cref="BarcodeEditor"/>, keeping the operation consistent with the state and invariants of the surrounding barcode editor workflow.
+    /// </summary>
+    /// <param name="e">E value supplied to the barcode editor operation and used when producing its result.</param>
     private void ChangeFormat(ChangeEventArgs e) {
         try
         {
@@ -496,6 +646,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change value for <see cref="BarcodeEditor"/>, keeping the operation consistent with the state and invariants of the surrounding barcode editor workflow.
+    /// </summary>
+    /// <param name="e">E value supplied to the barcode editor operation and used when producing its result.</param>
     private void ChangeValue(ChangeEventArgs e) {
         try
         {
@@ -507,6 +661,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change foreground for <see cref="BarcodeEditor"/>, keeping the operation consistent with the state and invariants of the surrounding barcode editor workflow.
+    /// </summary>
+    /// <param name="e">E value supplied to the barcode editor operation and used when producing its result.</param>
     private void ChangeForeground(ChangeEventArgs e) {
         try
         {
@@ -518,6 +676,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change background for <see cref="BarcodeEditor"/>, keeping the operation consistent with the state and invariants of the surrounding barcode editor workflow.
+    /// </summary>
+    /// <param name="e">E value supplied to the barcode editor operation and used when producing its result.</param>
     private void ChangeBackground(ChangeEventArgs e) {
         try
         {
@@ -529,6 +691,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change transparent for <see cref="BarcodeEditor"/>, keeping the operation consistent with the state and invariants of the surrounding barcode editor workflow.
+    /// </summary>
+    /// <param name="e">E value supplied to the barcode editor operation and used when producing its result.</param>
     private void ChangeTransparent(ChangeEventArgs e) {
         try
         {
@@ -540,6 +706,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change show text for <see cref="BarcodeEditor"/>, keeping the operation consistent with the state and invariants of the surrounding barcode editor workflow.
+    /// </summary>
+    /// <param name="e">E value supplied to the barcode editor operation and used when producing its result.</param>
     private void ChangeShowText(ChangeEventArgs e) {
         try
         {
@@ -551,6 +721,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change correction for <see cref="BarcodeEditor"/>, keeping the operation consistent with the state and invariants of the surrounding barcode editor workflow.
+    /// </summary>
+    /// <param name="e">E value supplied to the barcode editor operation and used when producing its result.</param>
     private void ChangeCorrection(ChangeEventArgs e) {
         try
         {
@@ -562,6 +736,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change shape for <see cref="BarcodeEditor"/>, keeping the operation consistent with the state and invariants of the surrounding barcode editor workflow.
+    /// </summary>
+    /// <param name="e">E value supplied to the barcode editor operation and used when producing its result.</param>
     private void ChangeShape(ChangeEventArgs e) {
         try
         {
@@ -573,6 +751,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change margin for <see cref="BarcodeEditor"/>, keeping the operation consistent with the state and invariants of the surrounding barcode editor workflow.
+    /// </summary>
+    /// <param name="e">E value supplied to the barcode editor operation and used when producing its result.</param>
     private void ChangeMargin(ChangeEventArgs e) {
         try
         {
@@ -584,6 +766,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change line width for <see cref="BarcodeEditor"/>, keeping the operation consistent with the state and invariants of the surrounding barcode editor workflow.
+    /// </summary>
+    /// <param name="e">E value supplied to the barcode editor operation and used when producing its result.</param>
     private void ChangeLineWidth(ChangeEventArgs e) {
         try
         {
@@ -595,6 +781,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change bar height for <see cref="BarcodeEditor"/>, keeping the operation consistent with the state and invariants of the surrounding barcode editor workflow.
+    /// </summary>
+    /// <param name="e">E value supplied to the barcode editor operation and used when producing its result.</param>
     private void ChangeBarHeight(ChangeEventArgs e) {
         try
         {
@@ -606,6 +796,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change font size for <see cref="BarcodeEditor"/>, keeping the operation consistent with the state and invariants of the surrounding barcode editor workflow.
+    /// </summary>
+    /// <param name="e">E value supplied to the barcode editor operation and used when producing its result.</param>
     private void ChangeFontSize(ChangeEventArgs e) {
         try
         {
@@ -617,6 +811,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs swap colors for <see cref="BarcodeEditor"/>, keeping the operation consistent with the state and invariants of the surrounding barcode editor workflow.
+    /// </summary>
     private void SwapColors() {
         try
         {
@@ -628,6 +825,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle transparency for <see cref="BarcodeEditor"/>, keeping the operation consistent with the state and invariants of the surrounding barcode editor workflow.
+    /// </summary>
     private void ToggleTransparency() {
         try
         {
@@ -639,6 +839,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets low correction for <see cref="BarcodeEditor"/>, keeping the operation consistent with the state and invariants of the surrounding barcode editor workflow.
+    /// </summary>
     private void SetLowCorrection() {
         try
         {
@@ -650,6 +853,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets medium correction for <see cref="BarcodeEditor"/>, keeping the operation consistent with the state and invariants of the surrounding barcode editor workflow.
+    /// </summary>
     private void SetMediumCorrection() {
         try
         {
@@ -661,6 +867,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets quartile correction for <see cref="BarcodeEditor"/>, keeping the operation consistent with the state and invariants of the surrounding barcode editor workflow.
+    /// </summary>
     private void SetQuartileCorrection() {
         try
         {
@@ -672,6 +881,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets high correction for <see cref="BarcodeEditor"/>, keeping the operation consistent with the state and invariants of the surrounding barcode editor workflow.
+    /// </summary>
     private void SetHighCorrection() {
         try
         {
@@ -683,6 +895,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets square for <see cref="BarcodeEditor"/>, keeping the operation consistent with the state and invariants of the surrounding barcode editor workflow.
+    /// </summary>
     private void SetSquare() {
         try
         {
@@ -694,6 +909,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets rounded for <see cref="BarcodeEditor"/>, keeping the operation consistent with the state and invariants of the surrounding barcode editor workflow.
+    /// </summary>
     private void SetRounded() {
         try
         {
@@ -705,6 +923,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets dots for <see cref="BarcodeEditor"/>, keeping the operation consistent with the state and invariants of the surrounding barcode editor workflow.
+    /// </summary>
     private void SetDots() {
         try
         {
@@ -716,6 +937,13 @@
             throw;
         }
     }
+    /// <summary>
+    /// Normalizes value for format for <see cref="BarcodeEditor"/>, keeping the operation consistent with the state and invariants of the surrounding barcode editor workflow.
+    /// </summary>
+    /// <param name="format">Format value supplied to the barcode editor operation and used when producing its result.</param>
+    /// <param name="source">Source value supplied to the barcode editor operation and used when producing its result.</param>
+    /// <param name="adjusted">Value indicating whether adjusted should apply to this operation.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string NormalizeValueForFormat(PublicationBarcodeFormat format, string? source, out bool adjusted)
     {
         try
@@ -761,6 +989,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs digits for <see cref="BarcodeEditor"/>, keeping the operation consistent with the state and invariants of the surrounding barcode editor workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the barcode editor operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Digits(string value) {
         try
         {
@@ -772,6 +1005,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Determines whether valid upc a checksum for <see cref="BarcodeEditor"/>, keeping the operation consistent with the state and invariants of the surrounding barcode editor workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the barcode editor operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool HasValidUpcAChecksum(string value)
     {
         try
@@ -793,6 +1031,12 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs int for <see cref="BarcodeEditor"/>, keeping the operation consistent with the state and invariants of the surrounding barcode editor workflow.
+    /// </summary>
+    /// <param name="e">E value supplied to the barcode editor operation and used when producing its result.</param>
+    /// <param name="fallback">Fallback value supplied to the barcode editor operation and used when producing its result.</param>
+    /// <returns>The int produced by the operation.</returns>
     private int Int(ChangeEventArgs e, int fallback) {
         try
         {
@@ -804,6 +1048,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs format name for <see cref="BarcodeEditor"/>, keeping the operation consistent with the state and invariants of the surrounding barcode editor workflow.
+    /// </summary>
+    /// <param name="f">F value supplied to the barcode editor operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string FormatName(PublicationBarcodeFormat f) {
         try
         {
@@ -815,6 +1064,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Releases resources owned by <see cref="BarcodeEditor"/> and leaves the barcode editor workflow in a safely disposed state.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     public async ValueTask DisposeAsync()
     {
         try
@@ -832,6 +1085,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs clone for <see cref="BarcodeEditor"/>, keeping the operation consistent with the state and invariants of the surrounding barcode editor workflow.
+    /// </summary>
+    /// <param name="source">Source value supplied to the barcode editor operation and used when producing its result.</param>
+    /// <returns>The barcode element produced by the operation.</returns>
     private BarcodeElement Clone(BarcodeElement source) {
         try
         {
@@ -843,6 +1101,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs copy for <see cref="BarcodeEditor"/>, keeping the operation consistent with the state and invariants of the surrounding barcode editor workflow.
+    /// </summary>
+    /// <param name="s">S value supplied to the barcode editor operation and used when producing its result.</param>
+    /// <param name="t">T value supplied to the barcode editor operation and used when producing its result.</param>
     private void Copy(BarcodeElement s, BarcodeElement t) {
         try
         {
@@ -854,4 +1117,5 @@
             throw;
         }
     }
+
 }

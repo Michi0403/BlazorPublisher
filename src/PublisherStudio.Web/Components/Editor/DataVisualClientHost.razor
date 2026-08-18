@@ -7,15 +7,51 @@
 <div id="@ElementId" class="data-visual-client-host"></div>
 
 @code {
+
+    /// <summary>
+    /// Gets or sets the document value that forms part of the data visual client host state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The document value exposed by <see cref="DataVisualClientHost"/>.</value>
     [Parameter, EditorRequired] public PublicationDocument Document { get; set; } = default!;
+    /// <summary>
+    /// Gets or sets the item value that forms part of the data visual client host state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The item value exposed by <see cref="DataVisualClientHost"/>.</value>
     [Parameter, EditorRequired] public DataVisualElement Item { get; set; } = default!;
+    /// <summary>
+    /// Gets or sets the stable current page identifier used to identify or correlate this data visual client host instance with related application state.
+    /// </summary>
+    /// <value>The current page identifier value exposed by <see cref="DataVisualClientHost"/>.</value>
     [Parameter] public Guid CurrentPageId { get; set; }
 
+    /// <summary>
+    /// Stores the internal instance identifier state used by <see cref="DataVisualClientHost"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly string _instanceId = Guid.NewGuid().ToString("N");
+    /// <summary>
+    /// Gets the stable element identifier used to identify or correlate this data visual client host instance with related application state.
+    /// </summary>
+    /// <value>The element identifier value exposed by <see cref="DataVisualClientHost"/>.</value>
     private string ElementId => $"ps-data-visual-{Item.Id:N}-{_instanceId}";
+    /// <summary>
+    /// Gets the client config value that forms part of the data visual client host state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The client config value exposed by <see cref="DataVisualClientHost"/>.</value>
     private object ClientConfig => DataService.BuildClientVisualConfiguration(Document, Item, CurrentPageId);
+    /// <summary>
+    /// Stores the internal last client config JSON state used by <see cref="DataVisualClientHost"/> while executing its surrounding workflow.
+    /// </summary>
     private string? _lastClientConfigJson;
+    /// <summary>
+    /// Tracks whether this component instance successfully attached its visual to the browser runtime; static prerender instances remain false.
+    /// </summary>
+    private bool _browserAttached;
 
+    /// <summary>
+    /// Handles the after render async lifecycle or event notification for <see cref="DataVisualClientHost"/>, updating the state required by the surrounding workflow.
+    /// </summary>
+    /// <param name="firstRender">Value indicating whether first render should apply to this operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         try
@@ -26,7 +62,11 @@
                 return;
 
             _lastClientConfigJson = configJson;
-            try { await JS.InvokeVoidAsync("PublisherStudioLiveDataRuntime.renderVisualById", ElementId, config).ConfigureAwait(true); }
+            try
+            {
+                await JS.InvokeVoidAsync("PublisherStudioLiveDataRuntime.renderVisualById", ElementId, config).ConfigureAwait(true);
+                _browserAttached = true;
+            }
             catch (JSDisconnectedException) { }
             catch (InvalidOperationException) { }
     
@@ -38,16 +78,24 @@
         }
     }
 
+    /// <summary>
+    /// Releases resources owned by <see cref="DataVisualClientHost"/> and leaves the data visual client host workflow in a safely disposed state.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     public async ValueTask DisposeAsync()
     {
         try
         {
             try
             {
-                await JS.InvokeVoidAsync("PublisherStudioLiveDataRuntime.disposeById", ElementId).ConfigureAwait(true);
+                if (_browserAttached)
+                {
+                    await JS.InvokeVoidAsync("PublisherStudioLiveDataRuntime.disposeById", ElementId).ConfigureAwait(true);
+                    _browserAttached = false;
+                }
             }
-            catch (JSDisconnectedException) { }
-            catch (InvalidOperationException) { }
+            catch (JSDisconnectedException) { _browserAttached = false; }
+            catch (InvalidOperationException) { _browserAttached = false; }
     
         }
         catch (Exception __componentMethodException)
@@ -56,4 +104,5 @@
             throw;
         }
     }
+
 }

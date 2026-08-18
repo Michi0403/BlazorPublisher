@@ -29,24 +29,83 @@
 </div>
 
 @code {
+
+    /// <summary>
+    /// Gets or sets the document value that forms part of the dev extreme component view state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The document value exposed by <see cref="DevExtremeComponentView"/>.</value>
     [Parameter, EditorRequired] public PublicationDocument Document { get; set; } = default!;
+    /// <summary>
+    /// Gets or sets the item value that forms part of the dev extreme component view state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The item value exposed by <see cref="DevExtremeComponentView"/>.</value>
     [Parameter, EditorRequired] public DevExtremeComponentElement Item { get; set; } = default!;
+    /// <summary>
+    /// Gets or sets the stable current page identifier used to identify or correlate this dev extreme component view instance with related application state.
+    /// </summary>
+    /// <value>The current page identifier value exposed by <see cref="DevExtremeComponentView"/>.</value>
     [Parameter] public Guid CurrentPageId { get; set; }
+    /// <summary>
+    /// Gets or sets the identifier prefix value that forms part of the dev extreme component view state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The identifier prefix value exposed by <see cref="DevExtremeComponentView"/>.</value>
     [Parameter] public string IdPrefix { get; set; } = "canvas";
+    /// <summary>
+    /// Gets or sets the element identifier override value that forms part of the dev extreme component view state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The element identifier override value exposed by <see cref="DevExtremeComponentView"/>.</value>
     [Parameter] public string? ElementIdOverride { get; set; }
+    /// <summary>
+    /// Gets or sets a value indicating whether designer mode applies to the dev extreme component view state.
+    /// </summary>
+    /// <value>The designer mode value exposed by <see cref="DevExtremeComponentView"/>.</value>
     [Parameter] public bool DesignerMode { get; set; }
+    /// <summary>
+    /// Gets or sets the designer interaction mode value that forms part of the dev extreme component view state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The designer interaction mode value exposed by <see cref="DevExtremeComponentView"/>.</value>
     [Parameter] public string DesignerInteractionMode { get; set; } = "content";
 
+    /// <summary>
+    /// Stores the internal instance identifier state used by <see cref="DevExtremeComponentView"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly string _instanceId = Guid.NewGuid().ToString("N");
+    /// <summary>
+    /// Stores the internal last rendered config state used by <see cref="DevExtremeComponentView"/> while executing its surrounding workflow.
+    /// </summary>
     private string? _lastRenderedConfig;
+    /// <summary>
+    /// Tracks whether the browser component runtime has rendered this instance; static prerender instances remain false and skip JavaScript disposal.
+    /// </summary>
+    private bool _browserAttached;
+    /// <summary>
+    /// Gets the stable element identifier used to identify or correlate this dev extreme component view instance with related application state.
+    /// </summary>
+    /// <value>The element identifier value exposed by <see cref="DevExtremeComponentView"/>.</value>
     private string ElementId => string.IsNullOrWhiteSpace(ElementIdOverride) ? $"ps-component-{IdPrefix}-{Item.Id:N}-{_instanceId}" : ElementIdOverride;
+    /// <summary>
+    /// Gets the normalized designer interaction mode value that forms part of the dev extreme component view state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The normalized designer interaction mode value exposed by <see cref="DevExtremeComponentView"/>.</value>
     private string NormalizedDesignerInteractionMode => string.Equals(DesignerInteractionMode, "object", StringComparison.OrdinalIgnoreCase) ? "object" : "content";
+    /// <summary>
+    /// Gets the client config base64 value that forms part of the dev extreme component view state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The client config base64 value exposed by <see cref="DevExtremeComponentView"/>.</value>
     private string ClientConfigBase64 => Components.BuildClientConfigurationBase64(Document, Item, CurrentPageId, DesignerMode, NormalizedDesignerInteractionMode);
+    /// <summary>
+    /// Gets a value indicating whether missing data applies to the dev extreme component view state.
+    /// </summary>
+    /// <value>The missing data value exposed by <see cref="DevExtremeComponentView"/>.</value>
     private bool MissingData => RequiresDataObject
         && (Item.Connection.Mode == PublicationComponentDataMode.PublicationDataObject
             || Item.Connection.Mode == PublicationComponentDataMode.StaticSnapshot)
         && Document.DataObjects.All(data => data.Id != Item.Connection.DataObjectId);
 
+    /// <summary>
+    /// Gets a value indicating whether requires data object applies to the dev extreme component view state.
+    /// </summary>
+    /// <value>The requires data object value exposed by <see cref="DevExtremeComponentView"/>.</value>
     private bool RequiresDataObject => Item.ComponentKind switch
     {
         PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu =>
@@ -56,7 +115,16 @@
         PublicationComponentKind.Gallery or PublicationComponentKind.TileView or PublicationComponentKind.PivotGrid => true,
         _ => false
     };
+    /// <summary>
+    /// Gets the container style value that forms part of the dev extreme component view state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The container style value exposed by <see cref="DevExtremeComponentView"/>.</value>
     private string ContainerStyle => $"background:{Item.Background};border:{Item.BorderWidthMm.ToString("0.###", CultureInfo.InvariantCulture)}mm solid {Item.BorderColor};{Item.CustomCss}";
+    /// <summary>
+    /// Performs inv for <see cref="DevExtremeComponentView"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component view workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the dev extreme component view operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Inv(double value) {
         try
         {
@@ -69,6 +137,11 @@
         }
     }
 
+    /// <summary>
+    /// Handles the after render async lifecycle or event notification for <see cref="DevExtremeComponentView"/>, updating the state required by the surrounding workflow.
+    /// </summary>
+    /// <param name="firstRender">Value indicating whether first render should apply to this operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         try
@@ -80,6 +153,7 @@
             {
                 await JS.InvokeVoidAsync("PublisherStudioComponentRuntime.renderById", ElementId, config).ConfigureAwait(true);
                 _lastRenderedConfig = config;
+                _browserAttached = true;
             }
             catch (JSDisconnectedException) { }
             catch (InvalidOperationException) { }
@@ -92,13 +166,24 @@
         }
     }
 
+    /// <summary>
+    /// Releases resources owned by <see cref="DevExtremeComponentView"/> and leaves the dev extreme component view workflow in a safely disposed state.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     public async ValueTask DisposeAsync()
     {
         try
         {
-            try { await JS.InvokeVoidAsync("PublisherStudioComponentRuntime.disposeById", ElementId).ConfigureAwait(true); }
-            catch (JSDisconnectedException) { }
-            catch (InvalidOperationException) { }
+            try
+            {
+                if (_browserAttached)
+                {
+                    await JS.InvokeVoidAsync("PublisherStudioComponentRuntime.disposeById", ElementId).ConfigureAwait(true);
+                    _browserAttached = false;
+                }
+            }
+            catch (JSDisconnectedException) { _browserAttached = false; }
+            catch (InvalidOperationException) { _browserAttached = false; }
     
         }
         catch (Exception __componentMethodException)
@@ -107,4 +192,5 @@
             throw;
         }
     }
+
 }

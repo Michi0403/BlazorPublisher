@@ -20,9 +20,22 @@
 </div>
 
 @code {
+
+    /// <summary>
+    /// Gets or sets the item value that forms part of the HTML embed view state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The item value exposed by <see cref="HtmlEmbedView"/>.</value>
     [Parameter, EditorRequired] public HtmlEmbedElement Item { get; set; } = default!;
+    /// <summary>
+    /// Gets or sets a value indicating whether designer mode applies to the HTML embed view state.
+    /// </summary>
+    /// <value>The designer mode value exposed by <see cref="HtmlEmbedView"/>.</value>
     [Parameter] public bool DesignerMode { get; set; }
 
+    /// <summary>
+    /// Gets the source document value that forms part of the HTML embed view state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The source document value exposed by <see cref="HtmlEmbedView"/>.</value>
     private string SourceDocument
     {
         get
@@ -34,6 +47,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs safe script for <see cref="HtmlEmbedView"/>, keeping the operation consistent with the state and invariants of the surrounding HTML embed view workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the HTML embed view operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string SafeScript(string value) {
         try
         {
@@ -45,4 +63,5 @@
             throw;
         }
     }
+
 }

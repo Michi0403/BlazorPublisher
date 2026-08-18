@@ -184,29 +184,112 @@
 </DxContextMenu>
 
 @code {
+
+    /// <summary>
+    /// Gets or sets the state value that forms part of the publication timeline state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The state value exposed by <see cref="PublicationTimeline"/>.</value>
     [Parameter, EditorRequired] public EditorStateService State { get; set; } = default!;
+    /// <summary>
+    /// Gets or sets the request insert audio value that forms part of the publication timeline state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The request insert audio value exposed by <see cref="PublicationTimeline"/>.</value>
     [Parameter] public EventCallback RequestInsertAudio { get; set; }
+    /// <summary>
+    /// Gets or sets the request insert video value that forms part of the publication timeline state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The request insert video value exposed by <see cref="PublicationTimeline"/>.</value>
     [Parameter] public EventCallback RequestInsertVideo { get; set; }
+    /// <summary>
+    /// Gets or sets the request create audio value that forms part of the publication timeline state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The request create audio value exposed by <see cref="PublicationTimeline"/>.</value>
     [Parameter] public EventCallback RequestCreateAudio { get; set; }
+    /// <summary>
+    /// Gets or sets the request create video value that forms part of the publication timeline state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The request create video value exposed by <see cref="PublicationTimeline"/>.</value>
     [Parameter] public EventCallback RequestCreateVideo { get; set; }
+    /// <summary>
+    /// Gets or sets the request edit media value that forms part of the publication timeline state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The request edit media value exposed by <see cref="PublicationTimeline"/>.</value>
     [Parameter] public EventCallback RequestEditMedia { get; set; }
+    /// <summary>
+    /// Gets or sets the request close value that forms part of the publication timeline state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The request close value exposed by <see cref="PublicationTimeline"/>.</value>
     [Parameter] public EventCallback RequestClose { get; set; }
 
+    /// <summary>
+    /// Stores the internal context menu state used by <see cref="PublicationTimeline"/> while executing its surrounding workflow.
+    /// </summary>
     private DxContextMenu _contextMenu = default!;
+    /// <summary>
+    /// Stores the JavaScript object reference dependency used by <see cref="PublicationTimeline"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private IJSObjectReference? _module;
+    /// <summary>
+    /// Stores the internal self state used by <see cref="PublicationTimeline"/> while executing its surrounding workflow.
+    /// </summary>
     private DotNetObjectReference<PublicationTimeline>? _self;
+    /// <summary>
+    /// Stores the internal playhead state used by <see cref="PublicationTimeline"/> while executing its surrounding workflow.
+    /// </summary>
     private double _playhead;
+    /// <summary>
+    /// Stores the internal playback run identifier state used by <see cref="PublicationTimeline"/> while executing its surrounding workflow.
+    /// </summary>
     private long _playbackRunId;
+    /// <summary>
+    /// Stores the internal view start state used by <see cref="PublicationTimeline"/> while executing its surrounding workflow.
+    /// </summary>
     private double _viewStart;
+    /// <summary>
+    /// Stores the internal view end state used by <see cref="PublicationTimeline"/> while executing its surrounding workflow.
+    /// </summary>
     private double _viewEnd = 10;
+    /// <summary>
+    /// Stores the internal selected identifier state used by <see cref="PublicationTimeline"/> while executing its surrounding workflow.
+    /// </summary>
     private Guid? _selectedId;
+    /// <summary>
+    /// Stores the internal context element identifier state used by <see cref="PublicationTimeline"/> while executing its surrounding workflow.
+    /// </summary>
     private Guid? _contextElementId;
+    /// <summary>
+    /// Stores the internal selection kind state used by <see cref="PublicationTimeline"/> while executing its surrounding workflow.
+    /// </summary>
     private TimelineSelectionKind _selectionKind;
+    /// <summary>
+    /// Gets the timeline duration value that forms part of the publication timeline state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The timeline duration value exposed by <see cref="PublicationTimeline"/>.</value>
     private double TimelineDuration => State.EffectivePageTimelineDuration();
+    /// <summary>
+    /// Gets the visible duration value that forms part of the publication timeline state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The visible duration value exposed by <see cref="PublicationTimeline"/>.</value>
     private double VisibleDuration => Math.Max(.1, _viewEnd - _viewStart);
+    /// <summary>
+    /// Gets the playhead percent value that forms part of the publication timeline state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The playhead percent value exposed by <see cref="PublicationTimeline"/>.</value>
     private double PlayheadPercent => Math.Clamp((_playhead - _viewStart) / VisibleDuration * 100, 0, 100);
+    /// <summary>
+    /// Gets the major tick value that forms part of the publication timeline state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The major tick value exposed by <see cref="PublicationTimeline"/>.</value>
     private double MajorTick => VisibleDuration switch { <= 5 => .5, <= 15 => 1, <= 45 => 5, <= 180 => 15, <= 600 => 60, _ => 300 };
+    /// <summary>
+    /// Gets the minor tick value that forms part of the publication timeline state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The minor tick value exposed by <see cref="PublicationTimeline"/>.</value>
     private double MinorTick => Math.Max(.05, MajorTick / 5);
+    /// <summary>
+    /// Gets the ticks collection maintained or exposed by this publication timeline instance for downstream processing.
+    /// </summary>
+    /// <value>The ticks value exposed by <see cref="PublicationTimeline"/>.</value>
     private IEnumerable<double> Ticks
     {
         get
@@ -216,24 +299,51 @@
         }
     }
 
+    /// <summary>
+    /// Gets the rows collection maintained or exposed by this publication timeline instance for downstream processing.
+    /// </summary>
+    /// <value>The rows value exposed by <see cref="PublicationTimeline"/>.</value>
     private List<TimelineRow> Rows => State.CurrentPage.Elements
         .Where(element => element.Animations.Count > 0 || element is PublicationMediaElement || element.Id == State.SelectedElementId)
         .OrderByDescending(element => element.ZIndex)
         .Select(element => new TimelineRow(element, element.Animations.OrderBy(item => item.Order).ToList()))
         .ToList();
 
+    /// <summary>
+    /// Gets the selected animation value that forms part of the publication timeline state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The selected animation value exposed by <see cref="PublicationTimeline"/>.</value>
     private PublicationAnimation? SelectedAnimation => _selectionKind == TimelineSelectionKind.Animation
         ? State.CurrentPage.Elements.SelectMany(item => item.Animations).FirstOrDefault(item => item.Id == _selectedId)
         : null;
+    /// <summary>
+    /// Gets the selected media value that forms part of the publication timeline state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The selected media value exposed by <see cref="PublicationTimeline"/>.</value>
     private PublicationMediaElement? SelectedMedia => _selectionKind == TimelineSelectionKind.Media
         ? State.CurrentPage.Elements.OfType<PublicationMediaElement>().FirstOrDefault(item => item.Id == _selectedId)
         : null;
+    /// <summary>
+    /// Gets the selected element value that forms part of the publication timeline state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The selected element value exposed by <see cref="PublicationTimeline"/>.</value>
     private PublicationElement? SelectedElement => _selectionKind == TimelineSelectionKind.Element
         ? State.CurrentPage.Elements.FirstOrDefault(item => item.Id == _contextElementId)
         : null;
+    /// <summary>
+    /// Gets a value indicating whether trim media start applies to the publication timeline state.
+    /// </summary>
+    /// <value>The can trim media start value exposed by <see cref="PublicationTimeline"/>.</value>
     private bool CanTrimMediaStart => SelectedMedia is { } media && _playhead > media.TimelineStartSeconds && _playhead < media.TimelineStartSeconds + media.TimelineLengthSeconds - .05;
+    /// <summary>
+    /// Gets a value indicating whether trim media end applies to the publication timeline state.
+    /// </summary>
+    /// <value>The can trim media end value exposed by <see cref="PublicationTimeline"/>.</value>
     private bool CanTrimMediaEnd => SelectedMedia is { } media && _playhead > media.TimelineStartSeconds + .05 && _playhead < media.TimelineStartSeconds + media.TimelineLengthSeconds;
 
+    /// <summary>
+    /// Handles the parameters set lifecycle or event notification for <see cref="PublicationTimeline"/>, updating the state required by the surrounding workflow.
+    /// </summary>
     protected override void OnParametersSet()
     {
         try
@@ -254,6 +364,11 @@
         }
     }
 
+    /// <summary>
+    /// Handles the after render async lifecycle or event notification for <see cref="PublicationTimeline"/>, updating the state required by the surrounding workflow.
+    /// </summary>
+    /// <param name="firstRender">Value indicating whether first render should apply to this operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         try
@@ -270,6 +385,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs viewport changed for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the publication timeline operation and used when producing its result.</param>
     private void ViewportChanged(RangeSelectorValueChangedEventArgs args)
     {
         try
@@ -287,6 +406,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs change playhead for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the publication timeline operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ChangePlayhead(ChangeEventArgs args)
     {
         try
@@ -303,6 +427,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs seek from ruler for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the publication timeline operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task SeekFromRuler(MouseEventArgs args) {
         try
         {
@@ -314,6 +443,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs seek from track for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the publication timeline operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task SeekFromTrack(MouseEventArgs args) {
         try
         {
@@ -325,6 +459,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs seek from pointer for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the publication timeline operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task SeekFromPointer(MouseEventArgs args)
     {
         try
@@ -342,6 +481,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs play timeline for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task PlayTimeline()
     {
         try
@@ -357,6 +500,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs pause timeline for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task PauseTimeline()
     {
         try
@@ -371,6 +518,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Stops timeline for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task StopTimeline()
     {
         try
@@ -386,6 +537,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Previews page for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task PreviewPage() {
         try
         {
@@ -398,6 +553,13 @@
         }
     }
 
+    /// <summary>
+    /// Performs timeline position changed for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
+    /// <param name="runId">Identifier of the run to use for this operation.</param>
+    /// <param name="seconds">Seconds value supplied to the publication timeline operation and used when producing its result.</param>
+    /// <param name="finished">Value indicating whether finished should apply to this operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     [JSInvokable]
     public Task TimelinePositionChanged(long runId, double seconds, bool finished)
     {
@@ -415,6 +577,12 @@
         }
     }
 
+    /// <summary>
+    /// Performs commit animation timeline clip for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="startSeconds">Start seconds value supplied to the publication timeline operation and used when producing its result.</param>
+    /// <param name="durationSeconds">Duration seconds value supplied to the publication timeline operation and used when producing its result.</param>
     [JSInvokable]
     public void CommitAnimationTimelineClip(string id, double startSeconds, double durationSeconds)
     {
@@ -431,6 +599,13 @@
         }
     }
 
+    /// <summary>
+    /// Performs commit media timeline clip for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="mode">Mode value supplied to the publication timeline operation and used when producing its result.</param>
+    /// <param name="startSeconds">Start seconds value supplied to the publication timeline operation and used when producing its result.</param>
+    /// <param name="durationSeconds">Duration seconds value supplied to the publication timeline operation and used when producing its result.</param>
     [JSInvokable]
     public void CommitMediaTimelineClip(string id, string mode, double startSeconds, double durationSeconds)
     {
@@ -447,6 +622,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs select element for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
     private void SelectElement(Guid id) {
         try
         {
@@ -458,6 +637,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs select animation for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
+    /// <param name="elementId">Identifier of the element to use for this operation.</param>
+    /// <param name="animationId">Identifier of the animation to use for this operation.</param>
     private void SelectAnimation(Guid elementId, Guid animationId) {
         try
         {
@@ -469,6 +653,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs select media for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
+    /// <param name="media">Media value supplied to the publication timeline operation and used when producing its result.</param>
     private void SelectMedia(PublicationMediaElement media) {
         try
         {
@@ -481,6 +669,13 @@
         }
     }
 
+    /// <summary>
+    /// Performs show animation menu for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
+    /// <param name="element">Element value supplied to the publication timeline operation and used when producing its result.</param>
+    /// <param name="animation">Animation value supplied to the publication timeline operation and used when producing its result.</param>
+    /// <param name="args">Args value supplied to the publication timeline operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ShowAnimationMenu(PublicationElement element, PublicationAnimation animation, MouseEventArgs args)
     {
         try
@@ -496,6 +691,12 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs show media menu for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
+    /// <param name="media">Media value supplied to the publication timeline operation and used when producing its result.</param>
+    /// <param name="args">Args value supplied to the publication timeline operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ShowMediaMenu(PublicationMediaElement media, MouseEventArgs args)
     {
         try
@@ -511,6 +712,12 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs show element menu for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
+    /// <param name="element">Element value supplied to the publication timeline operation and used when producing its result.</param>
+    /// <param name="args">Args value supplied to the publication timeline operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ShowElementMenu(PublicationElement element, MouseEventArgs args)
     {
         try
@@ -527,6 +734,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs show background menu for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the publication timeline operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ShowBackgroundMenu(MouseEventArgs args)
     {
         try
@@ -543,6 +755,10 @@
         }
     }
 
+    /// <summary>
+    /// Previews selected animation for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task PreviewSelectedAnimation() {
         try
         {
@@ -554,6 +770,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs move animation to playhead for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
     private void MoveAnimationToPlayhead() {
         try
         {
@@ -565,6 +784,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle explicit animation timing for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
     private void ToggleExplicitAnimationTiming()
     {
         try
@@ -580,6 +802,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs duplicate selected animation for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
     private void DuplicateSelectedAnimation() {
         try
         {
@@ -591,6 +816,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Deletes selected animation for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
     private void DeleteSelectedAnimation() {
         try
         {
@@ -603,6 +831,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs edit selected media for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task EditSelectedMedia() {
         try
         {
@@ -614,6 +846,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs play selected media for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task PlaySelectedMedia() {
         try
         {
@@ -627,6 +863,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs pause selected media for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task PauseSelectedMedia() {
         try
         {
@@ -640,6 +880,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs move media to playhead for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
     private void MoveMediaToPlayhead() {
         try
         {
@@ -651,6 +894,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs trim media start to playhead for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
     private void TrimMediaStartToPlayhead()
     {
         try
@@ -666,6 +912,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs trim media end to playhead for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
     private void TrimMediaEndToPlayhead()
     {
         try
@@ -681,6 +930,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle selected media mute for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
     private void ToggleSelectedMediaMute() {
         try
         {
@@ -692,6 +944,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle selected media loop for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
     private void ToggleSelectedMediaLoop() {
         try
         {
@@ -703,6 +958,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs duplicate selected media for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
     private void DuplicateSelectedMedia() {
         try
         {
@@ -714,6 +972,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Deletes selected media for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
     private void DeleteSelectedMedia() {
         try
         {
@@ -726,6 +987,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs select context element for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
     private void SelectContextElement() {
         try
         {
@@ -737,6 +1001,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds fade in for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
     private void AddFadeIn() {
         try
         {
@@ -748,6 +1015,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds pulse for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
     private void AddPulse() {
         try
         {
@@ -759,6 +1029,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds fade out for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
     private void AddFadeOut() {
         try
         {
@@ -770,6 +1043,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs clear element animations for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
     private void ClearElementAnimations() {
         try
         {
@@ -782,6 +1058,9 @@
         }
     }
 
+    /// <summary>
+    /// Sets duration to playhead for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
     private void SetDurationToPlayhead() {
         try
         {
@@ -793,6 +1072,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs fit duration to content for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
     private void FitDurationToContent() {
         try
         {
@@ -804,10 +1086,18 @@
             throw;
         }
     }
+    /// <summary>
+    /// Gets the content end value that forms part of the publication timeline state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The content end value exposed by <see cref="PublicationTimeline"/>.</value>
     private double ContentEnd => Math.Max(1, Math.Max(
         State.CurrentPage.Elements.SelectMany(item => item.Animations).Select(item => State.EffectiveAnimationStart(item) + AnimationSpan(item)).DefaultIfEmpty(0).Max(),
         State.CurrentPage.Elements.OfType<PublicationMediaElement>().Select(item => item.TimelineStartSeconds + item.TimelineLengthSeconds).DefaultIfEmpty(0).Max()));
 
+    /// <summary>
+    /// Performs insert audio for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task InsertAudio() {
         try
         {
@@ -819,6 +1109,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs insert video for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task InsertVideo() {
         try
         {
@@ -830,6 +1124,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Creates audio for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task CreateAudio() {
         try
         {
@@ -841,6 +1139,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Creates video for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task CreateVideo() {
         try
         {
@@ -852,6 +1154,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Closes timeline for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task CloseTimeline() {
         try
         {
@@ -864,6 +1170,12 @@
         }
     }
 
+    /// <summary>
+    /// Performs clip style for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
+    /// <param name="start">Start value supplied to the publication timeline operation and used when producing its result.</param>
+    /// <param name="duration">Duration value supplied to the publication timeline operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string ClipStyle(double start, double duration)
     {
         try
@@ -879,6 +1191,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs percent for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
+    /// <param name="seconds">Seconds value supplied to the publication timeline operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     private double Percent(double seconds) {
         try
         {
@@ -890,6 +1207,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs tick style for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
+    /// <param name="seconds">Seconds value supplied to the publication timeline operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string TickStyle(double seconds) {
         try
         {
@@ -901,6 +1223,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs animation span for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
+    /// <param name="item">Item value supplied to the publication timeline operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     private double AnimationSpan(PublicationAnimation item) {
         try
         {
@@ -912,6 +1239,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs track summary for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
+    /// <param name="row">Row value supplied to the publication timeline operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string TrackSummary(TimelineRow row) {
         try
         {
@@ -923,6 +1255,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs kind glyph for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
+    /// <param name="item">Item value supplied to the publication timeline operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string KindGlyph(PublicationElement item) {
         try
         {
@@ -948,6 +1285,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs trigger glyph for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the publication timeline operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string TriggerGlyph(PublicationAnimationTrigger value) {
         try
         {
@@ -965,6 +1307,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs timeline samples for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
+    /// <param name="audio">Audio value supplied to the publication timeline operation and used when producing its result.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private IEnumerable<double> TimelineSamples(AudioElement audio) {
         try
         {
@@ -978,6 +1325,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs wave height for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the publication timeline operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string WaveHeight(double value) {
         try
         {
@@ -989,6 +1341,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs friendly for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the publication timeline operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Friendly(string value) {
         try
         {
@@ -1000,6 +1357,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs time for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the publication timeline operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Time(double value) {
         try
         {
@@ -1011,6 +1373,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs inv for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the publication timeline operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Inv(double value) {
         try
         {
@@ -1022,6 +1389,12 @@
             throw;
         }
     }
+    /// <summary>
+    /// Attempts to double for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the publication timeline operation and used when producing its result.</param>
+    /// <param name="value">Value value supplied to the publication timeline operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool TryDouble(ChangeEventArgs args, out double value) {
         try
         {
@@ -1034,9 +1407,21 @@
         }
     }
 
+    /// <summary>
+    /// Represents a timeline row helper type nested within <see cref="PublicationTimeline"/>, grouping the state or behavior used only by that containing workflow.
+    /// </summary>
+    /// <param name="Element">Element value supplied to the publication timeline operation and used when producing its result.</param>
+    /// <param name="Animations">Animations value supplied to the publication timeline operation and used when producing its result.</param>
     private sealed record TimelineRow(PublicationElement Element, List<PublicationAnimation> Animations);
+    /// <summary>
+    /// Defines the supported timeline selection kind values used to select or describe behavior in the surrounding workflow.
+    /// </summary>
     private enum TimelineSelectionKind { Background, Element, Animation, Media }
 
+    /// <summary>
+    /// Releases resources owned by <see cref="PublicationTimeline"/> and leaves the publication timeline workflow in a safely disposed state.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     public async ValueTask DisposeAsync()
     {
         try
@@ -1067,4 +1452,5 @@
             throw;
         }
     }
+
 }

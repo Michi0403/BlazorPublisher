@@ -362,22 +362,84 @@
 }
 
 @code {
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the value is visible applies to the data state.
+    /// </summary>
+    /// <value>The visible value exposed by <see cref="DataManager"/>.</value>
     [Parameter] public bool Visible { get; set; }
+    /// <summary>
+    /// Gets or sets the state value that forms part of the data state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The state value exposed by <see cref="DataManager"/>.</value>
     [Parameter, EditorRequired] public EditorStateService State { get; set; } = default!;
+    /// <summary>
+    /// Gets or sets the closed value that forms part of the data state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The closed value exposed by <see cref="DataManager"/>.</value>
     [Parameter] public EventCallback Closed { get; set; }
+    /// <summary>
+    /// Gets or sets the data changed value that forms part of the data state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The data changed value exposed by <see cref="DataManager"/>.</value>
     [Parameter] public EventCallback DataChanged { get; set; }
 
+    /// <summary>
+    /// Stores the internal draft state used by <see cref="DataManager"/> while executing its surrounding workflow.
+    /// </summary>
     private PublicationDataObject _draft = new();
+    /// <summary>
+    /// Stores the internal was visible state used by <see cref="DataManager"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _wasVisible;
+    /// <summary>
+    /// Stores the internal error state used by <see cref="DataManager"/> while executing its surrounding workflow.
+    /// </summary>
     private string? _error;
+    /// <summary>
+    /// Stores the internal header lines state used by <see cref="DataManager"/> while executing its surrounding workflow.
+    /// </summary>
     private string _headerLines = string.Empty;
+    /// <summary>
+    /// Gets a value indicating whether existing draft applies to the data state.
+    /// </summary>
+    /// <value>The existing draft value exposed by <see cref="DataManager"/>.</value>
     private bool ExistingDraft => State.Document.DataObjects.Any(data => data.Id == _draft.Id);
+    /// <summary>
+    /// Gets a value indicating whether built in draft applies to the data state.
+    /// </summary>
+    /// <value>The is built in draft value exposed by <see cref="DataManager"/>.</value>
     private bool IsBuiltInDraft => IsBuiltIn(_draft.SourceKind);
+    /// <summary>
+    /// Gets the stable delimiter key used to identify or correlate this data instance with related application state.
+    /// </summary>
+    /// <value>The delimiter key value exposed by <see cref="DataManager"/>.</value>
     private string DelimiterKey => _draft.Delimiter == "\t" ? "tab" : _draft.Delimiter;
+    /// <summary>
+    /// Gets the stable web delimiter key used to identify or correlate this data instance with related application state.
+    /// </summary>
+    /// <value>The web delimiter key value exposed by <see cref="DataManager"/>.</value>
     private string WebDelimiterKey => _draft.Web.Delimiter == "\t" ? "tab" : _draft.Web.Delimiter;
+    /// <summary>
+    /// Gets the webhook route value that forms part of the data state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The webhook route value exposed by <see cref="DataManager"/>.</value>
     private string WebhookRoute => $"/api/publisher/webhooks/{_draft.Web.Id}/{_draft.Web.WebhookToken}";
+    /// <summary>
+    /// Gets the current publication route value that forms part of the data state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The current publication route value exposed by <see cref="DataManager"/>.</value>
     private string CurrentPublicationRoute => $"/api/publisher/publications/{State.Document.Id}";
+    /// <summary>
+    /// Gets the current pages route value that forms part of the data state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The current pages route value exposed by <see cref="DataManager"/>.</value>
     private string CurrentPagesRoute => $"/api/publisher/publications/{State.Document.Id}/pages";
+    /// <summary>
+    /// Performs data rows route for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
+    /// </summary>
+    /// <param name="dataId">Identifier of the data to use for this operation.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string DataRowsRoute(Guid dataId) {
         try
         {
@@ -389,14 +451,30 @@
             throw;
         }
     }
+    /// <summary>
+    /// Gets the source input label value that forms part of the data state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The source input label value exposed by <see cref="DataManager"/>.</value>
     private string SourceInputLabel => _draft.SourceKind switch
     {
         PublicationDataSourceKind.Json => "JSON",
         PublicationDataSourceKind.Xml => "XML",
         _ => "CSV / TSV / delimited text"
     };
+    /// <summary>
+    /// Gets the preview columns collection maintained or exposed by this data instance for downstream processing.
+    /// </summary>
+    /// <value>The preview columns value exposed by <see cref="DataManager"/>.</value>
     private IReadOnlyList<PublicationDataColumn> PreviewColumns => DataService.ResolveColumns(_draft);
+    /// <summary>
+    /// Gets the preview rows collection maintained or exposed by this data instance for downstream processing.
+    /// </summary>
+    /// <value>The preview rows value exposed by <see cref="DataManager"/>.</value>
     private IReadOnlyList<PublicationDataRow> PreviewRows => DataService.ResolveRows(State.Document, _draft, State.SelectedPageId);
+    /// <summary>
+    /// Gets the current validation value that forms part of the data state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The current validation value exposed by <see cref="DataManager"/>.</value>
     private PublicationDataValidationResult CurrentValidation
     {
         get
@@ -407,6 +485,9 @@
         }
     }
 
+    /// <summary>
+    /// Handles the parameters set lifecycle or event notification for <see cref="DataManager"/>, updating the state required by the surrounding workflow.
+    /// </summary>
     protected override void OnParametersSet()
     {
         try
@@ -427,6 +508,10 @@
         }
     }
 
+    /// <summary>
+    /// Sets draft for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the data operation and used when producing its result.</param>
     private void SetDraft(PublicationDataObject value)
     {
         try
@@ -447,6 +532,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs select for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
+    /// </summary>
+    /// <param name="data">Data value supplied to the data operation and used when producing its result.</param>
     private void Select(PublicationDataObject data) {
         try
         {
@@ -458,6 +547,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Creates new for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
+    /// </summary>
     private void CreateNew()
     {
         try
@@ -472,6 +564,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Creates sample for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
+    /// </summary>
     private void CreateSample()
     {
         try
@@ -487,6 +582,10 @@
         }
     }
 
+    /// <summary>
+    /// Parses or refresh for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ParseOrRefresh()
     {
         try
@@ -501,6 +600,9 @@
         }
     }
 
+    /// <summary>
+    /// Parses preview for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
+    /// </summary>
     private void ParsePreview()
     {
         try
@@ -516,6 +618,9 @@
         }
     }
 
+    /// <summary>
+    /// Parses snapshot if available for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
+    /// </summary>
     private void ParseSnapshotIfAvailable()
     {
         try
@@ -531,6 +636,10 @@
         }
     }
 
+    /// <summary>
+    /// Refreshes web for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task RefreshWeb()
     {
         try
@@ -551,6 +660,11 @@
         }
     }
 
+    /// <summary>
+    /// Imports data file for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
+    /// </summary>
+    /// <param name="args">Input file change event args dependency used by the data workflow to provide the corresponding application capability.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ImportDataFile(InputFileChangeEventArgs args)
     {
         try
@@ -578,6 +692,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs guess CSV delimiter for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
+    /// </summary>
+    /// <param name="source">Source value supplied to the data operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string GuessCsvDelimiter(string source)
     {
         try
@@ -594,6 +713,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs save for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task Save()
     {
         try
@@ -629,6 +752,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs delete for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task Delete()
     {
         try
@@ -646,6 +773,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs detach snapshot for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
+    /// </summary>
     private void DetachSnapshot()
     {
         try
@@ -661,6 +791,9 @@
         }
     }
 
+    /// <summary>
+    /// Adds column for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
+    /// </summary>
     private void AddColumn()
     {
         try
@@ -676,6 +809,9 @@
         }
     }
 
+    /// <summary>
+    /// Adds row for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
+    /// </summary>
     private void AddRow()
     {
         try
@@ -691,6 +827,10 @@
         }
     }
 
+    /// <summary>
+    /// Removes column for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
+    /// </summary>
+    /// <param name="columnName">Column name value supplied to the data operation and used when producing its result.</param>
     private void RemoveColumn(string columnName)
     {
         try
@@ -706,6 +846,10 @@
         }
     }
 
+    /// <summary>
+    /// Removes row for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
+    /// </summary>
+    /// <param name="rowIndex">Row index value supplied to the data operation and used when producing its result.</param>
     private void RemoveRow(int rowIndex)
     {
         try
@@ -721,6 +865,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs rename column for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
+    /// </summary>
+    /// <param name="oldName">Old name value supplied to the data operation and used when producing its result.</param>
+    /// <param name="args">Args value supplied to the data operation and used when producing its result.</param>
     private void RenameColumn(string oldName, ChangeEventArgs args)
     {
         try
@@ -736,6 +885,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs change column kind for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
+    /// </summary>
+    /// <param name="columnName">Column name value supplied to the data operation and used when producing its result.</param>
+    /// <param name="args">Args value supplied to the data operation and used when producing its result.</param>
     private void ChangeColumnKind(string columnName, ChangeEventArgs args)
     {
         try
@@ -757,6 +911,12 @@
         }
     }
 
+    /// <summary>
+    /// Performs change cell for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
+    /// </summary>
+    /// <param name="rowIndex">Row index value supplied to the data operation and used when producing its result.</param>
+    /// <param name="columnName">Column name value supplied to the data operation and used when producing its result.</param>
+    /// <param name="args">Args value supplied to the data operation and used when producing its result.</param>
     private void ChangeCell(int rowIndex, string columnName, ChangeEventArgs args)
     {
         try
@@ -772,6 +932,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs validation CSS for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
+    /// </summary>
+    /// <param name="severity">Severity value supplied to the data operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string ValidationCss(PublicationDataValidationSeverity severity) {
         try
         {
@@ -783,6 +948,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs validation icon for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
+    /// </summary>
+    /// <param name="severity">Severity value supplied to the data operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string ValidationIcon(PublicationDataValidationSeverity severity) {
         try
         {
@@ -800,6 +970,9 @@
         }
     }
 
+    /// <summary>
+    /// Applies header lines for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
+    /// </summary>
     private void ApplyHeaderLines()
     {
         try
@@ -818,6 +991,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs source name for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
+    /// </summary>
+    /// <param name="data">Data value supplied to the data operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string SourceName(PublicationDataObject data) {
         try
         {
@@ -837,6 +1015,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Determines whether built in for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
+    /// </summary>
+    /// <param name="kind">Kind value supplied to the data operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool IsBuiltIn(PublicationDataSourceKind kind) {
         try
         {
@@ -848,6 +1031,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs select live pages for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
+    /// </summary>
     private void SelectLivePages() {
         try
         {
@@ -859,6 +1045,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs select live document for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
+    /// </summary>
     private void SelectLiveDocument() {
         try
         {
@@ -870,6 +1059,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs select live objects for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
+    /// </summary>
     private void SelectLiveObjects() {
         try
         {
@@ -881,6 +1073,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs select live for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
+    /// </summary>
+    /// <param name="kind">Kind value supplied to the data operation and used when producing its result.</param>
     private void SelectLive(PublicationDataSourceKind kind)
     {
         try
@@ -896,6 +1092,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Resolves d row count for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
+    /// </summary>
+    /// <param name="data">Data value supplied to the data operation and used when producing its result.</param>
+    /// <returns>The int produced by the operation.</returns>
     private int ResolvedRowCount(PublicationDataObject data) {
         try
         {
@@ -907,6 +1108,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs close for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task Close() {
         try
         {
@@ -918,6 +1123,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change name for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the data operation and used when producing its result.</param>
     private void ChangeName(ChangeEventArgs args) {
         try
         {
@@ -929,6 +1138,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change raw source for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the data operation and used when producing its result.</param>
     private void ChangeRawSource(ChangeEventArgs args) {
         try
         {
@@ -940,6 +1153,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle headers for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the data operation and used when producing its result.</param>
     private void ToggleHeaders(ChangeEventArgs args) {
         try
         {
@@ -951,6 +1168,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change delimiter for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the data operation and used when producing its result.</param>
     private void ChangeDelimiter(ChangeEventArgs args) {
         try
         {
@@ -962,6 +1183,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change header lines for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the data operation and used when producing its result.</param>
     private void ChangeHeaderLines(ChangeEventArgs args) {
         try
         {
@@ -973,6 +1198,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change request body for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the data operation and used when producing its result.</param>
     private void ChangeRequestBody(ChangeEventArgs args) {
         try
         {
@@ -984,6 +1213,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change web URL for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the data operation and used when producing its result.</param>
     private void ChangeWebUrl(ChangeEventArgs args) {
         try
         {
@@ -995,6 +1228,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change JSON path for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the data operation and used when producing its result.</param>
     private void ChangeJsonPath(ChangeEventArgs args) {
         try
         {
@@ -1006,6 +1243,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change refresh seconds for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the data operation and used when producing its result.</param>
     private void ChangeRefreshSeconds(ChangeEventArgs args) {
         try
         {
@@ -1017,6 +1258,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change timeout seconds for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the data operation and used when producing its result.</param>
     private void ChangeTimeoutSeconds(ChangeEventArgs args) {
         try
         {
@@ -1028,6 +1273,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle web enabled for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the data operation and used when producing its result.</param>
     private void ToggleWebEnabled(ChangeEventArgs args) {
         try
         {
@@ -1039,6 +1288,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle refresh on open for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the data operation and used when producing its result.</param>
     private void ToggleRefreshOnOpen(ChangeEventArgs args) {
         try
         {
@@ -1050,6 +1303,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle snapshot fallback for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the data operation and used when producing its result.</param>
     private void ToggleSnapshotFallback(ChangeEventArgs args) {
         try
         {
@@ -1061,6 +1318,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle HTML fetch for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the data operation and used when producing its result.</param>
     private void ToggleHtmlFetch(ChangeEventArgs args) {
         try
         {
@@ -1072,6 +1333,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle web headers for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the data operation and used when producing its result.</param>
     private void ToggleWebHeaders(ChangeEventArgs args) {
         try
         {
@@ -1083,6 +1348,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change web delimiter for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the data operation and used when producing its result.</param>
     private void ChangeWebDelimiter(ChangeEventArgs args) {
         try
         {
@@ -1094,6 +1363,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change web method for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the data operation and used when producing its result.</param>
     private void ChangeWebMethod(ChangeEventArgs args) {
         try
         {
@@ -1105,6 +1378,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change response format for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the data operation and used when producing its result.</param>
     private void ChangeResponseFormat(ChangeEventArgs args) {
         try
         {
@@ -1116,6 +1393,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change web transport for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the data operation and used when producing its result.</param>
     private void ChangeWebTransport(ChangeEventArgs args)
     {
         try
@@ -1131,6 +1412,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change source kind for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the data operation and used when producing its result.</param>
     private void ChangeSourceKind(ChangeEventArgs args)
     {
         try
@@ -1149,6 +1434,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change document scope for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the data operation and used when producing its result.</param>
     private void ChangeDocumentScope(ChangeEventArgs args) {
         try
         {
@@ -1160,6 +1449,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs checked for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the data operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool Checked(ChangeEventArgs args) {
         try
         {
@@ -1171,6 +1465,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs friendly for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the data operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Friendly(string value) {
         try
         {
@@ -1182,4 +1481,5 @@
             throw;
         }
     }
+
 }

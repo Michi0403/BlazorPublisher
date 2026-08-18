@@ -166,8 +166,18 @@
 </div>
 
 @code {
+
+    /// <summary>
+    /// Gets or sets the document value that forms part of the print publication state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The document value exposed by <see cref="PrintPublication"/>.</value>
     [Parameter, EditorRequired] public PublicationDocument Document { get; set; } = default!;
 
+    /// <summary>
+    /// Performs picture filter for <see cref="PrintPublication"/>, keeping the operation consistent with the state and invariants of the surrounding print publication workflow.
+    /// </summary>
+    /// <param name="image">Image frame element dependency used by the print publication workflow to provide the corresponding application capability.</param>
+    /// <returns>The render fragment produced by the operation.</returns>
     private RenderFragment PictureFilter(ImageFrameElement image) {
         try
         {
@@ -224,6 +234,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs word art for <see cref="PrintPublication"/>, keeping the operation consistent with the state and invariants of the surrounding print publication workflow.
+    /// </summary>
+    /// <param name="item">Item value supplied to the print publication operation and used when producing its result.</param>
+    /// <returns>The render fragment produced by the operation.</returns>
     private RenderFragment WordArt(WordArtElement item) {
         try
         {
@@ -265,6 +280,18 @@
         }
     }
 
+    /// <summary>
+    /// Adds word art text for <see cref="PrintPublication"/>, keeping the operation consistent with the state and invariants of the surrounding print publication workflow.
+    /// </summary>
+    /// <param name="builder">Builder value supplied to the print publication operation and used when producing its result.</param>
+    /// <param name="sequence">Sequence value supplied to the print publication operation and used when producing its result.</param>
+    /// <param name="item">Item value supplied to the print publication operation and used when producing its result.</param>
+    /// <param name="pathId">Identifier of the path to use for this operation.</param>
+    /// <param name="fill">Fill value supplied to the print publication operation and used when producing its result.</param>
+    /// <param name="dx">Devexpress value supplied to the print publication operation and used when producing its result.</param>
+    /// <param name="dy">Dy value supplied to the print publication operation and used when producing its result.</param>
+    /// <param name="outline">Outline value supplied to the print publication operation and used when producing its result.</param>
+    /// <param name="main">Value indicating whether main should apply to this operation.</param>
     private void AddWordArtText(RenderTreeBuilder builder, ref int sequence, WordArtElement item, string pathId, string fill, double dx, double dy, double outline, bool main)
     {
         try
@@ -309,6 +336,12 @@
         }
     }
 
+    /// <summary>
+    /// Performs connector marker definition for <see cref="PrintPublication"/>, keeping the operation consistent with the state and invariants of the surrounding print publication workflow.
+    /// </summary>
+    /// <param name="connector">Connector value supplied to the print publication operation and used when producing its result.</param>
+    /// <param name="start">Value indicating whether start should apply to this operation.</param>
+    /// <returns>The render fragment produced by the operation.</returns>
     private RenderFragment ConnectorMarkerDefinition(ConnectorElement connector, bool start) {
         try
         {
@@ -344,6 +377,12 @@
         }
     }
 
+    /// <summary>
+    /// Performs marker identifier for <see cref="PrintPublication"/>, keeping the operation consistent with the state and invariants of the surrounding print publication workflow.
+    /// </summary>
+    /// <param name="connector">Connector value supplied to the print publication operation and used when producing its result.</param>
+    /// <param name="start">Value indicating whether start should apply to this operation.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string MarkerId(ConnectorElement connector, bool start) {
         try
         {
@@ -355,6 +394,12 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs marker URL for <see cref="PrintPublication"/>, keeping the operation consistent with the state and invariants of the surrounding print publication workflow.
+    /// </summary>
+    /// <param name="connector">Connector value supplied to the print publication operation and used when producing its result.</param>
+    /// <param name="start">Value indicating whether start should apply to this operation.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string MarkerUrl(ConnectorElement connector, bool start)
     {
         try
@@ -370,6 +415,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs video fit for <see cref="PrintPublication"/>, keeping the operation consistent with the state and invariants of the surrounding print publication workflow.
+    /// </summary>
+    /// <param name="mode">Mode value supplied to the print publication operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string VideoFit(PublicationVideoFitMode mode) {
         try
         {
@@ -386,6 +436,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs audio samples for <see cref="PrintPublication"/>, keeping the operation consistent with the state and invariants of the surrounding print publication workflow.
+    /// </summary>
+    /// <param name="audio">Audio value supplied to the print publication operation and used when producing its result.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private IEnumerable<double> AudioSamples(AudioElement audio) {
         try
         {
@@ -399,6 +454,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs wave height for <see cref="PrintPublication"/>, keeping the operation consistent with the state and invariants of the surrounding print publication workflow.
+    /// </summary>
+    /// <param name="sample">Sample value supplied to the print publication operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string WaveHeight(double sample) {
         try
         {
@@ -410,6 +470,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs time for <see cref="PrintPublication"/>, keeping the operation consistent with the state and invariants of the surrounding print publication workflow.
+    /// </summary>
+    /// <param name="seconds">Seconds value supplied to the print publication operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Time(double seconds) {
         try
         {
@@ -422,6 +487,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs page style for <see cref="PrintPublication"/>, keeping the operation consistent with the state and invariants of the surrounding print publication workflow.
+    /// </summary>
+    /// <param name="p">P value supplied to the print publication operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string PageStyle(PublicationPage p) {
         try
         {
@@ -433,6 +503,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs element style for <see cref="PrintPublication"/>, keeping the operation consistent with the state and invariants of the surrounding print publication workflow.
+    /// </summary>
+    /// <param name="e">E value supplied to the print publication operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string ElementStyle(PublicationElement e) {
         try
         {
@@ -444,6 +519,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs shape style for <see cref="PrintPublication"/>, keeping the operation consistent with the state and invariants of the surrounding print publication workflow.
+    /// </summary>
+    /// <param name="s">S value supplied to the print publication operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string ShapeStyle(ShapeElement s) {
         try
         {
@@ -458,6 +538,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs image frame style for <see cref="PrintPublication"/>, keeping the operation consistent with the state and invariants of the surrounding print publication workflow.
+    /// </summary>
+    /// <param name="i">Image frame element dependency used by the print publication workflow to provide the corresponding application capability.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string ImageFrameStyle(ImageFrameElement i)
     {
         try
@@ -474,6 +559,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs image style for <see cref="PrintPublication"/>, keeping the operation consistent with the state and invariants of the surrounding print publication workflow.
+    /// </summary>
+    /// <param name="i">Image frame element dependency used by the print publication workflow to provide the corresponding application capability.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string ImageStyle(ImageFrameElement i)
     {
         try
@@ -492,6 +582,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs picture filter identifier for <see cref="PrintPublication"/>, keeping the operation consistent with the state and invariants of the surrounding print publication workflow.
+    /// </summary>
+    /// <param name="image">Image frame element dependency used by the print publication workflow to provide the corresponding application capability.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string PictureFilterId(ImageFrameElement image) {
         try
         {
@@ -503,6 +598,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs blend mode for <see cref="PrintPublication"/>, keeping the operation consistent with the state and invariants of the surrounding print publication workflow.
+    /// </summary>
+    /// <param name="mode">Image blend mode dependency used by the print publication workflow to provide the corresponding application capability.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string BlendMode(ImageBlendMode mode) {
         try
         {
@@ -514,6 +614,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs word art path for <see cref="PrintPublication"/>, keeping the operation consistent with the state and invariants of the surrounding print publication workflow.
+    /// </summary>
+    /// <param name="warp">Warp value supplied to the print publication operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string WordArtPath(WordArtWarp warp) {
         try
         {
@@ -531,6 +636,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs mm for <see cref="PrintPublication"/>, keeping the operation consistent with the state and invariants of the surrounding print publication workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the print publication operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Mm(double value) {
         try
         {
@@ -542,6 +652,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs media source for <see cref="PrintPublication"/>, keeping the operation consistent with the state and invariants of the surrounding print publication workflow.
+    /// </summary>
+    /// <param name="media">Media value supplied to the print publication operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string MediaSource(PublicationMediaElement media) {
         try
         {
@@ -553,6 +668,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs media segment source for <see cref="PrintPublication"/>, keeping the operation consistent with the state and invariants of the surrounding print publication workflow.
+    /// </summary>
+    /// <param name="segment">Segment value supplied to the print publication operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string MediaSegmentSource(PublicationMediaSegment segment) {
         try
         {
@@ -564,6 +684,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs media poster for <see cref="PrintPublication"/>, keeping the operation consistent with the state and invariants of the surrounding print publication workflow.
+    /// </summary>
+    /// <param name="video">Video value supplied to the print publication operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string MediaPoster(VideoElement video) {
         try
         {
@@ -577,6 +702,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs video media style for <see cref="PrintPublication"/>, keeping the operation consistent with the state and invariants of the surrounding print publication workflow.
+    /// </summary>
+    /// <param name="video">Video value supplied to the print publication operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string VideoMediaStyle(VideoElement video)
     {
         try
@@ -593,6 +723,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs frame clip path for <see cref="PrintPublication"/>, keeping the operation consistent with the state and invariants of the surrounding print publication workflow.
+    /// </summary>
+    /// <param name="points">Media frame point dependency used by the print publication workflow to provide the corresponding application capability.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string FrameClipPath(IEnumerable<MediaFramePoint> points) {
         try
         {
@@ -604,6 +739,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs inv for <see cref="PrintPublication"/>, keeping the operation consistent with the state and invariants of the surrounding print publication workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the print publication operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Inv(double value) {
         try
         {
@@ -615,6 +755,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs nullable inv for <see cref="PrintPublication"/>, keeping the operation consistent with the state and invariants of the surrounding print publication workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the print publication operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string NullableInv(double? value) {
         try
         {
@@ -627,6 +772,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs story background for <see cref="PrintPublication"/>, keeping the operation consistent with the state and invariants of the surrounding print publication workflow.
+    /// </summary>
+    /// <param name="text">Text value supplied to the print publication operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string StoryBackground(TextFrameElement text) {
         try
         {
@@ -640,6 +790,7 @@
             throw;
         }
     }
+
 
 
 }

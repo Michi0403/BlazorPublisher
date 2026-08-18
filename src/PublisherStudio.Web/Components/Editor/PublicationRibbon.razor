@@ -631,6 +631,12 @@
 </DxRibbon>
 
 @code {
+
+    /// <summary>
+    /// Performs lt for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <param name="text">Text value supplied to the publication ribbon operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string LT(string text) {
         try
         {
@@ -643,9 +649,20 @@
         }
     }
 
+    /// <summary>
+    /// Gets the local GPT button text value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The local GPT button text value exposed by <see cref="PublicationRibbon"/>.</value>
     private string LocalGptButtonText => LocalGptConnection.State.IsLinked ? "LocalGPT AI Assist" : LocalGptConnection.State.IsConnected ? "Approve LocalGPT link" : "Connect LocalGPT";
+    /// <summary>
+    /// Gets a value indicating whether show AI council applies to the publication ribbon state.
+    /// </summary>
+    /// <value>The can show AI council value exposed by <see cref="PublicationRibbon"/>.</value>
     private bool CanShowAiCouncil => LocalGptConnection.State.HasCapability("council.run");
 
+    /// <summary>
+    /// Handles the initialized lifecycle or event notification for <see cref="PublicationRibbon"/>, updating the state required by the surrounding workflow.
+    /// </summary>
     protected override void OnInitialized()
     {
         try
@@ -660,6 +677,9 @@
         }
     }
 
+    /// <summary>
+    /// Handles the local GPT changed lifecycle or event notification for <see cref="PublicationRibbon"/>, updating the state required by the surrounding workflow.
+    /// </summary>
     private void OnLocalGptChanged() {
         try
         {
@@ -672,6 +692,11 @@
         }
     }
 
+    /// <summary>
+    /// Determines whether council team for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <param name="teamKey">Team key value supplied to the publication ribbon operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool HasCouncilTeam(string teamKey) {
         try
         {
@@ -687,6 +712,9 @@
         }
     }
 
+    /// <summary>
+    /// Opens organic plugins for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void OpenOrganicPlugins() {
         try
         {
@@ -700,6 +728,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Opens documentation for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void OpenDocumentation() {
         try
         {
@@ -711,6 +742,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Opens HTML documentation for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void OpenHtmlDocumentation() {
         try
         {
@@ -722,6 +756,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Opens PDF documentation for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void OpenPdfDocumentation() {
         try
         {
@@ -733,6 +770,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Opens API documentation for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void OpenApiDocumentation() {
         try
         {
@@ -745,83 +785,385 @@
         }
     }
 
+    /// <summary>
+    /// Gets or sets the state value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The state value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter, EditorRequired] public EditorStateService State { get; set; } = default!;
+    /// <summary>
+    /// Gets or sets a value indicating whether timeline visible applies to the publication ribbon state.
+    /// </summary>
+    /// <value>The timeline visible value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public bool TimelineVisible { get; set; }
+    /// <summary>
+    /// Gets or sets the on new value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on new value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback OnNew { get; set; }
+    /// <summary>
+    /// Gets or sets the on open value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on open value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback OnOpen { get; set; }
+    /// <summary>
+    /// Gets or sets the on import open document value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on import open document value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback OnImportOpenDocument { get; set; }
+    /// <summary>
+    /// Gets or sets the on save value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on save value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback OnSave { get; set; }
+    /// <summary>
+    /// Gets or sets the on print value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on print value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback OnPrint { get; set; }
+    /// <summary>
+    /// Gets or sets the on export png value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on export png value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback OnExportPng { get; set; }
+    /// <summary>
+    /// Gets or sets the on export jpeg value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on export jpeg value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback OnExportJpeg { get; set; }
+    /// <summary>
+    /// Gets or sets the on export SVG value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on export SVG value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback OnExportSvg { get; set; }
+    /// <summary>
+    /// Gets or sets the on export selected png value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on export selected png value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback OnExportSelectedPng { get; set; }
+    /// <summary>
+    /// Gets or sets the on export selected SVG value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on export selected SVG value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback OnExportSelectedSvg { get; set; }
+    /// <summary>
+    /// Gets or sets the on export website value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on export website value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback OnExportWebsite { get; set; }
+    /// <summary>
+    /// Gets or sets the on export site value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on export site value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback OnExportSite { get; set; }
+    /// <summary>
+    /// Gets or sets the on export structured site value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on export structured site value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback OnExportStructuredSite { get; set; }
+    /// <summary>
+    /// Gets or sets the on export video value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on export video value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback OnExportVideo { get; set; }
+    /// <summary>
+    /// Gets or sets the on insert picture value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on insert picture value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback OnInsertPicture { get; set; }
+    /// <summary>
+    /// Gets or sets the on create picture value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on create picture value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback OnCreatePicture { get; set; }
+    /// <summary>
+    /// Gets or sets the on edit picture value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on edit picture value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback OnEditPicture { get; set; }
+    /// <summary>
+    /// Gets or sets the on insert spreadsheet value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on insert spreadsheet value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback OnInsertSpreadsheet { get; set; }
+    /// <summary>
+    /// Gets or sets the on create spreadsheet value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on create spreadsheet value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback OnCreateSpreadsheet { get; set; }
+    /// <summary>
+    /// Gets or sets the on edit spreadsheet value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on edit spreadsheet value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback OnEditSpreadsheet { get; set; }
+    /// <summary>
+    /// Gets or sets the on download spreadsheet value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on download spreadsheet value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback OnDownloadSpreadsheet { get; set; }
+    /// <summary>
+    /// Gets or sets the on insert video value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on insert video value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback OnInsertVideo { get; set; }
+    /// <summary>
+    /// Gets or sets the on insert audio value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on insert audio value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback OnInsertAudio { get; set; }
+    /// <summary>
+    /// Gets or sets the on create video value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on create video value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback OnCreateVideo { get; set; }
+    /// <summary>
+    /// Gets or sets the on create audio value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on create audio value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback OnCreateAudio { get; set; }
+    /// <summary>
+    /// Gets or sets the on edit media value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on edit media value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback OnEditMedia { get; set; }
+    /// <summary>
+    /// Gets or sets the on insert barcode value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on insert barcode value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback OnInsertBarcode { get; set; }
+    /// <summary>
+    /// Gets or sets the on toggle timeline value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on toggle timeline value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback OnToggleTimeline { get; set; }
+    /// <summary>
+    /// Gets or sets the on edit story value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on edit story value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback OnEditStory { get; set; }
+    /// <summary>
+    /// Gets or sets the on fit page value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on fit page value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback OnFitPage { get; set; }
+    /// <summary>
+    /// Gets or sets the on toggle pages pane value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on toggle pages pane value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback OnTogglePagesPane { get; set; }
+    /// <summary>
+    /// Gets or sets the on toggle inspector pane value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on toggle inspector pane value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback OnToggleInspectorPane { get; set; }
+    /// <summary>
+    /// Gets or sets the on reset workspace value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on reset workspace value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback OnResetWorkspace { get; set; }
+    /// <summary>
+    /// Gets or sets the on insert data visual value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on insert data visual value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback<DataVisualKind> OnInsertDataVisual { get; set; }
+    /// <summary>
+    /// Gets or sets the on edit data visual value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on edit data visual value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback OnEditDataVisual { get; set; }
+    /// <summary>
+    /// Gets or sets the on manage data value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on manage data value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback OnManageData { get; set; }
+    /// <summary>
+    /// Gets or sets the on insert component value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on insert component value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback<PublicationComponentKind> OnInsertComponent { get; set; }
+    /// <summary>
+    /// Gets or sets the on edit component value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on edit component value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback OnEditComponent { get; set; }
+    /// <summary>
+    /// Gets or sets the on insert panel value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on insert panel value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback OnInsertPanel { get; set; }
+    /// <summary>
+    /// Gets or sets the on insert HTML embed value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on insert HTML embed value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback OnInsertHtmlEmbed { get; set; }
+    /// <summary>
+    /// Gets or sets the on insert video blob value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on insert video blob value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback OnInsertVideoBlob { get; set; }
+    /// <summary>
+    /// Gets or sets the on toggle panel library value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on toggle panel library value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback OnTogglePanelLibrary { get; set; }
+    /// <summary>
+    /// Gets or sets the on open media converter value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on open media converter value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback OnOpenMediaConverter { get; set; }
+    /// <summary>
+    /// Gets or sets the on preview page animations value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on preview page animations value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback OnPreviewPageAnimations { get; set; }
+    /// <summary>
+    /// Gets or sets the on edit page effects value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on edit page effects value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback OnEditPageEffects { get; set; }
+    /// <summary>
+    /// Gets or sets the on preview object animations value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on preview object animations value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback OnPreviewObjectAnimations { get; set; }
+    /// <summary>
+    /// Gets or sets the on stop animations value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on stop animations value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback OnStopAnimations { get; set; }
+    /// <summary>
+    /// Gets or sets the streaming value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The streaming value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public StreamingSessionSnapshot Streaming { get; set; } = new();
+    /// <summary>
+    /// Gets or sets the on streaming setup value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on streaming setup value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback OnStreamingSetup { get; set; }
+    /// <summary>
+    /// Gets or sets the on start dry run value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on start dry run value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback OnStartDryRun { get; set; }
+    /// <summary>
+    /// Gets or sets the on start streaming value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on start streaming value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback OnStartStreaming { get; set; }
+    /// <summary>
+    /// Gets or sets the on stop streaming value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on stop streaming value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback OnStopStreaming { get; set; }
+    /// <summary>
+    /// Gets or sets the on stop recording value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on stop recording value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback OnStopRecording { get; set; }
+    /// <summary>
+    /// Gets or sets the on stop session value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on stop session value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback OnStopSession { get; set; }
+    /// <summary>
+    /// Gets or sets the on toggle recording value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on toggle recording value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback OnToggleRecording { get; set; }
+    /// <summary>
+    /// Gets or sets the on toggle stream output value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on toggle stream output value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback<Guid> OnToggleStreamOutput { get; set; }
+    /// <summary>
+    /// Gets or sets the on select program page value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on select program page value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback<Guid> OnSelectProgramPage { get; set; }
+    /// <summary>
+    /// Gets or sets the on insert live source value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on insert live source value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback<PublicationLiveSourceKind> OnInsertLiveSource { get; set; }
+    /// <summary>
+    /// Gets or sets the on select chat output value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The on select chat output value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback<Guid?> OnSelectChatOutput { get; set; }
 
+    /// <summary>
+    /// Gets the crop command text value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The crop command text value exposed by <see cref="PublicationRibbon"/>.</value>
     private string CropCommandText => State.CropMode ? "Finish crop" : "Crop";
+    /// <summary>
+    /// Gets the rulers text value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The rulers text value exposed by <see cref="PublicationRibbon"/>.</value>
     private string RulersText => CheckText(State.Document.View.RulersVisible, "Rulers");
+    /// <summary>
+    /// Gets the grid text value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The grid text value exposed by <see cref="PublicationRibbon"/>.</value>
     private string GridText => CheckText(State.Document.View.GridVisible, "Grid");
+    /// <summary>
+    /// Gets the guides text value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The guides text value exposed by <see cref="PublicationRibbon"/>.</value>
     private string GuidesText => CheckText(State.Document.View.GuidesVisible, "Guides");
+    /// <summary>
+    /// Gets the snap grid text value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The snap grid text value exposed by <see cref="PublicationRibbon"/>.</value>
     private string SnapGridText => CheckText(State.Document.View.SnapToGrid, "Snap to grid");
+    /// <summary>
+    /// Gets the snap guides text value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The snap guides text value exposed by <see cref="PublicationRibbon"/>.</value>
     private string SnapGuidesText => CheckText(State.Document.View.SnapToGuides, "Snap to guides");
+    /// <summary>
+    /// Gets the snap page text value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The snap page text value exposed by <see cref="PublicationRibbon"/>.</value>
     private string SnapPageText => CheckText(State.Document.View.SnapToPage, "Snap to page");
+    /// <summary>
+    /// Gets the snap objects text value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The snap objects text value exposed by <see cref="PublicationRibbon"/>.</value>
     private string SnapObjectsText => CheckText(State.Document.View.SnapToObjects, "Snap to objects");
+    /// <summary>
+    /// Gets the snap in objects text value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The snap in objects text value exposed by <see cref="PublicationRibbon"/>.</value>
     private string SnapInObjectsText => CheckText(State.Document.View.SnapInObjects, "Snap in objects");
+    /// <summary>
+    /// Gets the timeline pane text value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The timeline pane text value exposed by <see cref="PublicationRibbon"/>.</value>
     private string TimelinePaneText => CheckText(TimelineVisible, "Timeline pane");
+    /// <summary>
+    /// Gets the zoom rendering text value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The zoom rendering text value exposed by <see cref="PublicationRibbon"/>.</value>
     private string ZoomRenderingText => State.Document.View.CanvasZoomMode == PublicationCanvasZoomMode.CssLayout
         ? "Rendering: sharp CSS"
         : "Rendering: compact transform";
+    /// <summary>
+    /// Gets the CSS zoom mode text value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The CSS zoom mode text value exposed by <see cref="PublicationRibbon"/>.</value>
     private string CssZoomModeText => CheckText(State.Document.View.CanvasZoomMode == PublicationCanvasZoomMode.CssLayout, "Sharp CSS layout (default)");
+    /// <summary>
+    /// Gets the transform zoom mode text value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The transform zoom mode text value exposed by <see cref="PublicationRibbon"/>.</value>
     private string TransformZoomModeText => CheckText(State.Document.View.CanvasZoomMode == PublicationCanvasZoomMode.Transform, "Compact transform");
+    /// <summary>
+    /// Performs check text for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <param name="value">Value indicating whether value should apply to this operation.</param>
+    /// <param name="text">Text value supplied to the publication ribbon operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string CheckText(bool value, string text) {
         try
         {
@@ -834,6 +1176,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs request new for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestNew() {
         try
         {
@@ -845,6 +1191,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request open for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestOpen() {
         try
         {
@@ -856,6 +1206,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request import open document for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestImportOpenDocument() {
         try
         {
@@ -867,6 +1221,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request save for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestSave() {
         try
         {
@@ -878,6 +1236,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request print for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestPrint() {
         try
         {
@@ -889,6 +1251,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request export png for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestExportPng() {
         try
         {
@@ -900,6 +1266,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request export jpeg for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestExportJpeg() {
         try
         {
@@ -911,6 +1281,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request export SVG for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestExportSvg() {
         try
         {
@@ -922,6 +1296,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request export selected png for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestExportSelectedPng() {
         try
         {
@@ -933,6 +1311,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request export selected SVG for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestExportSelectedSvg() {
         try
         {
@@ -944,6 +1326,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request export website for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestExportWebsite() {
         try
         {
@@ -955,6 +1341,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request export site for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestExportSite() {
         try
         {
@@ -966,6 +1356,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request export structured site for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestExportStructuredSite() {
         try
         {
@@ -977,6 +1371,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request export video for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestExportVideo() {
         try
         {
@@ -988,6 +1386,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request picture for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestPicture() {
         try
         {
@@ -999,6 +1401,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request create picture for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestCreatePicture() {
         try
         {
@@ -1010,6 +1416,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request edit picture for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestEditPicture() {
         try
         {
@@ -1021,6 +1431,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request spreadsheet for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestSpreadsheet() {
         try
         {
@@ -1032,6 +1446,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request create spreadsheet for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestCreateSpreadsheet() {
         try
         {
@@ -1043,6 +1461,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets text fit for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <param name="mode">Mode value supplied to the publication ribbon operation and used when producing its result.</param>
     private void SetTextFit(PublicationContentFitMode mode) {
         try
         {
@@ -1054,6 +1476,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs text fit clip for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void TextFitClip() {
         try
         {
@@ -1065,6 +1490,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs text fit whole for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void TextFitWhole() {
         try
         {
@@ -1076,6 +1504,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs text fit fill for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void TextFitFill() {
         try
         {
@@ -1087,6 +1518,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs text fit stretch for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void TextFitStretch() {
         try
         {
@@ -1098,6 +1532,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets spreadsheet fit for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <param name="mode">Mode value supplied to the publication ribbon operation and used when producing its result.</param>
     private void SetSpreadsheetFit(PublicationContentFitMode mode) {
         try
         {
@@ -1109,6 +1547,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs spreadsheet fit clip for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void SpreadsheetFitClip() {
         try
         {
@@ -1120,6 +1561,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs spreadsheet fit whole for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void SpreadsheetFitWhole() {
         try
         {
@@ -1131,6 +1575,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs spreadsheet fit fill for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void SpreadsheetFitFill() {
         try
         {
@@ -1142,6 +1589,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs spreadsheet fit stretch for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void SpreadsheetFitStretch() {
         try
         {
@@ -1153,6 +1603,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle spreadsheet grid lines for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void ToggleSpreadsheetGridLines() {
         try
         {
@@ -1164,6 +1617,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle spreadsheet sheet name for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void ToggleSpreadsheetSheetName() {
         try
         {
@@ -1176,6 +1632,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs request edit spreadsheet for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestEditSpreadsheet() {
         try
         {
@@ -1187,6 +1647,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request download spreadsheet for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestDownloadSpreadsheet() {
         try
         {
@@ -1198,6 +1662,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request video for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestVideo() {
         try
         {
@@ -1209,6 +1677,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request audio for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestAudio() {
         try
         {
@@ -1220,6 +1692,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request create video for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestCreateVideo() {
         try
         {
@@ -1231,6 +1707,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request create audio for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestCreateAudio() {
         try
         {
@@ -1242,6 +1722,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request edit media for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestEditMedia() {
         try
         {
@@ -1253,6 +1737,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request streaming setup for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestStreamingSetup() {
         try
         {
@@ -1264,6 +1752,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request start dry run for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestStartDryRun() {
         try
         {
@@ -1275,6 +1767,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request start streaming for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestStartStreaming() {
         try
         {
@@ -1286,6 +1782,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request stop streaming for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestStopStreaming() {
         try
         {
@@ -1297,6 +1797,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request stop recording for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestStopRecording() {
         try
         {
@@ -1308,6 +1812,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request stop session for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestStopSession() {
         try
         {
@@ -1319,6 +1827,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request toggle recording for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestToggleRecording() {
         try
         {
@@ -1330,6 +1842,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds live camera for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AddLiveCamera() {
         try
         {
@@ -1341,6 +1857,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds live screen for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AddLiveScreen() {
         try
         {
@@ -1352,6 +1872,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds live window for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AddLiveWindow() {
         try
         {
@@ -1363,6 +1887,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds live browser tab for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AddLiveBrowserTab() {
         try
         {
@@ -1374,6 +1902,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds live capture device for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AddLiveCaptureDevice() {
         try
         {
@@ -1385,6 +1917,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds live network media for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AddLiveNetworkMedia() {
         try
         {
@@ -1396,6 +1932,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds live microphone for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AddLiveMicrophone() {
         try
         {
@@ -1407,6 +1947,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds live system audio for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AddLiveSystemAudio() {
         try
         {
@@ -1418,6 +1962,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds live application audio for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AddLiveApplicationAudio() {
         try
         {
@@ -1429,6 +1977,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds now playing for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AddNowPlaying() {
         try
         {
@@ -1440,6 +1992,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request barcode for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestBarcode() {
         try
         {
@@ -1451,6 +2007,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request toggle timeline for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestToggleTimeline() {
         try
         {
@@ -1462,6 +2022,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request story editor for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestStoryEditor() {
         try
         {
@@ -1473,6 +2037,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request fit page for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestFitPage() {
         try
         {
@@ -1484,6 +2052,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request toggle pages pane for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestTogglePagesPane() {
         try
         {
@@ -1495,6 +2067,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request toggle inspector pane for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestToggleInspectorPane() {
         try
         {
@@ -1506,6 +2082,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request reset workspace for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestResetWorkspace() {
         try
         {
@@ -1517,6 +2097,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request edit data visual for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestEditDataVisual() {
         try
         {
@@ -1528,6 +2112,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request manage data for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestManageData() {
         try
         {
@@ -1539,6 +2127,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request edit component for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestEditComponent() {
         try
         {
@@ -1550,6 +2142,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request panel for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestPanel() {
         try
         {
@@ -1561,6 +2157,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request HTML embed for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestHtmlEmbed() {
         try
         {
@@ -1572,6 +2172,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request video blob for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestVideoBlob() {
         try
         {
@@ -1583,6 +2187,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request panel library for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestPanelLibrary() {
         try
         {
@@ -1594,6 +2202,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request media converter for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestMediaConverter() {
         try
         {
@@ -1605,6 +2217,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle content pan for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void ToggleContentPan() {
         try
         {
@@ -1616,6 +2231,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs reset content viewport for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void ResetContentViewport() {
         try
         {
@@ -1627,6 +2245,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request preview page animations for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestPreviewPageAnimations() {
         try
         {
@@ -1638,6 +2260,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request page effects for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestPageEffects() {
         try
         {
@@ -1649,6 +2275,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request preview object animations for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestPreviewObjectAnimations() {
         try
         {
@@ -1660,6 +2290,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs request stop animations for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestStopAnimations() {
         try
         {
@@ -1672,30 +2306,125 @@
         }
     }
 
+    /// <summary>
+    /// Gets a value indicating whether selection applies to the publication ribbon state.
+    /// </summary>
+    /// <value>The has selection value exposed by <see cref="PublicationRibbon"/>.</value>
     private bool HasSelection => State.SelectedElements.Count > 0;
+    /// <summary>
+    /// Gets a value indicating whether export selection applies to the publication ribbon state.
+    /// </summary>
+    /// <value>The can export selection value exposed by <see cref="PublicationRibbon"/>.</value>
     private bool CanExportSelection => State.SelectedElements.Count == 1 && State.SelectedElement is not null and not ConnectorElement;
+    /// <summary>
+    /// Gets a value indicating whether align applies to the publication ribbon state.
+    /// </summary>
+    /// <value>The can align value exposed by <see cref="PublicationRibbon"/>.</value>
     private bool CanAlign => State.SelectedElement is not null and not ConnectorElement;
+    /// <summary>
+    /// Gets a value indicating whether image selected applies to the publication ribbon state.
+    /// </summary>
+    /// <value>The is image selected value exposed by <see cref="PublicationRibbon"/>.</value>
     private bool IsImageSelected => State.SelectedElement is ImageFrameElement;
+    /// <summary>
+    /// Gets a value indicating whether text selected applies to the publication ribbon state.
+    /// </summary>
+    /// <value>The is text selected value exposed by <see cref="PublicationRibbon"/>.</value>
     private bool IsTextSelected => State.SelectedElement is TextFrameElement;
+    /// <summary>
+    /// Gets a value indicating whether shape selected applies to the publication ribbon state.
+    /// </summary>
+    /// <value>The is shape selected value exposed by <see cref="PublicationRibbon"/>.</value>
     private bool IsShapeSelected => State.SelectedElement is ShapeElement;
+    /// <summary>
+    /// Gets a value indicating whether word art selected applies to the publication ribbon state.
+    /// </summary>
+    /// <value>The is word art selected value exposed by <see cref="PublicationRibbon"/>.</value>
     private bool IsWordArtSelected => State.SelectedElement is WordArtElement;
+    /// <summary>
+    /// Gets a value indicating whether connector selected applies to the publication ribbon state.
+    /// </summary>
+    /// <value>The is connector selected value exposed by <see cref="PublicationRibbon"/>.</value>
     private bool IsConnectorSelected => State.SelectedElement is ConnectorElement;
+    /// <summary>
+    /// Gets a value indicating whether data visual selected applies to the publication ribbon state.
+    /// </summary>
+    /// <value>The is data visual selected value exposed by <see cref="PublicationRibbon"/>.</value>
     private bool IsDataVisualSelected => State.SelectedElement is DataVisualElement;
+    /// <summary>
+    /// Gets a value indicating whether component selected applies to the publication ribbon state.
+    /// </summary>
+    /// <value>The is component selected value exposed by <see cref="PublicationRibbon"/>.</value>
     private bool IsComponentSelected => State.SelectedElement is DevExtremeComponentElement;
+    /// <summary>
+    /// Gets a value indicating whether map component selected applies to the publication ribbon state.
+    /// </summary>
+    /// <value>The is map component selected value exposed by <see cref="PublicationRibbon"/>.</value>
     private bool IsMapComponentSelected => State.SelectedElement is DevExtremeComponentElement { ComponentKind: PublicationComponentKind.Map or PublicationComponentKind.VectorMap };
+    /// <summary>
+    /// Gets a value indicating whether spreadsheet selected applies to the publication ribbon state.
+    /// </summary>
+    /// <value>The is spreadsheet selected value exposed by <see cref="PublicationRibbon"/>.</value>
     private bool IsSpreadsheetSelected => State.SelectedElement is SpreadsheetElement;
+    /// <summary>
+    /// Gets the spreadsheet grid lines text value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The spreadsheet grid lines text value exposed by <see cref="PublicationRibbon"/>.</value>
     private string SpreadsheetGridLinesText => State.SelectedElement is SpreadsheetElement { ShowGridLines: true } ? "Hide grid lines" : "Show grid lines";
+    /// <summary>
+    /// Gets the spreadsheet sheet name text value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The spreadsheet sheet name text value exposed by <see cref="PublicationRibbon"/>.</value>
     private string SpreadsheetSheetNameText => State.SelectedElement is SpreadsheetElement { ShowSheetName: true } ? "Hide worksheet name" : "Show worksheet name";
+    /// <summary>
+    /// Gets a value indicating whether media selected applies to the publication ribbon state.
+    /// </summary>
+    /// <value>The is media selected value exposed by <see cref="PublicationRibbon"/>.</value>
     private bool IsMediaSelected => State.SelectedElement is PublicationMediaElement;
+    /// <summary>
+    /// Gets the media muted text value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The media muted text value exposed by <see cref="PublicationRibbon"/>.</value>
     private string MediaMutedText => CheckText((State.SelectedElement as PublicationMediaElement)?.Muted == true, "Muted");
+    /// <summary>
+    /// Gets the media loop text value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The media loop text value exposed by <see cref="PublicationRibbon"/>.</value>
     private string MediaLoopText => CheckText((State.SelectedElement as PublicationMediaElement)?.Loop == true, "Loop clip");
+    /// <summary>
+    /// Gets the media auto play text value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The media auto play text value exposed by <see cref="PublicationRibbon"/>.</value>
     private string MediaAutoPlayText => CheckText((State.SelectedElement as PublicationMediaElement)?.AutoPlay == true, "Play in presentation");
+    /// <summary>
+    /// Gets the shape fill value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The shape fill value exposed by <see cref="PublicationRibbon"/>.</value>
     private string ShapeFill => (State.SelectedElement as ShapeElement)?.Fill ?? "#ffffff";
+    /// <summary>
+    /// Gets the shape stroke value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The shape stroke value exposed by <see cref="PublicationRibbon"/>.</value>
     private string ShapeStroke => (State.SelectedElement as ShapeElement)?.Stroke ?? "#000000";
+    /// <summary>
+    /// Gets the connector stroke value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The connector stroke value exposed by <see cref="PublicationRibbon"/>.</value>
     private string ConnectorStroke => (State.SelectedElement as ConnectorElement)?.Stroke ?? "#245b85";
+    /// <summary>
+    /// Gets the page palette color value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The page palette color value exposed by <see cref="PublicationRibbon"/>.</value>
     private string PagePaletteColor => State.CurrentPage.Background.StartsWith('#') ? State.CurrentPage.Background : "#ffffff";
+    /// <summary>
+    /// Stores the internal page colors state used by <see cref="PublicationRibbon"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly string[] PageColors = ["#ffffff", "#f8fafc", "#fef3c7", "#fee2e2", "#dcfce7", "#dbeafe", "#ede9fe", "#111827"];
 
+    /// <summary>
+    /// Updates selected media for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <param name="update">Update value supplied to the publication ribbon operation and used when producing its result.</param>
     private void UpdateSelectedMedia(Action<PublicationMediaElement> update)
     {
         try
@@ -1709,6 +2438,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle media muted for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void ToggleMediaMuted() {
         try
         {
@@ -1720,6 +2452,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle media loop for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void ToggleMediaLoop() {
         try
         {
@@ -1731,6 +2466,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle media auto play for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void ToggleMediaAutoPlay() {
         try
         {
@@ -1742,6 +2480,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs media start at page entry for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void MediaStartAtPageEntry() {
         try
         {
@@ -1753,6 +2494,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs media start on click for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void MediaStartOnClick() {
         try
         {
@@ -1764,6 +2508,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs media start with animation for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void MediaStartWithAnimation() {
         try
         {
@@ -1776,6 +2523,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs undo for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void Undo() {
         try
         {
@@ -1787,6 +2537,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs redo for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void Redo() {
         try
         {
@@ -1798,6 +2551,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs copy for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void Copy() {
         try
         {
@@ -1809,6 +2565,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs paste for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void Paste() {
         try
         {
@@ -1820,6 +2579,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs duplicate for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void Duplicate() {
         try
         {
@@ -1831,6 +2593,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs delete for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void Delete() {
         try
         {
@@ -1842,6 +2607,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs group selected for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void GroupSelected() {
         try
         {
@@ -1853,6 +2621,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs ungroup selected for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void UngroupSelected() {
         try
         {
@@ -1864,6 +2635,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs bring to front for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void BringToFront() {
         try
         {
@@ -1875,6 +2649,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs bring forward for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void BringForward() {
         try
         {
@@ -1886,6 +2663,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs send backward for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void SendBackward() {
         try
         {
@@ -1897,6 +2677,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs send to back for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void SendToBack() {
         try
         {
@@ -1908,6 +2691,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs align left for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void AlignLeft() {
         try
         {
@@ -1919,6 +2705,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs align center for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void AlignCenter() {
         try
         {
@@ -1930,6 +2719,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs align right for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void AlignRight() {
         try
         {
@@ -1941,6 +2733,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs align top for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void AlignTop() {
         try
         {
@@ -1952,6 +2747,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs align middle for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void AlignMiddle() {
         try
         {
@@ -1963,6 +2761,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs align bottom for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void AlignBottom() {
         try
         {
@@ -1974,6 +2775,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds animation for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <param name="effect">Effect value supplied to the publication ribbon operation and used when producing its result.</param>
+    /// <param name="phase">Phase value supplied to the publication ribbon operation and used when producing its result.</param>
     private void AddAnimation(PublicationAnimationEffect effect, PublicationAnimationPhase phase) {
         try
         {
@@ -1985,6 +2791,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs animation fade in for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void AnimationFadeIn() {
         try
         {
@@ -1996,6 +2805,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs animation fly in for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void AnimationFlyIn() {
         try
         {
@@ -2007,6 +2819,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs animation zoom in for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void AnimationZoomIn() {
         try
         {
@@ -2018,6 +2833,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs animation wipe in for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void AnimationWipeIn() {
         try
         {
@@ -2029,6 +2847,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs animation pulse for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void AnimationPulse() {
         try
         {
@@ -2040,6 +2861,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs animation spin for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void AnimationSpin() {
         try
         {
@@ -2051,6 +2875,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs animation move for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void AnimationMove() {
         try
         {
@@ -2062,6 +2889,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs animation fade out for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void AnimationFadeOut() {
         try
         {
@@ -2073,6 +2903,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs animation fly out for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void AnimationFlyOut() {
         try
         {
@@ -2084,6 +2917,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs clear animations for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void ClearAnimations() {
         try
         {
@@ -2095,6 +2931,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets transition for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <param name="kind">Kind value supplied to the publication ribbon operation and used when producing its result.</param>
     private void SetTransition(PublicationPageTransitionKind kind) {
         try
         {
@@ -2106,6 +2946,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs transition none for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void TransitionNone() {
         try
         {
@@ -2117,6 +2960,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs transition fade for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void TransitionFade() {
         try
         {
@@ -2128,6 +2974,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs transition push for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void TransitionPush() {
         try
         {
@@ -2139,6 +2988,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs transition wipe for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void TransitionWipe() {
         try
         {
@@ -2150,6 +3002,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs transition zoom for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void TransitionZoom() {
         try
         {
@@ -2161,6 +3016,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs transition flip for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void TransitionFlip() {
         try
         {
@@ -2173,6 +3031,9 @@
         }
     }
 
+    /// <summary>
+    /// Adds text for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void AddText() {
         try
         {
@@ -2184,6 +3045,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds word art for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void AddWordArt() {
         try
         {
@@ -2195,6 +3059,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds rectangle for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void AddRectangle() {
         try
         {
@@ -2206,6 +3073,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds rounded rectangle for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void AddRoundedRectangle() {
         try
         {
@@ -2217,6 +3087,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds ellipse for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void AddEllipse() {
         try
         {
@@ -2228,6 +3101,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds line for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void AddLine() {
         try
         {
@@ -2239,6 +3115,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds chart for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AddChart() {
         try
         {
@@ -2250,6 +3130,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds pie chart for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AddPieChart() {
         try
         {
@@ -2261,6 +3145,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds polar chart for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AddPolarChart() {
         try
         {
@@ -2272,6 +3160,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds sparkline for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AddSparkline() {
         try
         {
@@ -2283,6 +3175,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds bar gauge for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AddBarGauge() {
         try
         {
@@ -2294,6 +3190,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds circular gauge for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AddCircularGauge() {
         try
         {
@@ -2305,6 +3205,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds linear gauge for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AddLinearGauge() {
         try
         {
@@ -2316,6 +3220,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds range selector for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AddRangeSelector() {
         try
         {
@@ -2327,6 +3235,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds sankey for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AddSankey() {
         try
         {
@@ -2338,6 +3250,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds funnel for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AddFunnel() {
         try
         {
@@ -2349,6 +3265,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds pyramid for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AddPyramid() {
         try
         {
@@ -2360,6 +3280,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds tree map for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AddTreeMap() {
         try
         {
@@ -2371,6 +3295,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds data table for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AddDataTable() {
         try
         {
@@ -2382,6 +3310,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds kpi for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AddKpi() {
         try
         {
@@ -2393,6 +3325,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds component for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <param name="kind">Kind value supplied to the publication ribbon operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AddComponent(PublicationComponentKind kind) {
         try
         {
@@ -2404,6 +3341,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds component data grid for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AddComponentDataGrid() {
         try
         {
@@ -2415,6 +3356,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds component tree list for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AddComponentTreeList() {
         try
         {
@@ -2426,6 +3371,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds component scheduler for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AddComponentScheduler() {
         try
         {
@@ -2437,6 +3386,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds component pivot grid for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AddComponentPivotGrid() {
         try
         {
@@ -2448,6 +3401,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds component map for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AddComponentMap() {
         try
         {
@@ -2459,6 +3416,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds component vector map for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AddComponentVectorMap() {
         try
         {
@@ -2470,6 +3431,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds component form for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AddComponentForm() {
         try
         {
@@ -2481,6 +3446,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds component text box for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AddComponentTextBox() {
         try
         {
@@ -2492,6 +3461,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds component text area for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AddComponentTextArea() {
         try
         {
@@ -2503,6 +3476,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds component number box for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AddComponentNumberBox() {
         try
         {
@@ -2514,6 +3491,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds component date box for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AddComponentDateBox() {
         try
         {
@@ -2525,6 +3506,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds component check box for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AddComponentCheckBox() {
         try
         {
@@ -2536,6 +3521,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds component select box for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AddComponentSelectBox() {
         try
         {
@@ -2547,6 +3536,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds component tag box for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AddComponentTagBox() {
         try
         {
@@ -2558,6 +3551,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds component gallery for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AddComponentGallery() {
         try
         {
@@ -2569,6 +3566,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds component tile view for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AddComponentTileView() {
         try
         {
@@ -2580,6 +3581,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds component chat for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AddComponentChat() {
         try
         {
@@ -2591,6 +3596,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds component menu for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AddComponentMenu() {
         try
         {
@@ -2602,6 +3611,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds component context menu for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AddComponentContextMenu() {
         try
         {
@@ -2613,6 +3626,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds component tab panel for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AddComponentTabPanel() {
         try
         {
@@ -2624,6 +3641,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds component multi view for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AddComponentMultiView() {
         try
         {
@@ -2635,6 +3656,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds component splitter for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AddComponentSplitter() {
         try
         {
@@ -2646,6 +3671,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds component scroll view for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AddComponentScrollView() {
         try
         {
@@ -2657,6 +3686,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds component button for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task AddComponentButton() {
         try
         {
@@ -2668,6 +3701,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Refreshes data for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void RefreshData() {
         try
         {
@@ -2679,6 +3715,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs make cartesian for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void MakeCartesian() {
         try
         {
@@ -2690,6 +3729,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs make pie for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void MakePie() {
         try
         {
@@ -2701,6 +3743,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs make polar for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void MakePolar() {
         try
         {
@@ -2712,6 +3757,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs make sparkline for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void MakeSparkline() {
         try
         {
@@ -2723,6 +3771,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs make gauge for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void MakeGauge() {
         try
         {
@@ -2734,6 +3785,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs make circular gauge for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void MakeCircularGauge() {
         try
         {
@@ -2745,6 +3799,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs make linear gauge for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void MakeLinearGauge() {
         try
         {
@@ -2756,6 +3813,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs make range selector for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void MakeRangeSelector() {
         try
         {
@@ -2767,6 +3827,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs make sankey for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void MakeSankey() {
         try
         {
@@ -2778,6 +3841,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs make funnel for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void MakeFunnel() {
         try
         {
@@ -2789,6 +3855,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs make pyramid for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void MakePyramid() {
         try
         {
@@ -2800,6 +3869,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs make tree map for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void MakeTreeMap() {
         try
         {
@@ -2811,6 +3883,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs make table for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void MakeTable() {
         try
         {
@@ -2822,6 +3897,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs make kpi for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void MakeKpi() {
         try
         {
@@ -2833,6 +3911,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets data visual kind for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <param name="kind">Kind value supplied to the publication ribbon operation and used when producing its result.</param>
     private void SetDataVisualKind(DataVisualKind kind) {
         try
         {
@@ -2844,6 +3926,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Starts connector for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void StartConnector() {
         try
         {
@@ -2855,6 +3940,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Starts arrow connector for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void StartArrowConnector() {
         try
         {
@@ -2866,6 +3954,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Starts signal connector for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void StartSignalConnector() {
         try
         {
@@ -2877,6 +3968,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Starts signal arrow for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void StartSignalArrow() {
         try
         {
@@ -2888,6 +3982,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds page for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void AddPage() {
         try
         {
@@ -2899,6 +3996,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs duplicate page for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void DuplicatePage() {
         try
         {
@@ -2910,6 +4010,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Deletes page for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void DeletePage() {
         try
         {
@@ -2922,6 +4025,9 @@
         }
     }
 
+    /// <summary>
+    /// Sets a3 portrait for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void SetA3Portrait() {
         try
         {
@@ -2933,6 +4039,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets a3 landscape for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void SetA3Landscape() {
         try
         {
@@ -2944,6 +4053,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets a4 portrait for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void SetA4Portrait() {
         try
         {
@@ -2955,6 +4067,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets a4 landscape for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void SetA4Landscape() {
         try
         {
@@ -2966,6 +4081,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets a5 portrait for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void SetA5Portrait() {
         try
         {
@@ -2977,6 +4095,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets a5 landscape for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void SetA5Landscape() {
         try
         {
@@ -2988,6 +4109,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets letter portrait for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void SetLetterPortrait() {
         try
         {
@@ -2999,6 +4123,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets letter landscape for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void SetLetterLandscape() {
         try
         {
@@ -3010,6 +4137,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets legal portrait for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void SetLegalPortrait() {
         try
         {
@@ -3021,6 +4151,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets tabloid landscape for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void SetTabloidLandscape() {
         try
         {
@@ -3032,6 +4165,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets business card for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void SetBusinessCard() {
         try
         {
@@ -3043,6 +4179,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets square for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void SetSquare() {
         try
         {
@@ -3054,6 +4193,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs swap orientation for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void SwapOrientation() {
         try
         {
@@ -3066,6 +4208,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs toggle crop for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void ToggleCrop() {
         try
         {
@@ -3077,6 +4222,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds vertical guide for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void AddVerticalGuide() {
         try
         {
@@ -3088,6 +4236,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds horizontal guide for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void AddHorizontalGuide() {
         try
         {
@@ -3099,6 +4250,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs clear guides for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void ClearGuides() {
         try
         {
@@ -3110,6 +4264,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle rulers for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void ToggleRulers() {
         try
         {
@@ -3121,6 +4278,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle grid for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void ToggleGrid() {
         try
         {
@@ -3132,6 +4292,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle guides for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void ToggleGuides() {
         try
         {
@@ -3143,6 +4306,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle snap grid for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void ToggleSnapGrid() {
         try
         {
@@ -3154,6 +4320,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle snap guides for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void ToggleSnapGuides() {
         try
         {
@@ -3165,6 +4334,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle snap page for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void ToggleSnapPage() {
         try
         {
@@ -3176,6 +4348,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle snap objects for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void ToggleSnapObjects() {
         try
         {
@@ -3187,6 +4362,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle snap in objects for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void ToggleSnapInObjects() {
         try
         {
@@ -3198,6 +4376,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs unit millimeter for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void UnitMillimeter() {
         try
         {
@@ -3209,6 +4390,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs unit centimeter for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void UnitCentimeter() {
         try
         {
@@ -3220,6 +4404,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs unit inch for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void UnitInch() {
         try
         {
@@ -3231,6 +4418,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs unit pixel for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void UnitPixel() {
         try
         {
@@ -3242,6 +4432,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs zoom50 for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void Zoom50() {
         try
         {
@@ -3253,6 +4446,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs zoom75 for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void Zoom75() {
         try
         {
@@ -3264,6 +4460,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs zoom100 for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void Zoom100() {
         try
         {
@@ -3275,6 +4474,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs zoom125 for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void Zoom125() {
         try
         {
@@ -3286,6 +4488,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs zoom150 for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void Zoom150() {
         try
         {
@@ -3297,6 +4502,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs use CSS zoom mode for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void UseCssZoomMode() {
         try
         {
@@ -3308,6 +4516,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs use transform zoom mode for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void UseTransformZoomMode() {
         try
         {
@@ -3320,6 +4531,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs picture fit for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void PictureFit() {
         try
         {
@@ -3331,6 +4545,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs picture fill for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void PictureFill() {
         try
         {
@@ -3342,6 +4559,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs brighten picture for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void BrightenPicture() {
         try
         {
@@ -3353,6 +4573,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs darken picture for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void DarkenPicture() {
         try
         {
@@ -3364,6 +4587,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs contrast picture for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void ContrastPicture() {
         try
         {
@@ -3375,6 +4601,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs reduce contrast picture for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void ReduceContrastPicture() {
         try
         {
@@ -3386,6 +4615,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs saturate picture for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void SaturatePicture() {
         try
         {
@@ -3397,6 +4629,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs desaturate picture for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void DesaturatePicture() {
         try
         {
@@ -3408,6 +4643,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle grayscale for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void ToggleGrayscale() {
         try
         {
@@ -3419,6 +4657,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle sepia for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void ToggleSepia() {
         try
         {
@@ -3430,6 +4671,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle invert for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void ToggleInvert() {
         try
         {
@@ -3441,6 +4685,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs tint blue for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void TintBlue() {
         try
         {
@@ -3452,6 +4699,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs tint warm for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void TintWarm() {
         try
         {
@@ -3463,6 +4713,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs tint green for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void TintGreen() {
         try
         {
@@ -3474,6 +4727,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs full recolor for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void FullRecolor() {
         try
         {
@@ -3485,6 +4741,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs clear tint for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void ClearTint() {
         try
         {
@@ -3496,6 +4755,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs tint for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <param name="color">Color value supplied to the publication ribbon operation and used when producing its result.</param>
+    /// <param name="mode">Image tint mode dependency used by the publication ribbon workflow to provide the corresponding application capability.</param>
     private void Tint(string color, ImageTintMode mode) {
         try
         {
@@ -3507,6 +4771,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs mask rectangle for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void MaskRectangle() {
         try
         {
@@ -3518,6 +4785,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs mask rounded for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void MaskRounded() {
         try
         {
@@ -3529,6 +4799,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs mask ellipse for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void MaskEllipse() {
         try
         {
@@ -3540,6 +4813,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle shadow for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void ToggleShadow() {
         try
         {
@@ -3551,6 +4827,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs ratio square for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void RatioSquare() {
         try
         {
@@ -3562,6 +4841,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs ratio four three for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void RatioFourThree() {
         try
         {
@@ -3573,6 +4855,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs ratio sixteen nine for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void RatioSixteenNine() {
         try
         {
@@ -3584,6 +4869,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs rotate left for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void RotateLeft() {
         try
         {
@@ -3595,6 +4883,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs rotate right for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void RotateRight() {
         try
         {
@@ -3606,6 +4897,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs rotate picture left for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void RotatePictureLeft() {
         try
         {
@@ -3617,6 +4911,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs rotate picture right for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void RotatePictureRight() {
         try
         {
@@ -3628,6 +4925,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs flip horizontal for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void FlipHorizontal() {
         try
         {
@@ -3639,6 +4939,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs flip vertical for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void FlipVertical() {
         try
         {
@@ -3650,6 +4953,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs text no fill for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void TextNoFill() {
         try
         {
@@ -3661,6 +4967,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs text white fill for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void TextWhiteFill() {
         try
         {
@@ -3673,6 +4982,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs word art blue for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void WordArtBlue() {
         try
         {
@@ -3684,6 +4996,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs word art gold for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void WordArtGold() {
         try
         {
@@ -3695,6 +5010,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs word art green for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void WordArtGreen() {
         try
         {
@@ -3706,6 +5024,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs word art flat for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void WordArtFlat() {
         try
         {
@@ -3717,6 +5038,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs word art straight for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void WordArtStraight() {
         try
         {
@@ -3728,6 +5052,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs word art arch up for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void WordArtArchUp() {
         try
         {
@@ -3739,6 +5066,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs word art arch down for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void WordArtArchDown() {
         try
         {
@@ -3750,6 +5080,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs word art wave for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void WordArtWave() {
         try
         {
@@ -3761,6 +5094,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs word art custom path for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void WordArtCustomPath() {
         try
         {
@@ -3776,6 +5112,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs word art reverse path for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void WordArtReversePath() {
         try
         {
@@ -3791,6 +5130,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs word art more depth for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void WordArtMoreDepth() {
         try
         {
@@ -3802,6 +5144,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs word art less depth for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void WordArtLessDepth() {
         try
         {
@@ -3813,6 +5158,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs word art shadow for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void WordArtShadow() {
         try
         {
@@ -3825,6 +5173,10 @@
         }
     }
 
+    /// <summary>
+    /// Sets connector for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <param name="update">Update value supplied to the publication ribbon operation and used when producing its result.</param>
     private void SetConnector(Action<ConnectorElement> update) {
         try
         {
@@ -3836,6 +5188,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs connector straight for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void ConnectorStraight() {
         try
         {
@@ -3847,6 +5202,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs connector elbow for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void ConnectorElbow() {
         try
         {
@@ -3858,6 +5216,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs connector curved for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void ConnectorCurved() {
         try
         {
@@ -3869,6 +5230,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs connector solid for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void ConnectorSolid() {
         try
         {
@@ -3880,6 +5244,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs connector dashed for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void ConnectorDashed() {
         try
         {
@@ -3891,6 +5258,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs connector dotted for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void ConnectorDotted() {
         try
         {
@@ -3902,6 +5272,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs connector thicker for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void ConnectorThicker() {
         try
         {
@@ -3913,6 +5286,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs connector thinner for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void ConnectorThinner() {
         try
         {
@@ -3924,6 +5300,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs connector no arrows for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void ConnectorNoArrows() {
         try
         {
@@ -3935,6 +5314,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs connector arrow end for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void ConnectorArrowEnd() {
         try
         {
@@ -3946,6 +5328,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs connector arrows both for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void ConnectorArrowsBoth() {
         try
         {
@@ -3957,6 +5342,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs connector diamond start for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void ConnectorDiamondStart() {
         try
         {
@@ -3968,6 +5356,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Handles the connector stroke changed lifecycle or event notification for <see cref="PublicationRibbon"/>, updating the state required by the surrounding workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the publication ribbon operation and used when producing its result.</param>
     private void OnConnectorStrokeChanged(string value) {
         try
         {
@@ -3980,6 +5372,11 @@
         }
     }
 
+    /// <summary>
+    /// Sets page for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <param name="width">Width value supplied to the publication ribbon operation and used when producing its result.</param>
+    /// <param name="height">Height value supplied to the publication ribbon operation and used when producing its result.</param>
     private void SetPage(double width, double height) {
         try
         {
@@ -3991,6 +5388,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs rotate for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <param name="amount">Amount value supplied to the publication ribbon operation and used when producing its result.</param>
     private void Rotate(double amount) {
         try
         {
@@ -4002,6 +5403,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Normalizes angle for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the publication ribbon operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     private double NormalizeAngle(double value) {
         try
         {
@@ -4013,6 +5419,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets image for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <param name="update">Update value supplied to the publication ribbon operation and used when producing its result.</param>
     private void SetImage(Action<ImageFrameElement> update) {
         try
         {
@@ -4024,6 +5434,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets image ratio for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <param name="ratio">Ratio value supplied to the publication ribbon operation and used when producing its result.</param>
     private void SetImageRatio(double ratio) {
         try
         {
@@ -4035,6 +5449,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets text for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <param name="update">Update value supplied to the publication ribbon operation and used when producing its result.</param>
     private void SetText(Action<TextFrameElement> update) {
         try
         {
@@ -4046,6 +5464,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets word art for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <param name="update">Update value supplied to the publication ribbon operation and used when producing its result.</param>
     private void SetWordArt(Action<WordArtElement> update) {
         try
         {
@@ -4057,6 +5479,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Handles the page color changed lifecycle or event notification for <see cref="PublicationRibbon"/>, updating the state required by the surrounding workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the publication ribbon operation and used when producing its result.</param>
     private void OnPageColorChanged(string value) {
         try
         {
@@ -4068,6 +5494,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets transparent page for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void SetTransparentPage() {
         try
         {
@@ -4079,6 +5508,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets white page for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void SetWhitePage() {
         try
         {
@@ -4090,6 +5522,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets selected shape for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
+    /// <param name="shapeKind">Shape kind value supplied to the publication ribbon operation and used when producing its result.</param>
     private void SetSelectedShape(PublicationShape shapeKind)
     {
         try
@@ -4109,6 +5545,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs selected shape rectangle for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void SelectedShapeRectangle() {
         try
         {
@@ -4120,6 +5559,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs selected shape rounded rectangle for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void SelectedShapeRoundedRectangle() {
         try
         {
@@ -4131,6 +5573,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs selected shape ellipse for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void SelectedShapeEllipse() {
         try
         {
@@ -4142,6 +5587,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs selected shape line for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void SelectedShapeLine() {
         try
         {
@@ -4153,6 +5601,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Handles the shape fill changed lifecycle or event notification for <see cref="PublicationRibbon"/>, updating the state required by the surrounding workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the publication ribbon operation and used when producing its result.</param>
     private void OnShapeFillChanged(string value) {
         try
         {
@@ -4164,6 +5616,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Handles the shape stroke changed lifecycle or event notification for <see cref="PublicationRibbon"/>, updating the state required by the surrounding workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the publication ribbon operation and used when producing its result.</param>
     private void OnShapeStrokeChanged(string value) {
         try
         {
@@ -4176,6 +5632,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs reset picture for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
+    /// </summary>
     private void ResetPicture()
     {
         try
@@ -4198,6 +5657,9 @@
         }
     }
 
+    /// <summary>
+    /// Releases resources owned by <see cref="PublicationRibbon"/> and leaves the publication ribbon workflow in a safely disposed state.
+    /// </summary>
     public void Dispose() {
         try
         {
@@ -4209,4 +5671,5 @@
             throw;
         }
     }
+
 }

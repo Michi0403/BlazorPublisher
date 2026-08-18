@@ -47,19 +47,65 @@
 </div>
 
 @code {
+
+    /// <summary>
+    /// Gets or sets the item value that forms part of the word art path editor state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The item value exposed by <see cref="WordArtPathEditor"/>.</value>
     [Parameter, EditorRequired] public WordArtElement Item { get; set; } = default!;
+    /// <summary>
+    /// Gets or sets the path changed used by this word art path editor instance to locate the associated file-system resource.
+    /// </summary>
+    /// <value>The path changed value exposed by <see cref="WordArtPathEditor"/>.</value>
     [Parameter] public EventCallback<List<WordArtPathPoint>> PathChanged { get; set; }
 
+    /// <summary>
+    /// Stores the JavaScript object reference dependency used by <see cref="WordArtPathEditor"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private IJSObjectReference? _module;
+    /// <summary>
+    /// Stores the internal self state used by <see cref="WordArtPathEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private DotNetObjectReference<WordArtPathEditor>? _self;
+    /// <summary>
+    /// Stores the internal initialized state used by <see cref="WordArtPathEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _initialized;
+    /// <summary>
+    /// Stores the internal drawing armed state used by <see cref="WordArtPathEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _drawingArmed;
+    /// <summary>
+    /// Gets the stable editor identifier used to identify or correlate this word art path editor instance with related application state.
+    /// </summary>
+    /// <value>The editor identifier value exposed by <see cref="WordArtPathEditor"/>.</value>
     private string EditorId => $"wordart-path-editor-{Item.Id:N}";
+    /// <summary>
+    /// Gets the stable grid identifier used to identify or correlate this word art path editor instance with related application state.
+    /// </summary>
+    /// <value>The grid identifier value exposed by <see cref="WordArtPathEditor"/>.</value>
     private string GridId => $"wordart-path-grid-{Item.Id:N}";
+    /// <summary>
+    /// Gets the grid fill value that forms part of the word art path editor state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The grid fill value exposed by <see cref="WordArtPathEditor"/>.</value>
     private string GridFill => $"url(#{GridId})";
+    /// <summary>
+    /// Gets the path data used by this word art path editor instance to locate the associated file-system resource.
+    /// </summary>
+    /// <value>The path data value exposed by <see cref="WordArtPathEditor"/>.</value>
     private string PathData => WordArtGeometry.Build(Item.CustomPathPoints);
+    /// <summary>
+    /// Gets the editor aspect ratio value that forms part of the word art path editor state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The editor aspect ratio value exposed by <see cref="WordArtPathEditor"/>.</value>
     private string EditorAspectRatio => Math.Clamp(Item.Width / Math.Max(Item.Height, 1), .35, 6).ToString("0.###", CultureInfo.InvariantCulture);
 
+    /// <summary>
+    /// Handles the after render async lifecycle or event notification for <see cref="WordArtPathEditor"/>, updating the state required by the surrounding workflow.
+    /// </summary>
+    /// <param name="firstRender">Value indicating whether first render should apply to this operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         try
@@ -85,6 +131,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs straight preset for <see cref="WordArtPathEditor"/>, keeping the operation consistent with the state and invariants of the surrounding word art path editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task StraightPresetAsync() {
         try
         {
@@ -96,6 +146,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs rise preset for <see cref="WordArtPathEditor"/>, keeping the operation consistent with the state and invariants of the surrounding word art path editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RisePresetAsync() {
         try
         {
@@ -107,6 +161,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs fall preset for <see cref="WordArtPathEditor"/>, keeping the operation consistent with the state and invariants of the surrounding word art path editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task FallPresetAsync() {
         try
         {
@@ -118,6 +176,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs arch up preset for <see cref="WordArtPathEditor"/>, keeping the operation consistent with the state and invariants of the surrounding word art path editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task ArchUpPresetAsync() {
         try
         {
@@ -129,6 +191,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs arch down preset for <see cref="WordArtPathEditor"/>, keeping the operation consistent with the state and invariants of the surrounding word art path editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task ArchDownPresetAsync() {
         try
         {
@@ -140,6 +206,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs gentle wave preset for <see cref="WordArtPathEditor"/>, keeping the operation consistent with the state and invariants of the surrounding word art path editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task GentleWavePresetAsync() {
         try
         {
@@ -151,6 +221,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs s curve preset for <see cref="WordArtPathEditor"/>, keeping the operation consistent with the state and invariants of the surrounding word art path editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task SCurvePresetAsync() {
         try
         {
@@ -162,6 +236,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs circle arc preset for <see cref="WordArtPathEditor"/>, keeping the operation consistent with the state and invariants of the surrounding word art path editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task CircleArcPresetAsync() {
         try
         {
@@ -174,6 +252,11 @@
         }
     }
 
+    /// <summary>
+    /// Applies preset for <see cref="WordArtPathEditor"/>, keeping the operation consistent with the state and invariants of the surrounding word art path editor workflow.
+    /// </summary>
+    /// <param name="key">Key value supplied to the word art path editor operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ApplyPresetAsync(string key)
     {
         try
@@ -190,6 +273,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs arm drawing for <see cref="WordArtPathEditor"/>, keeping the operation consistent with the state and invariants of the surrounding word art path editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ArmDrawingAsync()
     {
         try
@@ -205,6 +292,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs reverse for <see cref="WordArtPathEditor"/>, keeping the operation consistent with the state and invariants of the surrounding word art path editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ReverseAsync()
     {
         try
@@ -221,6 +312,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs reduce for <see cref="WordArtPathEditor"/>, keeping the operation consistent with the state and invariants of the surrounding word art path editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ReduceAsync()
     {
         try
@@ -237,6 +332,11 @@
         }
     }
 
+    /// <summary>
+    /// Sets draw mode for <see cref="WordArtPathEditor"/>, keeping the operation consistent with the state and invariants of the surrounding word art path editor workflow.
+    /// </summary>
+    /// <param name="enabled">Value indicating whether enabled should apply to this operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task SetDrawModeAsync(bool enabled)
     {
         try
@@ -252,6 +352,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs commit word art path for <see cref="WordArtPathEditor"/>, keeping the operation consistent with the state and invariants of the surrounding word art path editor workflow.
+    /// </summary>
+    /// <param name="points">Points value supplied to the word art path editor operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     [JSInvokable]
     public async Task CommitWordArtPath(WordArtPathPoint[] points)
     {
@@ -270,6 +375,10 @@
         }
     }
 
+    /// <summary>
+    /// Releases resources owned by <see cref="WordArtPathEditor"/> and leaves the word art path editor workflow in a safely disposed state.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     public async ValueTask DisposeAsync()
     {
         try
@@ -294,4 +403,5 @@
             throw;
         }
     }
+
 }

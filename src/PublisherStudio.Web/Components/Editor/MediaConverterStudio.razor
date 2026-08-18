@@ -303,34 +303,124 @@
 }
 
 @code {
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the value is visible applies to the media converter studio state.
+    /// </summary>
+    /// <value>The visible value exposed by <see cref="MediaConverterStudio"/>.</value>
     [Parameter] public bool Visible { get; set; }
+    /// <summary>
+    /// Gets or sets the initial source value that forms part of the media converter studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The initial source value exposed by <see cref="MediaConverterStudio"/>.</value>
     [Parameter] public MediaConversionInsertRequest? InitialSource { get; set; }
+    /// <summary>
+    /// Gets or sets the closed value that forms part of the media converter studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The closed value exposed by <see cref="MediaConverterStudio"/>.</value>
     [Parameter] public EventCallback Closed { get; set; }
+    /// <summary>
+    /// Gets or sets the inserted value that forms part of the media converter studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The inserted value exposed by <see cref="MediaConverterStudio"/>.</value>
     [Parameter] public EventCallback<MediaConversionInsertRequest> Inserted { get; set; }
+    /// <summary>
+    /// Gets or sets the opened in studio value that forms part of the media converter studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The opened in studio value exposed by <see cref="MediaConverterStudio"/>.</value>
     [Parameter] public EventCallback<MediaConversionInsertRequest> OpenedInStudio { get; set; }
 
+    /// <summary>
+    /// Stores the internal capabilities state used by <see cref="MediaConverterStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private MediaConversionCapabilities? _capabilities;
+    /// <summary>
+    /// Stores the browser file dependency used by <see cref="MediaConverterStudio"/> to delegate that application responsibility to its owning collaborator.
+    /// </summary>
     private IBrowserFile? _file;
+    /// <summary>
+    /// Stores the internal memory source state used by <see cref="MediaConverterStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private MediaConversionInsertRequest? _memorySource;
+    /// <summary>
+    /// Stores the internal last initial source state used by <see cref="MediaConverterStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private MediaConversionInsertRequest? _lastInitialSource;
+    /// <summary>
+    /// Stores the internal preset identifier state used by <see cref="MediaConverterStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private string _presetId = string.Empty;
+    /// <summary>
+    /// Stores the internal options state used by <see cref="MediaConverterStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private MediaConversionOptions _options = new();
+    /// <summary>
+    /// Gets the encoder preset suggestions collection maintained or exposed by this media converter studio instance for downstream processing.
+    /// </summary>
+    /// <value>The encoder preset suggestions value exposed by <see cref="MediaConverterStudio"/>.</value>
     private IReadOnlyList<string> EncoderPresetSuggestions => RuntimePolicy.GetCollection(PublisherRuntimeCollection.FfmpegEncoderPresetSuggestions);
+    /// <summary>
+    /// Gets the pixel format suggestions collection maintained or exposed by this media converter studio instance for downstream processing.
+    /// </summary>
+    /// <value>The pixel format suggestions value exposed by <see cref="MediaConverterStudio"/>.</value>
     private IReadOnlyList<string> PixelFormatSuggestions => RuntimePolicy.GetCollection(PublisherRuntimeCollection.FfmpegPixelFormatSuggestions);
+    /// <summary>
+    /// Stores the in-memory jobs collection maintained internally by <see cref="MediaConverterStudio"/> for its current workflow state.
+    /// </summary>
     private readonly List<MediaConversionJobInfo> _jobs = [];
+    /// <summary>
+    /// Stores the in-memory profiles collection maintained internally by <see cref="MediaConverterStudio"/> for its current workflow state.
+    /// </summary>
     private readonly List<MediaConversionProfile> _profiles = [];
+    /// <summary>
+    /// Stores the internal selected profile identifier state used by <see cref="MediaConverterStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private Guid _selectedProfileId;
+    /// <summary>
+    /// Stores the internal selected job identifier state used by <see cref="MediaConverterStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private Guid? _selectedJobId;
+    /// <summary>
+    /// Stores the internal profile name state used by <see cref="MediaConverterStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private string _profileName = "My conversion profile";
+    /// <summary>
+    /// Stores the internal profile description state used by <see cref="MediaConverterStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private string _profileDescription = string.Empty;
+    /// <summary>
+    /// Stores the cancellation source used by <see cref="MediaConverterStudio"/> to stop its current background or asynchronous operation.
+    /// </summary>
     private CancellationTokenSource? _polling;
+    /// <summary>
+    /// Stores the internal self state used by <see cref="MediaConverterStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private DotNetObjectReference<MediaConverterStudio>? _self;
+    /// <summary>
+    /// Stores the internal source drop zone state used by <see cref="MediaConverterStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private ElementReference _sourceDropZone;
+    /// <summary>
+    /// Stores the internal context menu state used by <see cref="MediaConverterStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private DxContextMenu _contextMenu = default!;
+    /// <summary>
+    /// Stores the internal drop bound state used by <see cref="MediaConverterStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _dropBound;
+    /// <summary>
+    /// Stores the internal was visible state used by <see cref="MediaConverterStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _wasVisible;
+    /// <summary>
+    /// Stores the internal error state used by <see cref="MediaConverterStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private string _error = string.Empty;
 
+    /// <summary>
+    /// Gets the matching presets collection maintained or exposed by this media converter studio instance for downstream processing.
+    /// </summary>
+    /// <value>The matching presets value exposed by <see cref="MediaConverterStudio"/>.</value>
     private IEnumerable<MediaConversionPreset> MatchingPresets
     {
         get
@@ -340,32 +430,124 @@
             return string.IsNullOrWhiteSpace(kind) ? presets : presets.Where(preset => preset.InputKind == kind);
         }
     }
+    /// <summary>
+    /// Gets the source kind value that forms part of the media converter studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The source kind value exposed by <see cref="MediaConverterStudio"/>.</value>
     private string SourceKind => EffectiveSourceMimeType.StartsWith("image/", StringComparison.OrdinalIgnoreCase) ? "image"
         : EffectiveSourceMimeType.StartsWith("audio/", StringComparison.OrdinalIgnoreCase) ? "audio"
         : EffectiveSourceMimeType.StartsWith("video/", StringComparison.OrdinalIgnoreCase) ? "video"
         : string.Empty;
+    /// <summary>
+    /// Gets the source name value that forms part of the media converter studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The source name value exposed by <see cref="MediaConverterStudio"/>.</value>
     private string SourceName => _file?.Name ?? _memorySource?.FileName ?? string.Empty;
+    /// <summary>
+    /// Gets the source MIME type value that forms part of the media converter studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The source MIME type value exposed by <see cref="MediaConverterStudio"/>.</value>
     private string SourceMimeType => _file?.ContentType ?? _memorySource?.MimeType ?? string.Empty;
+    /// <summary>
+    /// Gets the effective source MIME type value that forms part of the media converter studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The effective source MIME type value exposed by <see cref="MediaConverterStudio"/>.</value>
     private string EffectiveSourceMimeType => ResolveMimeType(SourceMimeType, SourceName);
+    /// <summary>
+    /// Gets the source size that quantifies the associated media converter studio data.
+    /// </summary>
+    /// <value>The source size value exposed by <see cref="MediaConverterStudio"/>.</value>
     private long SourceSize => _file?.Size ?? _memorySource?.Content.LongLength ?? 0;
+    /// <summary>
+    /// Gets the source origin value that forms part of the media converter studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The source origin value exposed by <see cref="MediaConverterStudio"/>.</value>
     private string SourceOrigin => _file is not null ? "Local file" : _memorySource?.Origin ?? string.Empty;
+    /// <summary>
+    /// Gets a value indicating whether source applies to the media converter studio state.
+    /// </summary>
+    /// <value>The has source value exposed by <see cref="MediaConverterStudio"/>.</value>
     private bool HasSource => _file is not null || _memorySource is not null;
+    /// <summary>
+    /// Gets the selected preset value that forms part of the media converter studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The selected preset value exposed by <see cref="MediaConverterStudio"/>.</value>
     private MediaConversionPreset? SelectedPreset => _capabilities?.Presets.FirstOrDefault(preset => preset.Id == _presetId);
+    /// <summary>
+    /// Gets the selected job value that forms part of the media converter studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The selected job value exposed by <see cref="MediaConverterStudio"/>.</value>
     private MediaConversionJobInfo? SelectedJob => _selectedJobId is { } id ? _jobs.FirstOrDefault(job => job.Id == id) : null;
+    /// <summary>
+    /// Gets a value indicating whether selected job completed applies to the media converter studio state.
+    /// </summary>
+    /// <value>The selected job completed value exposed by <see cref="MediaConverterStudio"/>.</value>
     private bool SelectedJobCompleted => SelectedJob?.Status == MediaConversionJobStatus.Completed;
+    /// <summary>
+    /// Gets a value indicating whether open source in studio applies to the media converter studio state.
+    /// </summary>
+    /// <value>The can open source in studio value exposed by <see cref="MediaConverterStudio"/>.</value>
     private bool CanOpenSourceInStudio => HasSource && CanOpenInStudio(EffectiveSourceMimeType);
+    /// <summary>
+    /// Gets a value indicating whether selected job running applies to the media converter studio state.
+    /// </summary>
+    /// <value>The selected job running value exposed by <see cref="MediaConverterStudio"/>.</value>
     private bool SelectedJobRunning => SelectedJob?.Status is MediaConversionJobStatus.Queued or MediaConversionJobStatus.Running;
+    /// <summary>
+    /// Gets a value indicating whether open selected in studio applies to the media converter studio state.
+    /// </summary>
+    /// <value>The can open selected in studio value exposed by <see cref="MediaConverterStudio"/>.</value>
     private bool CanOpenSelectedInStudio => SelectedJobCompleted && CanOpenInStudio(SelectedJob?.OutputMimeType);
+    /// <summary>
+    /// Gets a value indicating whether delete profile applies to the media converter studio state.
+    /// </summary>
+    /// <value>The can delete profile value exposed by <see cref="MediaConverterStudio"/>.</value>
     private bool CanDeleteProfile => _selectedProfileId != Guid.Empty && _profiles.FirstOrDefault(profile => profile.Id == _selectedProfileId)?.BuiltIn == false;
+    /// <summary>
+    /// Gets a value indicating whether start applies to the media converter studio state.
+    /// </summary>
+    /// <value>The can start value exposed by <see cref="MediaConverterStudio"/>.</value>
     private bool CanStart => HasSource && _capabilities?.Available == true && SelectedPreset?.Available == true;
+    /// <summary>
+    /// Gets the source studio command value that forms part of the media converter studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The source studio command value exposed by <see cref="MediaConverterStudio"/>.</value>
     private string SourceStudioCommand => HasSource ? $"Edit source in {StudioName(EffectiveSourceMimeType)}" : "Edit source in Studio";
+    /// <summary>
+    /// Gets the source studio context command value that forms part of the media converter studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The source studio context command value exposed by <see cref="MediaConverterStudio"/>.</value>
     private string SourceStudioContextCommand => HasSource ? $"Edit source in {StudioName(EffectiveSourceMimeType)}" : "Edit source in Studio";
+    /// <summary>
+    /// Gets the source studio button text value that forms part of the media converter studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The source studio button text value exposed by <see cref="MediaConverterStudio"/>.</value>
     private string SourceStudioButtonText => HasSource ? $"Edit in {StudioName(EffectiveSourceMimeType)}" : "Edit in Studio";
+    /// <summary>
+    /// Gets the source studio tooltip value that forms part of the media converter studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The source studio tooltip value exposed by <see cref="MediaConverterStudio"/>.</value>
     private string SourceStudioTooltip => HasSource ? $"Open the current source in {StudioName(EffectiveSourceMimeType)}" : "Open the current source in its Studio";
+    /// <summary>
+    /// Gets the selected studio command value that forms part of the media converter studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The selected studio command value exposed by <see cref="MediaConverterStudio"/>.</value>
     private string SelectedStudioCommand => SelectedJob is { } job ? $"Open in {StudioName(job.OutputMimeType)}" : "Open in Studio";
+    /// <summary>
+    /// Gets the selected studio context command value that forms part of the media converter studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The selected studio context command value exposed by <see cref="MediaConverterStudio"/>.</value>
     private string SelectedStudioContextCommand => SelectedJob is { } job ? $"Open selected result in {StudioName(job.OutputMimeType)}" : "Open selected result in Studio";
+    /// <summary>
+    /// Gets the metadata text value that forms part of the media converter studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The metadata text value exposed by <see cref="MediaConverterStudio"/>.</value>
     private string MetadataText => string.Join(Environment.NewLine, _options.Metadata.Select(pair => $"{pair.Key}={pair.Value}"));
 
+    /// <summary>
+    /// Handles the parameters set async lifecycle or event notification for <see cref="MediaConverterStudio"/>, updating the state required by the surrounding workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     protected override async Task OnParametersSetAsync()
     {
         try
@@ -403,6 +585,11 @@
         }
     }
 
+    /// <summary>
+    /// Handles the after render async lifecycle or event notification for <see cref="MediaConverterStudio"/>, updating the state required by the surrounding workflow.
+    /// </summary>
+    /// <param name="firstRender">Value indicating whether first render should apply to this operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         try
@@ -427,6 +614,13 @@
         }
     }
 
+    /// <summary>
+    /// Performs receive dropped media for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
+    /// <param name="assetId">Identifier of the asset to use for this operation.</param>
+    /// <param name="fileName">File name value supplied to the media converter studio operation and used when producing its result.</param>
+    /// <param name="mimeType">Mime type value supplied to the media converter studio operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     [JSInvokable]
     public Task ReceiveDroppedMedia(string assetId, string fileName, string mimeType)
     {
@@ -456,6 +650,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs receive media drop error for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
+    /// <param name="message">Message value supplied to the media converter studio operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     [JSInvokable]
     public Task ReceiveMediaDropError(string message)
     {
@@ -472,6 +671,10 @@
         }
     }
 
+    /// <summary>
+    /// Opens source picker for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task OpenSourcePicker() {
         try
         {
@@ -483,6 +686,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs select file for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
+    /// <param name="args">Input file change event args dependency used by the media converter studio workflow to provide the corresponding application capability.</param>
     private void SelectFile(InputFileChangeEventArgs args)
     {
         try
@@ -499,6 +706,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs clear source for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
     private void ClearSource() {
         try
         {
@@ -510,6 +720,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Ensures preset for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
     private void EnsurePreset()
     {
         try
@@ -531,6 +744,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs change preset for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media converter studio operation and used when producing its result.</param>
     private void ChangePreset(ChangeEventArgs args)
     {
         try
@@ -547,6 +764,10 @@
         }
     }
 
+    /// <summary>
+    /// Applies preset guidance for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
+    /// <param name="overwriteEncoderFields">Value indicating whether overwrite encoder fields should apply to this operation.</param>
     private void ApplyPresetGuidance(bool overwriteEncoderFields)
     {
         try
@@ -590,6 +811,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs start for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task Start()
     {
         try
@@ -630,6 +855,9 @@
         }
     }
 
+    /// <summary>
+    /// Starts polling for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
     private void StartPolling()
     {
         try
@@ -649,6 +877,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs poll for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task PollAsync(CancellationToken cancellationToken)
     {
         try
@@ -683,6 +916,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Refreshes jobs for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
     private void RefreshJobs()
     {
         try
@@ -699,6 +935,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Refreshes jobs command for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
     private void RefreshJobsCommand() {
         try
         {
@@ -710,6 +949,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs select job for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
     private void SelectJob(Guid id) {
         try
         {
@@ -723,6 +966,10 @@
     }
 
 
+    /// <summary>
+    /// Opens source in studio for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task OpenSourceInStudio()
     {
         try
@@ -764,6 +1011,11 @@
         }
     }
 
+    /// <summary>
+    /// Reads output for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
+    /// <param name="job">Job value supplied to the media converter studio operation and used when producing its result.</param>
+    /// <returns>The media conversion insert request produced by the operation.</returns>
     private async Task<MediaConversionInsertRequest> ReadOutput(MediaConversionJobInfo job)
     {
         try
@@ -783,6 +1035,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs download for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
+    /// <param name="job">Job value supplied to the media converter studio operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task Download(MediaConversionJobInfo job)
     {
         try
@@ -806,6 +1063,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs insert for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
+    /// <param name="job">Job value supplied to the media converter studio operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task Insert(MediaConversionJobInfo job)
     {
         try
@@ -820,6 +1082,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Opens in studio for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
+    /// <param name="job">Job value supplied to the media converter studio operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task OpenInStudio(MediaConversionJobInfo job)
     {
         try
@@ -838,6 +1105,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs download selected for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task DownloadSelected() {
         try
         {
@@ -849,6 +1120,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs insert selected for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task InsertSelected() {
         try
         {
@@ -860,6 +1135,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Opens selected in studio for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task OpenSelectedInStudio() {
         try
         {
@@ -871,6 +1150,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Determines whether cel selected for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
     private void CancelSelected() {
         try
         {
@@ -882,6 +1164,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Removes selected for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
     private void RemoveSelected() {
         try
         {
@@ -893,6 +1178,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs show converter context menu for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media converter studio operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task ShowConverterContextMenu(MouseEventArgs args) {
         try
         {
@@ -904,6 +1194,12 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs show job context menu for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
+    /// <param name="job">Job value supplied to the media converter studio operation and used when producing its result.</param>
+    /// <param name="args">Args value supplied to the media converter studio operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ShowJobContextMenu(MediaConversionJobInfo job, MouseEventArgs args)
     {
         try
@@ -919,6 +1215,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Determines whether cel for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
     private void Cancel(Guid id) {
         try
         {
@@ -930,6 +1230,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs remove for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
     private void Remove(Guid id) {
         try
         {
@@ -941,6 +1245,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs default job action for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
+    /// <param name="job">Job value supplied to the media converter studio operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task DefaultJobAction(MediaConversionJobInfo job) {
         try
         {
@@ -953,6 +1262,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs select profile for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media converter studio operation and used when producing its result.</param>
     private void SelectProfile(ChangeEventArgs args)
     {
         try
@@ -974,6 +1287,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Persists profile for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
     private void SaveProfile()
     {
         try
@@ -1000,6 +1316,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Deletes profile for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
     private void DeleteProfile()
     {
         try
@@ -1016,6 +1335,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs resolution source for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
     private void ResolutionSource() {
         try
         {
@@ -1027,6 +1349,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs resolution2160 for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
     private void Resolution2160() {
         try
         {
@@ -1038,6 +1363,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs resolution1440 for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
     private void Resolution1440() {
         try
         {
@@ -1049,6 +1377,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs resolution1080 for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
     private void Resolution1080() {
         try
         {
@@ -1060,6 +1391,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs resolution720 for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
     private void Resolution720() {
         try
         {
@@ -1071,6 +1405,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs resolution480 for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
     private void Resolution480() {
         try
         {
@@ -1082,6 +1419,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs resolution vertical for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
     private void ResolutionVertical() {
         try
         {
@@ -1093,6 +1433,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets resolution for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
+    /// <param name="width">Width value supplied to the media converter studio operation and used when producing its result.</param>
+    /// <param name="height">Height value supplied to the media converter studio operation and used when producing its result.</param>
     private void SetResolution(int width, int height) {
         try
         {
@@ -1104,6 +1449,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs scale fit for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
     private void ScaleFit() {
         try
         {
@@ -1115,6 +1463,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs scale fill for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
     private void ScaleFill() {
         try
         {
@@ -1126,6 +1477,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs scale stretch for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
     private void ScaleStretch() {
         try
         {
@@ -1137,6 +1491,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs scale preserve for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
     private void ScalePreserve() {
         try
         {
@@ -1148,6 +1505,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs frame rate30 for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
     private void FrameRate30() {
         try
         {
@@ -1159,6 +1519,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs frame rate60 for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
     private void FrameRate60() {
         try
         {
@@ -1170,6 +1533,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs frame rate source for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
     private void FrameRateSource() {
         try
         {
@@ -1181,6 +1547,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle normalize audio for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
     private void ToggleNormalizeAudio() {
         try
         {
@@ -1192,6 +1561,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle disable audio for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
     private void ToggleDisableAudio() {
         try
         {
@@ -1203,6 +1575,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle deinterlace for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
     private void ToggleDeinterlace() {
         try
         {
@@ -1214,6 +1589,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs audio stereo for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
     private void AudioStereo() {
         try
         {
@@ -1225,6 +1603,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs audio mono for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
     private void AudioMono() {
         try
         {
@@ -1237,6 +1618,9 @@
         }
     }
 
+    /// <summary>
+    /// Publishes er studio web defaults for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
     private void PublisherStudioWebDefaults() {
         try
         {
@@ -1248,6 +1632,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs broad web defaults for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
     private void BroadWebDefaults() {
         try
         {
@@ -1259,6 +1646,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs editing defaults for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
     private void EditingDefaults() {
         try
         {
@@ -1270,6 +1660,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs archive defaults for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
     private void ArchiveDefaults() {
         try
         {
@@ -1281,6 +1674,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Applies built in for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
+    /// <param name="name">Name value supplied to the media converter studio operation and used when producing its result.</param>
     private void ApplyBuiltIn(string name)
     {
         try
@@ -1298,6 +1695,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs change target for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media converter studio operation and used when producing its result.</param>
     private void ChangeTarget(ChangeEventArgs args) {
         try
         {
@@ -1309,6 +1710,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change scale mode for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media converter studio operation and used when producing its result.</param>
     private void ChangeScaleMode(ChangeEventArgs args) {
         try
         {
@@ -1320,6 +1725,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change metadata for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media converter studio operation and used when producing its result.</param>
     private void ChangeMetadata(ChangeEventArgs args)
     {
         try
@@ -1340,6 +1749,12 @@
         }
     }
 
+    /// <summary>
+    /// Resolves MIME type for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
+    /// <param name="mimeType">Mime type value supplied to the media converter studio operation and used when producing its result.</param>
+    /// <param name="fileName">File name value supplied to the media converter studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string ResolveMimeType(string? mimeType, string fileName) {
         try
         {
@@ -1354,6 +1769,11 @@
         }
     }
 
+    /// <summary>
+    /// Determines whether open in studio for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
+    /// <param name="mimeType">Mime type value supplied to the media converter studio operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool CanOpenInStudio(string? mimeType) {
         try
         {
@@ -1368,6 +1788,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs studio name for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
+    /// <param name="mimeType">Mime type value supplied to the media converter studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string StudioName(string? mimeType) {
         try
         {
@@ -1383,6 +1808,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs studio tooltip for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
+    /// <param name="mimeType">Mime type value supplied to the media converter studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string StudioTooltip(string? mimeType) {
         try
         {
@@ -1395,6 +1825,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs MIME from name for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
+    /// <param name="fileName">File name value supplied to the media converter studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string MimeFromName(string fileName) {
         try
         {
@@ -1424,6 +1859,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs preset name for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string PresetName(string id) {
         try
         {
@@ -1435,6 +1875,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs text for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media converter studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Text(ChangeEventArgs args) {
         try
         {
@@ -1446,6 +1891,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs bool for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media converter studio operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool Bool(ChangeEventArgs args) {
         try
         {
@@ -1457,6 +1907,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs nullable int for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media converter studio operation and used when producing its result.</param>
+    /// <returns>The int produced by the operation.</returns>
     private int? NullableInt(ChangeEventArgs args) {
         try
         {
@@ -1468,6 +1923,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs nullable double for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media converter studio operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     private double? NullableDouble(ChangeEventArgs args) {
         try
         {
@@ -1479,6 +1939,12 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs double for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the media converter studio operation and used when producing its result.</param>
+    /// <param name="fallback">Fallback value supplied to the media converter studio operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     private double Double(ChangeEventArgs args, double fallback) {
         try
         {
@@ -1490,6 +1956,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs nullable number for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the media converter studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string NullableNumber(double? value) {
         try
         {
@@ -1501,6 +1972,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs nullable number for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the media converter studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string NullableNumber(int? value) {
         try
         {
@@ -1512,6 +1988,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs number for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the media converter studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Number(double value) {
         try
         {
@@ -1523,6 +2004,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs format bytes for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
+    /// <param name="bytes">Bytes value supplied to the media converter studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string FormatBytes(long bytes) {
         try
         {
@@ -1535,6 +2021,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs close for <see cref="MediaConverterStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media converter studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task Close() {
         try
         {
@@ -1546,12 +2036,20 @@
             throw;
         }
     }
+    /// <summary>
+    /// Releases resources owned by <see cref="MediaConverterStudio"/> and leaves the media converter studio workflow in a safely disposed state.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     public async ValueTask DisposeAsync()
     {
         try
         {
             if (_polling is not null) { await _polling.CancelAsync().ConfigureAwait(true); _polling.Dispose(); _polling = null; }
-            try { await JS.InvokeVoidAsync("publisherStudio.unbindMediaConverterDrop", _sourceDropZone).ConfigureAwait(true); } catch { }
+            if (_dropBound)
+            {
+                try { await JS.InvokeVoidAsync("publisherStudio.unbindMediaConverterDrop", _sourceDropZone).ConfigureAwait(true); } catch { }
+                _dropBound = false;
+            }
             _self?.Dispose();
             _self = null;
     
@@ -1562,4 +2060,5 @@
             throw;
         }
     }
+
 }

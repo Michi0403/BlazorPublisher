@@ -652,13 +652,36 @@
 </DxContextMenu>
 
 @code {
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the value is visible applies to the streaming studio state.
+    /// </summary>
+    /// <value>The visible value exposed by <see cref="StreamingStudio"/>.</value>
     [Parameter] public bool Visible { get; set; }
+    /// <summary>
+    /// Gets or sets the document value that forms part of the streaming studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The document value exposed by <see cref="StreamingStudio"/>.</value>
     [Parameter, EditorRequired] public PublicationDocument Document { get; set; } = default!;
+    /// <summary>
+    /// Gets or sets the saved value that forms part of the streaming studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The saved value exposed by <see cref="StreamingStudio"/>.</value>
     [Parameter] public EventCallback<PublicationStreamingSettings> Saved { get; set; }
+    /// <summary>
+    /// Gets or sets the cancelled value that forms part of the streaming studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The cancelled value exposed by <see cref="StreamingStudio"/>.</value>
     [Parameter] public EventCallback Cancelled { get; set; }
 
+    /// <summary>
+    /// Defines the default twitch endpoint constant used by <see cref="StreamingStudio"/> so callers and internal logic share the same stable value.
+    /// </summary>
     private const string DefaultTwitchEndpoint = "rtmp://ingest.global-contribute.live-video.net/app/{streamKey}";
 
+    /// <summary>
+    /// Stores the internal provider transports state used by <see cref="StreamingStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly PublicationStreamTransport[] ProviderTransports =
     [
         PublicationStreamTransport.Rtmp,
@@ -666,59 +689,145 @@
         PublicationStreamTransport.Srt
     ];
 
+    /// <summary>
+    /// Stores the internal tab state used by <see cref="StreamingStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private string _tab = "providers";
+    /// <summary>
+    /// Stores the internal was visible state used by <see cref="StreamingStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _wasVisible;
+    /// <summary>
+    /// Stores the internal show workflow help state used by <see cref="StreamingStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _showWorkflowHelp = true;
+    /// <summary>
+    /// Stores the internal draft state used by <see cref="StreamingStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private PublicationStreamingSettings _draft = new();
+    /// <summary>
+    /// Stores the internal machine state used by <see cref="StreamingStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private StreamingMachineSettings _machine = new();
+    /// <summary>
+    /// Stores the internal provider draft state used by <see cref="StreamingStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private StreamingProviderProfile? _providerDraft;
+    /// <summary>
+    /// Stores the in-memory twitch ingest candidates collection maintained internally by <see cref="StreamingStudio"/> for its current workflow state.
+    /// </summary>
     private List<TwitchIngestCandidate> _twitchIngestCandidates = [];
+    /// <summary>
+    /// Stores the internal twitch authorization state used by <see cref="StreamingStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private TwitchDeviceAuthorization? _twitchAuthorization;
+    /// <summary>
+    /// Stores the cancellation source used by <see cref="StreamingStudio"/> to stop its current background or asynchronous operation.
+    /// </summary>
     private CancellationTokenSource? _twitchOAuthCancellation;
+    /// <summary>
+    /// Stores the internal twitch o auth busy state used by <see cref="StreamingStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _twitchOAuthBusy;
+    /// <summary>
+    /// Stores the internal twitch ingest busy state used by <see cref="StreamingStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _twitchIngestBusy;
+    /// <summary>
+    /// Stores the in-memory browser devices collection maintained internally by <see cref="StreamingStudio"/> for its current workflow state.
+    /// </summary>
     private List<BrowserMediaDeviceInfo> _browserDevices = [];
+    /// <summary>
+    /// Stores the in-memory native devices collection maintained internally by <see cref="StreamingStudio"/> for its current workflow state.
+    /// </summary>
     private List<NativeMediaDeviceInfo> _nativeDevices = [];
+    /// <summary>
+    /// Stores the internal selected output identifier state used by <see cref="StreamingStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private Guid? _selectedOutputId;
+    /// <summary>
+    /// Stores the internal status state used by <see cref="StreamingStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private string _status = "Ready";
+    /// <summary>
+    /// Stores the internal streaming context menu state used by <see cref="StreamingStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private DxContextMenu _streamingContextMenu = default!;
+    /// <summary>
+    /// Stores the internal context kind state used by <see cref="StreamingStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private string _contextKind = "workspace";
+    /// <summary>
+    /// Stores the internal context identifier state used by <see cref="StreamingStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private Guid? _contextId;
 
+    /// <summary>
+    /// Gets the selected output value that forms part of the streaming studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The selected output value exposed by <see cref="StreamingStudio"/>.</value>
     private PublicationStreamOutput? SelectedOutput => _selectedOutputId is { } id
         ? _draft.Outputs.FirstOrDefault(item => item.Id == id)
         : null;
 
+    /// <summary>
+    /// Gets a value indicating whether twitch o auth applies to the streaming studio state.
+    /// </summary>
+    /// <value>The is twitch o auth value exposed by <see cref="StreamingStudio"/>.</value>
     private bool IsTwitchOAuth => _providerDraft is
     {
         Provider: PublicationStreamProvider.Twitch,
         AuthenticationMode: StreamingProviderAuthenticationMode.OAuth
     };
 
+    /// <summary>
+    /// Gets a value indicating whether twitch o auth has chat scopes applies to the streaming studio state.
+    /// </summary>
+    /// <value>The twitch o auth has chat scopes value exposed by <see cref="StreamingStudio"/>.</value>
     private bool TwitchOAuthHasChatScopes => _providerDraft is not null
         && _providerDraft.OAuthScopes.Contains("chat:read", StringComparison.OrdinalIgnoreCase)
         && _providerDraft.OAuthScopes.Contains("chat:edit", StringComparison.OrdinalIgnoreCase);
 
+    /// <summary>
+    /// Gets the twitch client identifier placeholder value that forms part of the streaming studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The twitch client identifier placeholder value exposed by <see cref="StreamingStudio"/>.</value>
     private string TwitchClientIdPlaceholder => string.IsNullOrWhiteSpace(TwitchOAuth.DefaultClientId)
         ? "Twitch public application Client ID"
         : "Configured by PublisherStudio — leave blank to use it";
 
+    /// <summary>
+    /// Gets the twitch connection label value that forms part of the streaming studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The twitch connection label value exposed by <see cref="StreamingStudio"/>.</value>
     private string TwitchConnectionLabel => _providerDraft is null
         ? "Not configured"
         : _providerDraft.AuthenticationMode == StreamingProviderAuthenticationMode.Manual
             ? "Manual mode"
             : _providerDraft.HasStoredOAuthSession ? "OAuth connected" : "OAuth not connected";
 
+    /// <summary>
+    /// Gets the o auth expiry text value that forms part of the streaming studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The o auth expiry text value exposed by <see cref="StreamingStudio"/>.</value>
     private string OAuthExpiryText => _providerDraft?.OAuthAccessTokenExpiresUtc is { } expiresUtc
         ? expiresUtc <= DateTimeOffset.UtcNow ? "Refresh required" : $"Refreshes automatically · {expiresUtc.ToLocalTime():g}"
         : "Managed automatically";
 
+    /// <summary>
+    /// Gets the twitch ingest summary value that forms part of the streaming studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The twitch ingest summary value exposed by <see cref="StreamingStudio"/>.</value>
     private string TwitchIngestSummary => _providerDraft is null || string.IsNullOrWhiteSpace(_providerDraft.IngestServerName)
         ? "Not measured"
         : _providerDraft.IngestLatencyMilliseconds is { } milliseconds
             ? $"{_providerDraft.IngestServerName} · {milliseconds:0} ms"
             : _providerDraft.IngestServerName;
 
+    /// <summary>
+    /// Gets the section title value that forms part of the streaming studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The section title value exposed by <see cref="StreamingStudio"/>.</value>
     private string SectionTitle => _tab switch
     {
         "providers" => "Provider profiles",
@@ -729,6 +838,10 @@
         _ => "Advanced"
     };
 
+    /// <summary>
+    /// Gets the section description value that forms part of the streaming studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The section description value exposed by <see cref="StreamingStudio"/>.</value>
     private string SectionDescription => _tab switch
     {
         "providers" => "Create reusable provider identities and keep stream/Chat secrets in the machine profile store.",
@@ -739,6 +852,10 @@
         _ => "Control the integrated streaming runtime, program page, encoder preference, and session hotkeys."
     };
 
+    /// <summary>
+    /// Gets the section icon value that forms part of the streaming studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The section icon value exposed by <see cref="StreamingStudio"/>.</value>
     private string SectionIcon => _tab switch
     {
         "providers" => "pub-icon-web",
@@ -749,6 +866,10 @@
         _ => "pub-icon-properties"
     };
 
+    /// <summary>
+    /// Gets the workflow steps collection maintained or exposed by this streaming studio instance for downstream processing.
+    /// </summary>
+    /// <value>The workflow steps value exposed by <see cref="StreamingStudio"/>.</value>
     private IReadOnlyList<WorkflowStep> WorkflowSteps => _tab switch
     {
         "providers" =>
@@ -789,6 +910,10 @@
         ]
     };
 
+    /// <summary>
+    /// Gets the workflow tip value that forms part of the streaming studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The workflow tip value exposed by <see cref="StreamingStudio"/>.</value>
     private string WorkflowTip => _tab switch
     {
         "providers" => "Deleting a provider also removes publication outputs in this draft that reference it. Saved publications are unchanged until Apply.",
@@ -799,6 +924,10 @@
         _ => "Machine options are saved separately. Apply streaming setup stores only publication-specific page, output, recording, LAN, and hotkey settings."
     };
 
+    /// <summary>
+    /// Gets the LAN exposure text value that forms part of the streaming studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The LAN exposure text value exposed by <see cref="StreamingStudio"/>.</value>
     private string LanExposureText => !_draft.Lan.Enabled
         ? "Disabled"
         : string.Equals(_draft.Lan.BindAddress?.Trim(), "127.0.0.1", StringComparison.OrdinalIgnoreCase)
@@ -806,6 +935,10 @@
             ? "This computer only"
             : $"LAN address {_draft.Lan.BindAddress}";
 
+    /// <summary>
+    /// Handles the parameters set async lifecycle or event notification for <see cref="StreamingStudio"/>, updating the state required by the surrounding workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     protected override async Task OnParametersSetAsync()
     {
         try
@@ -835,6 +968,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs show providers for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
     private void ShowProviders() {
         try
         {
@@ -846,6 +982,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs show outputs for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
     private void ShowOutputs() {
         try
         {
@@ -857,6 +996,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs show recording for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
     private void ShowRecording() {
         try
         {
@@ -868,6 +1010,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs show LAN for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
     private void ShowLan() {
         try
         {
@@ -879,6 +1024,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs show devices for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
     private void ShowDevices() {
         try
         {
@@ -890,6 +1038,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs show advanced for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
     private void ShowAdvanced() {
         try
         {
@@ -901,6 +1052,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle workflow help for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
     private void ToggleWorkflowHelp() {
         try
         {
@@ -913,6 +1067,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs change provider for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the streaming studio operation and used when producing its result.</param>
     private void ChangeProvider(ChangeEventArgs args)
     {
         try
@@ -943,6 +1101,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs change authentication mode for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the streaming studio operation and used when producing its result.</param>
     private void ChangeAuthenticationMode(ChangeEventArgs args)
     {
         try
@@ -971,6 +1133,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs connect twitch o auth for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ConnectTwitchOAuth()
     {
         try
@@ -1059,6 +1225,10 @@
         }
     }
 
+    /// <summary>
+    /// Determines whether cel twitch o auth for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task CancelTwitchOAuth()
     {
         try
@@ -1074,6 +1244,10 @@
         }
     }
 
+    /// <summary>
+    /// Closes twitch authorization window for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task CloseTwitchAuthorizationWindowAsync()
     {
         try
@@ -1089,6 +1263,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs disconnect twitch o auth for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task DisconnectTwitchOAuth()
     {
         try
@@ -1112,6 +1290,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs test twitch ingest endpoints for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task TestTwitchIngestEndpoints()
     {
         try
@@ -1149,6 +1331,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs select twitch ingest endpoint for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the streaming studio operation and used when producing its result.</param>
     private void SelectTwitchIngestEndpoint(ChangeEventArgs args)
     {
         try
@@ -1166,6 +1352,10 @@
         }
     }
 
+    /// <summary>
+    /// Applies twitch ingest candidate for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
+    /// <param name="candidate">Candidate value supplied to the streaming studio operation and used when producing its result.</param>
     private void ApplyTwitchIngestCandidate(TwitchIngestCandidate candidate)
     {
         try
@@ -1185,6 +1375,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs twitch ingest option for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
+    /// <param name="candidate">Candidate value supplied to the streaming studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string TwitchIngestOption(TwitchIngestCandidate candidate) {
         try
         {
@@ -1201,6 +1396,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs new provider for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
     private void NewProvider()
     {
         try
@@ -1223,6 +1421,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs edit provider for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
+    /// <param name="profile">Profile value supplied to the streaming studio operation and used when producing its result.</param>
     private void EditProvider(StreamingProviderProfile profile)
     {
         try
@@ -1241,6 +1443,10 @@
         }
     }
 
+    /// <summary>
+    /// Persists provider for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task SaveProvider()
     {
         try
@@ -1269,6 +1475,10 @@
         }
     }
 
+    /// <summary>
+    /// Deletes provider for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task DeleteProvider()
     {
         try
@@ -1290,6 +1500,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs duplicate current provider for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
     private void DuplicateCurrentProvider()
     {
         try
@@ -1327,6 +1540,9 @@
         }
     }
 
+    /// <summary>
+    /// Adds output for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
     private void AddOutput()
     {
         try
@@ -1354,6 +1570,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs select output for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
     private void SelectOutput(Guid id) {
         try
         {
@@ -1366,6 +1586,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs change output profile for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
+    /// <param name="output">Output value supplied to the streaming studio operation and used when producing its result.</param>
+    /// <param name="args">Args value supplied to the streaming studio operation and used when producing its result.</param>
     private void ChangeOutputProfile(PublicationStreamOutput output, ChangeEventArgs args)
     {
         try
@@ -1388,6 +1613,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs change output preset for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
+    /// <param name="output">Output value supplied to the streaming studio operation and used when producing its result.</param>
+    /// <param name="args">Args value supplied to the streaming studio operation and used when producing its result.</param>
     private void ChangeOutputPreset(PublicationStreamOutput output, ChangeEventArgs args)
     {
         try
@@ -1405,6 +1635,10 @@
         }
     }
 
+    /// <summary>
+    /// Applies recommended defaults for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
+    /// <param name="output">Output value supplied to the streaming studio operation and used when producing its result.</param>
     private void ApplyRecommendedDefaults(PublicationStreamOutput output)
     {
         try
@@ -1420,6 +1654,10 @@
         }
     }
 
+    /// <summary>
+    /// Applies quality preset for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
+    /// <param name="output">Output value supplied to the streaming studio operation and used when producing its result.</param>
     private void ApplyQualityPreset(PublicationStreamOutput output)
     {
         try
@@ -1454,6 +1692,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs change LAN preset for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the streaming studio operation and used when producing its result.</param>
     private void ChangeLanPreset(ChangeEventArgs args)
     {
         try
@@ -1470,6 +1712,9 @@
         }
     }
 
+    /// <summary>
+    /// Applies LAN recommendation for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
     private void ApplyLanRecommendation()
     {
         try
@@ -1493,6 +1738,9 @@
         }
     }
 
+    /// <summary>
+    /// Applies selected output defaults for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
     private void ApplySelectedOutputDefaults()
     {
         try
@@ -1509,6 +1757,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs duplicate selected output for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
     private void DuplicateSelectedOutput()
     {
         try
@@ -1524,6 +1775,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs duplicate output for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
+    /// <param name="output">Output value supplied to the streaming studio operation and used when producing its result.</param>
     private void DuplicateOutput(PublicationStreamOutput output)
     {
         try
@@ -1543,6 +1798,9 @@
         }
     }
 
+    /// <summary>
+    /// Removes selected output for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
     private void RemoveSelectedOutput()
     {
         try
@@ -1557,6 +1815,10 @@
         }
     }
 
+    /// <summary>
+    /// Removes output for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
     private void RemoveOutput(Guid id)
     {
         try
@@ -1575,6 +1837,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs toggle recording for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
     private void ToggleRecording() {
         try
         {
@@ -1586,6 +1851,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs use clean master recording for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
     private void UseCleanMasterRecording() {
         try
         {
@@ -1597,6 +1865,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs use enabled output recording for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
     private void UseEnabledOutputRecording() {
         try
         {
@@ -1609,6 +1880,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs toggle recording output for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
     private void ToggleRecordingOutput(Guid id)
     {
         try
@@ -1623,6 +1898,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs toggle LAN for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
     private void ToggleLan() {
         try
         {
@@ -1635,6 +1913,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs use loopback LAN for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
     private void UseLoopbackLan()
     {
         try
@@ -1651,6 +1932,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs use browser and hls LAN for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
     private void UseBrowserAndHlsLan()
     {
         try
@@ -1668,6 +1952,10 @@
         }
     }
 
+    /// <summary>
+    /// Refreshes devices for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task RefreshDevices()
     {
         try
@@ -1688,6 +1976,10 @@
         }
     }
 
+    /// <summary>
+    /// Refreshes native devices for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task RefreshNativeDevices()
     {
         try
@@ -1723,6 +2015,10 @@
         }
     }
 
+    /// <summary>
+    /// Persists native device for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
+    /// <param name="device">Device value supplied to the streaming studio operation and used when producing its result.</param>
     private void SaveNativeDevice(NativeMediaDeviceInfo device)
     {
         try
@@ -1755,6 +2051,9 @@
         }
     }
 
+    /// <summary>
+    /// Adds device profile for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
     private void AddDeviceProfile()
     {
         try
@@ -1777,6 +2076,10 @@
         }
     }
 
+    /// <summary>
+    /// Removes device profile for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
     private void RemoveDeviceProfile(Guid id)
     {
         try
@@ -1793,6 +2096,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs duplicate device profile for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
+    /// <param name="profile">Profile value supplied to the streaming studio operation and used when producing its result.</param>
     private void DuplicateDeviceProfile(StreamingDeviceProfile profile)
     {
         try
@@ -1811,6 +2118,11 @@
         }
     }
 
+    /// <summary>
+    /// Determines whether save browser device for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
+    /// <param name="device">Device value supplied to the streaming studio operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool CanSaveBrowserDevice(BrowserMediaDeviceInfo device) {
         try
         {
@@ -1825,6 +2137,10 @@
         }
     }
 
+    /// <summary>
+    /// Persists browser device for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
+    /// <param name="device">Device value supplied to the streaming studio operation and used when producing its result.</param>
     private void SaveBrowserDevice(BrowserMediaDeviceInfo device)
     {
         try
@@ -1863,6 +2179,9 @@
         }
     }
 
+    /// <summary>
+    /// Adds hotkey for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
     private void AddHotkey()
     {
         try
@@ -1879,6 +2198,10 @@
         }
     }
 
+    /// <summary>
+    /// Removes hotkey for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
     private void RemoveHotkey(Guid id)
     {
         try
@@ -1894,6 +2217,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs duplicate hotkey for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
+    /// <param name="hotkey">Hotkey value supplied to the streaming studio operation and used when producing its result.</param>
     private void DuplicateHotkey(PublicationStreamingHotkey hotkey)
     {
         try
@@ -1911,6 +2238,10 @@
         }
     }
 
+    /// <summary>
+    /// Persists machine options for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task SaveMachineOptions()
     {
         try
@@ -1926,6 +2257,12 @@
         }
     }
 
+    /// <summary>
+    /// Performs show provider context menu for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
+    /// <param name="profile">Profile value supplied to the streaming studio operation and used when producing its result.</param>
+    /// <param name="args">Args value supplied to the streaming studio operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ShowProviderContextMenu(StreamingProviderProfile profile, MouseEventArgs args)
     {
         try
@@ -1943,6 +2280,12 @@
         }
     }
 
+    /// <summary>
+    /// Performs show output context menu for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
+    /// <param name="output">Output value supplied to the streaming studio operation and used when producing its result.</param>
+    /// <param name="args">Args value supplied to the streaming studio operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ShowOutputContextMenu(PublicationStreamOutput output, MouseEventArgs args)
     {
         try
@@ -1960,6 +2303,12 @@
         }
     }
 
+    /// <summary>
+    /// Performs show device context menu for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
+    /// <param name="profile">Profile value supplied to the streaming studio operation and used when producing its result.</param>
+    /// <param name="args">Args value supplied to the streaming studio operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ShowDeviceContextMenu(StreamingDeviceProfile profile, MouseEventArgs args)
     {
         try
@@ -1976,6 +2325,12 @@
         }
     }
 
+    /// <summary>
+    /// Performs show hotkey context menu for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
+    /// <param name="hotkey">Hotkey value supplied to the streaming studio operation and used when producing its result.</param>
+    /// <param name="args">Args value supplied to the streaming studio operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ShowHotkeyContextMenu(PublicationStreamingHotkey hotkey, MouseEventArgs args)
     {
         try
@@ -1992,6 +2347,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs show workspace context menu for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the streaming studio operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ShowWorkspaceContextMenu(MouseEventArgs args)
     {
         try
@@ -2008,6 +2368,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs show context menu for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the streaming studio operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ShowContextMenu(MouseEventArgs args)
     {
         try
@@ -2023,6 +2388,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs edit context provider for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
     private void EditContextProvider()
     {
         try
@@ -2038,6 +2406,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs duplicate context provider for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
     private void DuplicateContextProvider()
     {
         try
@@ -2055,6 +2426,10 @@
         }
     }
 
+    /// <summary>
+    /// Deletes context provider for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task DeleteContextProvider()
     {
         try
@@ -2072,6 +2447,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs select context output for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
     private void SelectContextOutput()
     {
         try
@@ -2086,6 +2464,9 @@
         }
     }
 
+    /// <summary>
+    /// Applies context output defaults for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
     private void ApplyContextOutputDefaults()
     {
         try
@@ -2104,6 +2485,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs duplicate context output for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
     private void DuplicateContextOutput()
     {
         try
@@ -2120,6 +2504,9 @@
         }
     }
 
+    /// <summary>
+    /// Removes context output for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
     private void RemoveContextOutput()
     {
         try
@@ -2134,6 +2521,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs duplicate context device for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
     private void DuplicateContextDevice()
     {
         try
@@ -2149,6 +2539,9 @@
         }
     }
 
+    /// <summary>
+    /// Removes context device for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
     private void RemoveContextDevice()
     {
         try
@@ -2163,6 +2556,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs duplicate context hotkey for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
     private void DuplicateContextHotkey()
     {
         try
@@ -2178,6 +2574,9 @@
         }
     }
 
+    /// <summary>
+    /// Removes context hotkey for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
     private void RemoveContextHotkey()
     {
         try
@@ -2192,6 +2591,10 @@
         }
     }
 
+    /// <summary>
+    /// Gets the estimated recording storage text value that forms part of the streaming studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The estimated recording storage text value exposed by <see cref="StreamingStudio"/>.</value>
     private string EstimatedRecordingStorageText
     {
         get
@@ -2221,6 +2624,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs recording variant name for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the streaming studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string RecordingVariantName(PublicationStreamRecordingVariant value) {
         try
         {
@@ -2239,6 +2647,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs apply for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task Apply()
     {
         try
@@ -2261,6 +2673,10 @@
         }
     }
 
+    /// <summary>
+    /// Determines whether cel for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task Cancel()
     {
         try
@@ -2276,7 +2692,18 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs clone for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
+    /// <typeparam name="T">Type used for t values handled by <see cref="StreamingStudio"/>.</typeparam>
+    /// <param name="value">Value value supplied to the streaming studio operation and used when producing its result.</param>
+    /// <returns>The t produced by the operation.</returns>
     private T Clone<T>(T value) => JsonSerializer.Deserialize<T>(JsonSerializer.Serialize(value))!;
+    /// <summary>
+    /// Performs short identifier for <see cref="StreamingStudio"/>, keeping the operation consistent with the state and invariants of the surrounding streaming studio workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the streaming studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string ShortId(string value) {
         try
         {
@@ -2289,5 +2716,12 @@
         }
     }
 
+    /// <summary>
+    /// Represents a workflow step helper type nested within <see cref="StreamingStudio"/>, grouping the state or behavior used only by that containing workflow.
+    /// </summary>
+    /// <param name="Number">Number value supplied to the streaming studio operation and used when producing its result.</param>
+    /// <param name="Title">Title value supplied to the streaming studio operation and used when producing its result.</param>
+    /// <param name="Text">Text value supplied to the streaming studio operation and used when producing its result.</param>
     private sealed record WorkflowStep(int Number, string Title, string Text);
+
 }

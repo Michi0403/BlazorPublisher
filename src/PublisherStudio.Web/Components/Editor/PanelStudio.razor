@@ -491,57 +491,212 @@
 }
 
 @code {
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the value is visible applies to the panel studio state.
+    /// </summary>
+    /// <value>The visible value exposed by <see cref="PanelStudio"/>.</value>
     [Parameter] public bool Visible { get; set; }
+    /// <summary>
+    /// Gets or sets the document value that forms part of the panel studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The document value exposed by <see cref="PanelStudio"/>.</value>
     [Parameter, EditorRequired] public PublicationDocument Document { get; set; } = default!;
+    /// <summary>
+    /// Gets or sets the stable current page identifier used to identify or correlate this panel studio instance with related application state.
+    /// </summary>
+    /// <value>The current page identifier value exposed by <see cref="PanelStudio"/>.</value>
     [Parameter] public Guid CurrentPageId { get; set; }
+    /// <summary>
+    /// Gets or sets the initial panel value that forms part of the panel studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The initial panel value exposed by <see cref="PanelStudio"/>.</value>
     [Parameter] public PanelElement? InitialPanel { get; set; }
+    /// <summary>
+    /// Gets or sets the saved value that forms part of the panel studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The saved value exposed by <see cref="PanelStudio"/>.</value>
     [Parameter] public EventCallback<PanelElement> Saved { get; set; }
+    /// <summary>
+    /// Gets or sets the cancelled value that forms part of the panel studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The cancelled value exposed by <see cref="PanelStudio"/>.</value>
     [Parameter] public EventCallback Cancelled { get; set; }
 
+    /// <summary>
+    /// Stores the internal draft state used by <see cref="PanelStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private PanelElement? _draft;
+    /// <summary>
+    /// Stores the internal selected view identifier state used by <see cref="PanelStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private Guid _selectedViewId;
+    /// <summary>
+    /// Stores the internal selected element identifier state used by <see cref="PanelStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private Guid? _selectedElementId;
+    /// <summary>
+    /// Stores the internal selected template identifier state used by <see cref="PanelStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private Guid? _selectedTemplateId;
+    /// <summary>
+    /// Stores the internal loaded identifier state used by <see cref="PanelStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private Guid? _loadedId;
+    /// <summary>
+    /// Stores the internal error state used by <see cref="PanelStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private string _error = string.Empty;
+    /// <summary>
+    /// Stores the internal interaction preview state used by <see cref="PanelStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _interactionPreview;
+    /// <summary>
+    /// Stores the internal preview size key state used by <see cref="PanelStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private string _previewSizeKey = "design";
+    /// <summary>
+    /// Stores the in-memory preview presets collection maintained internally by <see cref="PanelStudio"/> for its current workflow state.
+    /// </summary>
     private IReadOnlyList<PanelStudioPreviewPreset> _previewPresets = [];
+    /// <summary>
+    /// Stores the internal preview preset editor visible state used by <see cref="PanelStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _previewPresetEditorVisible;
+    /// <summary>
+    /// Stores the internal preview preset name state used by <see cref="PanelStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private string _previewPresetName = string.Empty;
+    /// <summary>
+    /// Stores the internal preview preset width state used by <see cref="PanelStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private int _previewPresetWidth = 1280;
+    /// <summary>
+    /// Stores the internal preview preset height state used by <see cref="PanelStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private int _previewPresetHeight = 720;
+    /// <summary>
+    /// Stores the internal drag tool identifier state used by <see cref="PanelStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private string _dragToolId = string.Empty;
+    /// <summary>
+    /// Stores the internal canvas element state used by <see cref="PanelStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private ElementReference _canvasElement;
+    /// <summary>
+    /// Stores the internal self state used by <see cref="PanelStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private DotNetObjectReference<PanelStudio>? _self;
+    /// <summary>
+    /// Stores the internal drag existing identifier state used by <see cref="PanelStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private Guid? _dragExistingId;
+    /// <summary>
+    /// Stores the internal drag prototype state used by <see cref="PanelStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private PublicationElement? _dragPrototype;
+    /// <summary>
+    /// Stores the internal drop surface bound state used by <see cref="PanelStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _dropSurfaceBound;
+    /// <summary>
+    /// Stores the internal drop surface binding key state used by <see cref="PanelStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private string? _dropSurfaceBindingKey;
+    /// <summary>
+    /// Stores the internal design surface layout key state used by <see cref="PanelStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private string? _designSurfaceLayoutKey;
+    /// <summary>
+    /// Stores the internal last interaction surface notification state used by <see cref="PanelStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private string _lastInteractionSurfaceNotification = string.Empty;
+    /// <summary>
+    /// Stores the internal interaction binding identifier state used by <see cref="PanelStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly string _interactionBindingId = Guid.NewGuid().ToString("N");
+    /// <summary>
+    /// Stores the internal preview revision state used by <see cref="PanelStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private int _previewRevision;
+    /// <summary>
+    /// Stores the internal advanced element JSON state used by <see cref="PanelStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private string _advancedElementJson = string.Empty;
+    /// <summary>
+    /// Stores the internal template name state used by <see cref="PanelStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private string _templateName = string.Empty;
+    /// <summary>
+    /// Stores the internal template category state used by <see cref="PanelStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private string _templateCategory = "My modules";
+    /// <summary>
+    /// Stores the internal template description state used by <see cref="PanelStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private string _templateDescription = string.Empty;
+    /// <summary>
+    /// Stores the internal element context menu state used by <see cref="PanelStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private DxContextMenu _elementContextMenu = default!;
+    /// <summary>
+    /// Stores the internal picture editor visible state used by <see cref="PanelStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _pictureEditorVisible;
+    /// <summary>
+    /// Stores the internal picture editor session identifier state used by <see cref="PanelStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private Guid _pictureEditorSessionId;
+    /// <summary>
+    /// Stores the internal picture editor target identifier state used by <see cref="PanelStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private Guid? _pictureEditorTargetId;
+    /// <summary>
+    /// Stores the internal disposed state used by <see cref="PanelStudio"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _disposed;
 
+    /// <summary>
+    /// Gets the current view value that forms part of the panel studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The current view value exposed by <see cref="PanelStudio"/>.</value>
     private PublicationPanelView? CurrentView => _draft?.Views.FirstOrDefault(view => view.Id == _selectedViewId) ?? _draft?.ActiveView;
+    /// <summary>
+    /// Gets the selected element value that forms part of the panel studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The selected element value exposed by <see cref="PanelStudio"/>.</value>
     private PublicationElement? SelectedElement => CurrentView?.Elements.FirstOrDefault(element => element.Id == _selectedElementId);
+    /// <summary>
+    /// Gets the palette tools collection maintained or exposed by this panel studio instance for downstream processing.
+    /// </summary>
+    /// <value>The palette tools value exposed by <see cref="PanelStudio"/>.</value>
     private IReadOnlyList<PanelComponentToolDescriptor> PaletteTools => Panels.GetComponentTools(Document);
+    /// <summary>
+    /// Gets the panel picture target value that forms part of the panel studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The panel picture target value exposed by <see cref="PanelStudio"/>.</value>
     private ImageFrameElement? PanelPictureTarget => _pictureEditorTargetId is { } id
         ? _draft?.Views.SelectMany(view => view.Elements).OfType<ImageFrameElement>().FirstOrDefault(image => image.Id == id)
         : null;
+    /// <summary>
+    /// Gets the panel picture document value that forms part of the panel studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The panel picture document value exposed by <see cref="PanelStudio"/>.</value>
     private PictureDocument? PanelPictureDocument => PanelPictureTarget?.PictureSource;
+    /// <summary>
+    /// Gets the panel picture raster value that forms part of the panel studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The panel picture raster value exposed by <see cref="PanelStudio"/>.</value>
     private string? PanelPictureRaster => PanelPictureTarget?.DataUrl;
+    /// <summary>
+    /// Gets the panel picture name value that forms part of the panel studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The panel picture name value exposed by <see cref="PanelStudio"/>.</value>
     private string PanelPictureName => PanelPictureTarget?.Name ?? "Picture";
 
+    /// <summary>
+    /// Handles the parameters set lifecycle or event notification for <see cref="PanelStudio"/>, updating the state required by the surrounding workflow.
+    /// </summary>
     protected override void OnParametersSet()
     {
         try
@@ -580,6 +735,11 @@
         }
     }
 
+    /// <summary>
+    /// Handles the after render async lifecycle or event notification for <see cref="PanelStudio"/>, updating the state required by the surrounding workflow.
+    /// </summary>
+    /// <param name="firstRender">Value indicating whether first render should apply to this operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         // Browser interaction has one component-lifetime identity. Layout dimensions are deliberately
@@ -630,6 +790,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs select view for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
     private void SelectView(Guid id)
     {
         try
@@ -647,6 +811,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs select element for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
     private void SelectElement(Guid? id)
     {
         try
@@ -667,6 +835,9 @@
         }
     }
 
+    /// <summary>
+    /// Adds view for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
     private void AddView()
     {
         try
@@ -684,6 +855,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs duplicate view for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
     private void DuplicateView()
     {
         try
@@ -707,6 +881,9 @@
         }
     }
 
+    /// <summary>
+    /// Deletes view for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
     private void DeleteView()
     {
         try
@@ -723,6 +900,9 @@
         }
     }
 
+    /// <summary>
+    /// Adds text for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
     private void AddText() {
         try
         {
@@ -734,6 +914,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds picture for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
     private void AddPicture() {
         try
         {
@@ -745,6 +928,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds video for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
     private void AddVideo() {
         try
         {
@@ -756,6 +942,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds audio for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
     private void AddAudio() {
         try
         {
@@ -767,6 +956,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds shape for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
     private void AddShape() {
         try
         {
@@ -778,6 +970,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds kpi for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
     private void AddKpi() {
         try
         {
@@ -789,6 +984,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds chart for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
     private void AddChart() {
         try
         {
@@ -800,6 +998,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds table for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
     private void AddTable() {
         try
         {
@@ -811,6 +1012,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds data grid for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
     private void AddDataGrid() {
         try
         {
@@ -822,6 +1026,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds button for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
     private void AddButton() {
         try
         {
@@ -833,6 +1040,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds menu for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
     private void AddMenu() {
         try
         {
@@ -844,6 +1054,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds chat for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
     private void AddChat() {
         try
         {
@@ -855,6 +1068,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds map for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
     private void AddMap() {
         try
         {
@@ -866,6 +1082,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds camera for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
     private void AddCamera() {
         try
         {
@@ -877,6 +1096,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds screen for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
     private void AddScreen() {
         try
         {
@@ -888,6 +1110,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds HTML for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
     private void AddHtml() {
         try
         {
@@ -899,6 +1124,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds nested panel for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
     private void AddNestedPanel() {
         try
         {
@@ -911,6 +1139,10 @@
         }
     }
 
+    /// <summary>
+    /// Adds tool for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="toolId">Identifier of the tool to use for this operation.</param>
     private void AddTool(string toolId)
     {
         try
@@ -929,6 +1161,11 @@
         }
     }
 
+    /// <summary>
+    /// Creates tool element for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="toolId">Identifier of the tool to use for this operation.</param>
+    /// <returns>The publication element produced by the operation.</returns>
     private PublicationElement? CreateToolElement(string toolId)
     {
         try
@@ -953,6 +1190,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs begin palette drag for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="tool">Tool value supplied to the panel studio operation and used when producing its result.</param>
     private void BeginPaletteDrag(PanelComponentToolDescriptor tool)
     {
         try
@@ -969,6 +1210,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs begin existing drag for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
     private void BeginExistingDrag(Guid id)
     {
         try
@@ -986,6 +1231,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs drop dragged element for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the panel studio operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task DropDraggedElement(DragEventArgs args)
     {
         // Snapshot the complete transaction before awaiting JS. HTML dragend can fire while
@@ -1054,6 +1304,15 @@
         }
     }
 
+    /// <summary>
+    /// Performs commit panel element bounds for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="elementId">Identifier of the element to use for this operation.</param>
+    /// <param name="x">X value supplied to the panel studio operation and used when producing its result.</param>
+    /// <param name="y">Y value supplied to the panel studio operation and used when producing its result.</param>
+    /// <param name="width">Width value supplied to the panel studio operation and used when producing its result.</param>
+    /// <param name="height">Height value supplied to the panel studio operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     [JSInvokable]
     public Task CommitPanelElementBounds(string elementId, double x, double y, double width, double height) {
         try
@@ -1085,6 +1344,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs select panel element for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="elementId">Identifier of the element to use for this operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     [JSInvokable]
     public Task SelectPanelElement(string elementId) {
         try
@@ -1102,6 +1366,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs activate panel element for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="elementId">Identifier of the element to use for this operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     [JSInvokable]
     public Task ActivatePanelElement(string elementId)
     {
@@ -1119,6 +1388,12 @@
         }
     }
 
+    /// <summary>
+    /// Performs panel studio command for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="command">Command value supplied to the panel studio operation and used when producing its result.</param>
+    /// <param name="amount">Amount value supplied to the panel studio operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     [JSInvokable]
     public Task PanelStudioCommand(string command, double amount = 1) {
         try
@@ -1149,6 +1424,12 @@
         }
     }
 
+    /// <summary>
+    /// Performs run panel interop for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="operation">Operation value supplied to the panel studio operation and used when producing its result.</param>
+    /// <param name="action">Action value supplied to the panel studio operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task RunPanelInteropAsync(string operation, Action action)
     {
         try
@@ -1168,6 +1449,12 @@
         }
     }
 
+    /// <summary>
+    /// Performs run panel interop for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="operation">Operation value supplied to the panel studio operation and used when producing its result.</param>
+    /// <param name="action">Action value supplied to the panel studio operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task RunPanelInteropAsync(string operation, Func<Task> action)
     {
         try
@@ -1186,6 +1473,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs report panel interaction error for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="message">Message value supplied to the panel studio operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     [JSInvokable]
     public Task ReportPanelInteractionError(string message)
     {
@@ -1210,6 +1502,11 @@
         }
     }
 
+    /// <summary>
+    /// Determines whether expected interaction shutdown for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="message">Message value supplied to the panel studio operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool IsExpectedInteractionShutdown(string message) {
         try
         {
@@ -1222,6 +1519,11 @@
         }
     }
 
+    /// <summary>
+    /// Resolves canvas point for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the panel studio operation and used when producing its result.</param>
+    /// <returns>The panel canvas point produced by the operation.</returns>
     private async Task<PanelCanvasPoint> ResolveCanvasPoint(DragEventArgs args)
     {
         try
@@ -1251,6 +1553,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs end drag for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
     private void EndDrag()
     {
         try
@@ -1271,9 +1576,17 @@
     // Width/Height are publication-placement dimensions; CanvasWidth/CanvasHeight own descendant coordinates.
     // Preview sizes change only the simulated containing viewport. Arrange mode keeps authored coordinates
     // through the canvas-region aspect fit; responsive layout can then be tested at realistic device widths.
+    /// <summary>
+    /// Gets the selected preview preset value that forms part of the panel studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The selected preview preset value exposed by <see cref="PanelStudio"/>.</value>
     private PanelStudioPreviewPreset? SelectedPreviewPreset =>
         _previewPresets.FirstOrDefault(item => string.Equals(item.Key, _previewSizeKey, StringComparison.OrdinalIgnoreCase));
 
+    /// <summary>
+    /// Gets the preview viewport px value that forms part of the panel studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The preview viewport px value exposed by <see cref="PanelStudio"/>.</value>
     private (double Width, double Height) PreviewViewportPx
     {
         get
@@ -1284,13 +1597,40 @@
             return (Math.Max(1, (_draft?.CanvasWidth ?? 160) * 96d / 25.4d), Math.Max(1, (_draft?.CanvasHeight ?? 90) * 96d / 25.4d));
         }
     }
+    /// <summary>
+    /// Gets the panel design width px value value that forms part of the panel studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The panel design width px value value exposed by <see cref="PanelStudio"/>.</value>
     private double PanelDesignWidthPxValue => PreviewViewportPx.Width;
+    /// <summary>
+    /// Gets the panel design height px value value that forms part of the panel studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The panel design height px value value exposed by <see cref="PanelStudio"/>.</value>
     private double PanelDesignHeightPxValue => PreviewViewportPx.Height;
+    /// <summary>
+    /// Gets the panel design width px value that forms part of the panel studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The panel design width px value exposed by <see cref="PanelStudio"/>.</value>
     private string PanelDesignWidthPx => Inv(PanelDesignWidthPxValue);
+    /// <summary>
+    /// Gets the panel design height px value that forms part of the panel studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The panel design height px value exposed by <see cref="PanelStudio"/>.</value>
     private string PanelDesignHeightPx => Inv(PanelDesignHeightPxValue);
+    /// <summary>
+    /// Gets the panel design width CSS value that forms part of the panel studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The panel design width CSS value exposed by <see cref="PanelStudio"/>.</value>
     private string PanelDesignWidthCss => $"{PanelDesignWidthPx}px";
+    /// <summary>
+    /// Gets the panel design height CSS value that forms part of the panel studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The panel design height CSS value exposed by <see cref="PanelStudio"/>.</value>
     private string PanelDesignHeightCss => $"{PanelDesignHeightPx}px";
 
+    /// <summary>
+    /// Refreshes preview presets for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
     private void RefreshPreviewPresets()
     {
         try
@@ -1305,6 +1645,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs change preview size for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the panel studio operation and used when producing its result.</param>
     private void ChangePreviewSize(ChangeEventArgs args)
     {
         try
@@ -1325,6 +1669,9 @@
         }
     }
 
+    /// <summary>
+    /// Opens preview preset editor for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
     private void OpenPreviewPresetEditor()
     {
         try
@@ -1343,6 +1690,9 @@
         }
     }
 
+    /// <summary>
+    /// Closes preview preset editor for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
     private void ClosePreviewPresetEditor() {
         try
         {
@@ -1355,6 +1705,9 @@
         }
     }
 
+    /// <summary>
+    /// Persists preview preset for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
     private void SavePreviewPreset()
     {
         try
@@ -1376,6 +1729,9 @@
         }
     }
 
+    /// <summary>
+    /// Deletes selected preview preset for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
     private void DeleteSelectedPreviewPreset()
     {
         try
@@ -1396,6 +1752,10 @@
         }
     }
 
+    /// <summary>
+    /// Gets the drag ghost style value that forms part of the panel studio state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The drag ghost style value exposed by <see cref="PanelStudio"/>.</value>
     private string DragGhostStyle
     {
         get
@@ -1407,6 +1767,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs hit style for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="element">Element value supplied to the panel studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string HitStyle(PublicationElement element)
     {
         try
@@ -1426,6 +1791,11 @@
         }
     }
 
+    /// <summary>
+    /// Normalizes d x for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="element">Element value supplied to the panel studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string NormalizedX(PublicationElement element) {
         try
         {
@@ -1437,6 +1807,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Normalizes d y for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="element">Element value supplied to the panel studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string NormalizedY(PublicationElement element) {
         try
         {
@@ -1448,6 +1823,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Normalizes d width for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="element">Element value supplied to the panel studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string NormalizedWidth(PublicationElement element) {
         try
         {
@@ -1459,6 +1839,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Normalizes d height for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="element">Element value supplied to the panel studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string NormalizedHeight(PublicationElement element) {
         try
         {
@@ -1471,6 +1856,10 @@
         }
     }
 
+    /// <summary>
+    /// Exports panel JSON for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ExportPanelJsonAsync()
     {
         if (_draft is null) return;
@@ -1487,6 +1876,10 @@
         }
     }
 
+    /// <summary>
+    /// Exports JSON canvas for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ExportJsonCanvasAsync()
     {
         if (_draft is null || CurrentView is null) return;
@@ -1539,6 +1932,11 @@
         }
     }
 
+    /// <summary>
+    /// Imports panel interchange for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="args">Input file change event args dependency used by the panel studio workflow to provide the corresponding application capability.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ImportPanelInterchangeAsync(InputFileChangeEventArgs args)
     {
         _error = string.Empty;
@@ -1601,6 +1999,11 @@
         }
     }
 
+    /// <summary>
+    /// Imports standard JSON canvas node for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="node">Node value supplied to the panel studio operation and used when producing its result.</param>
+    /// <returns>The publication element produced by the operation.</returns>
     private PublicationElement? ImportStandardJsonCanvasNode(JsonElement node)
     {
         try
@@ -1643,6 +2046,13 @@
         }
     }
 
+    /// <summary>
+    /// Reads number for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="node">Node value supplied to the panel studio operation and used when producing its result.</param>
+    /// <param name="propertyName">Property name value supplied to the panel studio operation and used when producing its result.</param>
+    /// <param name="fallback">Fallback value supplied to the panel studio operation and used when producing its result.</param>
+    /// <returns>The double produced by the operation.</returns>
     private double ReadNumber(JsonElement node, string propertyName, double fallback) {
         try
         {
@@ -1655,6 +2065,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs JSON canvas node type for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="element">Element value supplied to the panel studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string JsonCanvasNodeType(PublicationElement element) {
         try
         {
@@ -1674,6 +2089,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs JSON canvas color for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="element">Element value supplied to the panel studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string JsonCanvasColor(PublicationElement element) {
         try
         {
@@ -1694,6 +2114,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs plain text for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="markup">Markup value supplied to the panel studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string PlainText(string? markup) {
         try
         {
@@ -1706,6 +2131,12 @@
         }
     }
 
+    /// <summary>
+    /// Performs safe file name for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the panel studio operation and used when producing its result.</param>
+    /// <param name="fallback">Fallback value supplied to the panel studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string SafeFileName(string? value, string fallback) {
         try
         {
@@ -1718,6 +2149,11 @@
         }
     }
 
+    /// <summary>
+    /// Imports HTML for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="args">Input file change event args dependency used by the panel studio workflow to provide the corresponding application capability.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ImportHtml(InputFileChangeEventArgs args)
     {
         _error = string.Empty;
@@ -1743,6 +2179,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs replace selected media for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="args">Input file change event args dependency used by the panel studio workflow to provide the corresponding application capability.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ReplaceSelectedMedia(InputFileChangeEventArgs args)
     {
         if (SelectedElement is not { } selected) return;
@@ -1783,6 +2224,10 @@
         }
     }
 
+    /// <summary>
+    /// Adds element for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="element">Element value supplied to the panel studio operation and used when producing its result.</param>
     private void AddElement(PublicationElement element)
     {
         try
@@ -1797,6 +2242,11 @@
         }
     }
 
+    /// <summary>
+    /// Adds element for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="view">View value supplied to the panel studio operation and used when producing its result.</param>
+    /// <param name="element">Element value supplied to the panel studio operation and used when producing its result.</param>
     private void AddElement(PublicationPanelView view, PublicationElement element)
     {
         try
@@ -1815,6 +2265,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs duplicate element for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
     private void DuplicateElement()
     {
         try
@@ -1837,6 +2290,9 @@
         }
     }
 
+    /// <summary>
+    /// Deletes element for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
     private void DeleteElement()
     {
         try
@@ -1854,6 +2310,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs bring element to front for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
     private void BringElementToFront() {
         try
         {
@@ -1865,6 +2324,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs move element up for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
     private void MoveElementUp() {
         try
         {
@@ -1876,6 +2338,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs move element down for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
     private void MoveElementDown() {
         try
         {
@@ -1887,6 +2352,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs send element to back for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
     private void SendElementToBack() {
         try
         {
@@ -1899,6 +2367,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs move element for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="move">Move value supplied to the panel studio operation and used when producing its result.</param>
     private void MoveElement(PublicationLayerMove move)
     {
         try
@@ -1931,6 +2403,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs nudge selected for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="deltaX">Delta x value supplied to the panel studio operation and used when producing its result.</param>
+    /// <param name="deltaY">Delta y value supplied to the panel studio operation and used when producing its result.</param>
     private void NudgeSelected(double deltaX, double deltaY)
     {
         try
@@ -1947,6 +2424,12 @@
         }
     }
 
+    /// <summary>
+    /// Performs show element context menu for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="args">Args value supplied to the panel studio operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ShowElementContextMenu(Guid id, MouseEventArgs args)
     {
         try
@@ -1964,6 +2447,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs enable interaction preview for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
     private void EnableInteractionPreview()
     {
         try
@@ -1979,6 +2465,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs disable interaction preview for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
     private void DisableInteractionPreview()
     {
         try
@@ -1994,6 +2483,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs edit selected component for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task EditSelectedComponent() {
         try
         {
@@ -2008,6 +2501,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs activate element interaction for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ActivateElementInteraction(Guid id)
     {
         try
@@ -2034,6 +2532,10 @@
         }
     }
 
+    /// <summary>
+    /// Determines whether cel panel pointer for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task CancelPanelPointerAsync()
     {
         try
@@ -2058,6 +2560,11 @@
         }
     }
 
+    /// <summary>
+    /// Persists panel picture for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="result">Result value supplied to the panel studio operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task SavePanelPicture(PictureEditorResult result)
     {
         try
@@ -2081,6 +2588,9 @@
         }
     }
 
+    /// <summary>
+    /// Closes panel picture editor for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
     private void ClosePanelPictureEditor()
     {
         try
@@ -2096,6 +2606,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs select template for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
     private void SelectTemplate(Guid id)
     {
         try
@@ -2115,6 +2629,10 @@
         }
     }
 
+    /// <summary>
+    /// Persists selected as template for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task SaveSelectedAsTemplate()
     {
         try
@@ -2149,6 +2667,10 @@
         }
     }
 
+    /// <summary>
+    /// Persists selected as new template for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task SaveSelectedAsNewTemplate()
     {
         try
@@ -2164,6 +2686,9 @@
         }
     }
 
+    /// <summary>
+    /// Deletes selected template for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
     private void DeleteSelectedTemplate()
     {
         try
@@ -2183,6 +2708,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs icon for for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="element">Element value supplied to the panel studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string IconFor(PublicationElement element) {
         try
         {
@@ -2208,6 +2738,9 @@
         }
     }
 
+    /// <summary>
+    /// Refreshes advanced JSON for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
     private void RefreshAdvancedJson()
     {
         try { _advancedElementJson = SelectedElement is null ? string.Empty : Files.SerializeElement(SelectedElement); }
@@ -2219,6 +2752,9 @@
         }
     }
 
+    /// <summary>
+    /// Applies advanced JSON for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
     private void ApplyAdvancedJson()
     {
         if (CurrentView is null || SelectedElement is null || string.IsNullOrWhiteSpace(_advancedElementJson)) return;
@@ -2241,6 +2777,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs toggle interaction preview for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
     private void ToggleInteractionPreview()
     {
         try
@@ -2255,6 +2794,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Refreshes preview for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
     private void RefreshPreview()
     {
         try
@@ -2270,6 +2812,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs change panel name for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the panel studio operation and used when producing its result.</param>
     private void ChangePanelName(ChangeEventArgs args) {
         try
         {
@@ -2281,6 +2827,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change view name for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the panel studio operation and used when producing its result.</param>
     private void ChangeViewName(ChangeEventArgs args) {
         try
         {
@@ -2292,6 +2842,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change element name for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the panel studio operation and used when producing its result.</param>
     private void ChangeElementName(ChangeEventArgs args) {
         try
         {
@@ -2303,6 +2857,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change navigation for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the panel studio operation and used when producing its result.</param>
     private void ChangeNavigation(ChangeEventArgs args) {
         try
         {
@@ -2314,6 +2872,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change layout mode for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the panel studio operation and used when producing its result.</param>
     private void ChangeLayoutMode(ChangeEventArgs args) {
         try
         {
@@ -2325,6 +2887,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change nested navigation for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the panel studio operation and used when producing its result.</param>
     private void ChangeNestedNavigation(ChangeEventArgs args) {
         try
         {
@@ -2336,6 +2902,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change visual kind for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the panel studio operation and used when producing its result.</param>
     private void ChangeVisualKind(ChangeEventArgs args) {
         try
         {
@@ -2347,6 +2917,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change visual data object for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the panel studio operation and used when producing its result.</param>
     private void ChangeVisualDataObject(ChangeEventArgs args) {
         try
         {
@@ -2358,6 +2932,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change visual value fields for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the panel studio operation and used when producing its result.</param>
     private void ChangeVisualValueFields(ChangeEventArgs args)
     {
         try
@@ -2372,6 +2950,10 @@
             Notifications.Error("The visual field list could not be updated.", "Panel Studio", nameof(PanelStudio));
         }
     }
+    /// <summary>
+    /// Performs change component kind for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the panel studio operation and used when producing its result.</param>
     private void ChangeComponentKind(ChangeEventArgs args) {
         try
         {
@@ -2383,6 +2965,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change component data mode for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the panel studio operation and used when producing its result.</param>
     private void ChangeComponentDataMode(ChangeEventArgs args) {
         try
         {
@@ -2394,6 +2980,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change component data object for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the panel studio operation and used when producing its result.</param>
     private void ChangeComponentDataObject(ChangeEventArgs args) {
         try
         {
@@ -2405,6 +2995,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change chat display mode for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the panel studio operation and used when producing its result.</param>
     private void ChangeChatDisplayMode(ChangeEventArgs args) {
         try
         {
@@ -2416,6 +3010,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change live source kind for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the panel studio operation and used when producing its result.</param>
     private void ChangeLiveSourceKind(ChangeEventArgs args) {
         try
         {
@@ -2427,6 +3025,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle view enabled for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the panel studio operation and used when producing its result.</param>
     private void ToggleViewEnabled(ChangeEventArgs args) {
         try
         {
@@ -2439,6 +3041,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs as bool for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the panel studio operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool AsBool(ChangeEventArgs args) {
         try
         {
@@ -2455,6 +3062,7 @@
     /// Waits for queued pointer/keyboard layout commits to reach the Blazor circuit before
     /// a reusable module or the complete panel graph is cloned.
     /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task FlushPanelStudioInteractionsAsync()
     {
         try
@@ -2470,6 +3078,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs text for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the panel studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Text(ChangeEventArgs args) {
         try
         {
@@ -2481,6 +3094,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs inv for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the panel studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Inv(double value) {
         try
         {
@@ -2492,6 +3110,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change number for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the panel studio operation and used when producing its result.</param>
+    /// <param name="update">Update value supplied to the panel studio operation and used when producing its result.</param>
     private void ChangeNumber(ChangeEventArgs args, Action<double> update) {
         try
         {
@@ -2503,6 +3126,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs change int for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the panel studio operation and used when producing its result.</param>
+    /// <param name="update">Update value supplied to the panel studio operation and used when producing its result.</param>
     private void ChangeInt(ChangeEventArgs args, Action<int> update) {
         try
         {
@@ -2515,6 +3143,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs save for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task Save()
     {
         if (_draft is null) return;
@@ -2546,6 +3178,10 @@
         }
     }
 
+    /// <summary>
+    /// Determines whether cel for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task Cancel() {
         try
         {
@@ -2558,6 +3194,10 @@
         }
     }
 
+    /// <summary>
+    /// Releases resources owned by <see cref="PanelStudio"/> and leaves the panel studio workflow in a safely disposed state.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     public async ValueTask DisposeAsync()
     {
         try
@@ -2566,8 +3206,15 @@
             ClosePanelPictureEditor();
             try
             {
-                await JS.InvokeVoidAsync("publisherStudio.unbindPanelStudioDropSurface", _canvasElement).ConfigureAwait(false);
-                Logger.LogDebug($"{nameof(DisposeAsync)} unbound the Panel Studio browser interaction surface.");
+                if (_dropSurfaceBound)
+                {
+                    await JS.InvokeVoidAsync("publisherStudio.unbindPanelStudioDropSurface", _canvasElement).ConfigureAwait(false);
+                    Logger.LogDebug($"{nameof(DisposeAsync)} unbound the Panel Studio browser interaction surface.");
+                }
+                else
+                {
+                    Logger.LogDebug($"{nameof(DisposeAsync)} skipped browser unbind because this Panel Studio instance never attached during an interactive render.");
+                }
             }
             catch (JSDisconnectedException exception)
             {
@@ -2597,9 +3244,21 @@
         }
     }
 
+    /// <summary>
+    /// Represents a panel canvas point helper type nested within <see cref="PanelStudio"/>, grouping the state or behavior used only by that containing workflow.
+    /// </summary>
     private sealed class PanelCanvasPoint
     {
+        /// <summary>
+        /// Gets or sets the x value that forms part of the panel canvas point state consumed or produced by the surrounding workflow.
+        /// </summary>
+        /// <value>The x value exposed by <see cref="PanelCanvasPoint"/>.</value>
         public double X { get; set; }
+        /// <summary>
+        /// Gets or sets the y value that forms part of the panel canvas point state consumed or produced by the surrounding workflow.
+        /// </summary>
+        /// <value>The y value exposed by <see cref="PanelCanvasPoint"/>.</value>
         public double Y { get; set; }
     }
+
 }

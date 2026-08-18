@@ -51,13 +51,35 @@ else if (!_visible && _pending.Count > 0)
 }
 
 @code {
+
+    /// <summary>
+    /// Stores the in-memory pending collection maintained internally by <see cref="OrganicApprovalBar"/> for its current workflow state.
+    /// </summary>
     private IReadOnlyList<OrganicPluginWorkItem> _pending = [];
+    /// <summary>
+    /// Stores the internal collapsed state used by <see cref="OrganicApprovalBar"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _collapsed;
+    /// <summary>
+    /// Stores the internal visible state used by <see cref="OrganicApprovalBar"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _visible = true;
+    /// <summary>
+    /// Stores the internal busy state used by <see cref="OrganicApprovalBar"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _busy;
+    /// <summary>
+    /// Stores the internal editor work item identifier state used by <see cref="OrganicApprovalBar"/> while executing its surrounding workflow.
+    /// </summary>
     private Guid? _editorWorkItemId;
+    /// <summary>
+    /// Stores the internal interaction value state used by <see cref="OrganicApprovalBar"/> while executing its surrounding workflow.
+    /// </summary>
     private string _interactionValue = string.Empty;
 
+    /// <summary>
+    /// Handles the initialized lifecycle or event notification for <see cref="OrganicApprovalBar"/>, updating the state required by the surrounding workflow.
+    /// </summary>
     protected override void OnInitialized()
     {
         try
@@ -73,6 +95,9 @@ else if (!_visible && _pending.Count > 0)
         }
     }
 
+    /// <summary>
+    /// Performs refresh for <see cref="OrganicApprovalBar"/>, keeping the operation consistent with the state and invariants of the surrounding organic approval bar workflow.
+    /// </summary>
     private void Refresh()
     {
         try
@@ -103,6 +128,9 @@ else if (!_visible && _pending.Count > 0)
         }
     }
 
+    /// <summary>
+    /// Handles the changed lifecycle or event notification for <see cref="OrganicApprovalBar"/>, updating the state required by the surrounding workflow.
+    /// </summary>
     private void OnChanged()
     {
         try
@@ -123,6 +151,10 @@ else if (!_visible && _pending.Count > 0)
         }
     }
 
+    /// <summary>
+    /// Approves current for <see cref="OrganicApprovalBar"/>, keeping the operation consistent with the state and invariants of the surrounding organic approval bar workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ApproveCurrentAsync()
     {
         try
@@ -167,6 +199,10 @@ else if (!_visible && _pending.Count > 0)
         }
     }
 
+    /// <summary>
+    /// Performs decline current for <see cref="OrganicApprovalBar"/>, keeping the operation consistent with the state and invariants of the surrounding organic approval bar workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task DeclineCurrentAsync()
     {
         try
@@ -198,6 +234,11 @@ else if (!_visible && _pending.Count > 0)
         }
     }
 
+    /// <summary>
+    /// Performs needs editor for <see cref="OrganicApprovalBar"/>, keeping the operation consistent with the state and invariants of the surrounding organic approval bar workflow.
+    /// </summary>
+    /// <param name="request">Request containing the caller-supplied values that control this operation.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool NeedsEditor(OrganicWireEnvelope request) {
         try
         {
@@ -211,6 +252,11 @@ else if (!_visible && _pending.Count > 0)
         }
     }
 
+    /// <summary>
+    /// Performs editor label for <see cref="OrganicApprovalBar"/>, keeping the operation consistent with the state and invariants of the surrounding organic approval bar workflow.
+    /// </summary>
+    /// <param name="request">Request containing the caller-supplied values that control this operation.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string EditorLabel(OrganicWireEnvelope request) {
         try
         {
@@ -228,6 +274,11 @@ else if (!_visible && _pending.Count > 0)
         }
     }
 
+    /// <summary>
+    /// Reads editor for <see cref="OrganicApprovalBar"/>, keeping the operation consistent with the state and invariants of the surrounding organic approval bar workflow.
+    /// </summary>
+    /// <param name="request">Request containing the caller-supplied values that control this operation.</param>
+    /// <returns>The organic interaction editor produced by the operation.</returns>
     private OrganicInteractionEditor ReadEditor(OrganicWireEnvelope request)
     {
         try
@@ -249,6 +300,11 @@ else if (!_visible && _pending.Count > 0)
         }
     }
 
+    /// <summary>
+    /// Performs describe interaction for <see cref="OrganicApprovalBar"/>, keeping the operation consistent with the state and invariants of the surrounding organic approval bar workflow.
+    /// </summary>
+    /// <param name="request">Request containing the caller-supplied values that control this operation.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string DescribeInteraction(OrganicWireEnvelope request) {
         try
         {
@@ -267,6 +323,11 @@ else if (!_visible && _pending.Count > 0)
         }
     }
 
+    /// <summary>
+    /// Approves button text for <see cref="OrganicApprovalBar"/>, keeping the operation consistent with the state and invariants of the surrounding organic approval bar workflow.
+    /// </summary>
+    /// <param name="request">Request containing the caller-supplied values that control this operation.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string ApproveButtonText(OrganicWireEnvelope request) {
         try
         {
@@ -286,6 +347,13 @@ else if (!_visible && _pending.Count > 0)
         }
     }
 
+    /// <summary>
+    /// Attempts to read parameter for <see cref="OrganicApprovalBar"/>, keeping the operation consistent with the state and invariants of the surrounding organic approval bar workflow.
+    /// </summary>
+    /// <param name="request">Request containing the caller-supplied values that control this operation.</param>
+    /// <param name="name">Name value supplied to the organic approval bar operation and used when producing its result.</param>
+    /// <param name="value">Value value supplied to the organic approval bar operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool TryReadParameter(OrganicWireEnvelope request, string name, out string value)
     {
         try
@@ -305,6 +373,13 @@ else if (!_visible && _pending.Count > 0)
         }
     }
 
+    /// <summary>
+    /// Attempts to read int parameter for <see cref="OrganicApprovalBar"/>, keeping the operation consistent with the state and invariants of the surrounding organic approval bar workflow.
+    /// </summary>
+    /// <param name="request">Request containing the caller-supplied values that control this operation.</param>
+    /// <param name="name">Name value supplied to the organic approval bar operation and used when producing its result.</param>
+    /// <param name="fallback">Fallback value supplied to the organic approval bar operation and used when producing its result.</param>
+    /// <returns>The int produced by the operation.</returns>
     private int TryReadIntParameter(OrganicWireEnvelope request, string name, int fallback)
     {
         try
@@ -322,6 +397,13 @@ else if (!_visible && _pending.Count > 0)
         }
     }
 
+    /// <summary>
+    /// Attempts to read boolean parameter for <see cref="OrganicApprovalBar"/>, keeping the operation consistent with the state and invariants of the surrounding organic approval bar workflow.
+    /// </summary>
+    /// <param name="request">Request containing the caller-supplied values that control this operation.</param>
+    /// <param name="name">Name value supplied to the organic approval bar operation and used when producing its result.</param>
+    /// <param name="fallback">Value indicating whether fallback should apply to this operation.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     private bool TryReadBooleanParameter(OrganicWireEnvelope request, string name, bool fallback)
     {
         try
@@ -340,6 +422,9 @@ else if (!_visible && _pending.Count > 0)
         }
     }
 
+    /// <summary>
+    /// Performs toggle collapsed for <see cref="OrganicApprovalBar"/>, keeping the operation consistent with the state and invariants of the surrounding organic approval bar workflow.
+    /// </summary>
     private void ToggleCollapsed() {
         try
         {
@@ -351,6 +436,9 @@ else if (!_visible && _pending.Count > 0)
             throw;
         }
     }
+    /// <summary>
+    /// Performs hide for <see cref="OrganicApprovalBar"/>, keeping the operation consistent with the state and invariants of the surrounding organic approval bar workflow.
+    /// </summary>
     private void Hide() {
         try
         {
@@ -362,6 +450,9 @@ else if (!_visible && _pending.Count > 0)
             throw;
         }
     }
+    /// <summary>
+    /// Performs show for <see cref="OrganicApprovalBar"/>, keeping the operation consistent with the state and invariants of the surrounding organic approval bar workflow.
+    /// </summary>
     private void Show() {
         try
         {
@@ -374,6 +465,9 @@ else if (!_visible && _pending.Count > 0)
         }
     }
 
+    /// <summary>
+    /// Releases resources owned by <see cref="OrganicApprovalBar"/> and leaves the organic approval bar workflow in a safely disposed state.
+    /// </summary>
     public void Dispose() {
         try
         {
@@ -385,4 +479,5 @@ else if (!_visible && _pending.Count > 0)
             throw;
         }
     }
+
 }

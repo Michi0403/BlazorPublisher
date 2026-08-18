@@ -26,10 +26,23 @@
 </div>
 
 @code {
+
+    /// <summary>
+    /// Stores the internal timer gate state used by <see cref="UserNotificationHost"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly object _timerGate = new();
+    /// <summary>
+    /// Stores the in-memory expiration timers collection maintained internally by <see cref="UserNotificationHost"/> for its current workflow state.
+    /// </summary>
     private readonly Dictionary<Guid, Timer> _expirationTimers = [];
+    /// <summary>
+    /// Stores the internal disposed state used by <see cref="UserNotificationHost"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _disposed;
 
+    /// <summary>
+    /// Handles the initialized lifecycle or event notification for <see cref="UserNotificationHost"/>, updating the state required by the surrounding workflow.
+    /// </summary>
     protected override void OnInitialized()
     {
         try
@@ -45,6 +58,9 @@
         }
     }
 
+    /// <summary>
+    /// Handles the changed lifecycle or event notification for <see cref="UserNotificationHost"/>, updating the state required by the surrounding workflow.
+    /// </summary>
     private void OnChanged()
     {
         try
@@ -60,6 +76,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs synchronize expiration timers for <see cref="UserNotificationHost"/>, keeping the operation consistent with the state and invariants of the surrounding user notification host workflow.
+    /// </summary>
     private void SynchronizeExpirationTimers()
     {
         try
@@ -91,6 +110,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs expire notification for <see cref="UserNotificationHost"/>, keeping the operation consistent with the state and invariants of the surrounding user notification host workflow.
+    /// </summary>
+    /// <param name="state">State value supplied to the user notification host operation and used when producing its result.</param>
     private void ExpireNotification(object? state)
     {
         try
@@ -112,6 +135,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs icon for <see cref="UserNotificationHost"/>, keeping the operation consistent with the state and invariants of the surrounding user notification host workflow.
+    /// </summary>
+    /// <param name="severity">Severity value supplied to the user notification host operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Icon(UserNotificationSeverity severity) {
         try
         {
@@ -130,6 +158,9 @@
         }
     }
 
+    /// <summary>
+    /// Releases resources owned by <see cref="UserNotificationHost"/> and leaves the user notification host workflow in a safely disposed state.
+    /// </summary>
     public void Dispose()
     {
         try
@@ -150,4 +181,5 @@
             throw;
         }
     }
+
 }

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Source-only regression audit for PublisherStudio 2.7.9 story-source recovery and 1-Wire compatibility."""
+"""Source-only regression audit for PublisherStudio 2.8.8 story-source recovery and 1-Wire compatibility."""
 from pathlib import Path
 import re
 import sys
@@ -26,15 +26,15 @@ try:
         "src/PublisherStudio.Web/PublisherStudio.Web.csproj",
         "src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj",
     ):
-        require(rel, "<Version>2.7.9</Version>")
+        require(rel, "<Version>2.8.8</Version>")
 
-    require("src/PublisherStudio.Web/Components/App.razor", "publisherInterop.js?v=2.7.9")
+    require("src/PublisherStudio.Web/Components/App.razor", "publisherInterop.js?v=2.8.8")
     for rel in (
         "src/PublisherStudio.Web/Components/Pages/Editor.razor",
         "src/PublisherStudio.Web/Components/Editor/InspectorPanel.razor",
         "src/PublisherStudio.Web/Components/Editor/MediaStudio.razor",
     ):
-        require(rel, "mediaStudioInterop.js?v=2.7.9")
+        require(rel, "mediaStudioInterop.js?v=2.8.8")
 
     factory = "src/PublisherStudio.Web/Services/PublisherDocumentFactory.cs"
     rich = "src/PublisherStudio.Web/Services/RichTextDocumentFactory.cs"
@@ -76,7 +76,7 @@ try:
                 render_entries.append((path.relative_to(ROOT).as_posix(), line.strip()))
     expected = {
         ("src/PublisherStudio.Web/Components/Layout/JavaScriptDiagnosticsBridge.razor", "@rendermode @(new InteractiveServerRenderMode(prerender: false))"),
-        ("src/PublisherStudio.Web/Components/Pages/Editor.razor", "@rendermode @(new InteractiveServerRenderMode(prerender: true))"),
+        ("src/PublisherStudio.Web/Components/Pages/Editor.razor", "@rendermode InteractiveServer"),
         ("src/PublisherStudio.Web/Components/Pages/Help.razor", "@rendermode InteractiveServer"),
         ("src/PublisherStudio.Web/Components/Pages/Localization.razor", "@rendermode InteractiveServer"),
         ("src/PublisherStudio.Web/Components/Pages/OrganicPlugins.razor", "@rendermode InteractiveServer"),
@@ -95,7 +95,7 @@ try:
     require(story, 'RequestedOrganicCapabilities = ["publisher.business-context", "publisher.text.insert.propose"]')
     require("Directory.Build.props", "<LocalGptWireProtocolVersion>2.1.1</LocalGptWireProtocolVersion>")
 
-    print("PublisherStudio 2.7.9 story-source recovery and 1-Wire compatibility source audit passed.")
+    print("PublisherStudio 2.8.8 story-source recovery and 1-Wire compatibility source audit passed.")
 except Exception as exc:
-    print(f"PublisherStudio 2.7.9 source audit failed: {exc}", file=sys.stderr)
+    print(f"PublisherStudio 2.8.8 source audit failed: {exc}", file=sys.stderr)
     raise SystemExit(1)

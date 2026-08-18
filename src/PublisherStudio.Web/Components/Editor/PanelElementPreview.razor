@@ -66,8 +66,18 @@
 </div>
 
 @code {
+
+    /// <summary>
+    /// Gets or sets the item value that forms part of the panel element preview state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The item value exposed by <see cref="PanelElementPreview"/>.</value>
     [Parameter, EditorRequired] public PublicationElement Item { get; set; } = default!;
 
+    /// <summary>
+    /// Performs icon for <see cref="PanelElementPreview"/>, keeping the operation consistent with the state and invariants of the surrounding panel element preview workflow.
+    /// </summary>
+    /// <param name="kind">Kind value supplied to the panel element preview operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Icon(PublicationComponentKind kind) {
         try
         {
@@ -86,4 +96,5 @@
             throw;
         }
     }
+
 }

@@ -46,4 +46,13 @@ else {
     else { Fail 'Python 3 is required for strict method-granular component resilience; the build must never silently weaken this policy.' }
 }
 
-Write-Host "Component safety validation passed: $($razorFiles.Count) Razor components own typed loggers; every component method is method-locally guarded; no legacy exemptions are permitted." -ForegroundColor Green
+$prerenderAudit = Join-Path $PSScriptRoot 'audit_prerender_interop_safety.py'
+if (-not (Test-Path -LiteralPath $prerenderAudit -PathType Leaf)) { Fail 'The prerender JavaScript interop safety audit is missing.' }
+if ($python) { & $python.Source $prerenderAudit --root $RepositoryRoot; if ($LASTEXITCODE -ne 0) { Fail 'Prerender JavaScript interop safety audit failed.' } }
+else {
+    $launcher = Get-Command py -ErrorAction SilentlyContinue
+    if ($launcher) { & $launcher.Source -3 $prerenderAudit --root $RepositoryRoot; if ($LASTEXITCODE -ne 0) { Fail 'Prerender JavaScript interop safety audit failed.' } }
+    else { Fail 'Python 3 is required for prerender JavaScript interop safety; the build must never silently weaken this policy.' }
+}
+
+Write-Host "Component safety validation passed: $($razorFiles.Count) Razor components own typed loggers; every component method is method-locally guarded; prerender JavaScript interop is attachment-gated; no legacy exemptions are permitted." -ForegroundColor Green

@@ -1,5 +1,5 @@
-@page "/localization"
 @rendermode InteractiveServer
+@page "/localization"
 @using System.Text.Json
 @inject PublisherStudio.Services.Configuration.IFileLocalizationService LocalizationService
 @inject IUserNotificationService Notifications
@@ -49,18 +49,41 @@
 </main>
 
 @code {
+
+    /// <summary>
+    /// Stores the internal culture state used by <see cref="Localization"/> while executing its surrounding workflow.
+    /// </summary>
     private string _culture = CultureInfo.CurrentUICulture.Name;
+    /// <summary>
+    /// Stores the internal filter state used by <see cref="Localization"/> while executing its surrounding workflow.
+    /// </summary>
     private string _filter = string.Empty;
+    /// <summary>
+    /// Stores the in-memory strings collection maintained internally by <see cref="Localization"/> for its current workflow state.
+    /// </summary>
     private Dictionary<string, string> _strings = new(StringComparer.OrdinalIgnoreCase);
+    /// <summary>
+    /// Stores the internal status state used by <see cref="Localization"/> while executing its surrounding workflow.
+    /// </summary>
     private string _status = string.Empty;
+    /// <summary>
+    /// Stores the internal saving state used by <see cref="Localization"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _saving;
 
+    /// <summary>
+    /// Gets the filtered strings collection maintained or exposed by this localization instance for downstream processing.
+    /// </summary>
+    /// <value>The filtered strings value exposed by <see cref="Localization"/>.</value>
     private IEnumerable<KeyValuePair<string, string>> FilteredStrings => _strings
         .Where(pair => string.IsNullOrWhiteSpace(_filter)
             || pair.Key.Contains(_filter, StringComparison.OrdinalIgnoreCase)
             || pair.Value.Contains(_filter, StringComparison.OrdinalIgnoreCase))
         .OrderBy(pair => pair.Key, StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>
+    /// Handles the initialized lifecycle or event notification for <see cref="Localization"/>, updating the state required by the surrounding workflow.
+    /// </summary>
     protected override void OnInitialized()
     {
         try
@@ -85,6 +108,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs change culture for <see cref="Localization"/>, keeping the operation consistent with the state and invariants of the surrounding localization workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the localization operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task ChangeCultureAsync(ChangeEventArgs args)
     {
         try
@@ -101,6 +129,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs load for <see cref="Localization"/>, keeping the operation consistent with the state and invariants of the surrounding localization workflow.
+    /// </summary>
     private void Load()
     {
         try
@@ -117,6 +148,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs update for <see cref="Localization"/>, keeping the operation consistent with the state and invariants of the surrounding localization workflow.
+    /// </summary>
+    /// <param name="key">Key value supplied to the localization operation and used when producing its result.</param>
+    /// <param name="value">Value value supplied to the localization operation and used when producing its result.</param>
     private void Update(string key, string? value) {
         try
         {
@@ -129,6 +165,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs save for <see cref="Localization"/>, keeping the operation consistent with the state and invariants of the surrounding localization workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task SaveAsync()
     {
         try
@@ -157,6 +197,9 @@
         }
     }
 
+    /// <summary>
+    /// Applies culture for <see cref="Localization"/>, keeping the operation consistent with the state and invariants of the surrounding localization workflow.
+    /// </summary>
     private void ApplyCulture() {
         try
         {
@@ -168,6 +211,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs back for <see cref="Localization"/>, keeping the operation consistent with the state and invariants of the surrounding localization workflow.
+    /// </summary>
     private void Back() {
         try
         {
@@ -179,4 +225,5 @@
             throw;
         }
     }
+
 }

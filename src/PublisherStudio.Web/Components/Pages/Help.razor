@@ -1,5 +1,5 @@
-@page "/help"
 @rendermode InteractiveServer
+@page "/help"
 @inject PublisherStudio.Services.Documentation.IPublisherDocumentationCatalogService Documentation
 @inject IUserNotificationService Notifications
 @inject ILogger<Help> Logger
@@ -69,8 +69,16 @@
 <DocumentationViewerHost />
 
 @code {
+
+    /// <summary>
+    /// Gets or sets the status value that forms part of the help state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The status value exposed by <see cref="Help"/>.</value>
     private PublisherDocumentationStatus Status { get; set; } = new();
 
+    /// <summary>
+    /// Handles the initialized lifecycle or event notification for <see cref="Help"/>, updating the state required by the surrounding workflow.
+    /// </summary>
     protected override void OnInitialized()
     {
         try
@@ -94,6 +102,9 @@
         }
     }
 
+    /// <summary>
+    /// Opens HTML guide for <see cref="Help"/>, keeping the operation consistent with the state and invariants of the surrounding help workflow.
+    /// </summary>
     private void OpenHtmlGuide() {
         try
         {
@@ -106,6 +117,9 @@
         }
     }
 
+    /// <summary>
+    /// Opens PDF book for <see cref="Help"/>, keeping the operation consistent with the state and invariants of the surrounding help workflow.
+    /// </summary>
     private void OpenPdfBook() {
         try
         {
@@ -118,6 +132,9 @@
         }
     }
 
+    /// <summary>
+    /// Opens API reference for <see cref="Help"/>, keeping the operation consistent with the state and invariants of the surrounding help workflow.
+    /// </summary>
     private void OpenApiReference() {
         try
         {
@@ -130,6 +147,9 @@
         }
     }
 
+    /// <summary>
+    /// Opens build status for <see cref="Help"/>, keeping the operation consistent with the state and invariants of the surrounding help workflow.
+    /// </summary>
     private void OpenBuildStatus() {
         try
         {
@@ -142,6 +162,9 @@
         }
     }
 
+    /// <summary>
+    /// Opens getting started for <see cref="Help"/>, keeping the operation consistent with the state and invariants of the surrounding help workflow.
+    /// </summary>
     private void OpenGettingStarted() {
         try
         {
@@ -154,6 +177,9 @@
         }
     }
 
+    /// <summary>
+    /// Opens editor workspace for <see cref="Help"/>, keeping the operation consistent with the state and invariants of the surrounding help workflow.
+    /// </summary>
     private void OpenEditorWorkspace() {
         try
         {
@@ -166,6 +192,9 @@
         }
     }
 
+    /// <summary>
+    /// Opens pictures and media for <see cref="Help"/>, keeping the operation consistent with the state and invariants of the surrounding help workflow.
+    /// </summary>
     private void OpenPicturesAndMedia() {
         try
         {
@@ -178,6 +207,9 @@
         }
     }
 
+    /// <summary>
+    /// Opens streaming and recording for <see cref="Help"/>, keeping the operation consistent with the state and invariants of the surrounding help workflow.
+    /// </summary>
     private void OpenStreamingAndRecording() {
         try
         {
@@ -190,6 +222,9 @@
         }
     }
 
+    /// <summary>
+    /// Opens publishing and export for <see cref="Help"/>, keeping the operation consistent with the state and invariants of the surrounding help workflow.
+    /// </summary>
     private void OpenPublishingAndExport() {
         try
         {
@@ -202,6 +237,9 @@
         }
     }
 
+    /// <summary>
+    /// Opens local GPT and one wire for <see cref="Help"/>, keeping the operation consistent with the state and invariants of the surrounding help workflow.
+    /// </summary>
     private void OpenLocalGptAndOneWire() {
         try
         {
@@ -214,6 +252,9 @@
         }
     }
 
+    /// <summary>
+    /// Opens installer and updates for <see cref="Help"/>, keeping the operation consistent with the state and invariants of the surrounding help workflow.
+    /// </summary>
     private void OpenInstallerAndUpdates() {
         try
         {
@@ -226,6 +267,9 @@
         }
     }
 
+    /// <summary>
+    /// Opens troubleshooting for <see cref="Help"/>, keeping the operation consistent with the state and invariants of the surrounding help workflow.
+    /// </summary>
     private void OpenTroubleshooting() {
         try
         {
@@ -238,6 +282,12 @@
         }
     }
 
+    /// <summary>
+    /// Opens documentation for <see cref="Help"/>, keeping the operation consistent with the state and invariants of the surrounding help workflow.
+    /// </summary>
+    /// <param name="url">Url value supplied to the help operation and used when producing its result.</param>
+    /// <param name="title">Title value supplied to the help operation and used when producing its result.</param>
+    /// <param name="available">Value indicating whether available should apply to this operation.</param>
     private void OpenDocumentation(string url, string title, bool available = true)
     {
         try
@@ -268,6 +318,9 @@
     }
 
 
+    /// <summary>
+    /// Performs back to studio for <see cref="Help"/>, keeping the operation consistent with the state and invariants of the surrounding help workflow.
+    /// </summary>
     private void BackToStudio() {
         try
         {
@@ -279,4 +332,5 @@
             throw;
         }
     }
+
 }

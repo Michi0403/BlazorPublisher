@@ -784,27 +784,93 @@
 }
 
 @code {
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the value is visible applies to the dev extreme component editor state.
+    /// </summary>
+    /// <value>The visible value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
     [Parameter] public bool Visible { get; set; }
+    /// <summary>
+    /// Gets or sets the state value that forms part of the dev extreme component editor state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The state value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
     [Parameter, EditorRequired] public EditorStateService State { get; set; } = default!;
+    /// <summary>
+    /// Gets or sets the saved value that forms part of the dev extreme component editor state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The saved value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
     [Parameter] public EventCallback<DevExtremeComponentElement> Saved { get; set; }
+    /// <summary>
+    /// Gets or sets the cancelled value that forms part of the dev extreme component editor state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The cancelled value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
     [Parameter] public EventCallback Cancelled { get; set; }
+    /// <summary>
+    /// Gets or sets the manage data requested value that forms part of the dev extreme component editor state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The manage data requested value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
     [Parameter] public EventCallback ManageDataRequested { get; set; }
 
+    /// <summary>
+    /// Stores the internal draft state used by <see cref="DevExtremeComponentEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private DevExtremeComponentElement? _draft;
+    /// <summary>
+    /// Stores the internal loaded identifier state used by <see cref="DevExtremeComponentEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private Guid? _loadedId;
+    /// <summary>
+    /// Stores the internal was visible state used by <see cref="DevExtremeComponentEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _wasVisible;
+    /// <summary>
+    /// Stores the internal section state used by <see cref="DevExtremeComponentEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private string _section = "general";
+    /// <summary>
+    /// Stores the internal headers text state used by <see cref="DevExtremeComponentEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private string _headersText = string.Empty;
+    /// <summary>
+    /// Stores the internal testing connection state used by <see cref="DevExtremeComponentEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _testingConnection;
+    /// <summary>
+    /// Stores the internal connection status state used by <see cref="DevExtremeComponentEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private string _connectionStatus = string.Empty;
+    /// <summary>
+    /// Stores the internal draw mode state used by <see cref="DevExtremeComponentEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private string _drawMode = string.Empty;
+    /// <summary>
+    /// Stores the internal active feature identifier state used by <see cref="DevExtremeComponentEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private Guid? _activeFeatureId;
+    /// <summary>
+    /// Stores the internal geo JSON state used by <see cref="DevExtremeComponentEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private string _geoJson = string.Empty;
+    /// <summary>
+    /// Stores the internal geo JSON status state used by <see cref="DevExtremeComponentEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private string _geoJsonStatus = string.Empty;
+    /// <summary>
+    /// Stores the internal self state used by <see cref="DevExtremeComponentEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private DotNetObjectReference<DevExtremeComponentEditor>? _self;
+    /// <summary>
+    /// Stores the internal designer attached state used by <see cref="DevExtremeComponentEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _designerAttached;
+    /// <summary>
+    /// Stores the internal preview size key state used by <see cref="DevExtremeComponentEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private string _previewSizeKey = "auto";
 
+    /// <summary>
+    /// Stores the internal panel component kinds state used by <see cref="DevExtremeComponentEditor"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly PublicationComponentKind[] PanelComponentKinds =
     [
         PublicationComponentKind.DataGrid, PublicationComponentKind.TreeList, PublicationComponentKind.Form,
@@ -815,38 +881,136 @@
         PublicationComponentKind.VectorMap, PublicationComponentKind.Chat, PublicationComponentKind.Button
     ];
 
+    /// <summary>
+    /// Gets the current page elements collection maintained or exposed by this dev extreme component editor instance for downstream processing.
+    /// </summary>
+    /// <value>The current page elements value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
     private IEnumerable<PublicationElement> CurrentPageElements => State.CurrentPage.Elements.Where(element => element.Id != _draft?.Id);
+    /// <summary>
+    /// Gets a value indicating whether internal borders applies to the dev extreme component editor state.
+    /// </summary>
+    /// <value>The supports internal borders value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
     private bool SupportsInternalBorders => _draft?.ComponentKind is PublicationComponentKind.DataGrid or PublicationComponentKind.TreeList or PublicationComponentKind.PivotGrid;
+    /// <summary>
+    /// Gets a value indicating whether word wrap applies to the dev extreme component editor state.
+    /// </summary>
+    /// <value>The supports word wrap value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
     private bool SupportsWordWrap => _draft?.ComponentKind is PublicationComponentKind.DataGrid or PublicationComponentKind.TreeList;
+    /// <summary>
+    /// Gets a value indicating whether edit mode applies to the dev extreme component editor state.
+    /// </summary>
+    /// <value>The supports edit mode value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
     private bool SupportsEditMode => _draft?.ComponentKind is PublicationComponentKind.DataGrid or PublicationComponentKind.TreeList or PublicationComponentKind.Scheduler;
+    /// <summary>
+    /// Gets a value indicating whether selection applies to the dev extreme component editor state.
+    /// </summary>
+    /// <value>The supports selection value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
     private bool SupportsSelection => _draft?.ComponentKind is PublicationComponentKind.DataGrid or PublicationComponentKind.TreeList;
+    /// <summary>
+    /// Gets a value indicating whether page size applies to the dev extreme component editor state.
+    /// </summary>
+    /// <value>The supports page size value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
     private bool SupportsPageSize => _draft?.ComponentKind is PublicationComponentKind.DataGrid or PublicationComponentKind.TreeList;
+    /// <summary>
+    /// Gets a value indicating whether orientation applies to the dev extreme component editor state.
+    /// </summary>
+    /// <value>The supports orientation value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
     private bool SupportsOrientation => _draft?.ComponentKind is PublicationComponentKind.Menu or PublicationComponentKind.TileView or PublicationComponentKind.Splitter or PublicationComponentKind.ScrollView;
+    /// <summary>
+    /// Gets a value indicating whether button text applies to the dev extreme component editor state.
+    /// </summary>
+    /// <value>The supports button text value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
     private bool SupportsButtonText => _draft?.ComponentKind is PublicationComponentKind.Button or PublicationComponentKind.Form or PublicationComponentKind.CheckBox;
+    /// <summary>
+    /// Gets a value indicating whether placeholder applies to the dev extreme component editor state.
+    /// </summary>
+    /// <value>The supports placeholder value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
     private bool SupportsPlaceholder => _draft?.ComponentKind is PublicationComponentKind.TextBox or PublicationComponentKind.TextArea or PublicationComponentKind.NumberBox or PublicationComponentKind.DateBox or PublicationComponentKind.SelectBox or PublicationComponentKind.TagBox;
+    /// <summary>
+    /// Gets a value indicating whether initial value applies to the dev extreme component editor state.
+    /// </summary>
+    /// <value>The supports initial value value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
     private bool SupportsInitialValue => _draft?.ComponentKind is PublicationComponentKind.TextBox or PublicationComponentKind.TextArea or PublicationComponentKind.NumberBox or PublicationComponentKind.DateBox or PublicationComponentKind.CheckBox or PublicationComponentKind.SelectBox or PublicationComponentKind.TagBox;
+    /// <summary>
+    /// Gets a value indicating whether grid options applies to the dev extreme component editor state.
+    /// </summary>
+    /// <value>The supports grid options value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
     private bool SupportsGridOptions => _draft?.ComponentKind == PublicationComponentKind.DataGrid;
+    /// <summary>
+    /// Gets a value indicating whether uses key field applies to the dev extreme component editor state.
+    /// </summary>
+    /// <value>The uses key field value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
     private bool UsesKeyField => _draft?.ComponentKind is PublicationComponentKind.DataGrid or PublicationComponentKind.TreeList or PublicationComponentKind.Form or PublicationComponentKind.Scheduler or PublicationComponentKind.SelectBox or PublicationComponentKind.TagBox or PublicationComponentKind.Gallery or PublicationComponentKind.TileView or PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu or PublicationComponentKind.PivotGrid or PublicationComponentKind.Chat;
+    /// <summary>
+    /// Gets a value indicating whether uses parent field applies to the dev extreme component editor state.
+    /// </summary>
+    /// <value>The uses parent field value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
     private bool UsesParentField => _draft?.ComponentKind is PublicationComponentKind.TreeList or PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu;
+    /// <summary>
+    /// Gets a value indicating whether uses text field applies to the dev extreme component editor state.
+    /// </summary>
+    /// <value>The uses text field value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
     private bool UsesTextField => _draft?.ComponentKind is PublicationComponentKind.TreeList or PublicationComponentKind.Scheduler or PublicationComponentKind.Gallery or PublicationComponentKind.TileView or PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu;
+    /// <summary>
+    /// Gets a value indicating whether uses display field applies to the dev extreme component editor state.
+    /// </summary>
+    /// <value>The uses display field value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
     private bool UsesDisplayField => _draft?.ComponentKind is PublicationComponentKind.SelectBox or PublicationComponentKind.TagBox or PublicationComponentKind.Gallery or PublicationComponentKind.TileView or PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu;
+    /// <summary>
+    /// Gets a value indicating whether uses value field applies to the dev extreme component editor state.
+    /// </summary>
+    /// <value>The uses value field value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
     private bool UsesValueField => _draft?.ComponentKind is PublicationComponentKind.SelectBox or PublicationComponentKind.TagBox or PublicationComponentKind.Gallery or PublicationComponentKind.TileView;
+    /// <summary>
+    /// Gets a value indicating whether uses image field applies to the dev extreme component editor state.
+    /// </summary>
+    /// <value>The uses image field value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
     private bool UsesImageField => _draft?.ComponentKind is PublicationComponentKind.Gallery or PublicationComponentKind.TileView;
+    /// <summary>
+    /// Gets a value indicating whether manual menu applies to the dev extreme component editor state.
+    /// </summary>
+    /// <value>The is manual menu value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
     private bool IsManualMenu => _draft is not null
         && (_draft.ComponentKind is PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu)
         && _draft.MenuSourceMode == PublicationMenuSourceMode.ManualItems;
+    /// <summary>
+    /// Gets a value indicating whether uses data connection applies to the dev extreme component editor state.
+    /// </summary>
+    /// <value>The uses data connection value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
     private bool UsesDataConnection => !IsManualMenu;
+    /// <summary>
+    /// Stores the in-memory supported map providers collection maintained internally by <see cref="DevExtremeComponentEditor"/> for its current workflow state.
+    /// </summary>
     private readonly HashSet<string> SupportedMapProviders = new(StringComparer.OrdinalIgnoreCase) { "google", "googleStatic", "azure", "bing" };
+    /// <summary>
+    /// Gets a value indicating whether uses google map provider applies to the dev extreme component editor state.
+    /// </summary>
+    /// <value>The uses google map provider value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
     private bool UsesGoogleMapProvider => _draft?.MapProvider is "google" or "googleStatic";
+    /// <summary>
+    /// Gets a value indicating whether map configuration valid applies to the dev extreme component editor state.
+    /// </summary>
+    /// <value>The map configuration valid value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
     private bool MapConfigurationValid => _draft?.ComponentKind != PublicationComponentKind.Map
         || (SupportedMapProviders.Contains(_draft.MapProvider ?? string.Empty) && !string.IsNullOrWhiteSpace(_draft.MapApiKey));
+    /// <summary>
+    /// Gets a value indicating whether save applies to the dev extreme component editor state.
+    /// </summary>
+    /// <value>The can save value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
     private bool CanSave => _draft is not null && !string.IsNullOrWhiteSpace(_draft.Title)
         && MapConfigurationValid
         && (!UsesDataConnection || _draft.Connection.Mode is not (PublicationComponentDataMode.Rest or PublicationComponentDataMode.OData) || !string.IsNullOrWhiteSpace(_draft.Connection.Url));
+    /// <summary>
+    /// Gets the validation message value that forms part of the dev extreme component editor state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The validation message value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
     private string ValidationMessage => _draft?.ComponentKind == PublicationComponentKind.Map && !MapConfigurationValid
         ? "Select a supported provider and enter its API key. No provider preview request is made before both are present."
         : CanSave ? "Ready. Existing charts remain standalone and unchanged." : "Enter a title and, when a data-driven component uses direct REST/OData, an endpoint URL.";
 
+    /// <summary>
+    /// Handles the parameters set lifecycle or event notification for <see cref="DevExtremeComponentEditor"/>, updating the state required by the surrounding workflow.
+    /// </summary>
     protected override void OnParametersSet()
     {
         try
@@ -872,6 +1036,10 @@
     }
 
 
+    /// <summary>
+    /// Gets the component preview style value that forms part of the dev extreme component editor state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The component preview style value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
     private string ComponentPreviewStyle => _previewSizeKey switch
     {
         "phone" => "--component-preview-aspect:0.462085;",
@@ -881,6 +1049,10 @@
         _ => "--component-preview-aspect:auto;"
     };
 
+    /// <summary>
+    /// Performs change preview size for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the dev extreme component editor operation and used when producing its result.</param>
     private void ChangePreviewSize(ChangeEventArgs args)
     {
         try
@@ -896,6 +1068,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs section class for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the dev extreme component editor operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string SectionClass(string value) {
         try
         {
@@ -907,6 +1084,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs show general for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
     private void ShowGeneral() {
         try
         {
@@ -918,6 +1098,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs show data for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
     private void ShowData() {
         try
         {
@@ -929,6 +1112,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs show menu items for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
     private void ShowMenuItems() {
         try
         {
@@ -940,6 +1126,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs show fields for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
     private void ShowFields() {
         try
         {
@@ -951,6 +1140,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs show behavior for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
     private void ShowBehavior() {
         try
         {
@@ -962,6 +1154,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs show map for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
     private void ShowMap() {
         try
         {
@@ -973,6 +1168,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs show layout for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
     private void ShowLayout() {
         try
         {
@@ -984,6 +1182,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs show actions for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
     private void ShowActions() {
         try
         {
@@ -995,6 +1196,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs show advanced for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
     private void ShowAdvanced() {
         try
         {
@@ -1006,6 +1210,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs component icon for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
+    /// <param name="kind">Kind value supplied to the dev extreme component editor operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string ComponentIcon(PublicationComponentKind kind) {
         try
         {
@@ -1024,6 +1233,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs friendly for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the dev extreme component editor operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Friendly(string value) {
         try
         {
@@ -1036,6 +1250,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs change kind for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
+    /// <param name="kind">Kind value supplied to the dev extreme component editor operation and used when producing its result.</param>
     private void ChangeKind(PublicationComponentKind kind)
     {
         try
@@ -1075,6 +1293,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs use bundled vector map for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
     private void UseBundledVectorMap()
     {
         try
@@ -1093,9 +1314,25 @@
         }
     }
 
+    /// <summary>
+    /// Gets the draw class marker value that forms part of the dev extreme component editor state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The draw class marker value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
     private string DrawClassMarker => _drawMode == "marker" ? "active" : string.Empty;
+    /// <summary>
+    /// Gets the draw class line value that forms part of the dev extreme component editor state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The draw class line value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
     private string DrawClassLine => _drawMode == "line" ? "active" : string.Empty;
+    /// <summary>
+    /// Gets the draw class polygon value that forms part of the dev extreme component editor state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The draw class polygon value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
     private string DrawClassPolygon => _drawMode == "polygon" ? "active" : string.Empty;
+    /// <summary>
+    /// Sets draw mode for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
+    /// <param name="mode">Mode value supplied to the dev extreme component editor operation and used when producing its result.</param>
     private void SetDrawMode(string mode) {
         try
         {
@@ -1107,6 +1344,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets marker draw mode for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
     private void SetMarkerDrawMode() {
         try
         {
@@ -1118,6 +1358,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets line draw mode for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
     private void SetLineDrawMode() {
         try
         {
@@ -1129,6 +1372,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets polygon draw mode for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
     private void SetPolygonDrawMode() {
         try
         {
@@ -1140,6 +1386,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs finish feature for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
     private void FinishFeature() {
         try
         {
@@ -1151,6 +1400,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs undo point for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
     private void UndoPoint()
     {
         try
@@ -1165,6 +1417,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Removes feature for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
+    /// <param name="feature">Feature value supplied to the dev extreme component editor operation and used when producing its result.</param>
     private void RemoveFeature(PublicationVectorMapFeature feature) {
         try
         {
@@ -1176,6 +1432,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs clear features for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
     private void ClearFeatures() {
         try
         {
@@ -1188,6 +1447,11 @@
         }
     }
 
+    /// <summary>
+    /// Adds vector designer point for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
+    /// <param name="longitude">Longitude value supplied to the dev extreme component editor operation and used when producing its result.</param>
+    /// <param name="latitude">Latitude value supplied to the dev extreme component editor operation and used when producing its result.</param>
     [JSInvokable]
     public void AddVectorDesignerPoint(double longitude, double latitude)
     {
@@ -1215,6 +1479,9 @@
         }
     }
 
+    /// <summary>
+    /// Imports geo JSON for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
     private void ImportGeoJson()
     {
         try
@@ -1247,6 +1514,13 @@
         }
     }
 
+    /// <summary>
+    /// Parses geo geometry for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
+    /// <param name="type">Type value supplied to the dev extreme component editor operation and used when producing its result.</param>
+    /// <param name="coordinates">Coordinates value supplied to the dev extreme component editor operation and used when producing its result.</param>
+    /// <param name="name">Name value supplied to the dev extreme component editor operation and used when producing its result.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private IEnumerable<PublicationVectorMapFeature> ParseGeoGeometry(string type, System.Text.Json.JsonElement coordinates, string name)
     {
         try
@@ -1273,6 +1547,11 @@
         }
     }
 
+    /// <summary>
+    /// Handles the after render async lifecycle or event notification for <see cref="DevExtremeComponentEditor"/>, updating the state required by the surrounding workflow.
+    /// </summary>
+    /// <param name="firstRender">Value indicating whether first render should apply to this operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         try
@@ -1297,11 +1576,19 @@
         }
     }
 
+    /// <summary>
+    /// Releases resources owned by <see cref="DevExtremeComponentEditor"/> and leaves the dev extreme component editor workflow in a safely disposed state.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     public async ValueTask DisposeAsync()
     {
         try
         {
-            try { await JS.InvokeVoidAsync("PublisherStudioComponentRuntime.detachVectorDesigner", "ps-component-vector-designer").ConfigureAwait(true); } catch { }
+            if (_designerAttached)
+            {
+                try { await JS.InvokeVoidAsync("PublisherStudioComponentRuntime.detachVectorDesigner", "ps-component-vector-designer").ConfigureAwait(true); } catch { }
+                _designerAttached = false;
+            }
             _self?.Dispose();
     
         }
@@ -1312,6 +1599,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs connection mode changed for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task ConnectionModeChanged() {
         try
         {
@@ -1323,6 +1614,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs sync key field for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task SyncKeyField() {
         try
         {
@@ -1334,6 +1629,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs sync connection key for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task SyncConnectionKey() {
         try
         {
@@ -1345,6 +1644,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs use dataset fields if empty for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task UseDatasetFieldsIfEmpty() {
         try
         {
@@ -1356,6 +1659,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs use dataset fields for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
     private void UseDatasetFields() {
         try
         {
@@ -1368,6 +1674,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs use live page dataset for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
     private void UseLivePageDataset()
     {
         try
@@ -1398,6 +1707,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs use publication media dataset for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
     private void UsePublicationMediaDataset()
     {
         try
@@ -1427,6 +1739,9 @@
         }
     }
 
+    /// <summary>
+    /// Adds menu item for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
     private void AddMenuItem()
     {
         try
@@ -1443,6 +1758,9 @@
         }
     }
 
+    /// <summary>
+    /// Adds publication pages to menu for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
     private void AddPublicationPagesToMenu()
     {
         try
@@ -1462,6 +1780,11 @@
         }
     }
 
+    /// <summary>
+    /// Sets menu parent for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
+    /// <param name="item">Item value supplied to the dev extreme component editor operation and used when producing its result.</param>
+    /// <param name="args">Args value supplied to the dev extreme component editor operation and used when producing its result.</param>
     private void SetMenuParent(PublicationMenuItem item, ChangeEventArgs args)
         {
         try
@@ -1475,6 +1798,11 @@
         }
     }
 
+    /// <summary>
+    /// Sets menu target page for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
+    /// <param name="item">Item value supplied to the dev extreme component editor operation and used when producing its result.</param>
+    /// <param name="args">Args value supplied to the dev extreme component editor operation and used when producing its result.</param>
     private void SetMenuTargetPage(PublicationMenuItem item, ChangeEventArgs args)
     {
         try
@@ -1490,6 +1818,10 @@
         }
     }
 
+    /// <summary>
+    /// Removes menu item for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
+    /// <param name="item">Item value supplied to the dev extreme component editor operation and used when producing its result.</param>
     private void RemoveMenuItem(PublicationMenuItem item)
     {
         try
@@ -1506,6 +1838,9 @@
         }
     }
 
+    /// <summary>
+    /// Adds field for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
     private void AddField()
     {
         try
@@ -1541,6 +1876,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Removes field for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
+    /// <param name="field">Field value supplied to the dev extreme component editor operation and used when producing its result.</param>
     private void RemoveField(PublicationComponentField field) {
         try
         {
@@ -1552,6 +1891,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds panel for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
     private void AddPanel()
     {
         try
@@ -1572,6 +1914,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Removes panel for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
+    /// <param name="panel">Panel value supplied to the dev extreme component editor operation and used when producing its result.</param>
     private void RemovePanel(PublicationComponentPanel panel) {
         try
         {
@@ -1583,6 +1929,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds action for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
     private void AddAction() {
         try
         {
@@ -1594,6 +1943,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Removes action for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
+    /// <param name="action">Action value supplied to the dev extreme component editor operation and used when producing its result.</param>
     private void RemoveAction(PublicationComponentAction action) {
         try
         {
@@ -1606,6 +1959,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs change headers for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the dev extreme component editor operation and used when producing its result.</param>
     private void ChangeHeaders(ChangeEventArgs args)
     {
         try
@@ -1621,6 +1978,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs test endpoint for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task TestEndpoint()
     {
         try
@@ -1661,6 +2022,11 @@
         }
     }
 
+    /// <summary>
+    /// Parses headers for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the dev extreme component editor operation and used when producing its result.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private List<PublicationWebHeader> ParseHeaders(string value) {
         try
         {
@@ -1672,6 +2038,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs format headers for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
+    /// <param name="headers">Publication web header dependency used by the dev extreme component editor workflow to provide the corresponding application capability.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string FormatHeaders(IEnumerable<PublicationWebHeader> headers) {
         try
         {
@@ -1684,6 +2055,10 @@
         }
     }
 
+    /// <summary>
+    /// Gets the source columns collection maintained or exposed by this dev extreme component editor instance for downstream processing.
+    /// </summary>
+    /// <value>The source columns value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
     private IReadOnlyList<PublicationDataColumn> SourceColumns
     {
         get
@@ -1703,6 +2078,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs field choices for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
+    /// <param name="field">Field value supplied to the dev extreme component editor operation and used when producing its result.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private IReadOnlyList<PublicationDataColumn> FieldChoices(PublicationComponentField field)
     {
         try
@@ -1720,6 +2100,11 @@
         }
     }
 
+    /// <summary>
+    /// Sets field data property for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
+    /// <param name="field">Field value supplied to the dev extreme component editor operation and used when producing its result.</param>
+    /// <param name="args">Args value supplied to the dev extreme component editor operation and used when producing its result.</param>
     private void SetFieldDataProperty(PublicationComponentField field, ChangeEventArgs args)
     {
         try
@@ -1747,6 +2132,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs lookup columns for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
+    /// <param name="field">Field value supplied to the dev extreme component editor operation and used when producing its result.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private IReadOnlyList<PublicationDataColumn> LookupColumns(PublicationComponentField field)
         {
         try
@@ -1762,6 +2152,11 @@
         }
     }
 
+    /// <summary>
+    /// Sets lookup data object for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
+    /// <param name="field">Field value supplied to the dev extreme component editor operation and used when producing its result.</param>
+    /// <param name="args">Args value supplied to the dev extreme component editor operation and used when producing its result.</param>
     private void SetLookupDataObject(PublicationComponentField field, ChangeEventArgs args)
     {
         try
@@ -1783,6 +2178,11 @@
         }
     }
 
+    /// <summary>
+    /// Sets target page for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
+    /// <param name="action">Action value supplied to the dev extreme component editor operation and used when producing its result.</param>
+    /// <param name="args">Args value supplied to the dev extreme component editor operation and used when producing its result.</param>
     private void SetTargetPage(PublicationComponentAction action, ChangeEventArgs args) {
         try
         {
@@ -1794,6 +2194,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Sets target element for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
+    /// <param name="action">Action value supplied to the dev extreme component editor operation and used when producing its result.</param>
+    /// <param name="args">Args value supplied to the dev extreme component editor operation and used when producing its result.</param>
     private void SetTargetElement(PublicationComponentAction action, ChangeEventArgs args)
     {
         try
@@ -1812,6 +2217,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs method options for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
+    /// <returns>The render fragment produced by the operation.</returns>
     private RenderFragment MethodOptions() {
         try
         {
@@ -1834,6 +2243,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs request manage data for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RequestManageData() {
         try
         {
@@ -1845,6 +2258,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs save for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task Save()
     {
         try
@@ -1861,6 +2278,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Determines whether cel for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task Cancel() {
         try
         {
@@ -1872,4 +2293,5 @@
             throw;
         }
     }
+
 }

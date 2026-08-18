@@ -39,17 +39,60 @@
 </div>
 
 @code {
+
+    /// <summary>
+    /// Gets or sets the item value that forms part of the live source view state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The item value exposed by <see cref="LiveSourceView"/>.</value>
     [Parameter, EditorRequired] public LiveSourceElement Item { get; set; } = default!;
+    /// <summary>
+    /// Gets or sets a value indicating whether designer mode applies to the live source view state.
+    /// </summary>
+    /// <value>The designer mode value exposed by <see cref="LiveSourceView"/>.</value>
     [Parameter] public bool DesignerMode { get; set; }
 
+    /// <summary>
+    /// Stores the internal active state used by <see cref="LiveSourceView"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _active;
+    /// <summary>
+    /// Stores the internal runtime instance identifier state used by <see cref="LiveSourceView"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly string _runtimeInstanceId = Guid.NewGuid().ToString("N");
+    /// <summary>
+    /// Gets the stable runtime source identifier used to identify or correlate this live source view instance with related application state.
+    /// </summary>
+    /// <value>The runtime source identifier value exposed by <see cref="LiveSourceView"/>.</value>
     private string RuntimeSourceId => $"{Item.Id:N}-{_runtimeInstanceId}";
+    /// <summary>
+    /// Gets the stable activate button identifier used to identify or correlate this live source view instance with related application state.
+    /// </summary>
+    /// <value>The activate button identifier value exposed by <see cref="LiveSourceView"/>.</value>
     private string ActivateButtonId => $"live-source-activate-{Item.Id:N}";
+    /// <summary>
+    /// Gets the stable video identifier used to identify or correlate this live source view instance with related application state.
+    /// </summary>
+    /// <value>The video identifier value exposed by <see cref="LiveSourceView"/>.</value>
     private string VideoId => $"live-source-video-{RuntimeSourceId}";
+    /// <summary>
+    /// Gets the stable canvas identifier used to identify or correlate this live source view instance with related application state.
+    /// </summary>
+    /// <value>The canvas identifier value exposed by <see cref="LiveSourceView"/>.</value>
     private string CanvasId => $"live-source-canvas-{RuntimeSourceId}";
+    /// <summary>
+    /// Gets the stable meter identifier used to identify or correlate this live source view instance with related application state.
+    /// </summary>
+    /// <value>The meter identifier value exposed by <see cref="LiveSourceView"/>.</value>
     private string MeterId => $"live-source-meter-{RuntimeSourceId}";
+    /// <summary>
+    /// Gets the stable metadata identifier used to identify or correlate this live source view instance with related application state.
+    /// </summary>
+    /// <value>The metadata identifier value exposed by <see cref="LiveSourceView"/>.</value>
     private string MetadataId => $"live-source-metadata-{RuntimeSourceId}";
+    /// <summary>
+    /// Gets the source label value that forms part of the live source view state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The source label value exposed by <see cref="LiveSourceView"/>.</value>
     private string SourceLabel => Item.SourceKind switch
     {
         PublicationLiveSourceKind.BrowserTab => "browser tab",
@@ -60,6 +103,10 @@
         PublicationLiveSourceKind.NowPlaying => "Now Playing",
         _ => Item.SourceKind.ToString().ToLowerInvariant()
     };
+    /// <summary>
+    /// Gets the source icon value that forms part of the live source view state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The source icon value exposed by <see cref="LiveSourceView"/>.</value>
     private string SourceIcon => Item.SourceKind switch
     {
         PublicationLiveSourceKind.Camera => "📷",
@@ -74,6 +121,10 @@
         PublicationLiveSourceKind.NowPlaying => "♪",
         _ => "●"
     };
+    /// <summary>
+    /// Gets the source description value that forms part of the live source view state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The source description value exposed by <see cref="LiveSourceView"/>.</value>
     private string SourceDescription => Item.SourceKind switch
     {
         PublicationLiveSourceKind.ApplicationAudio when !string.IsNullOrWhiteSpace(Item.ApplicationId) => Item.ApplicationId,
@@ -81,14 +132,26 @@
         PublicationLiveSourceKind.NowPlaying when !string.IsNullOrWhiteSpace(Item.NowPlayingDirectory) => Item.NowPlayingDirectory,
         _ => Item.UseDeviceTimestamp ? "Device timestamps enabled" : "Session timestamps"
     };
+    /// <summary>
+    /// Gets the activation hint value that forms part of the live source view state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The activation hint value exposed by <see cref="LiveSourceView"/>.</value>
     private string ActivationHint => Item.SourceKind switch
     {
         PublicationLiveSourceKind.ApplicationAudio or PublicationLiveSourceKind.SystemAudio => "Uses the browser audio picker when available; native isolated capture remains the fallback",
         PublicationLiveSourceKind.NowPlaying => "Reads current MP3 tags through PublisherStudio's integrated streaming runtime",
         _ => "Browser permission may be requested"
     };
+    /// <summary>
+    /// Gets the frame style value that forms part of the live source view state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The frame style value exposed by <see cref="LiveSourceView"/>.</value>
     private string FrameStyle => $"background:{Item.Background};--live-brightness:{Inv(Item.Brightness)};--live-contrast:{Inv(Item.Contrast)};--live-saturation:{Inv(Item.Saturation)};--live-hue:{Inv(Item.HueRotation)}deg;--live-blur:{Inv(Item.Blur)}px";
 
+    /// <summary>
+    /// Performs activate for <see cref="LiveSourceView"/>, keeping the operation consistent with the state and invariants of the surrounding live source view workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task Activate()
     {
         try
@@ -159,6 +222,11 @@
         }
     }
 
+    /// <summary>
+    /// Handles the after render async lifecycle or event notification for <see cref="LiveSourceView"/>, updating the state required by the surrounding workflow.
+    /// </summary>
+    /// <param name="firstRender">Value indicating whether first render should apply to this operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         try
@@ -196,6 +264,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs video layer payload for <see cref="LiveSourceView"/>, keeping the operation consistent with the state and invariants of the surrounding live source view workflow.
+    /// </summary>
+    /// <returns>The object produced by the operation.</returns>
     private object[] VideoLayerPayload() {
         try
         {
@@ -237,12 +309,20 @@
         }
     }
 
+    /// <summary>
+    /// Releases resources owned by <see cref="LiveSourceView"/> and leaves the live source view workflow in a safely disposed state.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     public async ValueTask DisposeAsync()
     {
         try
         {
-            try { await JS.InvokeVoidAsync("publisherStreaming.detachSource", RuntimeSourceId).ConfigureAwait(true); }
-            catch { }
+            if (_active)
+            {
+                try { await JS.InvokeVoidAsync("publisherStreaming.detachSource", RuntimeSourceId).ConfigureAwait(true); }
+                catch { }
+                finally { _active = false; }
+            }
     
         }
         catch (Exception __componentMethodException)
@@ -252,6 +332,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs inv for <see cref="LiveSourceView"/>, keeping the operation consistent with the state and invariants of the surrounding live source view workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the live source view operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string Inv(double value) {
         try
         {
@@ -263,4 +348,5 @@
             throw;
         }
     }
+
 }

@@ -1,5 +1,5 @@
+@rendermode InteractiveServer
 @page "/"
-@rendermode @(new InteractiveServerRenderMode(prerender: true))
 @implements IDisposable
 @inject EditorStateService State
 @inject PublicationFileService Files
@@ -452,77 +452,273 @@
 <DocumentationViewerHost />
 
 @code {
+
+    /// <summary>
+    /// Stores the internal page surface state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private PageSurface? _pageSurface;
+    /// <summary>
+    /// Gets a value indicating whether mainframe selection visuals enabled applies to the editor state.
+    /// </summary>
+    /// <value>The mainframe selection visuals enabled value exposed by <see cref="Editor"/>.</value>
     private bool MainframeSelectionVisualsEnabled =>
         !_storyEditorVisible && !_spreadsheetEditorVisible && !_pictureEditorVisible &&
         !_dataVisualEditorVisible && !_componentEditorVisible && !_dataManagerVisible && !_mediaStudioVisible &&
         !_barcodeEditorVisible && !_streamingStudioVisible && !_panelStudioVisible &&
         !_mediaConverterVisible && !_structuredWebsiteExportVisible && !_singleWebsiteExportVisible && !_selectedPictureExportVisible && !_pageEffectStudioVisible;
+    /// <summary>
+    /// Stores the internal story editor visible state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _storyEditorVisible;
+    /// <summary>
+    /// Stores the internal story open AI on show state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _storyOpenAiOnShow;
+    /// <summary>
+    /// Stores the internal spreadsheet editor visible state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _spreadsheetEditorVisible;
+    /// <summary>
+    /// Stores the internal spreadsheet editor session identifier state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private Guid _spreadsheetEditorSessionId;
+    /// <summary>
+    /// Stores the internal spreadsheet editor target identifier state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private Guid? _spreadsheetEditorTargetId;
+    /// <summary>
+    /// Stores the internal pending new spreadsheet identifier state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private Guid? _pendingNewSpreadsheetId;
+    /// <summary>
+    /// Stores the internal spreadsheet editor file name state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private string _spreadsheetEditorFileName = "Spreadsheet.xlsx";
+    /// <summary>
+    /// Stores the internal picture editor visible state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _pictureEditorVisible;
+    /// <summary>
+    /// Stores the internal data visual editor visible state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _dataVisualEditorVisible;
+    /// <summary>
+    /// Stores the internal component editor visible state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _componentEditorVisible;
+    /// <summary>
+    /// Stores the internal data manager visible state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _dataManagerVisible;
+    /// <summary>
+    /// Stores the internal media studio visible state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _mediaStudioVisible;
+    /// <summary>
+    /// Stores the internal timeline visible state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _timelineVisible;
+    /// <summary>
+    /// Stores the internal barcode editor visible state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _barcodeEditorVisible;
+    /// <summary>
+    /// Stores the internal streaming studio visible state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _streamingStudioVisible;
+    /// <summary>
+    /// Stores the internal panel studio visible state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _panelStudioVisible;
+    /// <summary>
+    /// Stores the internal media converter visible state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _mediaConverterVisible;
+    /// <summary>
+    /// Stores the internal page effect studio visible state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _pageEffectStudioVisible;
+    /// <summary>
+    /// Stores the internal media converter initial source state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private MediaConversionInsertRequest? _mediaConverterInitialSource;
+    /// <summary>
+    /// Stores the internal panel studio initial state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private PanelElement? _panelStudioInitial;
+    /// <summary>
+    /// Stores the internal panel studio target identifier state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private Guid? _panelStudioTargetId;
+    /// <summary>
+    /// Stores the internal panel studio targets HTML state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _panelStudioTargetsHtml;
+    /// <summary>
+    /// Stores the internal video exporting state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _videoExporting;
+    /// <summary>
+    /// Stores the internal single website export visible state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _singleWebsiteExportVisible;
+    /// <summary>
+    /// Stores the internal single website exporting state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _singleWebsiteExporting;
+    /// <summary>
+    /// Stores the internal single website mode state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private string _singleWebsiteMode = "site";
+    /// <summary>
+    /// Stores the internal structured website export visible state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _structuredWebsiteExportVisible;
+    /// <summary>
+    /// Stores the internal structured website exporting state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _structuredWebsiteExporting;
+    /// <summary>
+    /// Stores the internal selected picture export visible state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _selectedPictureExportVisible;
+    /// <summary>
+    /// Stores the internal selected picture export format state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private string _selectedPictureExportFormat = "png";
+    /// <summary>
+    /// Stores the internal selected picture export target identifier state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private Guid? _selectedPictureExportTargetId;
+    /// <summary>
+    /// Stores the internal structured website options state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly StructuredWebsiteExportOptions _structuredWebsiteOptions = new();
+    /// <summary>
+    /// Stores the internal single website options state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly SingleWebsiteExportOptions _singleWebsiteOptions = new();
+    /// <summary>
+    /// Stores the internal pending new barcode identifier state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private Guid? _pendingNewBarcodeId;
+    /// <summary>
+    /// Stores the internal media studio session identifier state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private Guid _mediaStudioSessionId;
+    /// <summary>
+    /// Stores the internal media studio target identifier state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private Guid? _mediaStudioTargetId;
+    /// <summary>
+    /// Stores the internal media studio kind state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private PublicationElementKind _mediaStudioKind = PublicationElementKind.Audio;
+    /// <summary>
+    /// Stores the internal media studio initial state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private PublicationMediaElement? _mediaStudioInitial;
+    /// <summary>
+    /// Stores the internal media studio initial inserted segment state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private PublicationMediaSegment? _mediaStudioInitialInsertedSegment;
+    /// <summary>
+    /// Stores the internal pending new data visual identifier state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private Guid? _pendingNewDataVisualId;
+    /// <summary>
+    /// Stores the internal pending new component identifier state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private Guid? _pendingNewComponentId;
+    /// <summary>
+    /// Stores the internal resume data visual after manager state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _resumeDataVisualAfterManager;
+    /// <summary>
+    /// Stores the internal resume component after manager state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _resumeComponentAfterManager;
+    /// <summary>
+    /// Stores the internal picture editor session identifier state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private Guid _pictureEditorSessionId;
+    /// <summary>
+    /// Stores the internal picture editor target identifier state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private Guid? _pictureEditorTargetId;
+    /// <summary>
+    /// Stores the internal picture editor initial document state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private PictureDocument? _pictureEditorInitialDocument;
+    /// <summary>
+    /// Stores the internal picture editor initial raster state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private string? _pictureEditorInitialRaster;
+    /// <summary>
+    /// Stores the internal picture editor initial name state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private string _pictureEditorInitialName = "Picture";
+    /// <summary>
+    /// Stores the internal pending canvas insert state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private CanvasInsertRequest? _pendingCanvasInsert;
+    /// <summary>
+    /// Stores the internal replace picture target identifier state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private Guid? _replacePictureTargetId;
+    /// <summary>
+    /// Stores the internal workspace initialized state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _workspaceInitialized;
+    /// <summary>
+    /// Tracks whether this Editor instance has completed an interactive browser render; prerender-only instances never set this flag and therefore never issue JavaScript interop during disposal or background callbacks.
+    /// </summary>
+    private bool _interactiveAttached;
+    /// <summary>
+    /// Stores the internal recovery candidate state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private PublicationRecoverySnapshot? _recoveryCandidate;
+    /// <summary>
+    /// Stores the cancellation source used by <see cref="Editor"/> to stop its current background or asynchronous operation.
+    /// </summary>
     private CancellationTokenSource? _recoverySaveCancellation;
+    /// <summary>
+    /// Stores the internal scheduled recovery revision state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private long _scheduledRecoveryRevision = -1;
+    /// <summary>
+    /// Stores the internal disposed state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private bool _disposed;
+    /// <summary>
+    /// Stores the internal streaming hotkey reference state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private DotNetObjectReference<Editor>? _streamingHotkeyReference;
+    /// <summary>
+    /// Stores the internal bound streaming hotkeys state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private string _boundStreamingHotkeys = string.Empty;
+    /// <summary>
+    /// Stores the internal error state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private string? _error;
+    /// <summary>
+    /// Stores the internal notice state used by <see cref="Editor"/> while executing its surrounding workflow.
+    /// </summary>
     private string? _notice;
+    /// <summary>
+    /// Gets the selection status value that forms part of the editor state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The selection status value exposed by <see cref="Editor"/>.</value>
     private string SelectionStatus => State.ConnectorTool != ConnectorToolKind.None
         ? $"{State.ConnectorTool} connector tool — drag from one object port to another; Esc cancels"
         : State.SelectedElements.Count > 1
             ? $"{State.SelectedElements.Count} objects selected{(State.SelectedElements.Any(item => item.GroupId is not null) ? " · grouped" : string.Empty)}"
             : State.SelectedElement is null ? "No selection" : $"{State.SelectedElement.Kind}: {State.SelectedElement.Name}";
 
+    /// <summary>
+    /// Handles the initialized lifecycle or event notification for <see cref="Editor"/>, updating the state required by the surrounding workflow.
+    /// </summary>
     protected override void OnInitialized()
     {
         try
@@ -541,15 +737,22 @@
         }
     }
 
+    /// <summary>
+    /// Handles the after render async lifecycle or event notification for <see cref="Editor"/>, updating the state required by the surrounding workflow.
+    /// </summary>
+    /// <param name="firstRender">Value indicating whether first render should apply to this operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         try
         {
             if (!_workspaceInitialized)
             {
-                _workspaceInitialized = true;
                 await JS.InvokeVoidAsync("publisherStudio.initializeWorkspace", "publisher-workspace").ConfigureAwait(true);
                 await JS.InvokeVoidAsync("publisherStudio.setDocumentDirty", State.IsDirty).ConfigureAwait(true);
+                _workspaceInitialized = true;
+                _interactiveAttached = true;
+                Logger.LogDebug("PublisherStudio Editor attached to the InteractiveServer circuit; browser interop is now available for this component instance.");
             }
 
             var hotkeySignature = System.Text.Json.JsonSerializer.Serialize(State.Document.Streaming.Hotkeys);
@@ -568,6 +771,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs state changed for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
     private void StateChanged()
     {
         try
@@ -583,7 +789,8 @@
                 {
                     try
                     {
-                        await JS.InvokeVoidAsync("publisherStudio.setDocumentDirty", State.IsDirty).ConfigureAwait(true);
+                        if (_interactiveAttached)
+                            await JS.InvokeVoidAsync("publisherStudio.setDocumentDirty", State.IsDirty).ConfigureAwait(true);
                     }
                     catch (InvalidOperationException exception)
                     {
@@ -609,6 +816,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs local GPT connection changed for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
     private void LocalGptConnectionChanged() {
         try
         {
@@ -621,6 +831,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs new document for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
     private void NewDocument() {
         try
         {
@@ -632,6 +845,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds text quick for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
     private void AddTextQuick() {
         try
         {
@@ -643,6 +859,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Adds AI text quick for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task AddAiTextQuick()
     {
         try
@@ -661,6 +881,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs insert AI chat quick for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task InsertAiChatQuick()
     {
         try
@@ -684,6 +908,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs insert panel for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
     private void InsertPanel()
     {
         try
@@ -698,6 +925,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs insert HTML embed for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
     private void InsertHtmlEmbed()
     {
         try
@@ -712,6 +942,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs insert default video blob for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task InsertDefaultVideoBlob()
     {
         try
@@ -726,6 +960,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs insert panel preset for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="presetId">Identifier of the preset to use for this operation.</param>
     private void InsertPanelPreset(string presetId)
     {
         try
@@ -740,6 +978,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle panel library for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
     private void TogglePanelLibrary() {
         try
         {
@@ -751,6 +992,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Closes panel library for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
     private void ClosePanelLibrary() {
         try
         {
@@ -762,6 +1006,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Opens panel studio for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
     private void OpenPanelStudio()
     {
         try
@@ -810,6 +1057,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Persists panel studio for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="draft">Draft value supplied to the editor operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task SavePanelStudio(PanelElement draft)
     {
         try
@@ -858,6 +1110,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Closes panel studio for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
     private void ClosePanelStudio()
     {
         try
@@ -874,6 +1129,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Opens media converter for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
     private void OpenMediaConverter() {
         try
         {
@@ -885,6 +1143,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Opens media converter from studio for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="source">Source value supplied to the editor operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task OpenMediaConverterFromStudio(MediaConversionInsertRequest source)
     {
         try
@@ -902,6 +1165,9 @@
         }
     }
 
+    /// <summary>
+    /// Closes media converter for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
     private void CloseMediaConverter() {
         try
         {
@@ -914,6 +1180,11 @@
         }
     }
 
+    /// <summary>
+    /// Opens converted in studio for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="converted">Converted value supplied to the editor operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task OpenConvertedInStudio(MediaConversionInsertRequest converted)
     {
         try
@@ -975,6 +1246,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs insert converted media for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="converted">Converted value supplied to the editor operation and used when producing its result.</param>
     private void InsertConvertedMedia(MediaConversionInsertRequest converted)
     {
         try
@@ -1002,6 +1277,11 @@
         }
     }
 
+    /// <summary>
+    /// Handles canvas insert for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="request">Request containing the caller-supplied values that control this operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task HandleCanvasInsert(CanvasInsertRequest request)
     {
         try
@@ -1046,6 +1326,11 @@
         }
     }
 
+    /// <summary>
+    /// Handles external file drop for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="request">Request containing the caller-supplied values that control this operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task HandleExternalFileDrop(ExternalFileDropRequest request)
     {
         try
@@ -1180,6 +1465,17 @@
         }
     }
 
+    /// <summary>
+    /// Opens picture studio with inserted raster for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="image">Image frame element dependency used by the editor workflow to provide the corresponding application capability.</param>
+    /// <param name="dataUrl">Data url value supplied to the editor operation and used when producing its result.</param>
+    /// <param name="name">Name value supplied to the editor operation and used when producing its result.</param>
+    /// <param name="naturalWidth">Natural width value supplied to the editor operation and used when producing its result.</param>
+    /// <param name="naturalHeight">Natural height value supplied to the editor operation and used when producing its result.</param>
+    /// <param name="targetX">Target x value supplied to the editor operation and used when producing its result.</param>
+    /// <param name="targetY">Target y value supplied to the editor operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task OpenPictureStudioWithInsertedRaster(
         ImageFrameElement image,
         string dataUrl,
@@ -1218,6 +1514,11 @@
         }
     }
 
+    /// <summary>
+    /// Creates managed picture document for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="image">Image frame element dependency used by the editor workflow to provide the corresponding application capability.</param>
+    /// <returns>The picture document produced by the operation.</returns>
     private PictureDocument CreateManagedPictureDocument(ImageFrameElement image)
     {
         try
@@ -1235,6 +1536,11 @@
         }
     }
 
+    /// <summary>
+    /// Handles external drop error for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="message">Message value supplied to the editor operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task HandleExternalDropError(string message)
     {
         try
@@ -1250,6 +1556,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs decode text for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="bytes">Bytes value supplied to the editor operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string DecodeText(byte[] bytes)
     {
         try
@@ -1270,6 +1581,14 @@
         }
     }
 
+    /// <summary>
+    /// Resolves dropped MIME type for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="name">Name value supplied to the editor operation and used when producing its result.</param>
+    /// <param name="requested">Requested value supplied to the editor operation and used when producing its result.</param>
+    /// <param name="stored">Stored value supplied to the editor operation and used when producing its result.</param>
+    /// <param name="kind">Kind value supplied to the editor operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string ResolveDroppedMimeType(string name, string requested, string stored, string kind)
     {
         try
@@ -1318,6 +1637,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs plain text to HTML for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="text">Text value supplied to the editor operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string PlainTextToHtml(string text) {
         try
         {
@@ -1330,6 +1654,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs markdown to HTML for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="markdown">Markdown value supplied to the editor operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string MarkdownToHtml(string markdown)
     {
         try
@@ -1365,6 +1694,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs markdown inline for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="value">Value value supplied to the editor operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string MarkdownInline(string value)
     {
         try
@@ -1382,6 +1716,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Opens publication picker for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task OpenPublicationPicker()
     {
         try
@@ -1397,6 +1735,10 @@
         }
     }
 
+    /// <summary>
+    /// Opens open document picker for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task OpenOpenDocumentPicker()
     {
         try
@@ -1411,6 +1753,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Opens picture picker for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task OpenPicturePicker()
     {
         try
@@ -1427,6 +1773,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Opens spreadsheet picker for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task OpenSpreadsheetPicker()
     {
         try
@@ -1443,6 +1793,10 @@
         }
     }
 
+    /// <summary>
+    /// Opens replace picture picker for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task OpenReplacePicturePicker()
     {
         try
@@ -1460,6 +1814,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Opens video picker for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task OpenVideoPicker()
     {
         try
@@ -1474,6 +1832,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Opens audio picker for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task OpenAudioPicker()
     {
         try
@@ -1489,6 +1851,11 @@
         }
     }
 
+    /// <summary>
+    /// Opens hidden file input for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task OpenHiddenFileInput(string id)
     {
         try
@@ -1512,6 +1879,10 @@
         }
     }
 
+    /// <summary>
+    /// Persists publication for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task SavePublication()
     {
         try
@@ -1535,6 +1906,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs schedule recovery save for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
     private void ScheduleRecoverySave()
     {
         try
@@ -1557,6 +1931,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs debounced recovery save for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="cancellation">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task DebouncedRecoverySaveAsync(CancellationTokenSource cancellation)
     {
         try
@@ -1584,6 +1963,11 @@
         }
     }
 
+    /// <summary>
+    /// Persists recovery now for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task SaveRecoveryNow(CancellationToken cancellationToken = default)
     {
         try
@@ -1600,6 +1984,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs restore recovery for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RestoreRecovery()
     {
         try
@@ -1618,6 +2006,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs dismiss recovery for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task DismissRecovery()
     {
         try
@@ -1634,6 +2026,10 @@
         }
     }
 
+    /// <summary>
+    /// Exports png for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ExportPng() {
         try
         {
@@ -1645,6 +2041,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Exports jpeg for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ExportJpeg() {
         try
         {
@@ -1656,6 +2056,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Exports SVG for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ExportSvg() {
         try
         {
@@ -1667,6 +2071,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Exports selected png for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ExportSelectedPng() {
         try
         {
@@ -1678,6 +2086,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Exports selected SVG for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ExportSelectedSvg() {
         try
         {
@@ -1690,6 +2102,11 @@
         }
     }
 
+    /// <summary>
+    /// Exports selected object for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="format">Format value supplied to the editor operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ExportSelectedObject(string format)
     {
         try
@@ -1712,6 +2129,10 @@
         }
     }
 
+    /// <summary>
+    /// Closes selected picture export for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task CloseSelectedPictureExport()
     {
         try
@@ -1728,6 +2149,10 @@
         }
     }
 
+    /// <summary>
+    /// Exports selected merged choice for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ExportSelectedMergedChoice()
     {
         try
@@ -1752,6 +2177,12 @@
         }
     }
 
+    /// <summary>
+    /// Exports picture studio merged selection for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="selected">Image frame element dependency used by the editor workflow to provide the corresponding application capability.</param>
+    /// <param name="format">Format value supplied to the editor operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ExportPictureStudioMergedSelection(ImageFrameElement selected, string format)
     {
         try
@@ -1792,6 +2223,10 @@
         }
     }
 
+    /// <summary>
+    /// Exports selected layered choice for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ExportSelectedLayeredChoice()
     {
         try
@@ -1832,6 +2267,12 @@
         }
     }
 
+    /// <summary>
+    /// Exports selected object core for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="selected">Selected value supplied to the editor operation and used when producing its result.</param>
+    /// <param name="format">Format value supplied to the editor operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ExportSelectedObjectCore(PublicationElement? selected, string format)
     {
         try
@@ -1868,6 +2309,11 @@
         }
     }
 
+    /// <summary>
+    /// Exports raster pages for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="format">Format value supplied to the editor operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ExportRasterPages(string format)
     {
         try
@@ -1903,6 +2349,11 @@
         }
     }
 
+    /// <summary>
+    /// Exports page for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="format">Format value supplied to the editor operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ExportPage(string format)
     {
         try
@@ -1929,6 +2380,10 @@
         }
     }
 
+    /// <summary>
+    /// Exports presentation HTML for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task ExportPresentationHtml() {
         try
         {
@@ -1941,6 +2396,10 @@
         }
     }
 
+    /// <summary>
+    /// Exports site for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task ExportSite() {
         try
         {
@@ -1953,6 +2412,11 @@
         }
     }
 
+    /// <summary>
+    /// Opens single website export for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="mode">Mode value supplied to the editor operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task OpenSingleWebsiteExport(string mode)
     {
         try
@@ -1970,6 +2434,10 @@
         }
     }
 
+    /// <summary>
+    /// Closes single website export for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task CloseSingleWebsiteExport()
     {
         try
@@ -1985,6 +2453,10 @@
         }
     }
 
+    /// <summary>
+    /// Exports single website for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ExportSingleWebsite()
     {
         try
@@ -2028,6 +2500,10 @@
         }
     }
 
+    /// <summary>
+    /// Opens page effect studio for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task OpenPageEffectStudio()
     {
         try
@@ -2043,6 +2519,10 @@
         }
     }
 
+    /// <summary>
+    /// Closes page effect studio for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task ClosePageEffectStudio()
     {
         try
@@ -2058,6 +2538,10 @@
         }
     }
 
+    /// <summary>
+    /// Opens structured website export for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task OpenStructuredWebsiteExport()
     {
         try
@@ -2074,6 +2558,10 @@
         }
     }
 
+    /// <summary>
+    /// Closes structured website export for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task CloseStructuredWebsiteExport()
     {
         try
@@ -2089,6 +2577,10 @@
         }
     }
 
+    /// <summary>
+    /// Exports structured website for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ExportStructuredWebsite()
     {
         try
@@ -2133,6 +2625,10 @@
         }
     }
 
+    /// <summary>
+    /// Exports video for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ExportVideo()
     {
         try
@@ -2190,6 +2686,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs print for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task Print() {
         try
         {
@@ -2202,6 +2702,10 @@
         }
     }
 
+    /// <summary>
+    /// Previews page animations for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task PreviewPageAnimations() {
         try
         {
@@ -2213,6 +2717,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Previews object animations for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task PreviewObjectAnimations() {
         try
         {
@@ -2226,6 +2734,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Stops animations for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task StopAnimations() {
         try
         {
@@ -2238,6 +2750,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs fit page for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task FitPage()
     {
         try
@@ -2253,6 +2769,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs toggle pages pane for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task TogglePagesPane() {
         try
         {
@@ -2264,6 +2784,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs toggle inspector pane for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task ToggleInspectorPane() {
         try
         {
@@ -2275,6 +2799,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs reset workspace for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ResetWorkspace()
     {
         try
@@ -2290,8 +2818,17 @@
         }
     }
 
+    /// <summary>
+    /// Gets the current page number value that forms part of the editor state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The current page number value exposed by <see cref="Editor"/>.</value>
     private int CurrentPageNumber => Math.Max(1, State.Document.Pages.FindIndex(publicationPage => publicationPage.Id == State.SelectedPageId) + 1);
 
+    /// <summary>
+    /// Opens publication for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="args">Input file change event args dependency used by the editor workflow to provide the corresponding application capability.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task OpenPublication(InputFileChangeEventArgs args)
     {
         try
@@ -2316,6 +2853,11 @@
         }
     }
 
+    /// <summary>
+    /// Imports open document for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="args">Input file change event args dependency used by the editor workflow to provide the corresponding application capability.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ImportOpenDocument(InputFileChangeEventArgs args)
     {
         try
@@ -2344,6 +2886,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs insert picture for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="args">Input file change event args dependency used by the editor workflow to provide the corresponding application capability.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task InsertPicture(InputFileChangeEventArgs args)
     {
         try
@@ -2416,6 +2963,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs insert spreadsheet for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="args">Input file change event args dependency used by the editor workflow to provide the corresponding application capability.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task InsertSpreadsheet(InputFileChangeEventArgs args)
     {
         try
@@ -2454,6 +3006,10 @@
         }
     }
 
+    /// <summary>
+    /// Creates spreadsheet for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task CreateSpreadsheet()
     {
         try
@@ -2477,6 +3033,10 @@
         }
     }
 
+    /// <summary>
+    /// Opens spreadsheet editor for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task OpenSpreadsheetEditor()
     {
         try
@@ -2493,6 +3053,12 @@
         }
     }
 
+    /// <summary>
+    /// Opens spreadsheet editor by identifier for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="elementId">Identifier of the element to use for this operation.</param>
+    /// <param name="pendingNew">Value indicating whether pending new should apply to this operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task OpenSpreadsheetEditorById(Guid elementId, bool pendingNew = false)
     {
         try
@@ -2517,6 +3083,11 @@
         }
     }
 
+    /// <summary>
+    /// Creates spreadsheet data object for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="result">Result value supplied to the editor operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task CreateSpreadsheetDataObject(SpreadsheetDataObjectResult result)
     {
         try
@@ -2558,6 +3129,11 @@
         }
     }
 
+    /// <summary>
+    /// Persists spreadsheet for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="result">Result value supplied to the editor operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task SaveSpreadsheet(SpreadsheetEditorResult result)
     {
         try
@@ -2584,6 +3160,10 @@
         }
     }
 
+    /// <summary>
+    /// Closes spreadsheet editor for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task CloseSpreadsheetEditor()
     {
         try
@@ -2609,6 +3189,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs download selected spreadsheet for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task DownloadSelectedSpreadsheet()
     {
         try
@@ -2628,6 +3212,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs spreadsheet MIME type for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="format">Format value supplied to the editor operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string SpreadsheetMimeType(SpreadsheetStorageFormat format) {
         try
         {
@@ -2647,6 +3236,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs insert video for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="args">Input file change event args dependency used by the editor workflow to provide the corresponding application capability.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task InsertVideo(InputFileChangeEventArgs args) {
         try
         {
@@ -2658,6 +3252,11 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs insert audio for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="args">Input file change event args dependency used by the editor workflow to provide the corresponding application capability.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task InsertAudio(InputFileChangeEventArgs args) {
         try
         {
@@ -2670,6 +3269,12 @@
         }
     }
 
+    /// <summary>
+    /// Performs insert media file for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="args">Input file change event args dependency used by the editor workflow to provide the corresponding application capability.</param>
+    /// <param name="kind">Kind value supplied to the editor operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task InsertMediaFile(InputFileChangeEventArgs args, PublicationElementKind kind)
     {
         try
@@ -2692,7 +3297,7 @@
                 var bytes = buffer.ToArray();
                 if (bytes.Length == 0) throw new InvalidDataException("The selected media file is empty.");
 
-                module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=2.8.7").ConfigureAwait(true);
+                module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=2.8.8").ConfigureAwait(true);
                 temporaryAssetId = Guid.NewGuid();
                 var inspectionUrl = MediaAssets.RegisterBytes(temporaryAssetId, bytes, mimeType);
                 MediaSourceInfo info;
@@ -2770,6 +3375,12 @@
         }
     }
 
+    /// <summary>
+    /// Resolves media MIME type for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="file">Browser file dependency used by the editor workflow to provide the corresponding application capability.</param>
+    /// <param name="kind">Kind value supplied to the editor operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string ResolveMediaMimeType(IBrowserFile file, PublicationElementKind kind)
     {
         try
@@ -2803,6 +3414,10 @@
         }
     }
 
+    /// <summary>
+    /// Creates video for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task CreateVideo() {
         try
         {
@@ -2814,6 +3429,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Creates audio for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task CreateAudio() {
         try
         {
@@ -2826,6 +3445,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs edit selected media for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task EditSelectedMedia()
     {
         try
@@ -2842,6 +3465,13 @@
         }
     }
 
+    /// <summary>
+    /// Opens media studio for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="kind">Kind value supplied to the editor operation and used when producing its result.</param>
+    /// <param name="media">Media value supplied to the editor operation and used when producing its result.</param>
+    /// <param name="insertedSegment">Inserted segment value supplied to the editor operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task OpenMediaStudio(
         PublicationElementKind kind,
         PublicationMediaElement? media,
@@ -2865,6 +3495,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs insert video layer into mainframe for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="request">Request containing the caller-supplied values that control this operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task InsertVideoLayerIntoMainframe(VideoLayerMainframeInsertRequest request)
     {
         try
@@ -2898,6 +3533,11 @@
         }
     }
 
+    /// <summary>
+    /// Persists media studio for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="result">Result value supplied to the editor operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task SaveMediaStudio(MediaEditorResult result)
     {
         try
@@ -2956,6 +3596,11 @@
         }
     }
 
+    /// <summary>
+    /// Applies media result for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="item">Item value supplied to the editor operation and used when producing its result.</param>
+    /// <param name="result">Result value supplied to the editor operation and used when producing its result.</param>
     private void ApplyMediaResult(PublicationMediaElement item, MediaEditorResult result)
     {
         try
@@ -3000,6 +3645,10 @@
         }
     }
 
+    /// <summary>
+    /// Closes media studio for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task CloseMediaStudio()
     {
         try
@@ -3019,6 +3668,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs toggle timeline for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task ToggleTimeline()
     {
         try
@@ -3034,6 +3687,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs hide timeline for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task HideTimeline()
     {
         try
@@ -3049,6 +3706,10 @@
         }
     }
 
+    /// <summary>
+    /// Applies transparent color for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ApplyTransparentColor()
     {
         try
@@ -3073,6 +3734,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs restore original picture for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task RestoreOriginalPicture()
     {
         try
@@ -3092,6 +3757,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs insert barcode for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task InsertBarcode()
     {
         try
@@ -3109,6 +3778,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs edit barcode for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task EditBarcode()
     {
         try
@@ -3125,6 +3798,11 @@
         }
     }
 
+    /// <summary>
+    /// Persists barcode for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="result">Result value supplied to the editor operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task SaveBarcode(BarcodeElement result)
     {
         try
@@ -3152,6 +3830,10 @@
         }
     }
 
+    /// <summary>
+    /// Determines whether cel barcode for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task CancelBarcode()
     {
         try
@@ -3173,6 +3855,10 @@
         }
     }
 
+    /// <summary>
+    /// Determines whether cel publisher pointer for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task CancelPublisherPointerAsync()
     {
         try
@@ -3193,6 +3879,10 @@
         }
     }
 
+    /// <summary>
+    /// Creates picture for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task CreatePicture()
     {
         try
@@ -3213,6 +3903,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs edit selected picture for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task EditSelectedPicture()
     {
         try
@@ -3234,6 +3928,11 @@
         }
     }
 
+    /// <summary>
+    /// Persists picture studio for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="result">Result value supplied to the editor operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task SavePictureStudio(PictureEditorResult result)
     {
         try
@@ -3272,6 +3971,10 @@
         }
     }
 
+    /// <summary>
+    /// Closes picture studio for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task ClosePictureStudio()
     {
         try
@@ -3290,6 +3993,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs insert data visual for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="kind">Kind value supplied to the editor operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task InsertDataVisual(DataVisualKind kind)
     {
         try
@@ -3307,6 +4015,10 @@
         }
     }
 
+    /// <summary>
+    /// Opens data visual editor for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task OpenDataVisualEditor()
     {
         try
@@ -3324,6 +4036,10 @@
         }
     }
 
+    /// <summary>
+    /// Persists data visual editor for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task SaveDataVisualEditor()
     {
         try
@@ -3341,6 +4057,10 @@
         }
     }
 
+    /// <summary>
+    /// Determines whether cel data visual editor for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task CancelDataVisualEditor()
     {
         try
@@ -3363,6 +4083,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs insert component for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="kind">Kind value supplied to the editor operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task InsertComponent(PublicationComponentKind kind)
     {
         try
@@ -3380,6 +4105,10 @@
         }
     }
 
+    /// <summary>
+    /// Opens component editor for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task OpenComponentEditor()
     {
         try
@@ -3397,6 +4126,11 @@
         }
     }
 
+    /// <summary>
+    /// Persists component editor for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="draft">Draft value supplied to the editor operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task SaveComponentEditor(DevExtremeComponentElement draft)
     {
         try
@@ -3415,6 +4149,10 @@
         }
     }
 
+    /// <summary>
+    /// Determines whether cel component editor for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task CancelComponentEditor()
     {
         try
@@ -3436,6 +4174,10 @@
         }
     }
 
+    /// <summary>
+    /// Opens data manager from component for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task OpenDataManagerFromComponent()
     {
         try
@@ -3453,6 +4195,10 @@
         }
     }
 
+    /// <summary>
+    /// Opens data manager for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task OpenDataManager()
     {
         try
@@ -3468,6 +4214,10 @@
         }
     }
 
+    /// <summary>
+    /// Opens data manager from visual for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task OpenDataManagerFromVisual()
     {
         try
@@ -3485,6 +4235,10 @@
         }
     }
 
+    /// <summary>
+    /// Closes data manager for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task CloseDataManager()
     {
         try
@@ -3506,6 +4260,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs data manager changed for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task DataManagerChanged()
     {
         try
@@ -3523,6 +4281,10 @@
     }
 
 
+    /// <summary>
+    /// Handles global streaming hotkey for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="hotkeyEvent">Hotkey event value supplied to the editor operation and used when producing its result.</param>
     private void HandleGlobalStreamingHotkey(MediaHostHotkeyEvent hotkeyEvent) {
         try
         {
@@ -3535,6 +4297,12 @@
         }
     }
 
+    /// <summary>
+    /// Handles streaming hotkey for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="command">Command value supplied to the editor operation and used when producing its result.</param>
+    /// <param name="targetId">Identifier of the target to use for this operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     [JSInvokable]
     public Task HandleStreamingHotkey(string command, string? targetId) {
         try
@@ -3573,6 +4341,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs select adjacent streaming page for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="offset">Offset value supplied to the editor operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task SelectAdjacentStreamingPage(int offset)
     {
         try
@@ -3592,6 +4365,10 @@
         }
     }
 
+    /// <summary>
+    /// Opens streaming studio for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task OpenStreamingStudio()
     {
         try
@@ -3607,6 +4384,10 @@
         }
     }
 
+    /// <summary>
+    /// Closes streaming studio for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task CloseStreamingStudio()
     {
         try
@@ -3622,6 +4403,11 @@
         }
     }
 
+    /// <summary>
+    /// Persists streaming studio for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="settings">Settings containing the caller-supplied values that control this operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task SaveStreamingStudio(PublicationStreamingSettings settings)
     {
         try
@@ -3639,6 +4425,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs insert live source for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="kind">Kind value supplied to the editor operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task InsertLiveSource(PublicationLiveSourceKind kind)
     {
         try
@@ -3655,6 +4446,10 @@
         }
     }
 
+    /// <summary>
+    /// Starts dry run for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task StartDryRun() {
         try
         {
@@ -3666,6 +4461,10 @@
             throw;
         }
     }
+    /// <summary>
+    /// Starts streaming for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task StartStreaming() {
         try
         {
@@ -3678,6 +4477,11 @@
         }
     }
 
+    /// <summary>
+    /// Starts streaming session for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="dryRun">Value indicating whether dry run should apply to this operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task StartStreamingSession(bool dryRun)
     {
         try
@@ -3806,6 +4610,10 @@
         }
     }
 
+    /// <summary>
+    /// Stops streaming for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task StopStreaming()
     {
         try
@@ -3823,6 +4631,10 @@
         }
     }
 
+    /// <summary>
+    /// Stops stream recording for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task StopStreamRecording()
     {
         try
@@ -3838,6 +4650,10 @@
         }
     }
 
+    /// <summary>
+    /// Stops streaming session for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task StopStreamingSession()
     {
         try
@@ -3856,6 +4672,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs toggle stream recording for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ToggleStreamRecording()
     {
         try
@@ -3871,6 +4691,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs toggle stream output for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="outputId">Identifier of the output to use for this operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ToggleStreamOutput(Guid outputId)
     {
         try
@@ -3894,6 +4719,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs select chat output for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="outputId">Identifier of the output to use for this operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task SelectChatOutput(Guid? outputId)
     {
         try
@@ -3929,6 +4759,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs select program page for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="pageId">Identifier of the page to use for this operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task SelectProgramPage(Guid pageId)
     {
         try
@@ -3952,6 +4787,11 @@
         }
     }
 
+    /// <summary>
+    /// Performs clone streaming for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="settings">Settings containing the caller-supplied values that control this operation.</param>
+    /// <returns>The publication streaming settings produced by the operation.</returns>
     private PublicationStreamingSettings CloneStreaming(PublicationStreamingSettings settings) {
         try
         {
@@ -3965,6 +4805,11 @@
         }
     }
 
+    /// <summary>
+    /// Opens story editor by identifier for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task OpenStoryEditorById(Guid id)
     {
         try
@@ -3980,6 +4825,10 @@
         }
     }
 
+    /// <summary>
+    /// Opens story editor for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task OpenStoryEditor()
     {
         try
@@ -3996,6 +4845,10 @@
         }
     }
 
+    /// <summary>
+    /// Closes story editor for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task CloseStoryEditor()
     {
         try
@@ -4012,6 +4865,11 @@
         }
     }
 
+    /// <summary>
+    /// Persists story for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="result">Result value supplied to the editor operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task SaveStory((byte[] Content, string PreviewHtml, string DocumentBackground, StoryStorageFormat Format) result)
     {
         try
@@ -4029,7 +4887,16 @@
         }
     }
 
+    /// <summary>
+    /// Gets a value indicating whether use AI council applies to the editor state.
+    /// </summary>
+    /// <value>The can use AI council value exposed by <see cref="Editor"/>.</value>
     private bool CanUseAiCouncil => LocalGptConnection.State.IsLinked && LocalGptConnection.State.HasCapability("council.run");
+    /// <summary>
+    /// Performs lt for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="text">Text value supplied to the editor operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string LT(string text) {
         try
         {
@@ -4041,9 +4908,21 @@
             throw;
         }
     }
+    /// <summary>
+    /// Gets the current culture value that forms part of the editor state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The current culture value exposed by <see cref="Editor"/>.</value>
     private string CurrentCulture => Localization.ResolveAvailableCulture(System.Globalization.CultureInfo.CurrentUICulture.Name);
+    /// <summary>
+    /// Gets the language label value that forms part of the editor state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The language label value exposed by <see cref="Editor"/>.</value>
     private string LanguageLabel => Localization.Get("Text.Language", fallback: "Language");
 
+    /// <summary>
+    /// Performs rename document for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the editor operation and used when producing its result.</param>
     private void RenameDocument(ChangeEventArgs args)
     {
         try
@@ -4058,8 +4937,16 @@
         }
     }
 
+    /// <summary>
+    /// Gets the zoom percent value that forms part of the editor state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The zoom percent value exposed by <see cref="Editor"/>.</value>
     private int ZoomPercent => (int)Math.Round(State.Document.Zoom * 100, MidpointRounding.AwayFromZero);
 
+    /// <summary>
+    /// Performs change zoom percent for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the editor operation and used when producing its result.</param>
     private void ChangeZoomPercent(ChangeEventArgs args)
     {
         try
@@ -4075,6 +4962,9 @@
         }
     }
 
+    /// <summary>
+    /// Performs zoom in for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
     private void ZoomIn() {
         try
         {
@@ -4086,6 +4976,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs zoom out for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
     private void ZoomOut() {
         try
         {
@@ -4097,6 +4990,9 @@
             throw;
         }
     }
+    /// <summary>
+    /// Performs zoom100 for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
     private void Zoom100() {
         try
         {
@@ -4109,6 +5005,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs show error for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="ex">Ex value supplied to the editor operation and used when producing its result.</param>
     private void ShowError(Exception ex)
     {
         try
@@ -4127,6 +5027,10 @@
         }
     }
 
+    /// <summary>
+    /// Performs show notice for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
+    /// </summary>
+    /// <param name="message">Message value supplied to the editor operation and used when producing its result.</param>
     private void ShowNotice(string message)
     {
         try
@@ -4145,61 +5049,206 @@
         }
     }
 
+    /// <summary>
+    /// Carries the configurable single website export settings used to control the associated application behavior without hard-coding policy in consumers.
+    /// </summary>
     private sealed class SingleWebsiteExportOptions
     {
+        /// <summary>
+        /// Gets or sets the image mode value that forms part of the single website export state consumed or produced by the surrounding workflow.
+        /// </summary>
+        /// <value>The image mode value exposed by <see cref="SingleWebsiteExportOptions"/>.</value>
         public string ImageMode { get; set; } = "preserve";
+        /// <summary>
+        /// Gets or sets the image quality value that forms part of the single website export state consumed or produced by the surrounding workflow.
+        /// </summary>
+        /// <value>The image quality value exposed by <see cref="SingleWebsiteExportOptions"/>.</value>
         public double ImageQuality { get; set; } = 0.82;
+        /// <summary>
+        /// Gets or sets the video mode value that forms part of the single website export state consumed or produced by the surrounding workflow.
+        /// </summary>
+        /// <value>The video mode value exposed by <see cref="SingleWebsiteExportOptions"/>.</value>
         public string VideoMode { get; set; } = "preserve";
+        /// <summary>
+        /// Gets or sets the video quality value that forms part of the single website export state consumed or produced by the surrounding workflow.
+        /// </summary>
+        /// <value>The video quality value exposed by <see cref="SingleWebsiteExportOptions"/>.</value>
         public double VideoQuality { get; set; } = 0.78;
+        /// <summary>
+        /// Gets or sets a value indicating whether keep video fallback applies to the single website export state.
+        /// </summary>
+        /// <value>The keep video fallback value exposed by <see cref="SingleWebsiteExportOptions"/>.</value>
         public bool KeepVideoFallback { get; set; } = true;
     }
 
+    /// <summary>
+    /// Represents the outcome of single website export, carrying the data and status produced by the corresponding application operation.
+    /// </summary>
     private sealed class SingleWebsiteExportResult
     {
+        /// <summary>
+        /// Gets or sets the file name used by this single website export instance to locate the associated file-system resource.
+        /// </summary>
+        /// <value>The file name value exposed by <see cref="SingleWebsiteExportResult"/>.</value>
         public string FileName { get; set; } = string.Empty;
+        /// <summary>
+        /// Gets or sets the source bytes value that forms part of the single website export state consumed or produced by the surrounding workflow.
+        /// </summary>
+        /// <value>The source bytes value exposed by <see cref="SingleWebsiteExportResult"/>.</value>
         public long SourceBytes { get; set; }
+        /// <summary>
+        /// Gets or sets the output bytes value that forms part of the single website export state consumed or produced by the surrounding workflow.
+        /// </summary>
+        /// <value>The output bytes value exposed by <see cref="SingleWebsiteExportResult"/>.</value>
         public long OutputBytes { get; set; }
+        /// <summary>
+        /// Gets or sets the warnings collection maintained or exposed by this single website export instance for downstream processing.
+        /// </summary>
+        /// <value>The warnings value exposed by <see cref="SingleWebsiteExportResult"/>.</value>
         public List<string> Warnings { get; set; } = [];
     }
 
+    /// <summary>
+    /// Carries the configurable structured website export settings used to control the associated application behavior without hard-coding policy in consumers.
+    /// </summary>
     private sealed class StructuredWebsiteExportOptions
     {
+        /// <summary>
+        /// Gets or sets the mode value that forms part of the structured website export state consumed or produced by the surrounding workflow.
+        /// </summary>
+        /// <value>The mode value exposed by <see cref="StructuredWebsiteExportOptions"/>.</value>
         public string Mode { get; set; } = "site";
+        /// <summary>
+        /// Gets or sets the image mode value that forms part of the structured website export state consumed or produced by the surrounding workflow.
+        /// </summary>
+        /// <value>The image mode value exposed by <see cref="StructuredWebsiteExportOptions"/>.</value>
         public string ImageMode { get; set; } = "preserve";
+        /// <summary>
+        /// Gets or sets the image quality value that forms part of the structured website export state consumed or produced by the surrounding workflow.
+        /// </summary>
+        /// <value>The image quality value exposed by <see cref="StructuredWebsiteExportOptions"/>.</value>
         public double ImageQuality { get; set; } = 0.82;
+        /// <summary>
+        /// Gets or sets the video mode value that forms part of the structured website export state consumed or produced by the surrounding workflow.
+        /// </summary>
+        /// <value>The video mode value exposed by <see cref="StructuredWebsiteExportOptions"/>.</value>
         public string VideoMode { get; set; } = "preserve";
+        /// <summary>
+        /// Gets or sets the video quality value that forms part of the structured website export state consumed or produced by the surrounding workflow.
+        /// </summary>
+        /// <value>The video quality value exposed by <see cref="StructuredWebsiteExportOptions"/>.</value>
         public double VideoQuality { get; set; } = 0.78;
+        /// <summary>
+        /// Gets or sets a value indicating whether keep video fallback applies to the structured website export state.
+        /// </summary>
+        /// <value>The keep video fallback value exposed by <see cref="StructuredWebsiteExportOptions"/>.</value>
         public bool KeepVideoFallback { get; set; } = true;
+        /// <summary>
+        /// Gets or sets a value indicating whether compress archive applies to the structured website export state.
+        /// </summary>
+        /// <value>The compress archive value exposed by <see cref="StructuredWebsiteExportOptions"/>.</value>
         public bool CompressArchive { get; set; } = true;
     }
 
+    /// <summary>
+    /// Represents the outcome of structured website export, carrying the data and status produced by the corresponding application operation.
+    /// </summary>
     private sealed class StructuredWebsiteExportResult
     {
+        /// <summary>
+        /// Gets or sets the file name used by this structured website export instance to locate the associated file-system resource.
+        /// </summary>
+        /// <value>The file name value exposed by <see cref="StructuredWebsiteExportResult"/>.</value>
         public string FileName { get; set; } = string.Empty;
+        /// <summary>
+        /// Gets or sets the asset count that quantifies the associated structured website export data.
+        /// </summary>
+        /// <value>The asset count value exposed by <see cref="StructuredWebsiteExportResult"/>.</value>
         public int AssetCount { get; set; }
+        /// <summary>
+        /// Gets or sets the source bytes value that forms part of the structured website export state consumed or produced by the surrounding workflow.
+        /// </summary>
+        /// <value>The source bytes value exposed by <see cref="StructuredWebsiteExportResult"/>.</value>
         public long SourceBytes { get; set; }
+        /// <summary>
+        /// Gets or sets the archive bytes value that forms part of the structured website export state consumed or produced by the surrounding workflow.
+        /// </summary>
+        /// <value>The archive bytes value exposed by <see cref="StructuredWebsiteExportResult"/>.</value>
         public long ArchiveBytes { get; set; }
+        /// <summary>
+        /// Gets or sets the warnings collection maintained or exposed by this structured website export instance for downstream processing.
+        /// </summary>
+        /// <value>The warnings value exposed by <see cref="StructuredWebsiteExportResult"/>.</value>
         public List<string> Warnings { get; set; } = [];
     }
 
+    /// <summary>
+    /// Represents the outcome of video export, carrying the data and status produced by the corresponding application operation.
+    /// </summary>
     private sealed class VideoExportResult
     {
+        /// <summary>
+        /// Gets or sets the file name used by this video export instance to locate the associated file-system resource.
+        /// </summary>
+        /// <value>The file name value exposed by <see cref="VideoExportResult"/>.</value>
         public string FileName { get; set; } = string.Empty;
+        /// <summary>
+        /// Gets or sets the duration seconds value that forms part of the video export state consumed or produced by the surrounding workflow.
+        /// </summary>
+        /// <value>The duration seconds value exposed by <see cref="VideoExportResult"/>.</value>
         public double DurationSeconds { get; set; }
+        /// <summary>
+        /// Gets or sets the width value that forms part of the video export state consumed or produced by the surrounding workflow.
+        /// </summary>
+        /// <value>The width value exposed by <see cref="VideoExportResult"/>.</value>
         public int Width { get; set; }
+        /// <summary>
+        /// Gets or sets the height value that forms part of the video export state consumed or produced by the surrounding workflow.
+        /// </summary>
+        /// <value>The height value exposed by <see cref="VideoExportResult"/>.</value>
         public int Height { get; set; }
+        /// <summary>
+        /// Gets or sets a value indicating whether page sized capture applies to the video export state.
+        /// </summary>
+        /// <value>The page sized capture value exposed by <see cref="VideoExportResult"/>.</value>
         public bool PageSizedCapture { get; set; }
+        /// <summary>
+        /// Gets or sets the stable asset identifier used to identify or correlate this video export instance with related application state.
+        /// </summary>
+        /// <value>The asset identifier value exposed by <see cref="VideoExportResult"/>.</value>
         public string AssetId { get; set; } = string.Empty;
+        /// <summary>
+        /// Gets or sets the MIME type value that forms part of the video export state consumed or produced by the surrounding workflow.
+        /// </summary>
+        /// <value>The MIME type value exposed by <see cref="VideoExportResult"/>.</value>
         public string MimeType { get; set; } = "video/webm";
+        /// <summary>
+        /// Gets or sets the size bytes value that forms part of the video export state consumed or produced by the surrounding workflow.
+        /// </summary>
+        /// <value>The size bytes value exposed by <see cref="VideoExportResult"/>.</value>
         public long SizeBytes { get; set; }
     }
 
+    /// <summary>
+    /// Represents the outcome of page export, carrying the data and status produced by the corresponding application operation.
+    /// </summary>
     private sealed class PageExportResult
     {
+        /// <summary>
+        /// Gets or sets the count that quantifies the associated page export data.
+        /// </summary>
+        /// <value>The count value exposed by <see cref="PageExportResult"/>.</value>
         public int Count { get; set; }
+        /// <summary>
+        /// Gets or sets the file name used by this page export instance to locate the associated file-system resource.
+        /// </summary>
+        /// <value>The file name value exposed by <see cref="PageExportResult"/>.</value>
         public string FileName { get; set; } = string.Empty;
     }
 
+    /// <summary>
+    /// Releases resources owned by <see cref="Editor"/> and leaves the editor workflow in a safely disposed state.
+    /// </summary>
     public void Dispose()
     {
         try
@@ -4210,20 +5259,28 @@
             StreamingSession.Changed -= StateChanged;
             StreamingSession.HotkeyTriggered -= HandleGlobalStreamingHotkey;
             LocalGptConnection.Changed -= LocalGptConnectionChanged;
-            TaskRunner.Run(
-                nameof(Editor),
-                "UnbindStreamingHotkeys",
-                async _ =>
-                {
-                    try
+            if (_interactiveAttached)
+            {
+                _interactiveAttached = false;
+                TaskRunner.Run(
+                    nameof(Editor),
+                    "UnbindStreamingHotkeys",
+                    async _ =>
                     {
-                        await JS.InvokeVoidAsync("publisherStreaming.unbindHotkeys").ConfigureAwait(false);
-                    }
-                    catch (Exception exception) when (exception is JSDisconnectedException or TaskCanceledException or ObjectDisposedException or InvalidOperationException)
-                    {
-                        Logger.LogDebug(exception, "Streaming hotkey unbind ended during editor disposal/browser teardown.");
-                    }
-                });
+                        try
+                        {
+                            await JS.InvokeVoidAsync("publisherStreaming.unbindHotkeys").ConfigureAwait(false);
+                        }
+                        catch (Exception exception) when (exception is JSDisconnectedException or TaskCanceledException or ObjectDisposedException or InvalidOperationException)
+                        {
+                            Logger.LogDebug(exception, "Streaming hotkey unbind ended during interactive editor disposal/browser teardown.");
+                        }
+                    });
+            }
+            else
+            {
+                Logger.LogDebug("Editor disposal skipped browser hotkey cleanup because this component instance never attached to an interactive browser circuit (normal prerender disposal).");
+            }
             _streamingHotkeyReference?.Dispose();
             _recoverySaveCancellation?.Cancel();
             _recoverySaveCancellation?.Dispose();
@@ -4255,4 +5312,5 @@
             throw;
         }
     }
+
 }

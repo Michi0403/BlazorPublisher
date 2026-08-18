@@ -16,9 +16,23 @@
 }
 
 @code {
+
+    /// <summary>
+    /// Gets or sets the page value that forms part of the page effect layer state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The page value exposed by <see cref="PageEffectLayerRenderer"/>.</value>
     [Parameter, EditorRequired] public PublicationPage Page { get; set; } = default!;
+    /// <summary>
+    /// Gets or sets the placement value that forms part of the page effect layer state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The placement value exposed by <see cref="PageEffectLayerRenderer"/>.</value>
     [Parameter] public PublicationPageEffectPlacement Placement { get; set; }
 
+    /// <summary>
+    /// Performs layer style for <see cref="PageEffectLayerRenderer"/>, keeping the operation consistent with the state and invariants of the surrounding page effect layer workflow.
+    /// </summary>
+    /// <param name="effect">Effect value supplied to the page effect layer operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string LayerStyle(PublicationPageEffectLayer effect)
     {
         try
@@ -49,6 +63,12 @@
         }
     }
 
+    /// <summary>
+    /// Performs fill style for <see cref="PageEffectLayerRenderer"/>, keeping the operation consistent with the state and invariants of the surrounding page effect layer workflow.
+    /// </summary>
+    /// <param name="effect">Effect value supplied to the page effect layer operation and used when producing its result.</param>
+    /// <param name="final">Value indicating whether final should apply to this operation.</param>
+    /// <returns>The string produced by the operation.</returns>
     private string FillStyle(PublicationPageEffectLayer effect, bool final)
     {
         try
@@ -72,4 +92,5 @@
             throw;
         }
     }
+
 }

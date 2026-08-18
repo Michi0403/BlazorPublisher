@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Static source audit for PublisherStudio 2.8.5 text-service ownership build repair."""
+"""Static source audit for PublisherStudio 2.8.6 text-service ownership build repair."""
 from pathlib import Path
 import re
 import sys
@@ -31,7 +31,7 @@ try:
         "src/PublisherStudio.Web/PublisherStudio.Web.csproj",
         "src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj",
     ):
-        require(rel, "<Version>2.8.5</Version>")
+        require(rel, "<Version>2.8.6</Version>")
 
     require(
         "src/PublisherStudio.Web/Components/Editor/PageSurface.razor",
@@ -104,16 +104,16 @@ try:
     # Active assets carry the release cache token without changing render boundaries.
     require(
         "src/PublisherStudio.Web/Components/App.razor",
-        "css/site.css?v=20260818-285",
-        "videoEffectRuntime.js?v=2.8.5",
-        "publisherInterop.js?v=2.8.5",
+        "css/site.css?v=20260818-286",
+        "videoEffectRuntime.js?v=2.8.6",
+        "publisherInterop.js?v=2.8.6",
     )
     for rel in (
         "src/PublisherStudio.Web/Components/Pages/Editor.razor",
         "src/PublisherStudio.Web/Components/Editor/MediaStudio.razor",
         "src/PublisherStudio.Web/Components/Editor/InspectorPanel.razor",
     ):
-        require(rel, "mediaStudioInterop.js?v=2.8.5")
+        require(rel, "mediaStudioInterop.js?v=2.8.6")
 
     expected_render_files = {
         "src/PublisherStudio.Web/Components/Layout/JavaScriptDiagnosticsBridge.razor",
@@ -140,7 +140,7 @@ try:
         raise AssertionError("PageSurface still owns direct string.Join selection-key manipulation")
     checks += 1
 
-    print(f"PublisherStudio 2.8.5 text-service ownership source audit passed: {checks} checks.")
+    print(f"PublisherStudio 2.8.6 text-service ownership source audit passed: {checks} checks.")
 except AssertionError as exc:
-    print(f"PublisherStudio 2.8.5 source audit failed: {exc}", file=sys.stderr)
+    print(f"PublisherStudio 2.8.6 source audit failed: {exc}", file=sys.stderr)
     sys.exit(1)

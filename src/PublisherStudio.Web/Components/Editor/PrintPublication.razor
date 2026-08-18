@@ -2,6 +2,7 @@
 @inject PublicationMediaAssetStore MediaAssets
 
 @inject ILogger<PrintPublication> Logger
+@inject PublicationEditorTextService EditorText
 <div class="print-publication" aria-hidden="true"
      data-publication-culture="@(string.IsNullOrWhiteSpace(Document.ProjectSettings.Culture) ? CultureInfo.CurrentUICulture.Name : Document.ProjectSettings.Culture)"
      data-playback-start="@Document.Playback.StartAutomatically.ToString().ToLowerInvariant()"
@@ -595,7 +596,7 @@
     private string FrameClipPath(IEnumerable<MediaFramePoint> points) {
         try
         {
-            return $"polygon({string.Join(',', points.Select(point => $"{Inv(Math.Clamp(point.X, 0, 1) * 100)}% {Inv(Math.Clamp(point.Y, 0, 1) * 100)}%"))})";
+            return EditorText.BuildPublicationFramePolygonCss(points);
         }
         catch (Exception __componentMethodException)
         {

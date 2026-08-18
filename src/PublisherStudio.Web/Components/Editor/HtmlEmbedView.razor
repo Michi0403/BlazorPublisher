@@ -1,6 +1,7 @@
 @namespace PublisherStudio.Components.Editor
 
 @inject ILogger<HtmlEmbedView> Logger
+@inject PublicationEditorTextService EditorText
 <div class="publication-html-embed-shell @(DesignerMode ? "designer-object-mode" : "interaction-mode")">
     <iframe class="publication-html-embed"
             title="@Item.Name"
@@ -36,7 +37,7 @@
     private string SafeScript(string value) {
         try
         {
-            return value.Replace("</script", "<\\/script", StringComparison.OrdinalIgnoreCase);
+            return EditorText.EscapeEmbeddedScriptClosingTag(value);
         }
         catch (Exception __componentMethodException)
         {

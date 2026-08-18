@@ -2163,7 +2163,7 @@ public partial class PictureEditor
     private async Task DownloadPng() {
         try
         {
-            return await Download("image/png", "png", 1d).ConfigureAwait(true);
+            await Download("image/png", "png", 1d).ConfigureAwait(true);
         }
         catch (Exception __componentMethodException)
         {
@@ -2178,7 +2178,7 @@ public partial class PictureEditor
     private async Task DownloadJpeg() {
         try
         {
-            return await Download("image/jpeg", "jpg", .92d).ConfigureAwait(true);
+            await Download("image/jpeg", "jpg", .92d).ConfigureAwait(true);
         }
         catch (Exception __componentMethodException)
         {

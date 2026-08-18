@@ -1635,7 +1635,7 @@
     private async Task ExportPng() {
         try
         {
-            return await ExportRasterPages("png").ConfigureAwait(true);
+            await ExportRasterPages("png").ConfigureAwait(true);
         }
         catch (Exception __componentMethodException)
         {
@@ -1646,7 +1646,7 @@
     private async Task ExportJpeg() {
         try
         {
-            return await ExportRasterPages("jpeg").ConfigureAwait(true);
+            await ExportRasterPages("jpeg").ConfigureAwait(true);
         }
         catch (Exception __componentMethodException)
         {
@@ -1657,7 +1657,7 @@
     private async Task ExportSvg() {
         try
         {
-            return await ExportPage("svg").ConfigureAwait(true);
+            await ExportPage("svg").ConfigureAwait(true);
         }
         catch (Exception __componentMethodException)
         {
@@ -1668,7 +1668,7 @@
     private async Task ExportSelectedPng() {
         try
         {
-            return await ExportSelectedObject("png").ConfigureAwait(true);
+            await ExportSelectedObject("png").ConfigureAwait(true);
         }
         catch (Exception __componentMethodException)
         {
@@ -1679,7 +1679,7 @@
     private async Task ExportSelectedSvg() {
         try
         {
-            return await ExportSelectedObject("svg").ConfigureAwait(true);
+            await ExportSelectedObject("svg").ConfigureAwait(true);
         }
         catch (Exception __componentMethodException)
         {
@@ -2191,7 +2191,7 @@
     private async Task Print() {
         try
         {
-            return await JS.InvokeVoidAsync("publisherStudio.printPublication").ConfigureAwait(true);
+            await JS.InvokeVoidAsync("publisherStudio.printPublication").ConfigureAwait(true);
         }
         catch (Exception __componentMethodException)
         {
@@ -2648,7 +2648,7 @@
     private async Task InsertVideo(InputFileChangeEventArgs args) {
         try
         {
-            return await InsertMediaFile(args, PublicationElementKind.Video).ConfigureAwait(true);
+            await InsertMediaFile(args, PublicationElementKind.Video).ConfigureAwait(true);
         }
         catch (Exception __componentMethodException)
         {
@@ -2659,7 +2659,7 @@
     private async Task InsertAudio(InputFileChangeEventArgs args) {
         try
         {
-            return await InsertMediaFile(args, PublicationElementKind.Audio).ConfigureAwait(true);
+            await InsertMediaFile(args, PublicationElementKind.Audio).ConfigureAwait(true);
         }
         catch (Exception __componentMethodException)
         {
@@ -2690,7 +2690,7 @@
                 var bytes = buffer.ToArray();
                 if (bytes.Length == 0) throw new InvalidDataException("The selected media file is empty.");
 
-                module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=2.8.5").ConfigureAwait(true);
+                module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=2.8.6").ConfigureAwait(true);
                 temporaryAssetId = Guid.NewGuid();
                 var inspectionUrl = MediaAssets.RegisterBytes(temporaryAssetId, bytes, mimeType);
                 MediaSourceInfo info;

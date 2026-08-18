@@ -104,7 +104,7 @@
     protected override async Task OnInitializedAsync() {
         try
         {
-            return await RefreshAsync().ConfigureAwait(true);
+            await RefreshAsync().ConfigureAwait(true);
         }
         catch (Exception __componentMethodException)
         {

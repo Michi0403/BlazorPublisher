@@ -2,6 +2,7 @@
 @inject IJSRuntime JS
 
 @inject ILogger<AnimationPanel> Logger
+@inject PublicationEditorTextService EditorText
 <div class="animation-panel">
     <div class="animation-preview-bar">
         <button type="button" title="Preview the complete current page" @onclick="PreviewPage">▶ Page</button>
@@ -1131,7 +1132,7 @@
     private string Friendly(string value) {
         try
         {
-            return System.Text.RegularExpressions.Regex.Replace(value, "([a-z])([A-Z])", "$1 $2");
+            return EditorText.HumanizeIdentifier(value);
         }
         catch (Exception __componentMethodException)
         {

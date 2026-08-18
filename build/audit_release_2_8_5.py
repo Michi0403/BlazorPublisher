@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Static source audit for PublisherStudio 2.8.5 strict LocalGPT architecture maintenance."""
+"""Static source audit for PublisherStudio 2.8.6 strict LocalGPT architecture maintenance."""
 from pathlib import Path
 import json,re,sys
 ROOT=Path(__file__).resolve().parents[1]
@@ -21,11 +21,11 @@ def forbid(rel,*tokens):
 
 try:
  for rel in ['src/PublisherStudio.Web/PublisherStudio.Web.csproj','src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj']:
-  req(rel,'<Version>2.8.5</Version>')
+  req(rel,'<Version>2.8.6</Version>')
  req('Directory.Build.props','<LocalGptWireProtocolVersion>2.1.1</LocalGptWireProtocolVersion>')
- req('src/PublisherStudio.Web/Components/App.razor','css/site.css?v=20260818-285','videoEffectRuntime.js?v=2.8.5','publisherInterop.js?v=2.8.5')
+ req('src/PublisherStudio.Web/Components/App.razor','css/site.css?v=20260818-286','videoEffectRuntime.js?v=2.8.6','publisherInterop.js?v=2.8.6')
  for rel in ['src/PublisherStudio.Web/Components/Pages/Editor.razor','src/PublisherStudio.Web/Components/Editor/InspectorPanel.razor','src/PublisherStudio.Web/Components/Editor/MediaStudio.razor']:
-  req(rel,'mediaStudioInterop.js?v=2.8.5')
+  req(rel,'mediaStudioInterop.js?v=2.8.6')
 
  # Exact reviewed render boundary set.
  actual=[]
@@ -88,6 +88,6 @@ try:
  req('src/PublisherStudio.Web/Components/Editor/MediaConverterStudio.razor','Pixel format','Encoder preset')
  req('src/PublisherStudio.Web/Components/Editor/PageSurface.razor','InteractionEnabled','SelectionVisualsEnabled')
 
- print(f'PublisherStudio 2.8.5 strict architecture source audit passed: {checks} checks; explicit renderer helpers: {sum(len(v) for v in helpers.values())}.')
+ print(f'PublisherStudio 2.8.6 strict architecture source audit passed: {checks} checks; explicit renderer helpers: {sum(len(v) for v in helpers.values())}.')
 except Exception as e:
- print(f'PublisherStudio 2.8.5 source audit failed: {e}',file=sys.stderr); raise SystemExit(1)
+ print(f'PublisherStudio 2.8.6 source audit failed: {e}',file=sys.stderr); raise SystemExit(1)

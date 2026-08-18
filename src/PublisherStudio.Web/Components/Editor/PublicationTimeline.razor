@@ -3,6 +3,7 @@
 @inject IJSRuntime JS
 
 @inject ILogger<PublicationTimeline> Logger
+@inject PublicationEditorTextService EditorText
 <section id="publisher-timeline" class="publication-timeline">
     <header class="timeline-ribbon-host" @oncontextmenu="ShowBackgroundMenu" @oncontextmenu:preventDefault>
         <DxRibbon CssClass="timeline-ribbon categorized-ribbon" SizeMode="SizeMode.Small" AdaptivityAutoCollapseItemsToGroups="true">
@@ -305,7 +306,7 @@
     private async Task SeekFromRuler(MouseEventArgs args) {
         try
         {
-            return await SeekFromPointer(args).ConfigureAwait(true);
+            await SeekFromPointer(args).ConfigureAwait(true);
         }
         catch (Exception __componentMethodException)
         {
@@ -316,7 +317,7 @@
     private async Task SeekFromTrack(MouseEventArgs args) {
         try
         {
-            return await SeekFromPointer(args).ConfigureAwait(true);
+            await SeekFromPointer(args).ConfigureAwait(true);
         }
         catch (Exception __componentMethodException)
         {
@@ -991,7 +992,7 @@
     private string Friendly(string value) {
         try
         {
-            return System.Text.RegularExpressions.Regex.Replace(value, "([a-z])([A-Z])", "$1 $2");
+            return EditorText.HumanizeIdentifier(value);
         }
         catch (Exception __componentMethodException)
         {

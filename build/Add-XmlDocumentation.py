@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Enriches XML documentation for every maintained direct C# declaration and explicit Razor component member."""
+"""Enriches XML documentation for maintained C# and Razor component declarations."""
 from __future__ import annotations
 import argparse
 from pathlib import Path
@@ -10,9 +10,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('root', type=Path)
     args = parser.parse_args()
-    source_root = args.root.resolve()
-    repository_root = source_root.parent
-    csharp = run_csharp(source_root, 'enhance')
-    if csharp != 0:
-        raise SystemExit(csharp)
-    raise SystemExit(run_razor(repository_root, 'enhance'))
+    razor_exit = run_razor(args.root, 'enhance')
+    csharp_exit = run_csharp(args.root, 'enhance')
+    raise SystemExit(razor_exit or csharp_exit)

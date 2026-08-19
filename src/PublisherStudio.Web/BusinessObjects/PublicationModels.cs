@@ -391,8 +391,17 @@ public enum SignalGesture { None, Click, Hover }
 /// </summary>
 public enum SignalCompletionAction
 {
+    /// <summary>
+    /// Selects the none option for <see cref="SignalCompletionAction"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     None, Click, Hover, Show, Hide, ToggleVisibility, SetOpacity, ReplayAnimation,
+    /// <summary>
+    /// Selects the play media option for <see cref="SignalCompletionAction"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     PlayMedia, PauseMedia, ToggleMediaPlayback, Highlight, AddCssClass, RemoveCssClass,
+    /// <summary>
+    /// Selects the toggle CSS class option for <see cref="SignalCompletionAction"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     ToggleCssClass, RunSignal
 }
 /// <summary>

@@ -17,7 +17,7 @@ using PublisherStudio.Services.Configuration;
 namespace PublisherStudio.Components.Editor;
 
 /// <summary>
-/// Represents a picture editor application type, grouping the state and behavior that belong to that domain concept.
+/// Renders the picture editor Razor component and coordinates the component-local state, commands, and presentation behavior used by the surrounding PublisherStudio interface.
 /// </summary>
 public partial class PictureEditor
 {
@@ -7290,7 +7290,7 @@ public partial class PictureEditor
     }
 
     /// <summary>
-    /// Represents a picture area selection helper type nested within <see cref="PictureEditor"/>, grouping the state or behavior used only by that containing workflow.
+    /// Renders the picture area selection Razor component and coordinates the component-local state, commands, and presentation behavior used by the surrounding PublisherStudio interface.
     /// </summary>
     private sealed class PictureAreaSelection
     {
@@ -7307,7 +7307,7 @@ public partial class PictureEditor
     }
 
     /// <summary>
-    /// Represents the outcome of picture OCR, carrying the data and status produced by the corresponding application operation.
+    /// Renders the picture OCR Razor component and coordinates the component-local state, commands, and presentation behavior used by the surrounding PublisherStudio interface.
     /// </summary>
     private sealed class PictureOcrResult
     {
@@ -7339,7 +7339,7 @@ public partial class PictureEditor
     }
 
     /// <summary>
-    /// Represents a picture image size helper type nested within <see cref="PictureEditor"/>, grouping the state or behavior used only by that containing workflow.
+    /// Renders the picture image size Razor component and coordinates the component-local state, commands, and presentation behavior used by the surrounding PublisherStudio interface.
     /// </summary>
     private sealed class PictureImageSize
     {

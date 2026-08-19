@@ -5,21 +5,69 @@ namespace PublisherStudio.BusinessObjects;
 /// </summary>
 public enum PublisherRuntimePattern
 {
+    /// <summary>
+    /// Selects the publication body option for <see cref="PublisherRuntimePattern"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     PublicationBody,
+    /// <summary>
+    /// Selects the publication style option for <see cref="PublisherRuntimePattern"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     PublicationStyle,
+    /// <summary>
+    /// Selects the publication dangerous elements option for <see cref="PublisherRuntimePattern"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     PublicationDangerousElements,
+    /// <summary>
+    /// Selects the publication event attribute option for <see cref="PublisherRuntimePattern"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     PublicationEventAttribute,
+    /// <summary>
+    /// Selects the publication javascript URL option for <see cref="PublisherRuntimePattern"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     PublicationJavascriptUrl,
+    /// <summary>
+    /// Selects the code string option for <see cref="PublisherRuntimePattern"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     CodeString,
+    /// <summary>
+    /// Selects the code number option for <see cref="PublisherRuntimePattern"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     CodeNumber,
+    /// <summary>
+    /// Selects the open document length option for <see cref="PublisherRuntimePattern"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     OpenDocumentLength,
+    /// <summary>
+    /// Selects the open document rotate option for <see cref="PublisherRuntimePattern"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     OpenDocumentRotate,
+    /// <summary>
+    /// Selects the open document color option for <see cref="PublisherRuntimePattern"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     OpenDocumentColor,
+    /// <summary>
+    /// Selects the video edl event option for <see cref="PublisherRuntimePattern"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     VideoEdlEvent,
+    /// <summary>
+    /// Selects the video edl clip name option for <see cref="PublisherRuntimePattern"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     VideoEdlClipName,
+    /// <summary>
+    /// Selects the video edl source file option for <see cref="PublisherRuntimePattern"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     VideoEdlSourceFile,
+    /// <summary>
+    /// Selects the media duration option for <see cref="PublisherRuntimePattern"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     MediaDuration,
+    /// <summary>
+    /// Selects the native direct show device option for <see cref="PublisherRuntimePattern"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     NativeDirectShowDevice,
+    /// <summary>
+    /// Selects the native av foundation device option for <see cref="PublisherRuntimePattern"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     NativeAvFoundationDevice
 }
 
@@ -28,14 +76,41 @@ public enum PublisherRuntimePattern
 /// </summary>
 public enum PublisherRuntimeCollection
 {
+    /// <summary>
+    /// Selects the video project extensions option for <see cref="PublisherRuntimeCollection"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     VideoProjectExtensions,
+    /// <summary>
+    /// Selects the now playing extensions option for <see cref="PublisherRuntimeCollection"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     NowPlayingExtensions,
+    /// <summary>
+    /// Selects the allowed FFmpeg executable names option for <see cref="PublisherRuntimeCollection"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     AllowedFfmpegExecutableNames,
+    /// <summary>
+    /// Selects the forbidden FFmpeg advanced options option for <see cref="PublisherRuntimeCollection"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     ForbiddenFfmpegAdvancedOptions,
+    /// <summary>
+    /// Selects the FFmpeg windows bundled paths option for <see cref="PublisherRuntimeCollection"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     FfmpegWindowsBundledPaths,
+    /// <summary>
+    /// Selects the FFmpeg unix bundled paths option for <see cref="PublisherRuntimeCollection"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     FfmpegUnixBundledPaths,
+    /// <summary>
+    /// Selects the FFmpeg unix install paths option for <see cref="PublisherRuntimeCollection"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     FfmpegUnixInstallPaths,
+    /// <summary>
+    /// Selects the FFmpeg encoder preset suggestions option for <see cref="PublisherRuntimeCollection"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     FfmpegEncoderPresetSuggestions,
+    /// <summary>
+    /// Selects the FFmpeg pixel format suggestions option for <see cref="PublisherRuntimeCollection"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     FfmpegPixelFormatSuggestions
 }
 

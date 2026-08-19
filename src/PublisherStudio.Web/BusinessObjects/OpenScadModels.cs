@@ -5,6 +5,9 @@ namespace PublisherStudio.BusinessObjects;
 /// </summary>
 public enum OpenScadParameterType
 {
+    /// <summary>
+    /// Selects the number option for <see cref="OpenScadParameterType"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Number, Integer, Boolean, String, Vector2, Vector3, Vector4, Matrix4, Points2D, Faces, Expression, FilePath
 }
 
@@ -13,6 +16,9 @@ public enum OpenScadParameterType
 /// </summary>
 public enum OpenScadNodeCategory
 {
+    /// <summary>
+    /// Selects the primitive2 d option for <see cref="OpenScadNodeCategory"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Primitive2D, Primitive3D, Transform, BooleanOperation, Extrusion, Projection, Import, Utility, Custom
 }
 
@@ -21,6 +27,9 @@ public enum OpenScadNodeCategory
 /// </summary>
 public enum OpenScadCodePartKind
 {
+    /// <summary>
+    /// Selects the variable option for <see cref="OpenScadCodePartKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Variable, Function, Module, Raw
 }
 
@@ -29,6 +38,9 @@ public enum OpenScadCodePartKind
 /// </summary>
 public enum OpenScadAnimationProperty
 {
+    /// <summary>
+    /// Selects the translate option for <see cref="OpenScadAnimationProperty"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Translate, Rotate, Scale, Resize, ColorAlpha, Parameter
 }
 
@@ -37,6 +49,9 @@ public enum OpenScadAnimationProperty
 /// </summary>
 public enum OpenScadAnimationEasing
 {
+    /// <summary>
+    /// Selects the linear option for <see cref="OpenScadAnimationEasing"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Linear, EaseIn, EaseOut, EaseInOut, SmoothStep, SineInOut
 }
 

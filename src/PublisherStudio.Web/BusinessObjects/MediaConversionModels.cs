@@ -5,10 +5,25 @@ namespace PublisherStudio.BusinessObjects;
 /// </summary>
 public enum MediaConversionJobStatus
 {
+    /// <summary>
+    /// Selects the queued option for <see cref="MediaConversionJobStatus"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Queued,
+    /// <summary>
+    /// Selects the running option for <see cref="MediaConversionJobStatus"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Running,
+    /// <summary>
+    /// Selects the completed option for <see cref="MediaConversionJobStatus"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Completed,
+    /// <summary>
+    /// Selects the failed option for <see cref="MediaConversionJobStatus"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Failed,
+    /// <summary>
+    /// Selects the cancelled option for <see cref="MediaConversionJobStatus"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Cancelled
 }
 
@@ -17,9 +32,21 @@ public enum MediaConversionJobStatus
 /// </summary>
 public enum MediaConversionScaleMode
 {
+    /// <summary>
+    /// Selects the preserve option for <see cref="MediaConversionScaleMode"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Preserve,
+    /// <summary>
+    /// Selects the fit option for <see cref="MediaConversionScaleMode"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Fit,
+    /// <summary>
+    /// Selects the fill option for <see cref="MediaConversionScaleMode"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Fill,
+    /// <summary>
+    /// Selects the stretch option for <see cref="MediaConversionScaleMode"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Stretch
 }
 
@@ -28,11 +55,29 @@ public enum MediaConversionScaleMode
 /// </summary>
 public enum MediaConversionTarget
 {
+    /// <summary>
+    /// Selects the publisher studio web option for <see cref="MediaConversionTarget"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     PublisherStudioWeb,
+    /// <summary>
+    /// Selects the general web option for <see cref="MediaConversionTarget"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     GeneralWeb,
+    /// <summary>
+    /// Selects the video editing option for <see cref="MediaConversionTarget"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     VideoEditing,
+    /// <summary>
+    /// Selects the streaming option for <see cref="MediaConversionTarget"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Streaming,
+    /// <summary>
+    /// Selects the archive option for <see cref="MediaConversionTarget"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Archive,
+    /// <summary>
+    /// Selects the custom option for <see cref="MediaConversionTarget"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Custom
 }
 

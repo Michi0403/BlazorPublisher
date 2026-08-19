@@ -7,9 +7,21 @@ namespace PublisherStudio.BusinessObjects;
 /// </summary>
 public enum PublicationPanelNavigationMode
 {
+    /// <summary>
+    /// Selects the hidden option for <see cref="PublicationPanelNavigationMode"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Hidden,
+    /// <summary>
+    /// Selects the top tabs option for <see cref="PublicationPanelNavigationMode"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     TopTabs,
+    /// <summary>
+    /// Selects the side menu option for <see cref="PublicationPanelNavigationMode"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     SideMenu,
+    /// <summary>
+    /// Selects the overlay menu option for <see cref="PublicationPanelNavigationMode"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     OverlayMenu
 }
 
@@ -18,7 +30,13 @@ public enum PublicationPanelNavigationMode
 /// </summary>
 public enum PublicationPanelLayoutMode
 {
+    /// <summary>
+    /// Selects the fixed canvas option for <see cref="PublicationPanelLayoutMode"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     FixedCanvas,
+    /// <summary>
+    /// Selects the responsive option for <see cref="PublicationPanelLayoutMode"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Responsive
 }
 

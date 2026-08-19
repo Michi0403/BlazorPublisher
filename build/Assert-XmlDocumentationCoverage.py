@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validates comprehensive XML documentation for maintained C# and Razor component source."""
+"""Validates comprehensive, contextual XML documentation for maintained C# and Razor source."""
 from __future__ import annotations
 import argparse
 from pathlib import Path
@@ -10,9 +10,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('root', type=Path)
     args = parser.parse_args()
-    source_root = args.root.resolve()
-    repository_root = source_root.parent
-    csharp = run_csharp(source_root, 'validate')
-    if csharp != 0:
-        raise SystemExit(csharp)
-    raise SystemExit(run_razor(repository_root, 'validate'))
+    csharp_exit = run_csharp(args.root, 'validate')
+    razor_exit = run_razor(args.root, 'validate')
+    raise SystemExit(csharp_exit or razor_exit)

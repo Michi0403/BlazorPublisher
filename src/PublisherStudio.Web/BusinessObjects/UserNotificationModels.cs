@@ -5,9 +5,21 @@ namespace PublisherStudio.BusinessObjects;
 /// </summary>
 public enum UserNotificationSeverity
 {
+    /// <summary>
+    /// Selects the information option for <see cref="UserNotificationSeverity"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Information,
+    /// <summary>
+    /// Selects the success option for <see cref="UserNotificationSeverity"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Success,
+    /// <summary>
+    /// Selects the warning option for <see cref="UserNotificationSeverity"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Warning,
+    /// <summary>
+    /// Selects the error option for <see cref="UserNotificationSeverity"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Error
 }
 

@@ -702,7 +702,13 @@ public sealed class StreamingProfileStore
     /// </summary>
     private enum ProtectedValueKind
     {
+        /// <summary>
+        /// Selects the stream secret option for <see cref="ProtectedValueKind"/>, giving callers a named value for that supported mode or state.
+        /// </summary>
         StreamSecret,
+        /// <summary>
+        /// Selects the chat secret option for <see cref="ProtectedValueKind"/>, giving callers a named value for that supported mode or state.
+        /// </summary>
         ChatSecret
     }
 

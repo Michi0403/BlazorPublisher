@@ -7,12 +7,33 @@ namespace PublisherStudio.BusinessObjects;
 /// </summary>
 public enum PublicationStreamProvider
 {
+    /// <summary>
+    /// Selects the twitch option for <see cref="PublicationStreamProvider"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Twitch,
+    /// <summary>
+    /// Selects the you tube option for <see cref="PublicationStreamProvider"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     YouTube,
+    /// <summary>
+    /// Selects the kick option for <see cref="PublicationStreamProvider"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Kick,
+    /// <summary>
+    /// Selects the tik tok option for <see cref="PublicationStreamProvider"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     TikTok,
+    /// <summary>
+    /// Selects the custom rtmp option for <see cref="PublicationStreamProvider"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     CustomRtmp,
+    /// <summary>
+    /// Selects the custom srt option for <see cref="PublicationStreamProvider"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     CustomSrt,
+    /// <summary>
+    /// Selects the local network option for <see cref="PublicationStreamProvider"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     LocalNetwork
 }
 
@@ -21,7 +42,13 @@ public enum PublicationStreamProvider
 /// </summary>
 public enum StreamingProviderAuthenticationMode
 {
+    /// <summary>
+    /// Selects the manual option for <see cref="StreamingProviderAuthenticationMode"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Manual,
+    /// <summary>
+    /// Selects the o auth option for <see cref="StreamingProviderAuthenticationMode"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     OAuth
 }
 
@@ -30,11 +57,29 @@ public enum StreamingProviderAuthenticationMode
 /// </summary>
 public enum PublicationStreamTransport
 {
+    /// <summary>
+    /// Selects the rtmp option for <see cref="PublicationStreamTransport"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Rtmp,
+    /// <summary>
+    /// Selects the rtmps option for <see cref="PublicationStreamTransport"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Rtmps,
+    /// <summary>
+    /// Selects the srt option for <see cref="PublicationStreamTransport"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Srt,
+    /// <summary>
+    /// Selects the web rtc option for <see cref="PublicationStreamTransport"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     WebRtc,
+    /// <summary>
+    /// Selects the hls option for <see cref="PublicationStreamTransport"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Hls,
+    /// <summary>
+    /// Selects the rtsp option for <see cref="PublicationStreamTransport"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Rtsp
 }
 
@@ -43,10 +88,25 @@ public enum PublicationStreamTransport
 /// </summary>
 public enum PublicationStreamQualityPreset
 {
+    /// <summary>
+    /// Selects the recommended option for <see cref="PublicationStreamQualityPreset"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Recommended,
+    /// <summary>
+    /// Selects the high quality option for <see cref="PublicationStreamQualityPreset"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     HighQuality,
+    /// <summary>
+    /// Selects the low latency option for <see cref="PublicationStreamQualityPreset"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     LowLatency,
+    /// <summary>
+    /// Selects the bandwidth saving option for <see cref="PublicationStreamQualityPreset"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     BandwidthSaving,
+    /// <summary>
+    /// Selects the custom option for <see cref="PublicationStreamQualityPreset"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Custom
 }
 
@@ -55,8 +115,17 @@ public enum PublicationStreamQualityPreset
 /// </summary>
 public enum PublicationStreamVideoCodec
 {
+    /// <summary>
+    /// Selects the h264 option for <see cref="PublicationStreamVideoCodec"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     H264,
+    /// <summary>
+    /// Selects the hevc option for <see cref="PublicationStreamVideoCodec"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Hevc,
+    /// <summary>
+    /// Selects the av1 option for <see cref="PublicationStreamVideoCodec"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Av1
 }
 
@@ -65,7 +134,13 @@ public enum PublicationStreamVideoCodec
 /// </summary>
 public enum PublicationStreamAudioCodec
 {
+    /// <summary>
+    /// Selects the aac option for <see cref="PublicationStreamAudioCodec"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Aac,
+    /// <summary>
+    /// Selects the opus option for <see cref="PublicationStreamAudioCodec"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Opus
 }
 
@@ -74,11 +149,29 @@ public enum PublicationStreamAudioCodec
 /// </summary>
 public enum StreamingHardwareEncoderPreference
 {
+    /// <summary>
+    /// Selects the auto option for <see cref="StreamingHardwareEncoderPreference"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Auto,
+    /// <summary>
+    /// Selects the software option for <see cref="StreamingHardwareEncoderPreference"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Software,
+    /// <summary>
+    /// Selects the nvidia nvenc option for <see cref="StreamingHardwareEncoderPreference"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     NvidiaNvenc,
+    /// <summary>
+    /// Selects the intel quick sync option for <see cref="StreamingHardwareEncoderPreference"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     IntelQuickSync,
+    /// <summary>
+    /// Selects the amd amf option for <see cref="StreamingHardwareEncoderPreference"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     AmdAmf,
+    /// <summary>
+    /// Selects the apple video toolbox option for <see cref="StreamingHardwareEncoderPreference"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     AppleVideoToolbox
 }
 
@@ -87,8 +180,17 @@ public enum StreamingHardwareEncoderPreference
 /// </summary>
 public enum PublicationStreamRecordingVariant
 {
+    /// <summary>
+    /// Selects the clean master option for <see cref="PublicationStreamRecordingVariant"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     CleanMaster,
+    /// <summary>
+    /// Selects the each enabled output option for <see cref="PublicationStreamRecordingVariant"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     EachEnabledOutput,
+    /// <summary>
+    /// Selects the selected outputs option for <see cref="PublicationStreamRecordingVariant"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     SelectedOutputs
 }
 
@@ -97,15 +199,45 @@ public enum PublicationStreamRecordingVariant
 /// </summary>
 public enum PublicationLiveSourceKind
 {
+    /// <summary>
+    /// Selects the camera option for <see cref="PublicationLiveSourceKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Camera,
+    /// <summary>
+    /// Selects the screen option for <see cref="PublicationLiveSourceKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Screen,
+    /// <summary>
+    /// Selects the window option for <see cref="PublicationLiveSourceKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Window,
+    /// <summary>
+    /// Selects the browser tab option for <see cref="PublicationLiveSourceKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     BrowserTab,
+    /// <summary>
+    /// Selects the capture device option for <see cref="PublicationLiveSourceKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     CaptureDevice,
+    /// <summary>
+    /// Selects the microphone option for <see cref="PublicationLiveSourceKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Microphone,
+    /// <summary>
+    /// Selects the system audio option for <see cref="PublicationLiveSourceKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     SystemAudio,
+    /// <summary>
+    /// Selects the application audio option for <see cref="PublicationLiveSourceKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     ApplicationAudio,
+    /// <summary>
+    /// Selects the network media option for <see cref="PublicationLiveSourceKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     NetworkMedia,
+    /// <summary>
+    /// Selects the now playing option for <see cref="PublicationLiveSourceKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     NowPlaying
 }
 
@@ -114,8 +246,17 @@ public enum PublicationLiveSourceKind
 /// </summary>
 public enum PublicationLiveSourceFitMode
 {
+    /// <summary>
+    /// Selects the contain option for <see cref="PublicationLiveSourceFitMode"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Contain,
+    /// <summary>
+    /// Selects the cover option for <see cref="PublicationLiveSourceFitMode"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Cover,
+    /// <summary>
+    /// Selects the stretch option for <see cref="PublicationLiveSourceFitMode"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Stretch
 }
 
@@ -124,8 +265,17 @@ public enum PublicationLiveSourceFitMode
 /// </summary>
 public enum PublicationCaptureBackend
 {
+    /// <summary>
+    /// Selects the auto option for <see cref="PublicationCaptureBackend"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Auto,
+    /// <summary>
+    /// Selects the browser option for <see cref="PublicationCaptureBackend"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Browser,
+    /// <summary>
+    /// Selects the native option for <see cref="PublicationCaptureBackend"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Native
 }
 
@@ -134,8 +284,17 @@ public enum PublicationCaptureBackend
 /// </summary>
 public enum PublicationStreamSessionMode
 {
+    /// <summary>
+    /// Selects the idle option for <see cref="PublicationStreamSessionMode"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Idle,
+    /// <summary>
+    /// Selects the dry run option for <see cref="PublicationStreamSessionMode"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     DryRun,
+    /// <summary>
+    /// Selects the live option for <see cref="PublicationStreamSessionMode"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Live
 }
 
@@ -144,8 +303,17 @@ public enum PublicationStreamSessionMode
 /// </summary>
 public enum PublicationAdaptiveQualityProfile
 {
+    /// <summary>
+    /// Selects the efficiency option for <see cref="PublicationAdaptiveQualityProfile"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Efficiency,
+    /// <summary>
+    /// Selects the balanced option for <see cref="PublicationAdaptiveQualityProfile"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Balanced,
+    /// <summary>
+    /// Selects the quality option for <see cref="PublicationAdaptiveQualityProfile"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Quality
 }
 

@@ -5,9 +5,21 @@ namespace PublisherStudio.BusinessObjects;
 /// </summary>
 public enum PublicationLayerMove
 {
+    /// <summary>
+    /// Selects the bring to front option for <see cref="PublicationLayerMove"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     BringToFront,
+    /// <summary>
+    /// Selects the bring forward option for <see cref="PublicationLayerMove"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     BringForward,
+    /// <summary>
+    /// Selects the send backward option for <see cref="PublicationLayerMove"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     SendBackward,
+    /// <summary>
+    /// Selects the send to back option for <see cref="PublicationLayerMove"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     SendToBack
 }
 

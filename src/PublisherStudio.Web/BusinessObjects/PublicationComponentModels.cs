@@ -9,29 +9,101 @@ namespace PublisherStudio.BusinessObjects;
 /// </summary>
 public enum PublicationComponentKind
 {
+    /// <summary>
+    /// Selects the data grid option for <see cref="PublicationComponentKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     DataGrid,
+    /// <summary>
+    /// Selects the tree list option for <see cref="PublicationComponentKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     TreeList,
+    /// <summary>
+    /// Selects the scheduler option for <see cref="PublicationComponentKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Scheduler,
+    /// <summary>
+    /// Selects the form option for <see cref="PublicationComponentKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Form,
+    /// <summary>
+    /// Selects the text box option for <see cref="PublicationComponentKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     TextBox,
+    /// <summary>
+    /// Selects the text area option for <see cref="PublicationComponentKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     TextArea,
+    /// <summary>
+    /// Selects the number box option for <see cref="PublicationComponentKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     NumberBox,
+    /// <summary>
+    /// Selects the date box option for <see cref="PublicationComponentKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     DateBox,
+    /// <summary>
+    /// Selects the check box option for <see cref="PublicationComponentKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     CheckBox,
+    /// <summary>
+    /// Selects the select box option for <see cref="PublicationComponentKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     SelectBox,
+    /// <summary>
+    /// Selects the tag box option for <see cref="PublicationComponentKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     TagBox,
+    /// <summary>
+    /// Selects the gallery option for <see cref="PublicationComponentKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Gallery,
+    /// <summary>
+    /// Selects the tile view option for <see cref="PublicationComponentKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     TileView,
+    /// <summary>
+    /// Selects the menu option for <see cref="PublicationComponentKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Menu,
+    /// <summary>
+    /// Selects the context menu option for <see cref="PublicationComponentKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     ContextMenu,
+    /// <summary>
+    /// Selects the tab panel option for <see cref="PublicationComponentKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     TabPanel,
+    /// <summary>
+    /// Selects the multi view option for <see cref="PublicationComponentKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     MultiView,
+    /// <summary>
+    /// Selects the splitter option for <see cref="PublicationComponentKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Splitter,
+    /// <summary>
+    /// Selects the scroll view option for <see cref="PublicationComponentKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     ScrollView,
+    /// <summary>
+    /// Selects the pivot grid option for <see cref="PublicationComponentKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     PivotGrid,
+    /// <summary>
+    /// Selects the map option for <see cref="PublicationComponentKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Map,
+    /// <summary>
+    /// Selects the vector map option for <see cref="PublicationComponentKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     VectorMap,
+    /// <summary>
+    /// Selects the chat option for <see cref="PublicationComponentKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Chat,
+    /// <summary>
+    /// Selects the button option for <see cref="PublicationComponentKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Button
 }
 
@@ -41,10 +113,25 @@ public enum PublicationComponentKind
 /// </summary>
 public enum PublicationChatPlatform
 {
+    /// <summary>
+    /// Selects the output context option for <see cref="PublicationChatPlatform"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     OutputContext,
+    /// <summary>
+    /// Selects the preview option for <see cref="PublicationChatPlatform"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Preview,
+    /// <summary>
+    /// Selects the twitch option for <see cref="PublicationChatPlatform"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Twitch,
+    /// <summary>
+    /// Selects the you tube option for <see cref="PublicationChatPlatform"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     YouTube,
+    /// <summary>
+    /// Selects the custom option for <see cref="PublicationChatPlatform"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Custom
 }
 
@@ -53,9 +140,21 @@ public enum PublicationChatPlatform
 /// </summary>
 public enum PublicationChatDisplayMode
 {
+    /// <summary>
+    /// Selects the auto option for <see cref="PublicationChatDisplayMode"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Auto,
+    /// <summary>
+    /// Selects the interactive option for <see cref="PublicationChatDisplayMode"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Interactive,
+    /// <summary>
+    /// Selects the viewer only option for <see cref="PublicationChatDisplayMode"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     ViewerOnly,
+    /// <summary>
+    /// Selects the stream overlay option for <see cref="PublicationChatDisplayMode"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     StreamOverlay
 }
 
@@ -64,7 +163,13 @@ public enum PublicationChatDisplayMode
 /// </summary>
 public enum PublicationChatAiMode
 {
+    /// <summary>
+    /// Selects the none option for <see cref="PublicationChatAiMode"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     None,
+    /// <summary>
+    /// Selects the local GPT council option for <see cref="PublicationChatAiMode"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     LocalGptCouncil
 }
 
@@ -73,12 +178,33 @@ public enum PublicationChatAiMode
 /// </summary>
 public enum PublicationVectorMapBaseLayer
 {
+    /// <summary>
+    /// Selects the world option for <see cref="PublicationVectorMapBaseLayer"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     World,
+    /// <summary>
+    /// Selects the europe option for <see cref="PublicationVectorMapBaseLayer"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Europe,
+    /// <summary>
+    /// Selects the eurasia option for <see cref="PublicationVectorMapBaseLayer"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Eurasia,
+    /// <summary>
+    /// Selects the africa option for <see cref="PublicationVectorMapBaseLayer"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Africa,
+    /// <summary>
+    /// Selects the usa option for <see cref="PublicationVectorMapBaseLayer"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Usa,
+    /// <summary>
+    /// Selects the canada option for <see cref="PublicationVectorMapBaseLayer"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Canada,
+    /// <summary>
+    /// Selects the none option for <see cref="PublicationVectorMapBaseLayer"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     None
 }
 
@@ -87,8 +213,17 @@ public enum PublicationVectorMapBaseLayer
 /// </summary>
 public enum PublicationVectorFeatureKind
 {
+    /// <summary>
+    /// Selects the marker option for <see cref="PublicationVectorFeatureKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Marker,
+    /// <summary>
+    /// Selects the line option for <see cref="PublicationVectorFeatureKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Line,
+    /// <summary>
+    /// Selects the polygon option for <see cref="PublicationVectorFeatureKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Polygon
 }
 
@@ -176,7 +311,13 @@ public sealed class PublicationVectorMapFeature
 /// </summary>
 public enum PublicationComponentScope
 {
+    /// <summary>
+    /// Selects the page option for <see cref="PublicationComponentScope"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Page,
+    /// <summary>
+    /// Selects the document option for <see cref="PublicationComponentScope"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Document
 }
 
@@ -185,9 +326,21 @@ public enum PublicationComponentScope
 /// </summary>
 public enum PublicationComponentDataMode
 {
+    /// <summary>
+    /// Selects the publication data object option for <see cref="PublicationComponentDataMode"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     PublicationDataObject,
+    /// <summary>
+    /// Selects the static snapshot option for <see cref="PublicationComponentDataMode"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     StaticSnapshot,
+    /// <summary>
+    /// Selects the rest option for <see cref="PublicationComponentDataMode"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Rest,
+    /// <summary>
+    /// Selects the o data option for <see cref="PublicationComponentDataMode"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     OData
 }
 
@@ -196,7 +349,13 @@ public enum PublicationComponentDataMode
 /// </summary>
 public enum PublicationComponentProcessingMode
 {
+    /// <summary>
+    /// Selects the client option for <see cref="PublicationComponentProcessingMode"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Client,
+    /// <summary>
+    /// Selects the remote option for <see cref="PublicationComponentProcessingMode"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Remote
 }
 
@@ -205,11 +364,29 @@ public enum PublicationComponentProcessingMode
 /// </summary>
 public enum PublicationComponentEditMode
 {
+    /// <summary>
+    /// Selects the read only option for <see cref="PublicationComponentEditMode"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     ReadOnly,
+    /// <summary>
+    /// Selects the cell option for <see cref="PublicationComponentEditMode"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Cell,
+    /// <summary>
+    /// Selects the row option for <see cref="PublicationComponentEditMode"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Row,
+    /// <summary>
+    /// Selects the batch option for <see cref="PublicationComponentEditMode"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Batch,
+    /// <summary>
+    /// Selects the form option for <see cref="PublicationComponentEditMode"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Form,
+    /// <summary>
+    /// Selects the popup option for <see cref="PublicationComponentEditMode"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Popup
 }
 
@@ -218,8 +395,17 @@ public enum PublicationComponentEditMode
 /// </summary>
 public enum PublicationComponentSelectionMode
 {
+    /// <summary>
+    /// Selects the none option for <see cref="PublicationComponentSelectionMode"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     None,
+    /// <summary>
+    /// Selects the single option for <see cref="PublicationComponentSelectionMode"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Single,
+    /// <summary>
+    /// Selects the multiple option for <see cref="PublicationComponentSelectionMode"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Multiple
 }
 
@@ -228,13 +414,37 @@ public enum PublicationComponentSelectionMode
 /// </summary>
 public enum PublicationComponentEditorKind
 {
+    /// <summary>
+    /// Selects the auto option for <see cref="PublicationComponentEditorKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Auto,
+    /// <summary>
+    /// Selects the text box option for <see cref="PublicationComponentEditorKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     TextBox,
+    /// <summary>
+    /// Selects the text area option for <see cref="PublicationComponentEditorKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     TextArea,
+    /// <summary>
+    /// Selects the number box option for <see cref="PublicationComponentEditorKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     NumberBox,
+    /// <summary>
+    /// Selects the date box option for <see cref="PublicationComponentEditorKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     DateBox,
+    /// <summary>
+    /// Selects the check box option for <see cref="PublicationComponentEditorKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     CheckBox,
+    /// <summary>
+    /// Selects the select box option for <see cref="PublicationComponentEditorKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     SelectBox,
+    /// <summary>
+    /// Selects the tag box option for <see cref="PublicationComponentEditorKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     TagBox
 }
 
@@ -243,10 +453,25 @@ public enum PublicationComponentEditorKind
 /// </summary>
 public enum PublicationComponentFieldArea
 {
+    /// <summary>
+    /// Selects the none option for <see cref="PublicationComponentFieldArea"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     None,
+    /// <summary>
+    /// Selects the row option for <see cref="PublicationComponentFieldArea"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Row,
+    /// <summary>
+    /// Selects the column option for <see cref="PublicationComponentFieldArea"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Column,
+    /// <summary>
+    /// Selects the data option for <see cref="PublicationComponentFieldArea"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Data,
+    /// <summary>
+    /// Selects the filter option for <see cref="PublicationComponentFieldArea"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Filter
 }
 
@@ -255,10 +480,25 @@ public enum PublicationComponentFieldArea
 /// </summary>
 public enum PublicationComponentSummaryType
 {
+    /// <summary>
+    /// Selects the sum option for <see cref="PublicationComponentSummaryType"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Sum,
+    /// <summary>
+    /// Selects the count option for <see cref="PublicationComponentSummaryType"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Count,
+    /// <summary>
+    /// Selects the min option for <see cref="PublicationComponentSummaryType"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Min,
+    /// <summary>
+    /// Selects the max option for <see cref="PublicationComponentSummaryType"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Max,
+    /// <summary>
+    /// Selects the avg option for <see cref="PublicationComponentSummaryType"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Avg
 }
 
@@ -267,17 +507,53 @@ public enum PublicationComponentSummaryType
 /// </summary>
 public enum PublicationComponentActionTrigger
 {
+    /// <summary>
+    /// Selects the click option for <see cref="PublicationComponentActionTrigger"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Click,
+    /// <summary>
+    /// Selects the item click option for <see cref="PublicationComponentActionTrigger"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     ItemClick,
+    /// <summary>
+    /// Selects the selection changed option for <see cref="PublicationComponentActionTrigger"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     SelectionChanged,
+    /// <summary>
+    /// Selects the value changed option for <see cref="PublicationComponentActionTrigger"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     ValueChanged,
+    /// <summary>
+    /// Selects the submit option for <see cref="PublicationComponentActionTrigger"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Submit,
+    /// <summary>
+    /// Selects the row inserted option for <see cref="PublicationComponentActionTrigger"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     RowInserted,
+    /// <summary>
+    /// Selects the row updated option for <see cref="PublicationComponentActionTrigger"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     RowUpdated,
+    /// <summary>
+    /// Selects the row removed option for <see cref="PublicationComponentActionTrigger"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     RowRemoved,
+    /// <summary>
+    /// Selects the appointment added option for <see cref="PublicationComponentActionTrigger"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     AppointmentAdded,
+    /// <summary>
+    /// Selects the appointment updated option for <see cref="PublicationComponentActionTrigger"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     AppointmentUpdated,
+    /// <summary>
+    /// Selects the appointment deleted option for <see cref="PublicationComponentActionTrigger"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     AppointmentDeleted,
+    /// <summary>
+    /// Selects the message entered option for <see cref="PublicationComponentActionTrigger"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     MessageEntered
 }
 
@@ -286,21 +562,69 @@ public enum PublicationComponentActionTrigger
 /// </summary>
 public enum PublicationComponentActionKind
 {
+    /// <summary>
+    /// Selects the none option for <see cref="PublicationComponentActionKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     None,
+    /// <summary>
+    /// Selects the navigate option for <see cref="PublicationComponentActionKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Navigate,
+    /// <summary>
+    /// Selects the next page option for <see cref="PublicationComponentActionKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     NextPage,
+    /// <summary>
+    /// Selects the previous page option for <see cref="PublicationComponentActionKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     PreviousPage,
+    /// <summary>
+    /// Selects the go to page option for <see cref="PublicationComponentActionKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     GoToPage,
+    /// <summary>
+    /// Selects the open URL option for <see cref="PublicationComponentActionKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     OpenUrl,
+    /// <summary>
+    /// Selects the mail to option for <see cref="PublicationComponentActionKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     MailTo,
+    /// <summary>
+    /// Selects the refresh option for <see cref="PublicationComponentActionKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Refresh,
+    /// <summary>
+    /// Selects the show element option for <see cref="PublicationComponentActionKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     ShowElement,
+    /// <summary>
+    /// Selects the hide element option for <see cref="PublicationComponentActionKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     HideElement,
+    /// <summary>
+    /// Selects the toggle element option for <see cref="PublicationComponentActionKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     ToggleElement,
+    /// <summary>
+    /// Selects the submit rest option for <see cref="PublicationComponentActionKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     SubmitRest,
+    /// <summary>
+    /// Selects the set value option for <see cref="PublicationComponentActionKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     SetValue,
+    /// <summary>
+    /// Selects the apply filter option for <see cref="PublicationComponentActionKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     ApplyFilter,
+    /// <summary>
+    /// Selects the clear filter option for <see cref="PublicationComponentActionKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     ClearFilter,
+    /// <summary>
+    /// Selects the custom script option for <see cref="PublicationComponentActionKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     CustomScript
 }
 
@@ -309,10 +633,25 @@ public enum PublicationComponentActionKind
 /// </summary>
 public enum PublicationComponentHttpMethod
 {
+    /// <summary>
+    /// Selects the get option for <see cref="PublicationComponentHttpMethod"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Get,
+    /// <summary>
+    /// Selects the post option for <see cref="PublicationComponentHttpMethod"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Post,
+    /// <summary>
+    /// Selects the put option for <see cref="PublicationComponentHttpMethod"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Put,
+    /// <summary>
+    /// Selects the patch option for <see cref="PublicationComponentHttpMethod"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Patch,
+    /// <summary>
+    /// Selects the delete option for <see cref="PublicationComponentHttpMethod"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Delete
 }
 
@@ -613,7 +952,13 @@ public sealed class PublicationComponentAction
 /// </summary>
 public enum PublicationMenuSourceMode
 {
+    /// <summary>
+    /// Selects the data connection option for <see cref="PublicationMenuSourceMode"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     DataConnection,
+    /// <summary>
+    /// Selects the manual items option for <see cref="PublicationMenuSourceMode"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     ManualItems
 }
 
@@ -622,8 +967,17 @@ public enum PublicationMenuSourceMode
 /// </summary>
 public enum PublicationMenuDestinationKind
 {
+    /// <summary>
+    /// Selects the none option for <see cref="PublicationMenuDestinationKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     None,
+    /// <summary>
+    /// Selects the page option for <see cref="PublicationMenuDestinationKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Page,
+    /// <summary>
+    /// Selects the external URL option for <see cref="PublicationMenuDestinationKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     ExternalUrl
 }
 

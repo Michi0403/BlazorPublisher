@@ -147,9 +147,21 @@ public sealed class PublicationWebHeader
 /// </summary>
 public enum PublicationWebTransportKind
 {
+    /// <summary>
+    /// Selects the monolith API option for <see cref="PublicationWebTransportKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     MonolithApi,
+    /// <summary>
+    /// Selects the rest API option for <see cref="PublicationWebTransportKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     RestApi,
+    /// <summary>
+    /// Selects the webhook option for <see cref="PublicationWebTransportKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Webhook,
+    /// <summary>
+    /// Selects the stream option for <see cref="PublicationWebTransportKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Stream
 }
 
@@ -158,10 +170,25 @@ public enum PublicationWebTransportKind
 /// </summary>
 public enum PublicationWebHttpMethod
 {
+    /// <summary>
+    /// Selects the get option for <see cref="PublicationWebHttpMethod"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Get,
+    /// <summary>
+    /// Selects the post option for <see cref="PublicationWebHttpMethod"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Post,
+    /// <summary>
+    /// Selects the put option for <see cref="PublicationWebHttpMethod"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Put,
+    /// <summary>
+    /// Selects the patch option for <see cref="PublicationWebHttpMethod"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Patch,
+    /// <summary>
+    /// Selects the delete option for <see cref="PublicationWebHttpMethod"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Delete
 }
 
@@ -170,9 +197,24 @@ public enum PublicationWebHttpMethod
 /// </summary>
 public enum PublicationWebResponseFormat
 {
+    /// <summary>
+    /// Selects the auto option for <see cref="PublicationWebResponseFormat"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Auto,
+    /// <summary>
+    /// Selects the JSON option for <see cref="PublicationWebResponseFormat"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Json,
+    /// <summary>
+    /// Selects the delimited text option for <see cref="PublicationWebResponseFormat"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     DelimitedText,
+    /// <summary>
+    /// Selects the XML option for <see cref="PublicationWebResponseFormat"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Xml,
+    /// <summary>
+    /// Selects the text option for <see cref="PublicationWebResponseFormat"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Text
 }

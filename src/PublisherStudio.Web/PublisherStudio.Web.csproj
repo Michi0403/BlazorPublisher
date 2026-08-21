@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
@@ -6,7 +6,7 @@
     <InvariantGlobalization>false</InvariantGlobalization>
     <RootNamespace>PublisherStudio</RootNamespace>
     <AssemblyName>PublisherStudio.Web</AssemblyName>
-    <Version>2.9.3</Version>
+    <Version>2.9.4</Version>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);1591</NoWarn>
     <ApplicationIcon>..\..\assets\PublisherStudio.ico</ApplicationIcon>
@@ -20,7 +20,7 @@
     <SpreadsheetClientAsset>$(MSBuildProjectDirectory)\wwwroot\vendor\devexpress-aspnetcore-spreadsheet\dist\dx-aspnetcore-spreadsheet.js</SpreadsheetClientAsset>
     <DevExtremeRuntimeLicenseAsset>$(MSBuildProjectDirectory)\wwwroot\vendor\devextreme-license.js</DevExtremeRuntimeLicenseAsset>
     <DevExtremeRuntimeLicenseMetadata>$(MSBuildProjectDirectory)\wwwroot\vendor\devextreme-license.meta.json</DevExtremeRuntimeLicenseMetadata>
-    <DevExtremeRuntimeLicenseVersionFile>$(MSBuildProjectDirectory)\wwwroot\vendor\devextreme-license.version</DevExtremeRuntimeLicenseVersionFile>
+    <DevExtremeRuntimeKeyGeneratorVersionFile>$(MSBuildProjectDirectory)\wwwroot\vendor\devextreme-license.version</DevExtremeRuntimeKeyGeneratorVersionFile>
     <DevExtremeClientAssetMetadata>$(MSBuildProjectDirectory)\wwwroot\vendor\devextreme-assets.meta.json</DevExtremeClientAssetMetadata>
   </PropertyGroup>
   <ItemGroup>
@@ -40,6 +40,15 @@
     <PackageReference Include="DevExpress.Blazor.RichEdit.es" Version="$(DevExpressVersion)" />
     <PackageReference Include="DevExpress.Blazor.RichEdit.ja" Version="$(DevExpressVersion)" />
     <PackageReference Include="DevExpress.AspNetCore.Spreadsheet" Version="$(DevExpressVersion)" />
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="10.0.11" />
+    <PackageReference Include="System.CodeDom" Version="10.0.11" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="10.0.11" />
+    <PackageReference Include="System.Drawing.Common" Version="10.0.11" />
+    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.11" />
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="10.0.11" />
+    <PackageReference Include="System.ServiceModel.Http" Version="10.0.652802" />
+    <PackageReference Include="System.ServiceModel.NetTcp" Version="10.0.652802" />
+    <PackageReference Include="System.ServiceModel.Primitives" Version="10.0.652802" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\..\assets\PublisherStudio.ico" Link="PublisherStudio.ico" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
@@ -61,38 +70,24 @@
     Automated licensed build agents may opt in with:
       dotnet build -p:PrepareSpreadsheetAssetsOnBuild=true
   -->
-  <Target Name="PrepareSpreadsheetClientAssets"
-          BeforeTargets="PrepareForBuild"
-          Condition="'$(DesignTimeBuild)' != 'true' and '$(PrepareSpreadsheetAssetsOnBuild)' == 'true' and (!Exists('$(SpreadsheetClientAsset)') or !Exists('$(DevExtremeRuntimeLicenseAsset)') or !Exists('$(DevExtremeRuntimeLicenseMetadata)') or !Exists('$(DevExtremeRuntimeLicenseVersionFile)') or !Exists('$(DevExtremeClientAssetMetadata)'))">
-    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\..\..\Prepare-DevExpressAssets.ps1&quot;"
-          WorkingDirectory="$(MSBuildProjectDirectory)" />
+  <Target Name="PrepareSpreadsheetClientAssets" BeforeTargets="PrepareForBuild" Condition="'$(DesignTimeBuild)' != 'true' and '$(PrepareSpreadsheetAssetsOnBuild)' == 'true' and (!Exists('$(SpreadsheetClientAsset)') or !Exists('$(DevExtremeRuntimeLicenseAsset)') or !Exists('$(DevExtremeRuntimeLicenseMetadata)') or !Exists('$(DevExtremeRuntimeKeyGeneratorVersionFile)') or !Exists('$(DevExtremeClientAssetMetadata)'))">
+    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\..\..\Prepare-DevExpressAssets.ps1&quot;" WorkingDirectory="$(MSBuildProjectDirectory)" />
   </Target>
 
-  <Target Name="SpreadsheetClientAssetBuildNotice"
-          BeforeTargets="PrepareForBuild"
-          Condition="'$(DesignTimeBuild)' != 'true' and '$(PrepareSpreadsheetAssetsOnBuild)' != 'true' and (!Exists('$(SpreadsheetClientAsset)') or !Exists('$(DevExtremeRuntimeLicenseAsset)') or !Exists('$(DevExtremeRuntimeLicenseMetadata)') or !Exists('$(DevExtremeRuntimeLicenseVersionFile)') or !Exists('$(DevExtremeClientAssetMetadata)'))">
+  <Target Name="SpreadsheetClientAssetBuildNotice" BeforeTargets="PrepareForBuild" Condition="'$(DesignTimeBuild)' != 'true' and '$(PrepareSpreadsheetAssetsOnBuild)' != 'true' and (!Exists('$(SpreadsheetClientAsset)') or !Exists('$(DevExtremeRuntimeLicenseAsset)') or !Exists('$(DevExtremeRuntimeLicenseMetadata)') or !Exists('$(DevExtremeRuntimeKeyGeneratorVersionFile)') or !Exists('$(DevExtremeClientAssetMetadata)'))">
     <Warning Text="DevExpress browser assets or the generated public DevExtreme runtime license are not prepared. Run Prepare-DevExpressAssets.cmd once from the solution root on a licensed developer/build machine. The .NET solution may compile without them, but Spreadsheet Studio and standalone HTML export will not be release-ready." />
   </Target>
 
-  <Target Name="ValidateSpreadsheetClientAssetsForPublish"
-          BeforeTargets="ComputeFilesToPublish"
-          Condition="'$(DesignTimeBuild)' != 'true'">
-    <Error Condition="!Exists('$(SpreadsheetClientAsset)')"
-           Text="Spreadsheet Studio browser assets are missing. Run Prepare-DevExpressAssets.cmd from the solution root before publishing." />
-    <Error Condition="!Exists('$(DevExtremeRuntimeLicenseAsset)')"
-           Text="The generated public DevExtreme runtime license is missing. Run Prepare-DevExpressAssets.cmd on the licensed build machine before publishing." />
-    <Error Condition="!Exists('$(DevExtremeRuntimeLicenseMetadata)')"
-           Text="The DevExtreme runtime-license metadata is missing. Run Prepare-DevExpressAssets.cmd again before publishing." />
-    <Error Condition="!Exists('$(DevExtremeRuntimeLicenseVersionFile)')"
-           Text="The DevExtreme runtime-license version marker is missing. Run Prepare-DevExpressAssets.cmd again before publishing." />
-    <Error Condition="!Exists('$(DevExtremeClientAssetMetadata)')"
-           Text="The DevExtreme client-asset metadata is missing. Run Prepare-DevExpressAssets.cmd again before publishing." />
-    <ReadLinesFromFile File="$(DevExtremeRuntimeLicenseVersionFile)"
-                       Condition="Exists('$(DevExtremeRuntimeLicenseVersionFile)')">
-      <Output TaskParameter="Lines" ItemName="DevExtremeRuntimeLicenseVersionLines" />
+  <Target Name="ValidateSpreadsheetClientAssetsForPublish" BeforeTargets="ComputeFilesToPublish" Condition="'$(DesignTimeBuild)' != 'true'">
+    <Error Condition="!Exists('$(SpreadsheetClientAsset)')" Text="Spreadsheet Studio browser assets are missing. Run Prepare-DevExpressAssets.cmd from the solution root before publishing." />
+    <Error Condition="!Exists('$(DevExtremeRuntimeLicenseAsset)')" Text="The generated public DevExtreme runtime license is missing. Run Prepare-DevExpressAssets.cmd on the licensed build machine before publishing." />
+    <Error Condition="!Exists('$(DevExtremeRuntimeLicenseMetadata)')" Text="The DevExtreme runtime-license metadata is missing. Run Prepare-DevExpressAssets.cmd again before publishing." />
+    <Error Condition="!Exists('$(DevExtremeRuntimeKeyGeneratorVersionFile)')" Text="The DevExtreme runtime-key generator version marker is missing. Run Prepare-DevExpressAssets.cmd again before publishing." />
+    <Error Condition="!Exists('$(DevExtremeClientAssetMetadata)')" Text="The DevExtreme client-asset metadata is missing. Run Prepare-DevExpressAssets.cmd again before publishing." />
+    <ReadLinesFromFile File="$(DevExtremeRuntimeKeyGeneratorVersionFile)" Condition="Exists('$(DevExtremeRuntimeKeyGeneratorVersionFile)')">
+      <Output TaskParameter="Lines" ItemName="DevExtremeRuntimeKeyGeneratorVersionLines" />
     </ReadLinesFromFile>
-    <Error Condition="Exists('$(DevExtremeRuntimeLicenseVersionFile)') and '@(DevExtremeRuntimeLicenseVersionLines)' != '$(DevExpressVersion)'"
-           Text="The generated DevExtreme runtime license targets version '@(DevExtremeRuntimeLicenseVersionLines)', but this project uses $(DevExpressVersion). Run Prepare-DevExpressAssets.cmd again." />
+    <Error Condition="Exists('$(DevExtremeRuntimeKeyGeneratorVersionFile)') and '@(DevExtremeRuntimeKeyGeneratorVersionLines)' != '$(DevExpressVersion)'" Text="The DevExtreme runtime key was generated with devextreme version '@(DevExtremeRuntimeKeyGeneratorVersionLines)', but this project uses $(DevExpressVersion). Run Prepare-DevExpressAssets.cmd again." />
   </Target>
   <ItemGroup>
     <PublisherStudioConfigurationFile Include="appsettings*.json;Configuration\**\*;Localization\**\*.json" />
@@ -102,26 +97,18 @@
     <PublisherStudioDocumentationPublishFile Include="wwwroot\help-docs\index.html;wwwroot\help-docs\api\index.html;wwwroot\help-docs\documentation-status.json;wwwroot\help-docs\public\docfx.min.css;wwwroot\help-docs\public\docfx.min.js;wwwroot\help-docs\styles\publisherstudio-kawaii.css;wwwroot\help-docs\styles\publisherstudio-kawaii.js" />
   </ItemGroup>
 
-  <Target Name="ValidatePublisherStudioDocumentationFilesForPublish"
-          AfterTargets="Publish"
-          Condition="'$(DesignTimeBuild)' != 'true' and '$(PublishDir)' != ''">
+  <Target Name="ValidatePublisherStudioDocumentationFilesForPublish" AfterTargets="Publish" Condition="'$(DesignTimeBuild)' != 'true' and '$(PublishDir)' != ''">
     <ItemGroup>
-      <MissingPublisherStudioDocumentationPublishFile Include="@(PublisherStudioDocumentationPublishFile)"
-                                                       Condition="!Exists('$(PublishDir)%(Identity)')" />
+      <MissingPublisherStudioDocumentationPublishFile Include="@(PublisherStudioDocumentationPublishFile)" Condition="!Exists('$(PublishDir)%(Identity)')" />
     </ItemGroup>
-    <Error Condition="'@(MissingPublisherStudioDocumentationPublishFile)' != ''"
-           Text="PublisherStudio publish output is missing installed HTML documentation files: @(MissingPublisherStudioDocumentationPublishFile, ', ')" />
+    <Error Condition="'@(MissingPublisherStudioDocumentationPublishFile)' != ''" Text="PublisherStudio publish output is missing installed HTML documentation files: @(MissingPublisherStudioDocumentationPublishFile, ', ')" />
   </Target>
 
-  <Target Name="ValidatePublisherConfigurationFilesForPublish"
-          AfterTargets="Publish"
-          Condition="'$(DesignTimeBuild)' != 'true' and '$(PublishDir)' != ''">
+  <Target Name="ValidatePublisherConfigurationFilesForPublish" AfterTargets="Publish" Condition="'$(DesignTimeBuild)' != 'true' and '$(PublishDir)' != ''">
     <ItemGroup>
-      <MissingPublisherStudioConfigurationFile Include="@(PublisherStudioConfigurationFile)"
-                                               Condition="!Exists('$(PublishDir)%(Identity)')" />
+      <MissingPublisherStudioConfigurationFile Include="@(PublisherStudioConfigurationFile)" Condition="!Exists('$(PublishDir)%(Identity)')" />
     </ItemGroup>
-    <Error Condition="'@(MissingPublisherStudioConfigurationFile)' != ''"
-           Text="PublisherStudio publish output is missing configuration files: @(MissingPublisherStudioConfigurationFile, ', ')" />
+    <Error Condition="'@(MissingPublisherStudioConfigurationFile)' != ''" Text="PublisherStudio publish output is missing configuration files: @(MissingPublisherStudioConfigurationFile, ', ')" />
   </Target>
 
 </Project>

@@ -16,7 +16,7 @@
 - Targeted `node_modules` DevExpress package folders are cleared before `npm ci`, preventing npm tar extraction from reusing a partially locked package tree.
 - The Node preparation helper verifies restored and copied package versions and records SHA-256/size metadata for prepared runtime assets.
 - Standalone export no longer infers a DevExtreme version by regex-searching minified `dx.all.js`. It compares the generated license version marker, prepared asset manifest and copied `devextreme-dist/package.json` instead.
-- Export fetches prepared runtime assets with `cache: no-store`, and the running application uses explicit `25.2.9` cache identifiers for DevExtreme runtime/CSS/maps/license. This prevents a browser session from retaining a previous 25.2.9 payload after correct files have been regenerated.
+- Export fetches prepared runtime assets with `cache: no-store`, and the running application uses explicit `25.2.9` cache identifiers for DevExtreme runtime/CSS/maps/license. This prevents a browser session from retaining a previous 25.2.8 payload after correct files have been regenerated.
 - `THIRD-PARTY-NOTICES.md` is aligned to DevExpress/DevExtreme 25.2.9.
 - Generated commercial browser payloads/private licensing material are not included in this source archive; `Prepare-DevExpressAssets.cmd` still prepares them on the licensed build machine.
 

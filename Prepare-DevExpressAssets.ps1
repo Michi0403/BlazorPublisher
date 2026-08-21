@@ -6,10 +6,15 @@ $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
 $webDirectory = Join-Path $root "src\PublisherStudio.Web"
 $prepareModule = Join-Path $webDirectory "tools\prepare-devexpress-assets.mjs"
+$licenseResolverModule = Join-Path $webDirectory "tools\resolve-devextreme-package-root.mjs"
 $packageJsonPath = Join-Path $webDirectory "package.json"
 $vendorDirectory = Join-Path $webDirectory "wwwroot\vendor"
 $runtimeLicensePath = Join-Path $vendorDirectory "devextreme-license.js"
-$runtimeLicenseTempPath = Join-Path $vendorDirectory "devextreme-license.generated.js"
+$runtimeLicenseMetadataPath = Join-Path $vendorDirectory "devextreme-license.meta.json"
+$runtimeLicenseVersionPath = Join-Path $vendorDirectory "devextreme-license.version"
+$licenseTempDirectory = Join-Path ([System.IO.Path]::GetTempPath()) ("PublisherStudio-DevExtreme-" + $PID + "-" + [Guid]::NewGuid().ToString("N"))
+$runtimeLicenseGeneratedPath = Join-Path $licenseTempDirectory "devextreme-license.js"
+$previousDevExtremeSourceRoot = $env:PUBLISHERSTUDIO_DEVEXTREME_SOURCE_ROOT
 
 
 function Remove-GeneratedPathWithRetry {
@@ -156,9 +161,8 @@ $generatedVendorPaths = @(
     (Join-Path $vendorDirectory "devexpress-aspnetcore-spreadsheet"),
     (Join-Path $vendorDirectory "jquery"),
     (Join-Path $vendorDirectory "devextreme-assets.meta.json"),
-    (Join-Path $vendorDirectory "devextreme-license.meta.json"),
-    (Join-Path $vendorDirectory "devextreme-license.version"),
-    $runtimeLicenseTempPath
+    $runtimeLicenseMetadataPath,
+    $runtimeLicenseVersionPath
 )
 foreach ($generatedPath in $generatedVendorPaths) {
     Remove-GeneratedPathWithRetry -Path $generatedPath
@@ -192,17 +196,40 @@ try {
     }
 
     New-Item -ItemType Directory -Path $vendorDirectory -Force | Out-Null
-    Remove-Item $runtimeLicenseTempPath -Force -ErrorAction SilentlyContinue
+    New-Item -ItemType Directory -Path $licenseTempDirectory -Force | Out-Null
 
-    Write-Host "Generating the public DevExtreme runtime license..." -ForegroundColor Cyan
+    Write-Host "Resolving the exact DevExtreme package used for browser assets and license generation..." -ForegroundColor Cyan
+    $resolverOutput = @(& $npx --package "devextreme@$devExtremeVersion" --yes node $licenseResolverModule $devExtremeVersion)
+    if ($LASTEXITCODE -ne 0) {
+        throw "Could not resolve the exact devextreme@$devExtremeVersion package used by npx."
+    }
+    $devExtremeSourceRoot = $resolverOutput | Where-Object { -not [string]::IsNullOrWhiteSpace($_) -and (Test-Path -LiteralPath $_) } | Select-Object -Last 1
+    if ([string]::IsNullOrWhiteSpace($devExtremeSourceRoot)) {
+        throw "npx did not expose a usable devextreme@$devExtremeVersion package root."
+    }
+
+    $resolvedPackageJsonPath = Join-Path $devExtremeSourceRoot "package.json"
+    $resolvedPackageJson = Get-Content $resolvedPackageJsonPath -Raw | ConvertFrom-Json
+    if ($resolvedPackageJson.version -ne $devExtremeVersion) {
+        throw "Resolved DevExtreme package is $($resolvedPackageJson.version), but PublisherStudio requires $devExtremeVersion."
+    }
+    $licenseGeneratorPath = Join-Path $devExtremeSourceRoot "bin\devextreme-license.js"
+    if (-not (Test-Path -LiteralPath $licenseGeneratorPath)) {
+        throw "The exact devextreme@$devExtremeVersion package does not contain bin\devextreme-license.js."
+    }
+
+    # One exact devextreme package is authoritative for both the generated runtime key
+    # and the browser runtime overlay copied by prepare-devexpress-assets.mjs.
+    $env:PUBLISHERSTUDIO_DEVEXTREME_SOURCE_ROOT = $devExtremeSourceRoot
+
+    Write-Host "Generating the public DevExtreme runtime license from devextreme@$devExtremeVersion..." -ForegroundColor Cyan
     Write-Host "The private DevExpress license remains on this build machine and is never copied into the application." -ForegroundColor DarkGray
-    & $npx --package "devextreme@$devExtremeVersion" --yes devextreme-license `
+    & $node $licenseGeneratorPath `
         --non-modular `
-        --out $runtimeLicenseTempPath `
+        --out $runtimeLicenseGeneratedPath `
         --force `
         --no-gitignore
     if ($LASTEXITCODE -ne 0) {
-        Remove-Item $runtimeLicenseTempPath -Force -ErrorAction SilentlyContinue
         throw @"
 DevExtreme runtime-license generation failed with exit code $LASTEXITCODE.
 
@@ -212,25 +239,50 @@ An existing generated runtime key was left untouched.
 "@
     }
 
-    if (-not (Test-Path $runtimeLicenseTempPath)) {
-        throw "The DevExtreme license generator completed without creating '$runtimeLicenseTempPath'."
+    if (-not (Test-Path -LiteralPath $runtimeLicenseGeneratedPath)) {
+        throw "The DevExtreme license generator completed without creating '$runtimeLicenseGeneratedPath'."
     }
-    $generatedLicenseSource = Get-Content $runtimeLicenseTempPath -Raw
+    $generatedLicenseSource = Get-Content $runtimeLicenseGeneratedPath -Raw
     if ($generatedLicenseSource -notmatch 'DevExpress\s*\.\s*config\s*\(' -or
-        $generatedLicenseSource -notmatch 'licenseKey\s*:') {
-        Remove-Item $runtimeLicenseTempPath -Force -ErrorAction SilentlyContinue
-        throw "The DevExtreme license generator produced an invalid non-modular runtime file."
+        $generatedLicenseSource -notmatch 'licenseKey\s*:' -or
+        $generatedLicenseSource -notmatch 'licenseKey\s*:\s*(["''`]).+?\1') {
+        throw "The DevExtreme license generator produced an invalid or empty non-modular runtime file."
     }
-    Remove-GeneratedPathWithRetry -Path $runtimeLicensePath
-    Move-Item $runtimeLicenseTempPath $runtimeLicensePath -Force
 
     Write-Host "Copying DevExpress browser packages into wwwroot/vendor..." -ForegroundColor Cyan
     & $node $prepareModule
     if ($LASTEXITCODE -ne 0) {
         throw "DevExpress client-asset preparation failed with exit code $LASTEXITCODE."
     }
+
+    # Only publish the newly generated key after the browser asset preparation succeeded.
+    # The Node asset copier never guesses or owns this path.
+    Remove-GeneratedPathWithRetry -Path $runtimeLicensePath
+    Copy-Item -LiteralPath $runtimeLicenseGeneratedPath -Destination $runtimeLicensePath -Force
+
+    $licenseHash = (Get-FileHash -LiteralPath $runtimeLicensePath -Algorithm SHA256).Hash.ToLowerInvariant()
+    $licenseMetadata = [ordered]@{
+        schemaVersion = 2
+        generatorPackage = "devextreme"
+        generatorPackageVersion = $devExtremeVersion
+        generatedAtUtc = [DateTime]::UtcNow.ToString("o")
+        sha256 = $licenseHash
+    }
+    $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+    [System.IO.File]::WriteAllText(
+        $runtimeLicenseMetadataPath,
+        (($licenseMetadata | ConvertTo-Json -Depth 4) + [Environment]::NewLine),
+        $utf8NoBom)
+    [System.IO.File]::WriteAllText($runtimeLicenseVersionPath, ($devExtremeVersion + [Environment]::NewLine), $utf8NoBom)
 }
 finally {
+    if ($null -eq $previousDevExtremeSourceRoot) {
+        Remove-Item Env:PUBLISHERSTUDIO_DEVEXTREME_SOURCE_ROOT -ErrorAction SilentlyContinue
+    }
+    else {
+        $env:PUBLISHERSTUDIO_DEVEXTREME_SOURCE_ROOT = $previousDevExtremeSourceRoot
+    }
+    Remove-Item -LiteralPath $licenseTempDirectory -Recurse -Force -ErrorAction SilentlyContinue
     Pop-Location
 }
 
@@ -250,22 +302,43 @@ if ($missingAssets.Count -gt 0) {
     throw "DevExpress client assets are incomplete. Missing: $($missingAssets -join ', ')"
 }
 
-$metadataPath = Join-Path $vendorDirectory "devextreme-license.meta.json"
-$metadata = Get-Content $metadataPath -Raw | ConvertFrom-Json
-$versionMarkerPath = Join-Path $vendorDirectory "devextreme-license.version"
-$versionMarker = (Get-Content $versionMarkerPath -Raw).Trim()
-if ($metadata.devExtremeVersion -ne $devExtremeVersion -or $versionMarker -ne $devExtremeVersion) {
-    throw "The generated runtime-license metadata does not match DevExtreme $devExtremeVersion."
+$metadata = Get-Content $runtimeLicenseMetadataPath -Raw | ConvertFrom-Json
+$versionMarker = (Get-Content $runtimeLicenseVersionPath -Raw).Trim()
+if ($metadata.schemaVersion -ne 2 -or
+    $metadata.generatorPackage -ne "devextreme" -or
+    $metadata.generatorPackageVersion -ne $devExtremeVersion -or
+    $versionMarker -ne $devExtremeVersion) {
+    throw "The generated runtime-key metadata does not match the exact devextreme@$devExtremeVersion generator package."
+}
+$actualLicenseHash = (Get-FileHash -LiteralPath $runtimeLicensePath -Algorithm SHA256).Hash.ToLowerInvariant()
+if ($metadata.sha256 -ne $actualLicenseHash) {
+    throw "The generated DevExtreme runtime-key hash does not match its preparation metadata."
 }
 
 $assetMetadataPath = Join-Path $vendorDirectory "devextreme-assets.meta.json"
 $assetMetadata = Get-Content $assetMetadataPath -Raw | ConvertFrom-Json
-if (($assetMetadata.schemaVersion -ne 2 -and $assetMetadata.schemaVersion -ne 1) -or $assetMetadata.devExtremeVersion -ne $devExtremeVersion) {
+if (($assetMetadata.schemaVersion -lt 1 -or $assetMetadata.schemaVersion -gt 4) -or $assetMetadata.devExtremeVersion -ne $devExtremeVersion) {
     throw "The DevExtreme client-asset metadata does not match DevExtreme $devExtremeVersion."
 }
 
 if ($assetMetadata.schemaVersion -ge 2 -and $assetMetadata.restoredPackageVersion -ne $devExtremeVersion) {
-    throw "The restored DevExtreme package version recorded in client-asset metadata does not match DevExtreme $devExtremeVersion."
+    throw "The restored DevExtreme lock version recorded in client-asset metadata does not match DevExtreme $devExtremeVersion."
+}
+
+if ($assetMetadata.schemaVersion -ge 3) {
+    if ($assetMetadata.lockedPackageVersion -ne $devExtremeVersion) {
+        throw "The DevExtreme package-lock version recorded in client-asset metadata does not match DevExtreme $devExtremeVersion."
+    }
+    if ([string]::IsNullOrWhiteSpace([string]$assetMetadata.lockedPackageIntegrity)) {
+        throw "The DevExtreme client-asset metadata is missing the npm lock integrity hash."
+    }
+}
+
+if ($assetMetadata.schemaVersion -ge 4) {
+    if ($assetMetadata.authoritativeRuntimePackage -ne "devextreme" -or
+        $assetMetadata.authoritativeRuntimePackageVersion -ne $devExtremeVersion) {
+        throw "The prepared browser runtime was not sourced from the exact devextreme@$devExtremeVersion package used by the license generator."
+    }
 }
 
 $copiedPackageJsonPath = Join-Path $vendorDirectory "devextreme-dist\package.json"
@@ -274,7 +347,7 @@ if (-not (Test-Path -LiteralPath $copiedPackageJsonPath)) {
 }
 $copiedPackageJson = Get-Content $copiedPackageJsonPath -Raw | ConvertFrom-Json
 if ($copiedPackageJson.version -ne $devExtremeVersion) {
-    throw "The copied DevExtreme browser package is version $($copiedPackageJson.version), but PublisherStudio requires $devExtremeVersion."
+    Write-Warning "The copied devextreme-dist package.json reports $($copiedPackageJson.version), while the npm lock and prepared asset manifest target $devExtremeVersion. The lock integrity and asset SHA-256 values remain authoritative."
 }
 
 $expectedAssetEntries = @(

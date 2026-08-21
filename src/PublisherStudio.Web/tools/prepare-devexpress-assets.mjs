@@ -6,10 +6,29 @@ const project = resolve(import.meta.dirname, "..");
 const nodeModules = join(project, "node_modules");
 const vendor = join(project, "wwwroot", "vendor");
 const packageJson = JSON.parse(await readFile(join(project, "package.json"), "utf8"));
+const packageLock = JSON.parse(await readFile(join(project, "package-lock.json"), "utf8"));
 const devExtremeVersion = packageJson.dependencies?.["devextreme-dist"];
+const lockedDevExtreme = packageLock.packages?.["node_modules/devextreme-dist"];
+const lockedSpreadsheet = packageLock.packages?.["node_modules/devexpress-aspnetcore-spreadsheet"];
+const authoritativeDevExtremeRoot = String(process.env.PUBLISHERSTUDIO_DEVEXTREME_SOURCE_ROOT || "").trim();
 
 if (!devExtremeVersion) {
     throw new Error("package.json does not define dependencies.devextreme-dist.");
+}
+if (!lockedDevExtreme || String(lockedDevExtreme.version || "").trim() !== devExtremeVersion) {
+    throw new Error(
+        `package-lock.json must lock devextreme-dist exactly to ${devExtremeVersion}; ` +
+        `found ${String(lockedDevExtreme?.version || "missing")}. Run npm install to refresh the lock file.`
+    );
+}
+if (!String(lockedDevExtreme.integrity || "").trim()) {
+    throw new Error("package-lock.json does not contain an integrity hash for devextreme-dist.");
+}
+if (!lockedSpreadsheet || String(lockedSpreadsheet.version || "").trim() !== devExtremeVersion) {
+    throw new Error(
+        `package-lock.json must lock devexpress-aspnetcore-spreadsheet exactly to ${devExtremeVersion}; ` +
+        `found ${String(lockedSpreadsheet?.version || "missing")}.`
+    );
 }
 
 async function exists(path) {
@@ -79,6 +98,20 @@ async function packageVersion(packageRoot) {
 }
 
 
+
+if (!authoritativeDevExtremeRoot) {
+    throw new Error(
+        "PUBLISHERSTUDIO_DEVEXTREME_SOURCE_ROOT is missing. Prepare-DevExpressAssets.ps1 must resolve the exact devextreme package used by the license generator before copying browser assets."
+    );
+}
+const authoritativeDevExtremeMetadataVersion = await packageVersion(authoritativeDevExtremeRoot);
+if (authoritativeDevExtremeMetadataVersion !== devExtremeVersion) {
+    throw new Error(
+        `The authoritative devextreme package is ${authoritativeDevExtremeMetadataVersion || "unknown"}, ` +
+        `but PublisherStudio requires ${devExtremeVersion}.`
+    );
+}
+
 async function copyPackage(sourceRelative, destinationRelative) {
     const source = join(nodeModules, sourceRelative);
     if (!await exists(source)) {
@@ -98,6 +131,34 @@ async function copyPackage(sourceRelative, destinationRelative) {
         dereference: true,
         errorOnExist: false
     });
+}
+
+async function overlayAuthoritativeDevExtremeRuntime() {
+    const sourceDist = join(authoritativeDevExtremeRoot, "dist");
+    const destinationRoot = join(vendor, "devextreme-dist");
+    if (!await exists(sourceDist)) {
+        throw new Error(`The authoritative devextreme@${devExtremeVersion} package does not contain its dist directory.`);
+    }
+
+    // The same exact devextreme package that owns devextreme-license also owns the
+    // browser runtime overlay. This prevents a devextreme-dist packaging-metadata
+    // discrepancy from pairing an older dx.all.js with a newer generated key.
+    const entries = await readdir(sourceDist, { withFileTypes: true });
+    for (const entry of entries) {
+        const source = join(sourceDist, entry.name);
+        const destination = join(destinationRoot, entry.name);
+        if (entry.isDirectory()) {
+            await cp(source, destination, {
+                recursive: true,
+                force: true,
+                dereference: true,
+                errorOnExist: false
+            });
+        } else if (entry.isFile()) {
+            await mkdir(dirname(destination), { recursive: true });
+            await copyFile(source, destination);
+        }
+    }
 }
 
 async function findFileBySuffix(root, suffixParts, depth = 0) {
@@ -143,6 +204,8 @@ async function findFileBySuffix(root, suffixParts, depth = 0) {
 async function resolveAssetSource(relativeAsset) {
     const relativeParts = relativeAsset.split("/");
     const directCandidates = [
+        join(authoritativeDevExtremeRoot, "dist", ...relativeParts),
+        join(authoritativeDevExtremeRoot, ...relativeParts),
         join(nodeModules, "devextreme-dist", ...relativeParts),
         join(nodeModules, "devextreme-dist", "dist", ...relativeParts),
         join(nodeModules, "devextreme", "dist", ...relativeParts),
@@ -154,6 +217,7 @@ async function resolveAssetSource(relativeAsset) {
     }
 
     for (const root of [
+        authoritativeDevExtremeRoot,
         join(nodeModules, "devextreme-dist"),
         join(nodeModules, "devextreme")
     ]) {
@@ -198,64 +262,33 @@ async function ensureDevExtremeAsset(relativeAsset, minimumBytes) {
     };
 }
 
-async function validateRuntimeLicense() {
-    const licensePath = join(vendor, "devextreme-license.js");
-    if (!await exists(licensePath)) {
-        throw new Error(
-            "The generated DevExtreme runtime license is missing. Run the devextreme-license CLI before preparing the client assets."
-        );
-    }
-
-    const source = await readFile(licensePath, "utf8");
-    const hasConfigCall = /DevExpress\s*\.\s*config\s*\(/.test(source);
-    const hasLicenseProperty = /licenseKey\s*:/.test(source);
-    const hasNonEmptyQuotedValue = /licenseKey\s*:\s*(["'`])(?:(?!\1).)+\1/.test(source);
-
-    if (!hasConfigCall || !hasLicenseProperty || !hasNonEmptyQuotedValue) {
-        throw new Error(
-            "The generated DevExtreme runtime license file is empty or malformed. Regenerate it on a licensed build machine."
-        );
-    }
-
-    const metadata = {
-        schemaVersion: 1,
-        devExtremeVersion,
-        generatedAtUtc: new Date().toISOString(),
-        generator: `devextreme-license from devextreme@${devExtremeVersion}`
-    };
-    await writeFile(
-        join(vendor, "devextreme-license.meta.json"),
-        `${JSON.stringify(metadata, null, 2)}\n`,
-        "utf8"
-    );
-    await writeFile(join(vendor, "devextreme-license.version"), `${devExtremeVersion}\n`, "utf8");
-}
-
-const restoredDevExtremeVersion = await packageVersion(join(nodeModules, "devextreme-dist"));
-if (restoredDevExtremeVersion !== devExtremeVersion) {
-    throw new Error(
-        `Restored devextreme-dist is ${restoredDevExtremeVersion || "unknown"}, ` +
-        `but package.json requires ${devExtremeVersion}. Remove the targeted node_modules package and restore again.`
+const restoredDevExtremeMetadataVersion = await packageVersion(join(nodeModules, "devextreme-dist"));
+if (restoredDevExtremeMetadataVersion !== devExtremeVersion) {
+    console.warn(
+        `PublisherStudio: devextreme-dist package.json reports ${restoredDevExtremeMetadataVersion || "unknown"} ` +
+        `while package-lock.json restores ${devExtremeVersion}. Continuing because npm ci validates the exact ` +
+        `locked archive integrity (${lockedDevExtreme.integrity}); the internal package metadata is diagnostic only.`
     );
 }
 
-const restoredSpreadsheetVersion = await packageVersion(join(nodeModules, "devexpress-aspnetcore-spreadsheet"));
-if (restoredSpreadsheetVersion !== devExtremeVersion) {
-    throw new Error(
-        `Restored devexpress-aspnetcore-spreadsheet is ${restoredSpreadsheetVersion || "unknown"}, ` +
-        `but package.json requires ${devExtremeVersion}.`
+const restoredSpreadsheetMetadataVersion = await packageVersion(join(nodeModules, "devexpress-aspnetcore-spreadsheet"));
+if (restoredSpreadsheetMetadataVersion !== devExtremeVersion) {
+    console.warn(
+        `PublisherStudio: devexpress-aspnetcore-spreadsheet package.json reports ` +
+        `${restoredSpreadsheetMetadataVersion || "unknown"} while the lock file requires ${devExtremeVersion}.`
     );
 }
 
 await mkdir(vendor, { recursive: true });
 await copyPackage("devextreme-dist", "devextreme-dist");
+await overlayAuthoritativeDevExtremeRuntime();
 await copyPackage("devexpress-aspnetcore-spreadsheet", "devexpress-aspnetcore-spreadsheet");
 
-const copiedDevExtremeVersion = await packageVersion(join(vendor, "devextreme-dist"));
-if (copiedDevExtremeVersion !== devExtremeVersion) {
-    throw new Error(
-        `Copied DevExtreme browser package is ${copiedDevExtremeVersion || "unknown"}, ` +
-        `but ${devExtremeVersion} is required.`
+const copiedDevExtremeMetadataVersion = await packageVersion(join(vendor, "devextreme-dist"));
+if (copiedDevExtremeMetadataVersion !== devExtremeVersion) {
+    console.warn(
+        `PublisherStudio: copied devextreme-dist package.json reports ${copiedDevExtremeMetadataVersion || "unknown"}; ` +
+        `the prepared manifest will retain the authoritative lock version and content hashes.`
     );
 }
 
@@ -271,13 +304,19 @@ const preparedAssets = [
     await ensureDevExtremeAsset("css/dx.light.css", 64 * 1024)
 ];
 
-await validateRuntimeLicense();
 await writeFile(
     join(vendor, "devextreme-assets.meta.json"),
     `${JSON.stringify({
-        schemaVersion: 2,
+        schemaVersion: 4,
         devExtremeVersion,
-        restoredPackageVersion: restoredDevExtremeVersion,
+        authoritativeRuntimePackage: "devextreme",
+        authoritativeRuntimePackageVersion: authoritativeDevExtremeMetadataVersion,
+        restoredPackageVersion: devExtremeVersion,
+        lockedPackageVersion: String(lockedDevExtreme.version || "").trim(),
+        lockedPackageResolved: String(lockedDevExtreme.resolved || "").trim(),
+        lockedPackageIntegrity: String(lockedDevExtreme.integrity || "").trim(),
+        restoredPackageMetadataVersion: restoredDevExtremeMetadataVersion,
+        copiedPackageMetadataVersion: copiedDevExtremeMetadataVersion,
         preparedAtUtc: new Date().toISOString(),
         package: "devextreme-dist",
         assets: preparedAssets

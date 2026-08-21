@@ -97,6 +97,7 @@ public static class PublisherStudioServiceCollectionExtensions
         AddSingleton<WordArtPathGeometry, WordArtPathGeometry>(services);
         AddSingleton<ConnectorGeometry, ConnectorGeometry>(services);
         AddSingleton<PublicationAnimationData, PublicationAnimationData>(services);
+        AddSingleton<PublicationBehaviorService, PublicationBehaviorService>(services);
         AddSingleton<PublicationElementTraversal, PublicationElementTraversal>(services);
         AddSingleton<PublicationMediaData, PublicationMediaData>(services);
         AddSingleton<RichTextDocumentFactory, RichTextDocumentFactory>(services);

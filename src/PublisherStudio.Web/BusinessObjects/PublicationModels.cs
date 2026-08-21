@@ -652,6 +652,11 @@ public abstract class PublicationElement
     /// <value>The interaction value exposed by <see cref="PublicationElement"/>.</value>
     public PublicationInteraction Interaction { get; set; } = new();
     /// <summary>
+    /// Gets or sets the declarative behaviors executed by the publication object runtime.
+    /// </summary>
+    /// <value>The behavior rules persisted with this publication element.</value>
+    public List<PublicationBehavior> Behaviors { get; set; } = [];
+    /// <summary>
     /// Gets or sets the connector ports collection maintained or exposed by this publication element instance for downstream processing.
     /// </summary>
     /// <value>The connector ports value exposed by <see cref="PublicationElement"/>.</value>

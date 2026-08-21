@@ -1,4 +1,4 @@
-param(
+﻿param(
     [switch]$SkipPackageRestore
 )
 
@@ -10,6 +10,59 @@ $packageJsonPath = Join-Path $webDirectory "package.json"
 $vendorDirectory = Join-Path $webDirectory "wwwroot\vendor"
 $runtimeLicensePath = Join-Path $vendorDirectory "devextreme-license.js"
 $runtimeLicenseTempPath = Join-Path $vendorDirectory "devextreme-license.generated.js"
+
+
+function Remove-GeneratedPathWithRetry {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [int]$Attempts = 8
+    )
+
+    if (-not (Test-Path -LiteralPath $Path)) {
+        return
+    }
+
+    $lastError = $null
+    for ($attempt = 1; $attempt -le $Attempts; $attempt++) {
+        try {
+            Get-ChildItem -LiteralPath $Path -Force -Recurse -ErrorAction SilentlyContinue | ForEach-Object {
+                try { $_.IsReadOnly = $false } catch { }
+            }
+            Remove-Item -LiteralPath $Path -Recurse -Force -ErrorAction Stop
+            if (-not (Test-Path -LiteralPath $Path)) {
+                return
+            }
+        }
+        catch {
+            $lastError = $_.Exception
+        }
+
+        Start-Sleep -Milliseconds (150 * $attempt)
+    }
+
+    if (Test-Path -LiteralPath $Path) {
+        $parent = Split-Path -Parent $Path
+        $leaf = Split-Path -Leaf $Path
+        $stale = Join-Path $parent ($leaf + ".stale-" + [DateTime]::UtcNow.ToString("yyyyMMddHHmmssfff") + "-" + $PID)
+        try {
+            Rename-Item -LiteralPath $Path -NewName (Split-Path -Leaf $stale) -Force -ErrorAction Stop
+            try {
+                Remove-Item -LiteralPath $stale -Recurse -Force -ErrorAction SilentlyContinue
+            }
+            catch {
+                # The renamed directory no longer participates in the live vendor path.
+            }
+            return
+        }
+        catch {
+            $lastError = $_.Exception
+        }
+    }
+
+    $message = if ($null -ne $lastError) { $lastError.Message } else { "unknown Windows file-system error" }
+    throw "Could not clear generated browser asset path '$Path'. Close PublisherStudio/browser/file-indexer handles that are locking the generated vendor folder, then retry. Last error: $message"
+}
+
 
 function Resolve-Executable {
     param(
@@ -97,6 +150,29 @@ Write-Host "npm: $npm" -ForegroundColor DarkGray
 Write-Host "npx: $npx" -ForegroundColor DarkGray
 Write-Host "DevExtreme: $devExtremeVersion" -ForegroundColor DarkGray
 
+Write-Host "Clearing generated DevExpress browser asset folders before preparation..." -ForegroundColor Cyan
+$generatedVendorPaths = @(
+    (Join-Path $vendorDirectory "devextreme-dist"),
+    (Join-Path $vendorDirectory "devexpress-aspnetcore-spreadsheet"),
+    (Join-Path $vendorDirectory "jquery"),
+    (Join-Path $vendorDirectory "devextreme-assets.meta.json"),
+    (Join-Path $vendorDirectory "devextreme-license.meta.json"),
+    (Join-Path $vendorDirectory "devextreme-license.version"),
+    $runtimeLicenseTempPath
+)
+foreach ($generatedPath in $generatedVendorPaths) {
+    Remove-GeneratedPathWithRetry -Path $generatedPath
+}
+
+if (-not $SkipPackageRestore) {
+    # Clear only the generated package folders involved in this preparation.
+    # This also avoids npm tar extraction reusing a stale, partially locked package tree.
+    $nodeModulesDirectory = Join-Path $webDirectory "node_modules"
+    foreach ($packageName in @("devextreme-dist", "devexpress-aspnetcore-spreadsheet", "devextreme")) {
+        Remove-GeneratedPathWithRetry -Path (Join-Path $nodeModulesDirectory $packageName)
+    }
+}
+
 Push-Location $webDirectory
 try {
     if (-not $SkipPackageRestore) {
@@ -145,6 +221,7 @@ An existing generated runtime key was left untouched.
         Remove-Item $runtimeLicenseTempPath -Force -ErrorAction SilentlyContinue
         throw "The DevExtreme license generator produced an invalid non-modular runtime file."
     }
+    Remove-GeneratedPathWithRetry -Path $runtimeLicensePath
     Move-Item $runtimeLicenseTempPath $runtimeLicensePath -Force
 
     Write-Host "Copying DevExpress browser packages into wwwroot/vendor..." -ForegroundColor Cyan
@@ -183,8 +260,21 @@ if ($metadata.devExtremeVersion -ne $devExtremeVersion -or $versionMarker -ne $d
 
 $assetMetadataPath = Join-Path $vendorDirectory "devextreme-assets.meta.json"
 $assetMetadata = Get-Content $assetMetadataPath -Raw | ConvertFrom-Json
-if ($assetMetadata.schemaVersion -ne 1 -or $assetMetadata.devExtremeVersion -ne $devExtremeVersion) {
+if (($assetMetadata.schemaVersion -ne 2 -and $assetMetadata.schemaVersion -ne 1) -or $assetMetadata.devExtremeVersion -ne $devExtremeVersion) {
     throw "The DevExtreme client-asset metadata does not match DevExtreme $devExtremeVersion."
+}
+
+if ($assetMetadata.schemaVersion -ge 2 -and $assetMetadata.restoredPackageVersion -ne $devExtremeVersion) {
+    throw "The restored DevExtreme package version recorded in client-asset metadata does not match DevExtreme $devExtremeVersion."
+}
+
+$copiedPackageJsonPath = Join-Path $vendorDirectory "devextreme-dist\package.json"
+if (-not (Test-Path -LiteralPath $copiedPackageJsonPath)) {
+    throw "The copied DevExtreme package metadata is missing: $copiedPackageJsonPath"
+}
+$copiedPackageJson = Get-Content $copiedPackageJsonPath -Raw | ConvertFrom-Json
+if ($copiedPackageJson.version -ne $devExtremeVersion) {
+    throw "The copied DevExtreme browser package is version $($copiedPackageJson.version), but PublisherStudio requires $devExtremeVersion."
 }
 
 $expectedAssetEntries = @(

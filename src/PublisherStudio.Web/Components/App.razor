@@ -11,39 +11,39 @@
     @DxResourceManager.RegisterTheme(Themes.OfficeWhite)
     <link href="_content/DevExpress.Blazor.RichEdit/dx-blazor-richedit.css" rel="stylesheet" />
     <script src="vendor/jquery/jquery.min.js"></script>
-    <script src="vendor/devextreme-dist/js/dx.all.js"></script>
+    <script src="vendor/devextreme-dist/js/dx.all.js?v=25.2.9"></script>
     @DxResourceManager.RegisterScripts((config) => {
         config.Unregister(CommonResources.DevExtremeJS);
     })
-    <link rel="stylesheet" href="vendor/devextreme-dist/css/dx.light.css" />
-    <link rel="stylesheet" href="css/site.css?v=20260818-290" />
+    <link rel="stylesheet" href="vendor/devextreme-dist/css/dx.light.css?v=25.2.9" />
+    <link rel="stylesheet" href="css/site.css?v=2.9.3" />
     <link rel="stylesheet" href="PublisherStudio.Web.styles.css" />
     <HeadOutlet />
 </head>
 <body>
     <JavaScriptDiagnosticsBridge />
     <Routes />
-    <script src="vendor/devextreme-dist/js/vectormap-data/world.js"></script>
-    <script src="vendor/devextreme-dist/js/vectormap-data/europe.js"></script>
-    <script src="vendor/devextreme-dist/js/vectormap-data/eurasia.js"></script>
-    <script src="vendor/devextreme-dist/js/vectormap-data/africa.js"></script>
-    <script src="vendor/devextreme-dist/js/vectormap-data/usa.js"></script>
-    <script src="vendor/devextreme-dist/js/vectormap-data/canada.js"></script>
-    <script src="vendor/devextreme-license.js"
+    <script src="vendor/devextreme-dist/js/vectormap-data/world.js?v=25.2.9"></script>
+    <script src="vendor/devextreme-dist/js/vectormap-data/europe.js?v=25.2.9"></script>
+    <script src="vendor/devextreme-dist/js/vectormap-data/eurasia.js?v=25.2.9"></script>
+    <script src="vendor/devextreme-dist/js/vectormap-data/africa.js?v=25.2.9"></script>
+    <script src="vendor/devextreme-dist/js/vectormap-data/usa.js?v=25.2.9"></script>
+    <script src="vendor/devextreme-dist/js/vectormap-data/canada.js?v=25.2.9"></script>
+    <script src="vendor/devextreme-license.js?v=25.2.9"
             onerror="try { globalThis.publisherStudioJavaScriptDiagnostics?.report?.('devextreme-license.load', new Error('PublisherStudio: the generated DevExtreme runtime license is missing. Run Prepare-DevExpressAssets.cmd on the licensed build machine.')); } catch (error) { console.error('PublisherStudio: the generated DevExtreme runtime license is missing. Run Prepare-DevExpressAssets.cmd on the licensed build machine.', error); }"></script>
     <script src="js/vendor/JsBarcode.all.min.js"></script>
     <script src="js/vendor/qrcode-generator.js"></script>
     <script src="js/organicSecurityQr.js"></script>
     <script src="js/vendor/html2canvas.min.js"></script>
-    <script src="js/localizationRuntime.js?v=2.6.5"></script>
+    <script src="js/localizationRuntime.js?v=2.9.3"></script>
     <script src="js/liveDataInterop.js"></script>
-    <script src="js/videoEffectRuntime.js?v=2.9.2"></script>
+    <script src="js/videoEffectRuntime.js?v=2.9.3"></script>
     <script src="js/streamingInterop.js"></script>
-    <script src="js/componentRuntime.js"></script>
+    <script src="js/componentRuntime.js?v=2.9.3"></script>
     <script src="js/tooltipRuntime.js"></script>
     <script src="js/automationInterop.js"></script>
     <script src="js/secureCaptureInterop.js"></script>
-    <script type="module" src="js/publisherInterop.js?v=2.9.2"></script>
+    <script type="module" src="js/publisherInterop.js?v=2.9.3"></script>
     <script src="_framework/blazor.web.js"></script>
 </body>
 </html>

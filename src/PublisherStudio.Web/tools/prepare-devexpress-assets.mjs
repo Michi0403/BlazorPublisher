@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { copyFile, cp, mkdir, readFile, readdir, realpath, rm, stat, writeFile } from "node:fs/promises";
+import { copyFile, cp, mkdir, readFile, readdir, realpath, rename, rm, stat, writeFile } from "node:fs/promises";
 import { dirname, join, relative, resolve, sep } from "node:path";
 
 const project = resolve(import.meta.dirname, "..");
@@ -21,6 +21,64 @@ async function exists(path) {
     }
 }
 
+async function removeGeneratedDirectory(path) {
+    if (!await exists(path)) return;
+
+    let lastError = null;
+    for (let attempt = 0; attempt < 8; attempt++) {
+        try {
+            await rm(path, {
+                recursive: true,
+                force: true,
+                maxRetries: 4,
+                retryDelay: 125
+            });
+            if (!await exists(path)) return;
+        } catch (error) {
+            lastError = error;
+        }
+        await new Promise(resolveDelay => setTimeout(resolveDelay, 150 * (attempt + 1)));
+    }
+
+    // Antivirus/indexer handles on Windows can briefly block a recursive rmdir.
+    // A rename removes the stale package from the live vendor path immediately;
+    // a best-effort cleanup then removes the renamed directory.
+    const stale = `${path}.stale-${Date.now()}-${process.pid}`;
+    try {
+        await rename(path, stale);
+        try {
+            await rm(stale, {
+                recursive: true,
+                force: true,
+                maxRetries: 8,
+                retryDelay: 150
+            });
+        } catch {
+            // The renamed stale directory is not addressable by PublisherStudio.
+            // A later preparation run can remove it.
+        }
+        return;
+    } catch (error) {
+        lastError = error;
+    }
+
+    throw new Error(
+        `Could not replace generated browser package '${path}'. ` +
+        `Close any process that has the generated vendor directory open and retry. ` +
+        `Last error: ${lastError?.message || lastError || "unknown error"}`
+    );
+}
+
+async function packageVersion(packageRoot) {
+    const packagePath = join(packageRoot, "package.json");
+    if (!await exists(packagePath)) {
+        throw new Error(`Missing package metadata: ${packagePath}`);
+    }
+    const metadata = JSON.parse(await readFile(packagePath, "utf8"));
+    return String(metadata.version || "").trim();
+}
+
+
 async function copyPackage(sourceRelative, destinationRelative) {
     const source = join(nodeModules, sourceRelative);
     if (!await exists(source)) {
@@ -28,7 +86,7 @@ async function copyPackage(sourceRelative, destinationRelative) {
     }
 
     const destination = join(vendor, destinationRelative);
-    await rm(destination, { recursive: true, force: true });
+    await removeGeneratedDirectory(destination);
     await mkdir(dirname(destination), { recursive: true });
 
     // DevExpress packages may contain directory links on Windows. Copy their
@@ -173,9 +231,35 @@ async function validateRuntimeLicense() {
     await writeFile(join(vendor, "devextreme-license.version"), `${devExtremeVersion}\n`, "utf8");
 }
 
+const restoredDevExtremeVersion = await packageVersion(join(nodeModules, "devextreme-dist"));
+if (restoredDevExtremeVersion !== devExtremeVersion) {
+    throw new Error(
+        `Restored devextreme-dist is ${restoredDevExtremeVersion || "unknown"}, ` +
+        `but package.json requires ${devExtremeVersion}. Remove the targeted node_modules package and restore again.`
+    );
+}
+
+const restoredSpreadsheetVersion = await packageVersion(join(nodeModules, "devexpress-aspnetcore-spreadsheet"));
+if (restoredSpreadsheetVersion !== devExtremeVersion) {
+    throw new Error(
+        `Restored devexpress-aspnetcore-spreadsheet is ${restoredSpreadsheetVersion || "unknown"}, ` +
+        `but package.json requires ${devExtremeVersion}.`
+    );
+}
+
 await mkdir(vendor, { recursive: true });
 await copyPackage("devextreme-dist", "devextreme-dist");
 await copyPackage("devexpress-aspnetcore-spreadsheet", "devexpress-aspnetcore-spreadsheet");
+
+const copiedDevExtremeVersion = await packageVersion(join(vendor, "devextreme-dist"));
+if (copiedDevExtremeVersion !== devExtremeVersion) {
+    throw new Error(
+        `Copied DevExtreme browser package is ${copiedDevExtremeVersion || "unknown"}, ` +
+        `but ${devExtremeVersion} is required.`
+    );
+}
+
+await removeGeneratedDirectory(join(vendor, "jquery"));
 await mkdir(join(vendor, "jquery"), { recursive: true });
 await copyFile(
     join(nodeModules, "jquery", "dist", "jquery.min.js"),
@@ -191,8 +275,9 @@ await validateRuntimeLicense();
 await writeFile(
     join(vendor, "devextreme-assets.meta.json"),
     `${JSON.stringify({
-        schemaVersion: 1,
+        schemaVersion: 2,
         devExtremeVersion,
+        restoredPackageVersion: restoredDevExtremeVersion,
         preparedAtUtc: new Date().toISOString(),
         package: "devextreme-dist",
         assets: preparedAssets

@@ -1,18 +1,11 @@
-# PublisherStudio 2.9.2
+# PublisherStudio 2.9.3
 
-PublisherStudio 2.9.2 is the **Translation Editor Localization** release built forward from 2.9.1. It preserves the existing editor/runtime architecture and Panel Studio persistence behavior.
+PublisherStudio 2.9.3 is the **Panel Behaviors & DevExtreme Asset Repair** release.
 
-## Toolchain state retained
+Panel Studio now turns its existing interactive components into an easier publication object interface: stable object addresses, compact common behavior controls, right-click quick actions, target/method selection, and JavaScript helper snippets are persisted with the publication and used by the shared browser runtime.
 
-- SDK policy: `10.0.301` with `latestFeature` roll-forward
-- Target framework: `net10.0`
-- DevExpress: `25.2.9`
-- LocalGPT 1-Wire protocol: `2.1.1`
+The DevExtreme preparation/export path is also corrected for the 25.2.9 upgrade. Generated vendor targets are cleared/replaced with Windows retry handling, restored/copied package metadata and hashes are verified, browser URLs are cache-busted, export bypasses stale HTTP cache, and version validation uses package/manifest/license metadata instead of a brittle regex over minified `dx.all.js`.
 
-## Main changes
+Toolchain state remains `.NET 10` / `net10.0` with DevExpress/DevExtreme 25.2.9. Generated commercial vendor assets and private licensing material are deliberately absent from this source archive and are prepared on the licensed build machine.
 
-The Translation Editor now uses PublisherStudio's existing file-localization service for its own page title, labels, actions, status and notifications. Culture choices show localized culture display names instead of raw culture codes. Matching editor keys are present across the six maintained catalogs. Browser module cache identifiers were advanced with the application version.
-
-## Validation boundary
-
-This source package was not compiled with .NET/DevExpress in the preparation environment. Validation is source/static only. See `CHANGELOG-v2.9.2-TRANSLATION-EDITOR-LOCALIZATION.md` and `VALIDATION-v2.9.2-source.md`.
+This archive is **SOURCE-NOT-COMPILED**. See `CHANGELOG-v2.9.3-PANEL-BEHAVIORS-DEVEXTREME-ASSET-REPAIR.md` and `VALIDATION-v2.9.3-source.md`.

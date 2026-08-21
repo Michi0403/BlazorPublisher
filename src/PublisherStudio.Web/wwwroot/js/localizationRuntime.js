@@ -160,7 +160,7 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
         const locale = devExtremeCultures.has(neutral) ? neutral : 'en';
         if (locale === 'en') { globalThis.DevExpress?.localization?.locale?.('en'); return; }
         const script = document.createElement('script');
-        script.src = `vendor/devextreme-dist/js/localization/dx.messages.${locale}.js`;
+        script.src = `vendor/devextreme-dist/js/localization/dx.messages.${locale}.js?v=25.2.9`;
         script.defer = false;
         script.onload = () => { try { return (globalThis.DevExpress?.localization?.locale?.(requestedLanguage.toLowerCase())); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/localizationRuntime.js:script.onload@130', __javascriptError); throw __javascriptError; } };
         document.head.appendChild(script);

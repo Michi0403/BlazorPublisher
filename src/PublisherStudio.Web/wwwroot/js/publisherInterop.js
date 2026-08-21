@@ -7658,13 +7658,13 @@ async function buildPublisherSingleHtml(mode, title, exportOptions = {}) { try {
         await window.PublisherStudioComponentRuntime.refreshAll(source, { polling: false, fetchNow: true });
     }
     const fetchExportAsset = async (url, description = 'offline export asset') => { try {
-        const response = await fetch(url, { cache: 'force-cache' });
+        const response = await fetch(url, { cache: 'no-store' });
         if (!response.ok) {
             throw new Error(`The ${description} ${url} is missing (${response.status}). Run Prepare-DevExpressAssets.cmd on the licensed build machine before building or publishing PublisherStudio.`);
         }
         return await response.text();
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:fetchExportAsset@7337', __javascriptError); throw __javascriptError; }};
-    const [devExtremeCss, jquerySource, devExtremeSource, worldMapSource, europeMapSource, eurasiaMapSource, africaMapSource, usaMapSource, canadaMapSource, devExtremeLicenseSource, devExtremeLicenseVersion, liveDataSource, componentRuntimeSource, tooltipRuntimeSource] = await Promise.all([
+    const [devExtremeCss, jquerySource, devExtremeSource, worldMapSource, europeMapSource, eurasiaMapSource, africaMapSource, usaMapSource, canadaMapSource, devExtremeLicenseSource, devExtremeLicenseVersion, devExtremeAssetMetadataSource, devExtremePackageSource, liveDataSource, componentRuntimeSource, tooltipRuntimeSource] = await Promise.all([
         fetchExportAsset('vendor/devextreme-dist/css/dx.light.css'),
         fetchExportAsset('vendor/jquery/jquery.min.js'),
         fetchExportAsset('vendor/devextreme-dist/js/dx.all.js'),
@@ -7676,6 +7676,8 @@ async function buildPublisherSingleHtml(mode, title, exportOptions = {}) { try {
         fetchExportAsset('vendor/devextreme-dist/js/vectormap-data/canada.js'),
         fetchExportAsset('vendor/devextreme-license.js', 'generated DevExtreme runtime license'),
         fetchExportAsset('vendor/devextreme-license.version', 'DevExtreme runtime-license version marker'),
+        fetchExportAsset('vendor/devextreme-assets.meta.json', 'DevExtreme prepared-asset metadata'),
+        fetchExportAsset('vendor/devextreme-dist/package.json', 'copied DevExtreme package metadata'),
         fetchExportAsset('js/liveDataInterop.js'),
         fetchExportAsset('js/componentRuntime.js'),
         fetchExportAsset('js/tooltipRuntime.js')
@@ -7683,11 +7685,43 @@ async function buildPublisherSingleHtml(mode, title, exportOptions = {}) { try {
     if (!/DevExpress\s*\.\s*config\s*\(/.test(devExtremeLicenseSource) || !/licenseKey\s*:/.test(devExtremeLicenseSource)) {
         throw new Error('The generated DevExtreme runtime license file is invalid. Run Prepare-DevExpressAssets.cmd again on the licensed build machine.');
     }
-    const bundledDevExtremeVersion = /Version:\s*([0-9]+(?:\.[0-9]+){2})/.exec(devExtremeSource)?.[1] || '';
-    const licensedDevExtremeVersion = String(devExtremeLicenseVersion || '').trim();
-    if (!bundledDevExtremeVersion || licensedDevExtremeVersion !== bundledDevExtremeVersion) {
-        throw new Error(`The DevExtreme runtime license targets ${licensedDevExtremeVersion || 'an unknown version'}, but the bundled browser runtime is ${bundledDevExtremeVersion || 'unknown'}. Run Prepare-DevExpressAssets.cmd again.`);
+    let devExtremeAssetMetadata;
+    let devExtremePackageMetadata;
+    try {
+        devExtremeAssetMetadata = JSON.parse(devExtremeAssetMetadataSource);
+        devExtremePackageMetadata = JSON.parse(devExtremePackageSource);
+    } catch (error) {
+        throw new Error(`The prepared DevExtreme metadata is invalid. Run Prepare-DevExpressAssets.cmd again. ${error?.message || error}`);
     }
+    const preparedDevExtremeVersion = String(devExtremeAssetMetadata?.devExtremeVersion || '').trim();
+    const copiedDevExtremeVersion = String(devExtremePackageMetadata?.version || '').trim();
+    const licensedDevExtremeVersion = String(devExtremeLicenseVersion || '').trim();
+    if (!preparedDevExtremeVersion || !copiedDevExtremeVersion ||
+        preparedDevExtremeVersion !== copiedDevExtremeVersion ||
+        licensedDevExtremeVersion !== copiedDevExtremeVersion) {
+        throw new Error(`The prepared DevExtreme assets are inconsistent (license ${licensedDevExtremeVersion || 'unknown'}, package ${copiedDevExtremeVersion || 'unknown'}, manifest ${preparedDevExtremeVersion || 'unknown'}). Run Prepare-DevExpressAssets.cmd again.`);
+    }
+    const verifyPreparedTextAsset = async (manifestPath, sourceText) => { try {
+        const entry = Array.isArray(devExtremeAssetMetadata?.assets)
+            ? devExtremeAssetMetadata.assets.find(item => String(item?.path || '') === manifestPath)
+            : null;
+        if (!entry) throw new Error(`Prepared DevExtreme manifest entry is missing for ${manifestPath}.`);
+        const bytes = new TextEncoder().encode(String(sourceText || ''));
+        if (Number(entry.bytes) !== bytes.byteLength) {
+            throw new Error(`Prepared DevExtreme asset size mismatch for ${manifestPath}: manifest ${entry.bytes}, fetched ${bytes.byteLength}.`);
+        }
+        if (globalThis.crypto?.subtle && entry.sha256) {
+            const digest = new Uint8Array(await globalThis.crypto.subtle.digest('SHA-256', bytes));
+            const actual = [...digest].map(value => value.toString(16).padStart(2, '0')).join('');
+            if (actual !== String(entry.sha256).toLowerCase()) {
+                throw new Error(`Prepared DevExtreme asset hash mismatch for ${manifestPath}. Clear browser cache and run Prepare-DevExpressAssets.cmd again.`);
+            }
+        }
+    } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:verifyPreparedTextAsset@2.9.3', __javascriptError); throw __javascriptError; } };
+    await Promise.all([
+        verifyPreparedTextAsset('devextreme-dist/js/dx.all.js', devExtremeSource),
+        verifyPreparedTextAsset('devextreme-dist/css/dx.light.css', devExtremeCss)
+    ]);
     const safeScript = value => { try { return (String(value).replace(/<\/script/gi, '<\\/script')); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:safeScript@7368', __javascriptError); throw __javascriptError; } };
     await document.fonts?.ready;
     await waitForImages(source);

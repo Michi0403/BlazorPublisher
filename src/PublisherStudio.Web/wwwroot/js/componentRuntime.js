@@ -724,7 +724,14 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
             } else if (kind === "customscript") {
                 if (!config.allowCustomScript) throw new Error("Custom script is disabled for this component.");
                 const handler = new Function("context", `"use strict";\n${action.script || ""}`);
-                await handler(Object.freeze({ ...context, config: clone(config) }));
+                const publicationRuntime = window.PublisherStudioPublicationRuntime;
+                const scriptContext = Object.freeze({
+                    ...context,
+                    config: clone(config),
+                    objects: publicationRuntime?.objects?.(context.host) || null,
+                    publication: publicationRuntime?.publication || null
+                });
+                await handler(scriptContext);
             }
         } catch (error) {
             showError(error?.message || String(error));
@@ -2293,9 +2300,335 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
          } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:callback:panels.forEach@2213', __javascriptError); throw __javascriptError; }});
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:disposePanels@2210', __javascriptError); throw __javascriptError; }}
 
+
+    function resolvePublicationObject(targetOrAddress, root = document) { try {
+        if (targetOrAddress instanceof Element) return targetOrAddress;
+        const value = String(targetOrAddress || "").trim();
+        if (!value) return null;
+        const scopes = [];
+        if (root instanceof Element || root instanceof Document) scopes.push(root);
+        if (document && !scopes.includes(document)) scopes.push(document);
+        for (const scope of scopes) {
+            try {
+                const byAddress = scope.querySelector?.(`[data-object-address="${CSS.escape(value)}"]`);
+                if (byAddress) return byAddress;
+            } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:suppressed-catch:resolvePublicationObject-address', __caughtJavaScriptError); }
+        }
+        const match = /\/element\/([0-9a-f-]{36})$/i.exec(value);
+        const elementId = match?.[1] || (/^[0-9a-f-]{36}$/i.test(value) ? value : "");
+        if (!elementId) return null;
+        for (const scope of scopes) {
+            try {
+                const byId = scope.querySelector?.(`[data-element-id="${CSS.escape(elementId)}"]`);
+                if (byId) return byId;
+            } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:suppressed-catch:resolvePublicationObject-id', __caughtJavaScriptError); }
+        }
+        return null;
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:resolvePublicationObject', __javascriptError); throw __javascriptError; }}
+
+    function publicationObjectComponentHost(target) { try {
+        if (!target) return null;
+        if (target.matches?.("[data-ps-component-config]")) return target;
+        return target.querySelector?.("[data-ps-component-config]") || null;
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:publicationObjectComponentHost', __javascriptError); throw __javascriptError; }}
+
+    function setPublicationObjectVisible(target, visible) { try {
+        if (!target) return false;
+        if (visible) {
+            const previous = target.dataset?.psBehaviorDisplay;
+            if (target.style) target.style.display = previous ?? "";
+            if (target.dataset) delete target.dataset.psBehaviorDisplay;
+            target.removeAttribute?.("aria-hidden");
+        } else {
+            if (target.dataset && target.dataset.psBehaviorDisplay === undefined) {
+                target.dataset.psBehaviorDisplay = target.style?.display || "";
+            }
+            if (target.style) target.style.display = "none";
+            target.setAttribute?.("aria-hidden", "true");
+        }
+        return true;
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:setPublicationObjectVisible', __javascriptError); throw __javascriptError; }}
+
+    async function invokeObjectMethod(targetOrAddress, method, value, root = document) { try {
+        const target = resolvePublicationObject(targetOrAddress, root);
+        if (!target) throw new Error(`Publication object '${String(targetOrAddress || "")}' is not available.`);
+        const name = lower(method);
+        const componentHost = publicationObjectComponentHost(target);
+        const state = componentHost ? states.get(componentHost) : null;
+        const instance = state?.instance || null;
+        const media = target.matches?.("video,audio") ? target : target.querySelector?.("video,audio");
+        const focusTarget = target.matches?.("button,a,input,select,textarea,[tabindex]") ? target : target.querySelector?.("button,a,input,select,textarea,[tabindex]");
+
+        if (name === "click") {
+            target.click?.();
+            return true;
+        }
+        if (name === "focus") {
+            (focusTarget || target).focus?.();
+            return true;
+        }
+        if (name === "blur") {
+            (focusTarget || target).blur?.();
+            return true;
+        }
+        if (name === "show") return setPublicationObjectVisible(target, true);
+        if (name === "hide") return setPublicationObjectVisible(target, false);
+        if (name === "togglevisibility") {
+            const hidden = target.style?.display === "none" || target.getAttribute?.("aria-hidden") === "true";
+            return setPublicationObjectVisible(target, hidden);
+        }
+        if (name === "enable" || name === "disable") {
+            const disabled = name === "disable";
+            if (instance?.option) instance.option("disabled", disabled);
+            for (const control of [target, ...target.querySelectorAll?.("button,input,select,textarea") || []]) {
+                if ("disabled" in control) control.disabled = disabled;
+            }
+            target.setAttribute?.("aria-disabled", disabled ? "true" : "false");
+            return true;
+        }
+        if (name === "refresh" || name === "refreshdata") {
+            if (state && componentHost) await refreshState(componentHost, state);
+            else await window.PublisherStudioLiveDataRuntime?.refreshAll?.(target, { polling: false, fetchNow: true });
+            instance?.repaint?.();
+            return true;
+        }
+        if (name === "repaint") {
+            instance?.repaint?.();
+            return true;
+        }
+        if (name === "reset") {
+            instance?.reset?.();
+            return true;
+        }
+        if (name === "setvalue") {
+            if (instance?.option) instance.option("value", value);
+            else {
+                const input = target.matches?.("input,select,textarea") ? target : target.querySelector?.("input,select,textarea");
+                if (input) {
+                    input.value = value ?? "";
+                    input.dispatchEvent(new Event("change", { bubbles: true }));
+                } else target.textContent = value ?? "";
+            }
+            return true;
+        }
+        if (name === "settext") {
+            if (instance?.option) {
+                if (instance.option("text") !== undefined) instance.option("text", value ?? "");
+                else if (instance.option("value") !== undefined) instance.option("value", value ?? "");
+                else target.textContent = value ?? "";
+            } else target.textContent = value ?? "";
+            return true;
+        }
+        if (name === "clearfilter") {
+            const dataSource = instance?.getDataSource?.() || state?.dataSource;
+            dataSource?.filter?.(null);
+            await dataSource?.reload?.();
+            instance?.refresh?.();
+            return true;
+        }
+        if (name === "clearselection") {
+            await instance?.clearSelection?.();
+            return true;
+        }
+        if (name === "selectall") {
+            await instance?.selectAll?.();
+            return true;
+        }
+        if (name === "scrolltotime") {
+            instance?.scrollToTime?.(value ?? new Date());
+            return true;
+        }
+        if (name === "play") {
+            await media?.play?.();
+            return true;
+        }
+        if (name === "pause") {
+            media?.pause?.();
+            return true;
+        }
+        throw new Error(`Publication object method '${String(method || "")}' is not supported.`);
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:invokeObjectMethod', __javascriptError); throw __javascriptError; }}
+
+
+    const publicationBehaviorBindings = new WeakMap();
+    const activePublicationBehaviorIds = new Set();
+
+    function publicationObjectApi(targetOrAddress, host = null) { try {
+        const root = host?.closest?.(".print-page,.publication-panel-view,.ps-slide,.ps-site-page") || document;
+        const element = resolvePublicationObject(targetOrAddress, root);
+        if (!element) return null;
+        return Object.freeze({
+            address: element.dataset?.objectAddress || String(targetOrAddress || ""),
+            elementId: element.dataset?.elementId || "",
+            call(method, value) { try { return invokeObjectMethod(element, method, value, root); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:publicationObjectApi.call', __javascriptError); throw __javascriptError; } }
+        });
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:publicationObjectApi', __javascriptError); throw __javascriptError; }}
+
+    function publicationObjectsApi(host = null) { try {
+        const current = host?.closest?.("[data-publication-element],[data-panel-element]") || host || null;
+        return Object.freeze({
+            get(address) { try { return publicationObjectApi(address, host); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:publicationObjectsApi.get', __javascriptError); throw __javascriptError; } },
+            current(currentHost = current) { try { return publicationObjectApi(currentHost, host); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:publicationObjectsApi.current', __javascriptError); throw __javascriptError; } },
+            byId(elementId) { try { return publicationObjectApi(String(elementId || ""), host); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:publicationObjectsApi.byId', __javascriptError); throw __javascriptError; } }
+        });
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:publicationObjectsApi', __javascriptError); throw __javascriptError; }}
+
+    const publicationNavigationApi = Object.freeze({
+        goToPage(pageId) { try {
+            const value = String(pageId || "").trim();
+            if (!value) return false;
+            const api = window.PublisherStudioNavigation || window.PublisherStudioPresentation;
+            if (api?.goToPage) return api.goToPage(value);
+            window.dispatchEvent(new CustomEvent("publisherstudio:navigate", { detail: { pageId: value } }));
+            return true;
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:publicationNavigationApi.goToPage', __javascriptError); throw __javascriptError; }},
+        nextPage() { try {
+            const api = window.PublisherStudioNavigation || window.PublisherStudioPresentation;
+            if (api?.nextPage) return api.nextPage();
+            if (api?.next) return api.next();
+            window.dispatchEvent(new CustomEvent("publisherstudio:navigate-next"));
+            return true;
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:publicationNavigationApi.nextPage', __javascriptError); throw __javascriptError; }},
+        previousPage() { try {
+            const api = window.PublisherStudioNavigation || window.PublisherStudioPresentation;
+            if (api?.previousPage) return api.previousPage();
+            if (api?.previous) return api.previous();
+            window.dispatchEvent(new CustomEvent("publisherstudio:navigate-previous"));
+            return true;
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:publicationNavigationApi.previousPage', __javascriptError); throw __javascriptError; }}
+    });
+
+    function normalizedBehaviorName(value) { try {
+        return String(value || "").replace(/[^a-z0-9]/gi, "").toLowerCase();
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:normalizedBehaviorName', __javascriptError); throw __javascriptError; }}
+
+    function parsePublicationBehaviors(element) { try {
+        const source = String(element?.dataset?.behaviors || "").trim();
+        if (!source) return [];
+        const parsed = JSON.parse(source);
+        return Array.isArray(parsed) ? parsed.filter(rule => rule && rule.enabled !== false) : [];
+     } catch (__javascriptError) {
+        publisherStudioDiagnostics.report('js/componentRuntime.js:parsePublicationBehaviors', __javascriptError);
+        return [];
+     }}
+
+    function publicationBehaviorTarget(source, rule) { try {
+        const targetId = String(rule?.targetElementId || "").trim();
+        if (!targetId) return source;
+        const page = source.closest?.(".print-page,.publication-panel-view,.ps-slide,.ps-site-page");
+        return resolvePublicationObject(targetId, page || document) || resolvePublicationObject(targetId, document);
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:publicationBehaviorTarget', __javascriptError); throw __javascriptError; }}
+
+    async function executePublicationBehavior(source, rule, event = null) { try {
+        const ruleId = String(rule?.id || "");
+        if (ruleId && activePublicationBehaviorIds.has(ruleId)) return false;
+        if (ruleId) activePublicationBehaviorIds.add(ruleId);
+        try {
+            const action = normalizedBehaviorName(rule?.action);
+            const target = publicationBehaviorTarget(source, rule);
+            if (action === "none") return false;
+            if (action === "click") return await invokeObjectMethod(target, "click");
+            if (action === "focus") return await invokeObjectMethod(target, "focus");
+            if (action === "blur") return await invokeObjectMethod(target, "blur");
+            if (action === "refreshdata") return await invokeObjectMethod(target, "refreshData");
+            if (action === "show") return await invokeObjectMethod(target, "show");
+            if (action === "hide") return await invokeObjectMethod(target, "hide");
+            if (action === "togglevisibility") return await invokeObjectMethod(target, "toggleVisibility");
+            if (action === "enable") return await invokeObjectMethod(target, "enable");
+            if (action === "disable") return await invokeObjectMethod(target, "disable");
+            if (action === "settext") return await invokeObjectMethod(target, "setText", rule?.value ?? "");
+            if (action === "setvalue") return await invokeObjectMethod(target, "setValue", rule?.value ?? "");
+            if (action === "callmethod") return await invokeObjectMethod(target, String(rule?.method || ""), rule?.value ?? "");
+            if (action === "gotopage") return publicationNavigationApi.goToPage(rule?.targetPageId);
+            if (action === "nextpage") return publicationNavigationApi.nextPage();
+            if (action === "previouspage") return publicationNavigationApi.previousPage();
+            if (action === "openurl") {
+                const url = String(rule?.url || "").trim();
+                if (!/^(https?:|mailto:)/i.test(url)) throw new Error("Only http, https and mailto publication behavior addresses are allowed.");
+                window.open(url, rule?.openInNewWindow === false ? "_self" : "_blank", "noopener");
+                return true;
+            }
+            return false;
+        } finally {
+            if (ruleId) activePublicationBehaviorIds.delete(ruleId);
+        }
+     } catch (__javascriptError) {
+        publisherStudioDiagnostics.report('js/componentRuntime.js:executePublicationBehavior', __javascriptError);
+        showError(__javascriptError?.message || String(__javascriptError));
+        return false;
+     }}
+
+    function behaviorEventName(trigger) { try {
+        const name = normalizedBehaviorName(trigger);
+        if (name === "click") return "click";
+        if (name === "doubleclick") return "dblclick";
+        if (name === "change") return "change";
+        if (name === "focus") return "focusin";
+        if (name === "blur") return "focusout";
+        if (name === "pointerenter") return "pointerenter";
+        if (name === "pointerleave") return "pointerleave";
+        if (name === "load") return "load";
+        return "";
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:behaviorEventName', __javascriptError); throw __javascriptError; }}
+
+    function bindPublicationBehaviors(element) { try {
+        const source = String(element?.dataset?.behaviors || "").trim();
+        const previous = publicationBehaviorBindings.get(element);
+        if (previous?.source === source) return;
+        previous?.controller?.abort?.();
+
+        const rules = parsePublicationBehaviors(element);
+        if (!rules.length) {
+            publicationBehaviorBindings.delete(element);
+            return;
+        }
+
+        const controller = new AbortController();
+        publicationBehaviorBindings.set(element, { controller, source });
+        const byEvent = new Map();
+        for (const rule of rules) {
+            const eventName = behaviorEventName(rule.trigger);
+            if (!eventName) continue;
+            if (!byEvent.has(eventName)) byEvent.set(eventName, []);
+            byEvent.get(eventName).push(rule);
+        }
+
+        const arranged = () => element.closest?.('.panel-studio-canvas[data-panel-studio-arrange="true"]') !== null;
+
+        for (const [eventName, eventRules] of byEvent.entries()) {
+            if (eventName === "load") {
+                queueMicrotask(() => { try {
+                    if (!element.isConnected || arranged()) return;
+                    for (const rule of eventRules) executePublicationBehavior(element, rule, null);
+                 } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:publication-behavior-load', __javascriptError); }});
+                continue;
+            }
+            element.addEventListener(eventName, event => { try {
+                if (arranged()) return;
+                for (const rule of eventRules) executePublicationBehavior(element, rule, event);
+             } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:publication-behavior-event', __javascriptError); }}, { signal: controller.signal });
+        }
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:bindPublicationBehaviors', __javascriptError); throw __javascriptError; }}
+
+    function startPublicationBehaviors(root) { try {
+        const scope = root || document;
+        const elements = scope.matches?.("[data-behaviors]") ? [scope] : [...scope.querySelectorAll?.("[data-behaviors]") || []];
+        elements.forEach(bindPublicationBehaviors);
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:startPublicationBehaviors', __javascriptError); throw __javascriptError; }}
+
+    function disposePublicationBehaviors(root) { try {
+        if (!root) return;
+        const elements = root.matches?.("[data-behaviors]") ? [root] : [...root.querySelectorAll?.("[data-behaviors]") || []];
+        elements.forEach(element => { try {
+            publicationBehaviorBindings.get(element)?.controller?.abort?.();
+            publicationBehaviorBindings.delete(element);
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:disposePublicationBehaviors-item', __javascriptError); }});
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:disposePublicationBehaviors', __javascriptError); throw __javascriptError; }}
+
     async function refreshAll(root, options = {}) { try {
         const scope = root || document;
         startPanels(scope);
+        startPublicationBehaviors(scope);
         const elements = scope.matches?.("[data-ps-component-config]") ? [scope] : [...scope.querySelectorAll?.("[data-ps-component-config]") || []];
         await Promise.all(elements.map(element => { try { return (render(element, element.dataset.psComponentConfig, { polling: options.polling, fetchNow: options.fetchNow !== false })); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:callback:elements.map@2223', __javascriptError); throw __javascriptError; } }));
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:refreshAll@2219', __javascriptError); throw __javascriptError; }}
@@ -2303,6 +2636,7 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
     function start(root, options = {}) { try {
         const scope = root || document;
         startPanels(scope);
+        startPublicationBehaviors(scope);
         const elements = scope.matches?.("[data-ps-component-config]") ? [scope] : [...scope.querySelectorAll?.("[data-ps-component-config]") || []];
         elements.forEach(element => { try { return (render(element, element.dataset.psComponentConfig, { polling: options.polling !== false, fetchNow: options.fetchNow !== false })); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:callback:elements.forEach@2230', __javascriptError); throw __javascriptError; } });
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:start@2226', __javascriptError); throw __javascriptError; }}
@@ -2321,12 +2655,23 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
         getBroadcastLayers(context, pageElementId) { try { return chatBroadcastLayers(context || {}, pageElementId);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:getBroadcastLayers@2244', __javascriptError); throw __javascriptError; }}
     };
 
+    window.PublisherStudioPublicationRuntime = {
+        objects: publicationObjectsApi,
+        publication: publicationNavigationApi,
+        resolveObject: resolvePublicationObject,
+        call(address, method, value) { try { return invokeObjectMethod(address, method, value); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:PublisherStudioPublicationRuntime.call', __javascriptError); throw __javascriptError; } },
+        start(root) { try { startPublicationBehaviors(root || document); return true; } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:PublisherStudioPublicationRuntime.start', __javascriptError); throw __javascriptError; } },
+        refresh(root) { try { startPublicationBehaviors(root || document); return true; } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:PublisherStudioPublicationRuntime.refresh', __javascriptError); throw __javascriptError; } }
+    };
+
     window.PublisherStudioComponentRuntime = {
         render,
         renderById(id, config) { try { return render(document.getElementById(id), config, { polling: false, fetchNow: false });  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:renderById@2249', __javascriptError); throw __javascriptError; }},
         disposeById(id) { try { const element = document.getElementById(id); if (element) dispose(element);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:disposeById@2250', __javascriptError); throw __javascriptError; }},
         refreshAll,
         probeConnection,
+        resolvePublicationObject,
+        invokeObjectMethod,
         attachVectorDesigner(id, dotnet) { try {
             const element = document.getElementById(id);
             if (!element) return false;
@@ -2347,11 +2692,13 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
             const elements = root.matches?.("[data-ps-component-config]") ? [root] : [...root.querySelectorAll?.("[data-ps-component-config]") || []];
             elements.forEach(dispose);
             disposePanels(root);
+            disposePublicationBehaviors(root);
          } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:dispose@2268', __javascriptError); throw __javascriptError; }},
         refreshPanels(root) { try { startPanels(root || document);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:refreshPanels@2274', __javascriptError); throw __javascriptError; }}
     };
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:ArrowFunction@2', __javascriptError); throw __javascriptError; }})();
 
 // Guard exported browser namespaces after the file has initialized.
+publisherStudioDiagnostics.guardObject("PublisherStudioPublicationRuntime", window.PublisherStudioPublicationRuntime);
 publisherStudioDiagnostics.guardObject("PublisherStudioChatRuntime", window.PublisherStudioChatRuntime);
 publisherStudioDiagnostics.guardObject("PublisherStudioComponentRuntime", window.PublisherStudioComponentRuntime);

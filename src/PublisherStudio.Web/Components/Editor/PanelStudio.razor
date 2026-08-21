@@ -6,6 +6,7 @@
 @inject PanelDocumentService Panels
 @inject PublicationFileService Files
 @inject PublicationComponentService Components
+@inject PublicationBehaviorService Behaviors
 @inject IJSRuntime JS
 @inject IPublicationElementLayoutService Layout
 @inject IUserNotificationService Notifications
@@ -296,6 +297,145 @@
                             </div>
                         </section>
 
+                        <section class="panel-inspector-section panel-behavior-editor">
+                            <div class="panel-behavior-heading">
+                                <strong>Behavior &amp; object interface</strong>
+                                <span>@selected.Behaviors.Count rule(s)</span>
+                            </div>
+                            <label class="panel-object-address">Object address<input readonly value="@SelectedObjectAddress" title="Stable address available to publication scripts" /></label>
+                            <div class="panel-behavior-quick-actions" aria-label="Quick click behaviors">
+                                <button type="button" @onclick="() => AddQuickBehavior(PublicationBehaviorAction.Click)">Click target</button>
+                                <button type="button" @onclick="() => AddQuickBehavior(PublicationBehaviorAction.Focus)">Focus</button>
+                                <button type="button" @onclick="() => AddQuickBehavior(PublicationBehaviorAction.RefreshData)">Refresh</button>
+                                <button type="button" @onclick="() => AddQuickBehavior(PublicationBehaviorAction.ToggleVisibility)">Toggle visible</button>
+                                <button type="button" @onclick="() => AddQuickBehavior(PublicationBehaviorAction.Enable)">Enable</button>
+                                <button type="button" @onclick="() => AddQuickBehavior(PublicationBehaviorAction.Disable)">Disable</button>
+                            </div>
+                            <div class="data-form-grid panel-behavior-grid" style="grid-template-columns:1fr 1fr">
+                                <label>When
+                                    <select value="@_behaviorTrigger" @onchange="ChangeBehaviorTrigger">
+                                        @foreach (var trigger in Enum.GetValues<PublicationBehaviorTrigger>())
+                                        {
+                                            <option value="@trigger">@trigger</option>
+                                        }
+                                    </select>
+                                </label>
+                                <label>Do
+                                    <select value="@_behaviorAction" @onchange="ChangeBehaviorAction">
+                                        @foreach (var action in Enum.GetValues<PublicationBehaviorAction>())
+                                        {
+                                            <option value="@action">@action</option>
+                                        }
+                                    </select>
+                                </label>
+                                @if (BehaviorNeedsTarget)
+                                {
+                                    <label style="grid-column:1/-1">Target object
+                                        <select value="@_behaviorTargetId" @onchange="ChangeBehaviorTarget">
+                                            <option value="">This object</option>
+                                            @foreach (var target in BehaviorTargets)
+                                            {
+                                                <option value="@target.ElementId">@target.Scope · @target.Name · @target.Kind</option>
+                                            }
+                                        </select>
+                                    </label>
+                                }
+                                @if (_behaviorAction == PublicationBehaviorAction.CallMethod)
+                                {
+                                    <label style="grid-column:1/-1">Common method
+                                        <select value="@_behaviorMethod" @onchange="args => _behaviorMethod = Text(args)">
+                                            @foreach (var method in SelectedCommonMethods)
+                                            {
+                                                <option value="@method">@method()</option>
+                                            }
+                                        </select>
+                                    </label>
+                                }
+                                @if (_behaviorAction is PublicationBehaviorAction.SetText or PublicationBehaviorAction.SetValue)
+                                {
+                                    <label style="grid-column:1/-1">Value<input value="@_behaviorValue" @onchange="args => _behaviorValue = Text(args)" /></label>
+                                }
+                                @if (_behaviorAction == PublicationBehaviorAction.GoToPage)
+                                {
+                                    <label style="grid-column:1/-1">Page
+                                        <select value="@_behaviorTargetPageId" @onchange="ChangeBehaviorPage">
+                                            <option value="">Choose page</option>
+                                            @foreach (var page in Document.Pages)
+                                            {
+                                                <option value="@page.Id">@page.Name</option>
+                                            }
+                                        </select>
+                                    </label>
+                                }
+                                @if (_behaviorAction == PublicationBehaviorAction.OpenUrl)
+                                {
+                                    <label style="grid-column:1/-1">Address<input type="url" value="@_behaviorUrl" @onchange="args => _behaviorUrl = Text(args)" /></label>
+                                }
+                            </div>
+                            <button type="button" class="panel-behavior-add" @onclick="AddBehavior">Add behavior</button>
+                            @if (selected.Behaviors.Count > 0)
+                            {
+                                <div class="panel-behavior-list">
+                                    @foreach (var behavior in selected.Behaviors)
+                                    {
+                                        <div @key="behavior.Id" class="panel-behavior-row">
+                                            <span><strong>@behavior.Trigger</strong> → @behavior.Action</span>
+                                            <small>@BehaviorTargetAddress(behavior)</small>
+                                            <button type="button" title="Remove behavior" @onclick="() => RemoveBehavior(behavior.Id)">×</button>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            <details class="panel-object-directory">
+                                <summary>Publication object addresses · @BehaviorTargets.Count</summary>
+                                <div class="panel-object-directory-list">
+                                    <code>@PublicationObjectAddress</code>
+                                    @foreach (var target in BehaviorTargets)
+                                    {
+                                        <div @key="target.ElementId">
+                                            <span>@target.Scope · @target.Name</span>
+                                            <code>@target.Address</code>
+                                        </div>
+                                    }
+                                </div>
+                            </details>
+                            @if (selected is DevExtremeComponentElement scriptableComponent)
+                            {
+                                <details class="panel-script-assistant">
+                                    <summary>JavaScript helper</summary>
+                                    <p class="field-help">Custom component scripts receive <code>context.objects</code> and <code>context.publication</code>. Pick an object and a common method instead of typing its address by hand.</p>
+                                    <div class="data-form-grid" style="grid-template-columns:1fr 1fr">
+                                        <label>Object
+                                            <select value="@_scriptTargetId" @onchange="ChangeScriptTarget">
+                                                <option value="">This component</option>
+                                                @foreach (var target in BehaviorTargets)
+                                                {
+                                                    <option value="@target.ElementId">@target.Scope · @target.Name</option>
+                                                }
+                                            </select>
+                                        </label>
+                                        <label>Method
+                                            <select value="@_scriptMethod" @onchange="args => _scriptMethod = Text(args)">
+                                                @foreach (var method in ScriptCommonMethods)
+                                                {
+                                                    <option value="@method">@method()</option>
+                                                }
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <div class="panel-inline-actions">
+                                        <button type="button" @onclick="() => AddGeneratedComponentScript(scriptableComponent)">Add click script</button>
+                                        @foreach (var helper in ScriptHelpers)
+                                        {
+                                            <button type="button" title="@helper.Description" @onclick="() => AddScriptHelper(scriptableComponent, helper.Key)">@helper.Label</button>
+                                        }
+                                    </div>
+                                    <small class="field-help">PublisherStudio creates the custom-script action and enables it explicitly. No runtime eval is used for the ordinary behavior rules above.</small>
+                                </details>
+                            }
+                            <small class="field-help">The same object interface is available to exported publication JavaScript. Declarative actions stay allow-listed and require no script.</small>
+                        </section>
+
                         @if (selected is DataVisualElement visual)
                         {
                             <section class="panel-inspector-section">
@@ -410,6 +550,16 @@
                                 <label>HTML<textarea rows="7" value="@html.Html" @onchange="args => html.Html = Text(args)"></textarea></label>
                                 <label>CSS<textarea rows="5" value="@html.Css" @onchange="args => html.Css = Text(args)"></textarea></label>
                                 <label>JavaScript<textarea rows="5" value="@html.JavaScript" @onchange="args => html.JavaScript = Text(args)"></textarea></label>
+                                <div class="panel-script-assistant compact">
+                                    <strong>JavaScript helper</strong>
+                                    <div class="panel-inline-actions">
+                                        @foreach (var helper in HtmlScriptHelpers)
+                                        {
+                                            <button type="button" title="@helper.Description" @onclick="() => AddHtmlScriptHelper(html, helper.Key)">@helper.Label</button>
+                                        }
+                                    </div>
+                                    <small class="field-help">These snippets run only inside this iframe sandbox. Publication-component scripts use the object interface shown in Behavior &amp; object interface.</small>
+                                </div>
                                 <label class="check-row"><input type="checkbox" checked="@html.AllowScripts" @onchange="args => html.AllowScripts = AsBool(args)" /> Enable JavaScript inside sandbox</label>
                                 <label class="check-row"><input type="checkbox" checked="@html.AllowForms" @onchange="args => html.AllowForms = AsBool(args)" /> Allow forms</label>
                                 <label class="check-row"><input type="checkbox" checked="@html.AllowPopups" @onchange="args => html.AllowPopups = AsBool(args)" /> Allow popups</label>
@@ -483,6 +633,19 @@
                     <DxContextMenuItem Text="Bring forward" Click="MoveElementUp" />
                     <DxContextMenuItem Text="Send backward" Click="MoveElementDown" />
                     <DxContextMenuItem Text="Send to back" Click="SendElementToBack" />
+                </Items>
+            </DxContextMenuItem>
+            <DxContextMenuItem Text="Behavior" BeginGroup="true">
+                <Items>
+                    <DxContextMenuItem Text="On click → Click" Click="QuickBehaviorClick" />
+                    <DxContextMenuItem Text="On click → Focus" Click="QuickBehaviorFocus" />
+                    <DxContextMenuItem Text="On click → Refresh data" Click="QuickBehaviorRefresh" />
+                    <DxContextMenuItem Text="On click → Toggle visibility" Click="QuickBehaviorToggle" />
+                    <DxContextMenuItem Text="On click → Show" Click="QuickBehaviorShow" />
+                    <DxContextMenuItem Text="On click → Hide" Click="QuickBehaviorHide" />
+                    <DxContextMenuItem Text="On click → Enable" Click="QuickBehaviorEnable" />
+                    <DxContextMenuItem Text="On click → Disable" Click="QuickBehaviorDisable" />
+                    <DxContextMenuItem Text="Configure in inspector" BeginGroup="true" Click="SelectBehaviorEditor" />
                 </Items>
             </DxContextMenuItem>
             <DxContextMenuItem Text="Test interactions" BeginGroup="true" Click="EnableInteractionPreview" />
@@ -635,6 +798,25 @@
     /// Stores the internal template description state used by <see cref="PanelStudio"/> while executing its surrounding workflow.
     /// </summary>
     private string _templateDescription = string.Empty;
+    /// <summary>Stores the event selected for the compact behavior editor.</summary>
+    private PublicationBehaviorTrigger _behaviorTrigger = PublicationBehaviorTrigger.Click;
+    /// <summary>Stores the action selected for the compact behavior editor.</summary>
+    private PublicationBehaviorAction _behaviorAction = PublicationBehaviorAction.Click;
+    /// <summary>Stores the selected target element identifier text for the behavior editor.</summary>
+    private string _behaviorTargetId = string.Empty;
+    /// <summary>Stores the selected target page identifier text for the behavior editor.</summary>
+    private string _behaviorTargetPageId = string.Empty;
+    /// <summary>Stores the selected common method for the behavior editor.</summary>
+    private string _behaviorMethod = "click";
+    /// <summary>Stores the simple value used by set-text and set-value behavior.</summary>
+    private string _behaviorValue = string.Empty;
+    /// <summary>Stores the external address used by open-url behavior.</summary>
+    private string _behaviorUrl = string.Empty;
+    /// <summary>Stores the selected target object used by the JavaScript helper.</summary>
+    private string _scriptTargetId = string.Empty;
+    /// <summary>Stores the selected common method used by the JavaScript helper.</summary>
+    private string _scriptMethod = "refresh";
+
     /// <summary>
     /// Stores the internal element context menu state used by <see cref="PanelStudio"/> while executing its surrounding workflow.
     /// </summary>
@@ -666,6 +848,49 @@
     /// </summary>
     /// <value>The selected element value exposed by <see cref="PanelStudio"/>.</value>
     private PublicationElement? SelectedElement => CurrentView?.Elements.FirstOrDefault(element => element.Id == _selectedElementId);
+    /// <summary>Gets the stable root object address for the publication being edited.</summary>
+    /// <value>The publication object address value exposed by <see cref="PanelStudio"/>.</value>
+    private string PublicationObjectAddress => Behaviors.Address(Document);
+    /// <summary>Gets the stable object address for the currently selected Panel Studio element.</summary>
+    /// <value>The selected object address value exposed by <see cref="PanelStudio"/>.</value>
+    private string SelectedObjectAddress => SelectedElement is { } selected ? Behaviors.Address(Document, selected) : PublicationObjectAddress;
+    /// <summary>Gets the addressable publication objects available as behavior and script targets.</summary>
+    /// <value>The behavior targets value exposed by <see cref="PanelStudio"/>.</value>
+    private IReadOnlyList<PublicationObjectAddressOption> BehaviorTargets => _draft is not null && CurrentView is not null ? Behaviors.Targets(Document, _draft, CurrentView) : [];
+    /// <summary>Gets the common methods appropriate for the currently selected behavior target.</summary>
+    /// <value>The selected common methods value exposed by <see cref="PanelStudio"/>.</value>
+    private IReadOnlyList<string> SelectedCommonMethods => SelectedElement is { } selected && _draft is not null
+        ? Behaviors.CommonMethods(Document, _draft, selected, ParseGuid(_behaviorTargetId))
+        : [];
+    /// <summary>Gets the common methods appropriate for the target selected by the JavaScript helper.</summary>
+    /// <value>The script common methods value exposed by <see cref="PanelStudio"/>.</value>
+    private IReadOnlyList<string> ScriptCommonMethods => SelectedElement is { } selected && _draft is not null
+        ? Behaviors.CommonMethods(Document, _draft, selected, ParseGuid(_scriptTargetId))
+        : [];
+    /// <summary>
+    /// Gets the script helpers collection maintained or exposed by this panel studio instance for downstream processing.
+    /// </summary>
+    /// <value>The script helpers value exposed by <see cref="PanelStudio"/>.</value>
+    private IReadOnlyList<PublicationScriptHelperOption> ScriptHelpers => Behaviors.ScriptHelpers();
+    /// <summary>Gets the isolated HTML-script helper examples offered by Panel Studio.</summary>
+    /// <value>The HTML script helpers value exposed by <see cref="PanelStudio"/>.</value>
+    private IReadOnlyList<PublicationScriptHelperOption> HtmlScriptHelpers => Behaviors.HtmlScriptHelpers();
+    /// <summary>
+    /// Gets a value indicating whether behavior needs target applies to the panel studio state.
+    /// </summary>
+    /// <value>The behavior needs target value exposed by <see cref="PanelStudio"/>.</value>
+    private bool BehaviorNeedsTarget => _behaviorAction is PublicationBehaviorAction.Click
+        or PublicationBehaviorAction.Focus
+        or PublicationBehaviorAction.Blur
+        or PublicationBehaviorAction.RefreshData
+        or PublicationBehaviorAction.Show
+        or PublicationBehaviorAction.Hide
+        or PublicationBehaviorAction.ToggleVisibility
+        or PublicationBehaviorAction.Enable
+        or PublicationBehaviorAction.Disable
+        or PublicationBehaviorAction.SetText
+        or PublicationBehaviorAction.SetValue
+        or PublicationBehaviorAction.CallMethod;
     /// <summary>
     /// Gets the palette tools collection maintained or exposed by this panel studio instance for downstream processing.
     /// </summary>
@@ -2774,6 +2999,428 @@
             Logger.LogError(exception, "Panel Studio advanced component configuration could not be applied.");
             _error = $"Component configuration could not be applied: {exception.Message}";
             Notifications.Error(_error, "Component configuration", nameof(PanelStudio));
+        }
+    }
+
+
+    /// <summary>Parses an optional publication element identifier used by the compact behavior editor.</summary>
+    /// <param name="value">Value value supplied to the panel studio operation and used when producing its result.</param>
+    /// <returns>The GUID produced by the operation.</returns>
+    private Guid? ParseGuid(string value)
+    {
+        try
+        {
+            return Guid.TryParse(value, out var id) ? id : null;
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, $"{nameof(ParseGuid)} failed.");
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Performs change behavior trigger for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the panel studio operation and used when producing its result.</param>
+    private void ChangeBehaviorTrigger(ChangeEventArgs args)
+    {
+        try
+        {
+            if (Enum.TryParse<PublicationBehaviorTrigger>(Text(args), out var trigger)) _behaviorTrigger = trigger;
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, $"{nameof(ChangeBehaviorTrigger)} failed.");
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Performs change behavior action for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the panel studio operation and used when producing its result.</param>
+    private void ChangeBehaviorAction(ChangeEventArgs args)
+    {
+        try
+        {
+            if (!Enum.TryParse<PublicationBehaviorAction>(Text(args), out var action)) return;
+            _behaviorAction = action;
+            if (action == PublicationBehaviorAction.CallMethod)
+            {
+                _behaviorMethod = SelectedCommonMethods.FirstOrDefault() ?? "click";
+            }
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, $"{nameof(ChangeBehaviorAction)} failed.");
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Performs change behavior target for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the panel studio operation and used when producing its result.</param>
+    private void ChangeBehaviorTarget(ChangeEventArgs args)
+    {
+        try
+        {
+            _behaviorTargetId = Text(args);
+            if (_behaviorAction == PublicationBehaviorAction.CallMethod &&
+                !SelectedCommonMethods.Contains(_behaviorMethod, StringComparer.OrdinalIgnoreCase))
+            {
+                _behaviorMethod = SelectedCommonMethods.FirstOrDefault() ?? "click";
+            }
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, $"{nameof(ChangeBehaviorTarget)} failed.");
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Performs change behavior page for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the panel studio operation and used when producing its result.</param>
+    private void ChangeBehaviorPage(ChangeEventArgs args)
+    {
+        try
+        {
+            _behaviorTargetPageId = Text(args);
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, $"{nameof(ChangeBehaviorPage)} failed.");
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Performs change script target for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    /// <param name="args">Args value supplied to the panel studio operation and used when producing its result.</param>
+    private void ChangeScriptTarget(ChangeEventArgs args)
+    {
+        try
+        {
+            _scriptTargetId = Text(args);
+            if (!ScriptCommonMethods.Contains(_scriptMethod, StringComparer.OrdinalIgnoreCase))
+            {
+                _scriptMethod = ScriptCommonMethods.FirstOrDefault() ?? "refresh";
+            }
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, $"{nameof(ChangeScriptTarget)} failed.");
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Adds behavior for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
+    /// </summary>
+    private void AddBehavior()
+    {
+        try
+        {
+            if (SelectedElement is not { } selected) return;
+            Behaviors.Add(
+                selected,
+                _behaviorTrigger,
+                _behaviorAction,
+                BehaviorNeedsTarget ? ParseGuid(_behaviorTargetId) : null,
+                _behaviorAction == PublicationBehaviorAction.GoToPage ? ParseGuid(_behaviorTargetPageId) : null,
+                _behaviorAction == PublicationBehaviorAction.CallMethod ? _behaviorMethod : null,
+                _behaviorAction is PublicationBehaviorAction.SetText or PublicationBehaviorAction.SetValue ? _behaviorValue : null,
+                _behaviorAction == PublicationBehaviorAction.OpenUrl ? _behaviorUrl : null);
+            RefreshAdvancedJson();
+            _previewRevision++;
+            Notifications.Success("Behavior added to the selected publication object.", "Panel Studio", nameof(PanelStudio));
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, $"{nameof(AddBehavior)} failed.");
+            Notifications.Error("The publication behavior could not be added.", "Panel Studio", nameof(PanelStudio));
+        }
+    }
+
+    /// <summary>Adds a common click behavior without requiring the full behavior form.</summary>
+    /// <param name="action">Action value supplied to the panel studio operation and used when producing its result.</param>
+    private void AddQuickBehavior(PublicationBehaviorAction action)
+    {
+        try
+        {
+            _behaviorTrigger = PublicationBehaviorTrigger.Click;
+            _behaviorAction = action;
+            AddBehavior();
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, $"{nameof(AddQuickBehavior)} failed.");
+            Notifications.Error("The quick publication behavior could not be added.", "Panel Studio", nameof(PanelStudio));
+        }
+    }
+
+    /// <summary>Removes one persisted publication behavior from the selected element.</summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    private void RemoveBehavior(Guid id)
+    {
+        try
+        {
+            if (SelectedElement is not { } selected) return;
+            selected.Behaviors.RemoveAll(item => item.Id == id);
+            RefreshAdvancedJson();
+            _previewRevision++;
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, $"{nameof(RemoveBehavior)} failed.");
+            Notifications.Error("The publication behavior could not be removed.", "Panel Studio", nameof(PanelStudio));
+        }
+    }
+
+    /// <summary>Returns a readable target address for a persisted publication behavior.</summary>
+    /// <param name="behavior">Behavior value supplied to the panel studio operation and used when producing its result.</param>
+    /// <returns>The string produced by the operation.</returns>
+    private string BehaviorTargetAddress(PublicationBehavior behavior)
+    {
+        try
+        {
+            if (behavior.Action == PublicationBehaviorAction.GoToPage && behavior.TargetPageId is { } pageId)
+            {
+                var page = Document.Pages.FirstOrDefault(item => item.Id == pageId);
+                return page is null ? $"page:{pageId}" : Behaviors.Address(Document, page);
+            }
+            if (behavior.Action == PublicationBehaviorAction.OpenUrl) return behavior.Url;
+            if (behavior.TargetElementId is not { } targetId) return SelectedObjectAddress;
+            return BehaviorTargets.FirstOrDefault(item => item.ElementId == targetId)?.Address ?? $"element:{targetId}";
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, $"{nameof(BehaviorTargetAddress)} failed.");
+            return "Target unavailable";
+        }
+    }
+
+    /// <summary>Returns or creates the explicitly enabled click custom-script action for a component.</summary>
+    /// <param name="component">Component value supplied to the panel studio operation and used when producing its result.</param>
+    /// <returns>The publication component action produced by the operation.</returns>
+    private PublicationComponentAction EnsureClickScriptAction(DevExtremeComponentElement component)
+    {
+        try
+        {
+            component.AllowCustomScript = true;
+            var action = component.Actions.FirstOrDefault(item =>
+                item.Trigger == PublicationComponentActionTrigger.Click &&
+                item.Action == PublicationComponentActionKind.CustomScript);
+            if (action is not null) return action;
+
+            action = new PublicationComponentAction
+            {
+                Trigger = PublicationComponentActionTrigger.Click,
+                Action = PublicationComponentActionKind.CustomScript
+            };
+            component.Actions.Add(action);
+            return action;
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, $"{nameof(EnsureClickScriptAction)} failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Adds a generated object-interface method call to a component's click script.</summary>
+    /// <param name="component">Component value supplied to the panel studio operation and used when producing its result.</param>
+    private void AddGeneratedComponentScript(DevExtremeComponentElement component)
+    {
+        try
+        {
+            var address = ParseGuid(_scriptTargetId) is { } targetId
+                ? BehaviorTargets.FirstOrDefault(item => item.ElementId == targetId)?.Address ?? SelectedObjectAddress
+                : SelectedObjectAddress;
+            var method = ScriptCommonMethods.Contains(_scriptMethod, StringComparer.OrdinalIgnoreCase)
+                ? _scriptMethod
+                : ScriptCommonMethods.FirstOrDefault() ?? "refresh";
+            var action = EnsureClickScriptAction(component);
+            action.Script = Behaviors.AppendScript(action.Script, Behaviors.ScriptCall(address, method));
+            RefreshAdvancedJson();
+            _previewRevision++;
+            Notifications.Success($"Added {method}() through the publication object interface.", "JavaScript helper", nameof(PanelStudio));
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, $"{nameof(AddGeneratedComponentScript)} failed.");
+            Notifications.Error("The generated publication JavaScript could not be added.", "Panel Studio", nameof(PanelStudio));
+        }
+    }
+
+    /// <summary>Adds one ready-made publication JavaScript helper to a component's click script.</summary>
+    /// <param name="component">Component value supplied to the panel studio operation and used when producing its result.</param>
+    /// <param name="helperKey">Helper key value supplied to the panel studio operation and used when producing its result.</param>
+    private void AddScriptHelper(DevExtremeComponentElement component, string helperKey)
+    {
+        try
+        {
+            var helper = Behaviors.FindScriptHelper(helperKey, htmlEmbed: false);
+            if (helper is null) return;
+            var action = EnsureClickScriptAction(component);
+            action.Script = Behaviors.AppendScript(action.Script, helper.Code);
+            RefreshAdvancedJson();
+            _previewRevision++;
+            Notifications.Success($"Added JavaScript helper: {helper.Label}.", "JavaScript helper", nameof(PanelStudio));
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, $"{nameof(AddScriptHelper)} failed.");
+            Notifications.Error("The selected JavaScript helper could not be added.", "Panel Studio", nameof(PanelStudio));
+        }
+    }
+
+    /// <summary>Adds one ready-made JavaScript helper to an explicitly enabled isolated HTML sandbox.</summary>
+    /// <param name="html">Html value supplied to the panel studio operation and used when producing its result.</param>
+    /// <param name="helperKey">Helper key value supplied to the panel studio operation and used when producing its result.</param>
+    private void AddHtmlScriptHelper(HtmlEmbedElement html, string helperKey)
+    {
+        try
+        {
+            var helper = Behaviors.FindScriptHelper(helperKey, htmlEmbed: true);
+            if (helper is null) return;
+            html.AllowScripts = true;
+            html.JavaScript = Behaviors.AppendScript(html.JavaScript, helper.Code);
+            RefreshAdvancedJson();
+            _previewRevision++;
+            Notifications.Success($"Added sandbox JavaScript helper: {helper.Label}.", "JavaScript helper", nameof(PanelStudio));
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, $"{nameof(AddHtmlScriptHelper)} failed.");
+            Notifications.Error("The selected HTML JavaScript helper could not be added.", "Panel Studio", nameof(PanelStudio));
+        }
+    }
+
+    /// <summary>Adds an on-click click behavior from the component context menu.</summary>
+    private void QuickBehaviorClick()
+    {
+        try
+        {
+            AddQuickBehavior(PublicationBehaviorAction.Click);
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, $"{nameof(QuickBehaviorClick)} failed.");
+            Notifications.Error("The quick behavior could not be added.", "Panel Studio", nameof(PanelStudio));
+        }
+    }
+    /// <summary>Adds an on-click focus behavior from the component context menu.</summary>
+    private void QuickBehaviorFocus()
+    {
+        try
+        {
+            AddQuickBehavior(PublicationBehaviorAction.Focus);
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, $"{nameof(QuickBehaviorFocus)} failed.");
+            Notifications.Error("The quick behavior could not be added.", "Panel Studio", nameof(PanelStudio));
+        }
+    }
+    /// <summary>Adds an on-click refresh behavior from the component context menu.</summary>
+    private void QuickBehaviorRefresh()
+    {
+        try
+        {
+            AddQuickBehavior(PublicationBehaviorAction.RefreshData);
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, $"{nameof(QuickBehaviorRefresh)} failed.");
+            Notifications.Error("The quick behavior could not be added.", "Panel Studio", nameof(PanelStudio));
+        }
+    }
+    /// <summary>Adds an on-click visibility-toggle behavior from the component context menu.</summary>
+    private void QuickBehaviorToggle()
+    {
+        try
+        {
+            AddQuickBehavior(PublicationBehaviorAction.ToggleVisibility);
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, $"{nameof(QuickBehaviorToggle)} failed.");
+            Notifications.Error("The quick behavior could not be added.", "Panel Studio", nameof(PanelStudio));
+        }
+    }
+    /// <summary>Adds an on-click show behavior from the component context menu.</summary>
+    private void QuickBehaviorShow()
+    {
+        try
+        {
+            AddQuickBehavior(PublicationBehaviorAction.Show);
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, $"{nameof(QuickBehaviorShow)} failed.");
+            Notifications.Error("The quick behavior could not be added.", "Panel Studio", nameof(PanelStudio));
+        }
+    }
+    /// <summary>Adds an on-click hide behavior from the component context menu.</summary>
+    private void QuickBehaviorHide()
+    {
+        try
+        {
+            AddQuickBehavior(PublicationBehaviorAction.Hide);
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, $"{nameof(QuickBehaviorHide)} failed.");
+            Notifications.Error("The quick behavior could not be added.", "Panel Studio", nameof(PanelStudio));
+        }
+    }
+    /// <summary>Adds an on-click enable behavior from the component context menu.</summary>
+    private void QuickBehaviorEnable()
+    {
+        try
+        {
+            AddQuickBehavior(PublicationBehaviorAction.Enable);
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, $"{nameof(QuickBehaviorEnable)} failed.");
+            Notifications.Error("The quick behavior could not be added.", "Panel Studio", nameof(PanelStudio));
+        }
+    }
+    /// <summary>Adds an on-click disable behavior from the component context menu.</summary>
+    private void QuickBehaviorDisable()
+    {
+        try
+        {
+            AddQuickBehavior(PublicationBehaviorAction.Disable);
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, $"{nameof(QuickBehaviorDisable)} failed.");
+            Notifications.Error("The quick behavior could not be added.", "Panel Studio", nameof(PanelStudio));
+        }
+    }
+
+    /// <summary>Prepares the inspector behavior editor after the context-menu Configure command.</summary>
+    private void SelectBehaviorEditor()
+    {
+        try
+        {
+            _behaviorTrigger = PublicationBehaviorTrigger.Click;
+            _behaviorAction = PublicationBehaviorAction.Click;
+            _behaviorTargetId = string.Empty;
+            _behaviorMethod = SelectedCommonMethods.FirstOrDefault() ?? "click";
+            Notifications.Information("Behavior editor is ready in the right-side inspector.", "Panel Studio", nameof(PanelStudio));
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, $"{nameof(SelectBehaviorEditor)} failed.");
+            Notifications.Error("The behavior editor could not be prepared.", "Panel Studio", nameof(PanelStudio));
         }
     }
 

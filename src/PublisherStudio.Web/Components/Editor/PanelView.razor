@@ -1,5 +1,6 @@
 @namespace PublisherStudio.Components.Editor
 @inject PublicationMediaAssetStore MediaAssets
+@inject PublicationBehaviorService Behaviors
 
 @inject ILogger<PanelView> Logger
 <div class="publication-panel panel-nav-@Item.NavigationMode.ToString().ToLowerInvariant() panel-layout-@Item.LayoutMode.ToString().ToLowerInvariant() @(DesignerMode ? "panel-designer-preview" : null) @(ForceCanvasLayout ? "panel-force-canvas" : null)"
@@ -28,6 +29,8 @@
                          data-panel-element
                          data-element-id="@element.Id" data-element-name="@element.Name"
                          data-element-kind="@element.Kind.ToString().ToLowerInvariant()"
+                         data-object-address="@Behaviors.Address(Document, Item, view, element)"
+                         data-behaviors="@Behaviors.Serialize(element)"
                          data-interaction="@AnimationData.Interaction(element)"
                          data-interaction-action="@element.Interaction.Action"
                          data-media-kind="@(element is PublicationMediaElement ? element.Kind.ToString().ToLowerInvariant() : null)"

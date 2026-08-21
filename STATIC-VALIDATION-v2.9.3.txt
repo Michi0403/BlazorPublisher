@@ -1,0 +1,19 @@
+PublisherStudio 2.9.3 source/static validation
+===============================================
+No dotnet/MSBuild/NuGet restore/publish/EF command was run.
+No private DevExpress license or generated licensed vendor payload is included.
+
+PASS  JavaScript syntax: componentRuntime.js, publisherInterop.js, localizationRuntime.js, prepare-devexpress-assets.mjs
+PASS  JavaScript diagnostics inventory mirror: 16 maintained browser files
+PASS  XML documentation: 6,124 C# declarations; 3,352 Razor members
+PASS  Application architecture policy
+PASS  Async continuation policy: 78 source files / 1,088 await tokens
+PASS  Service resilience: 1,325 service methods + 4 policy-compliant iterators
+PASS  Component resilience: 2,639 component methods
+PASS  Panel Studio persistence audit
+PASS  Iterator exception policy
+PASS  Prerender JavaScript safety audit
+PASS  Text-service ownership baseline mirror: 0 new component/controller operations
+PASS  Localization parity: 3,307 keys in each of de-DE/en-US/es-ES/fr-FR/ja-JP/uk-UA
+PASS  Explicit render-mode directives unchanged from 2.9.2
+PASS  Dedicated 2.9.3 release audit

@@ -346,7 +346,7 @@
                                         <select value="@_behaviorMethod" @onchange="args => _behaviorMethod = Text(args)">
                                             @foreach (var method in SelectedCommonMethods)
                                             {
-                                                <option value="@method">@method()</option>
+                                                <option value="@method">@(method + "()")</option>
                                             }
                                         </select>
                                     </label>
@@ -362,7 +362,7 @@
                                             <option value="">Choose page</option>
                                             @foreach (var page in Document.Pages)
                                             {
-                                                <option value="@page.Id">@page.Name</option>
+                                                <option value="@(page.Id)">@(page.Name)</option>
                                             }
                                         </select>
                                     </label>
@@ -418,7 +418,7 @@
                                             <select value="@_scriptMethod" @onchange="args => _scriptMethod = Text(args)">
                                                 @foreach (var method in ScriptCommonMethods)
                                                 {
-                                                    <option value="@method">@method()</option>
+                                                    <option value="@method">@(method + "()")</option>
                                                 }
                                             </select>
                                         </label>
@@ -427,7 +427,7 @@
                                         <button type="button" @onclick="() => AddGeneratedComponentScript(scriptableComponent)">Add click script</button>
                                         @foreach (var helper in ScriptHelpers)
                                         {
-                                            <button type="button" title="@helper.Description" @onclick="() => AddScriptHelper(scriptableComponent, helper.Key)">@helper.Label</button>
+                                            <button type="button" title="@(helper.Description)" @onclick="() => AddScriptHelper(scriptableComponent, helper.Key)">@(helper.Label)</button>
                                         }
                                     </div>
                                     <small class="field-help">PublisherStudio creates the custom-script action and enables it explicitly. No runtime eval is used for the ordinary behavior rules above.</small>
@@ -555,7 +555,7 @@
                                     <div class="panel-inline-actions">
                                         @foreach (var helper in HtmlScriptHelpers)
                                         {
-                                            <button type="button" title="@helper.Description" @onclick="() => AddHtmlScriptHelper(html, helper.Key)">@helper.Label</button>
+                                            <button type="button" title="@(helper.Description)" @onclick="() => AddHtmlScriptHelper(html, helper.Key)">@(helper.Label)</button>
                                         }
                                     </div>
                                     <small class="field-help">These snippets run only inside this iframe sandbox. Publication-component scripts use the object interface shown in Behavior &amp; object interface.</small>

@@ -3290,5 +3290,20 @@
   "Text.Rendering␠the␠selected␠range␠with␠the␠current␠Video␠Studio␠layers␠and␠effects.␠The␠browser␠writes␠only␠the␠video␠canvas␠and␠audio␠stream;␠player␠controls␠and␠editor␠chrome␠are␠not␠captured.": "選択範囲を現在の Video Studio レイヤーとエフェクトでレンダリングしています。ブラウザーは動画キャンバスと音声ストリームだけを書き出し、プレーヤー操作部やエディター UI は記録しません。",
   "Text.Rendered␠video␠export␠could␠not␠start": "レンダリング済み動画の書き出しを開始できませんでした",
   "Text.Rendered␠video␠exported": "レンダリング済み動画を書き出しました",
-  "Text.Rendered␠video␠export␠failed": "レンダリング済み動画の書き出しに失敗しました"
+  "Text.Rendered␠video␠export␠failed": "レンダリング済み動画の書き出しに失敗しました",
+  "Localization.Editor.PageTitle": "PublisherStudio 翻訳",
+  "Localization.Editor.Title": "翻訳エディター",
+  "Localization.Editor.Intro": "配布済みのソースファイルを変更せずに、ブラウザーとアプリケーションの文字列を編集します。上書きは LocalAppData に保存されます。",
+  "Localization.Editor.Back": "Publisher に戻る",
+  "Localization.Editor.Culture": "言語",
+  "Localization.Editor.Filter": "フィルター",
+  "Localization.Editor.SearchPlaceholder": "キーまたはテキストを検索",
+  "Localization.Editor.Saving": "保存中…",
+  "Localization.Editor.Save": "上書きを保存",
+  "Localization.Editor.UseLanguage": "この言語を使用",
+  "Localization.Editor.LoadFailed": "翻訳を読み込めませんでした",
+  "Localization.Editor.Loaded": "{1} の文字列を {0} 件読み込みました。",
+  "Localization.Editor.Saved": "{1} の上書きを {0} 件保存しました。",
+  "Localization.Editor.SavedTitle": "翻訳を保存しました",
+  "Localization.Editor.SaveFailed": "翻訳は保存されませんでした"
 }

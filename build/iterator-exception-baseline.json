@@ -1,6 +1,0 @@
-[
-  "src/PublisherStudio.Web/Services/Automation/BusinessObjectContextService.cs|private IEnumerable<Type> UnwrapTypes(Type type)|iterator requires logging",
-  "src/PublisherStudio.Web/Services/Automation/BusinessObjectContextService.cs|private IEnumerable<Type> UnwrapTypes(Type type)|iterator requires try/finally",
-  "src/PublisherStudio.Web/Services/OpenScad/OpenScadDocumentService.cs|private IEnumerable<OpenScadNode> Enumerate(IEnumerable<OpenScadNode> nodes)|iterator requires logging",
-  "src/PublisherStudio.Web/Services/OpenScad/OpenScadDocumentService.cs|private IEnumerable<OpenScadNode> Enumerate(IEnumerable<OpenScadNode> nodes)|iterator requires try/finally"
-]

@@ -3290,5 +3290,20 @@
   "Text.Rendering␠the␠selected␠range␠with␠the␠current␠Video␠Studio␠layers␠and␠effects.␠The␠browser␠writes␠only␠the␠video␠canvas␠and␠audio␠stream;␠player␠controls␠and␠editor␠chrome␠are␠not␠captured.": "Вибраний діапазон рендериться з поточними шарами та ефектами Video Studio. Браузер записує лише відеополотно й аудіопотік; елементи керування програвачем та інтерфейс редактора не захоплюються.",
   "Text.Rendered␠video␠export␠could␠not␠start": "Не вдалося запустити експорт відрендереного відео",
   "Text.Rendered␠video␠exported": "Відрендерене відео експортовано",
-  "Text.Rendered␠video␠export␠failed": "Помилка експорту відрендереного відео"
+  "Text.Rendered␠video␠export␠failed": "Помилка експорту відрендереного відео",
+  "Localization.Editor.PageTitle": "Переклади PublisherStudio",
+  "Localization.Editor.Title": "Редактор перекладів",
+  "Localization.Editor.Intro": "Редагуйте рядки браузера й застосунку без зміни файлів вихідного коду постачання. Перевизначення зберігаються в LocalAppData.",
+  "Localization.Editor.Back": "Назад до Publisher",
+  "Localization.Editor.Culture": "Мова",
+  "Localization.Editor.Filter": "Фільтр",
+  "Localization.Editor.SearchPlaceholder": "Пошук ключа або тексту",
+  "Localization.Editor.Saving": "Збереження…",
+  "Localization.Editor.Save": "Зберегти перевизначення",
+  "Localization.Editor.UseLanguage": "Використовувати цю мову",
+  "Localization.Editor.LoadFailed": "Не вдалося завантажити переклади",
+  "Localization.Editor.Loaded": "Завантажено {0} рядків для {1}.",
+  "Localization.Editor.Saved": "Збережено {0} перевизначень для {1}.",
+  "Localization.Editor.SavedTitle": "Переклади збережено",
+  "Localization.Editor.SaveFailed": "Переклади не було збережено"
 }

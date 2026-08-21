@@ -3290,5 +3290,20 @@
   "Text.Rendering␠the␠selected␠range␠with␠the␠current␠Video␠Studio␠layers␠and␠effects.␠The␠browser␠writes␠only␠the␠video␠canvas␠and␠audio␠stream;␠player␠controls␠and␠editor␠chrome␠are␠not␠captured.": "Der ausgewählte Bereich wird mit den aktuellen Video-Studio-Ebenen und -Effekten gerendert. Der Browser schreibt nur die Videoleinwand und den Audiostream; Player-Steuerelemente und die Editor-Oberfläche werden nicht aufgezeichnet.",
   "Text.Rendered␠video␠export␠could␠not␠start": "Gerenderter Videoexport konnte nicht gestartet werden",
   "Text.Rendered␠video␠exported": "Gerendertes Video exportiert",
-  "Text.Rendered␠video␠export␠failed": "Gerenderter Videoexport fehlgeschlagen"
+  "Text.Rendered␠video␠export␠failed": "Gerenderter Videoexport fehlgeschlagen",
+  "Localization.Editor.PageTitle": "PublisherStudio-Übersetzungen",
+  "Localization.Editor.Title": "Übersetzungseditor",
+  "Localization.Editor.Intro": "Bearbeite Browser- und Anwendungstexte, ohne die ausgelieferten Quelldateien zu ändern. Überschreibungen werden in LocalAppData gespeichert.",
+  "Localization.Editor.Back": "Zurück zu Publisher",
+  "Localization.Editor.Culture": "Sprache",
+  "Localization.Editor.Filter": "Filter",
+  "Localization.Editor.SearchPlaceholder": "Schlüssel oder Text suchen",
+  "Localization.Editor.Saving": "Speichern…",
+  "Localization.Editor.Save": "Überschreibungen speichern",
+  "Localization.Editor.UseLanguage": "Diese Sprache verwenden",
+  "Localization.Editor.LoadFailed": "Übersetzungen konnten nicht geladen werden",
+  "Localization.Editor.Loaded": "{0} Texte für {1} geladen.",
+  "Localization.Editor.Saved": "{0} Überschreibungen für {1} gespeichert.",
+  "Localization.Editor.SavedTitle": "Übersetzungen gespeichert",
+  "Localization.Editor.SaveFailed": "Übersetzungen wurden nicht gespeichert"
 }

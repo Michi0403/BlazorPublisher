@@ -3290,5 +3290,20 @@
   "Text.Rendering␠the␠selected␠range␠with␠the␠current␠Video␠Studio␠layers␠and␠effects.␠The␠browser␠writes␠only␠the␠video␠canvas␠and␠audio␠stream;␠player␠controls␠and␠editor␠chrome␠are␠not␠captured.": "Se está renderizando el intervalo seleccionado con las capas y efectos actuales de Video Studio. El navegador escribe únicamente el lienzo de vídeo y el flujo de audio; no se capturan los controles del reproductor ni la interfaz del editor.",
   "Text.Rendered␠video␠export␠could␠not␠start": "No se pudo iniciar la exportación de vídeo renderizado",
   "Text.Rendered␠video␠exported": "Vídeo renderizado exportado",
-  "Text.Rendered␠video␠export␠failed": "Falló la exportación de vídeo renderizado"
+  "Text.Rendered␠video␠export␠failed": "Falló la exportación de vídeo renderizado",
+  "Localization.Editor.PageTitle": "Traducciones de PublisherStudio",
+  "Localization.Editor.Title": "Editor de traducciones",
+  "Localization.Editor.Intro": "Edita los textos del navegador y de la aplicación sin cambiar los archivos fuente distribuidos. Las anulaciones se guardan en LocalAppData.",
+  "Localization.Editor.Back": "Volver a Publisher",
+  "Localization.Editor.Culture": "Idioma",
+  "Localization.Editor.Filter": "Filtro",
+  "Localization.Editor.SearchPlaceholder": "Buscar clave o texto",
+  "Localization.Editor.Saving": "Guardando…",
+  "Localization.Editor.Save": "Guardar anulaciones",
+  "Localization.Editor.UseLanguage": "Usar este idioma",
+  "Localization.Editor.LoadFailed": "No se pudieron cargar las traducciones",
+  "Localization.Editor.Loaded": "Se cargaron {0} textos para {1}.",
+  "Localization.Editor.Saved": "Se guardaron {0} anulaciones para {1}.",
+  "Localization.Editor.SavedTitle": "Traducciones guardadas",
+  "Localization.Editor.SaveFailed": "Las traducciones no se guardaron"
 }

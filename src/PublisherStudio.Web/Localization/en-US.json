@@ -3290,5 +3290,20 @@
   "Text.Rendering␠the␠selected␠range␠with␠the␠current␠Video␠Studio␠layers␠and␠effects.␠The␠browser␠writes␠only␠the␠video␠canvas␠and␠audio␠stream;␠player␠controls␠and␠editor␠chrome␠are␠not␠captured.": "Rendering the selected range with the current Video Studio layers and effects. The browser writes only the video canvas and audio stream; player controls and editor chrome are not captured.",
   "Text.Rendered␠video␠export␠could␠not␠start": "Rendered video export could not start",
   "Text.Rendered␠video␠exported": "Rendered video exported",
-  "Text.Rendered␠video␠export␠failed": "Rendered video export failed"
+  "Text.Rendered␠video␠export␠failed": "Rendered video export failed",
+  "Localization.Editor.PageTitle": "PublisherStudio translations",
+  "Localization.Editor.Title": "Translation editor",
+  "Localization.Editor.Intro": "Edit browser and application strings without changing the shipped source files. Overrides are stored in LocalAppData.",
+  "Localization.Editor.Back": "Back to Publisher",
+  "Localization.Editor.Culture": "Culture",
+  "Localization.Editor.Filter": "Filter",
+  "Localization.Editor.SearchPlaceholder": "Search key or text",
+  "Localization.Editor.Saving": "Saving…",
+  "Localization.Editor.Save": "Save overrides",
+  "Localization.Editor.UseLanguage": "Use this language",
+  "Localization.Editor.LoadFailed": "Translations could not be loaded",
+  "Localization.Editor.Loaded": "Loaded {0} strings for {1}.",
+  "Localization.Editor.Saved": "Saved {0} {1} string overrides.",
+  "Localization.Editor.SavedTitle": "Translations saved",
+  "Localization.Editor.SaveFailed": "Translations were not saved"
 }

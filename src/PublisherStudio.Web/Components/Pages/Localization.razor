@@ -6,30 +6,30 @@
 @inject ILogger<Localization> Logger
 @inject NavigationManager Navigation
 
-<PageTitle>PublisherStudio translations</PageTitle>
+<PageTitle>@L("Localization.Editor.PageTitle", "PublisherStudio translations")</PageTitle>
 
 <main class="localization-editor-page">
     <header>
         <div>
             <p class="organic-plugin-kicker">PublisherStudio</p>
-            <h1>Translation editor</h1>
-            <p>Edit browser and application strings without changing the shipped source files. Overrides are stored in LocalAppData.</p>
+            <h1>@L("Localization.Editor.Title", "Translation editor")</h1>
+            <p>@L("Localization.Editor.Intro", "Edit browser and application strings without changing the shipped source files. Overrides are stored in LocalAppData.")</p>
         </div>
-        <button type="button" @onclick="Back">Back to Publisher</button>
+        <button type="button" @onclick="Back">@L("Localization.Editor.Back", "Back to Publisher")</button>
     </header>
 
     <section class="localization-editor-toolbar">
-        <label>Culture
+        <label>@L("Localization.Editor.Culture", "Culture")
             <select value="@_culture" @onchange="ChangeCultureAsync">
                 @foreach (var culture in LocalizationService.GetAvailableCultures())
                 {
-                    <option value="@culture">@culture</option>
+                    <option value="@culture">@LocalizationService.GetCultureDisplayName(culture)</option>
                 }
             </select>
         </label>
-        <label>Filter<input @bind="_filter" @bind:event="oninput" placeholder="Search key or text" /></label>
-        <button type="button" @onclick="SaveAsync" disabled="@_saving">@(_saving ? "Saving…" : "Save overrides")</button>
-        <button type="button" @onclick="ApplyCulture">Use this language</button>
+        <label>@L("Localization.Editor.Filter", "Filter")<input @bind="_filter" @bind:event="oninput" placeholder='@L("Localization.Editor.SearchPlaceholder", "Search key or text")' /></label>
+        <button type="button" @onclick="SaveAsync" disabled="@_saving">@(_saving ? L("Localization.Editor.Saving", "Saving…") : L("Localization.Editor.Save", "Save overrides"))</button>
+        <button type="button" @onclick="ApplyCulture">@L("Localization.Editor.UseLanguage", "Use this language")</button>
     </section>
 
     @if (!string.IsNullOrWhiteSpace(_status))
@@ -97,7 +97,7 @@
             {
                 Logger.LogError(exception, "Could not initialize the PublisherStudio localization editor.");
                 _status = exception.Message;
-                Notifications.Error(exception.Message, "Translations could not be loaded", nameof(Localization));
+                Notifications.Error(exception.Message, L("Localization.Editor.LoadFailed", "Translations could not be loaded"), nameof(Localization));
             }
     
         }
@@ -137,7 +137,7 @@
         try
         {
             _strings = new Dictionary<string, string>(LocalizationService.GetStrings(_culture), StringComparer.OrdinalIgnoreCase);
-            _status = $"Loaded {_strings.Count} strings for {_culture}.";
+            _status = string.Format(CultureInfo.CurrentCulture, L("Localization.Editor.Loaded", "Loaded {0} strings for {1}."), _strings.Count, LocalizationService.GetCultureDisplayName(_culture));
             Logger.LogInformation("Loaded {StringCount} localization strings for culture {Culture}.", _strings.Count, _culture);
     
         }
@@ -177,15 +177,15 @@
             try
             {
                 await LocalizationService.SaveOverridesAsync(_culture, _strings).ConfigureAwait(true);
-                _status = $"Saved {_strings.Count} {_culture} string overrides.";
+                _status = string.Format(CultureInfo.CurrentCulture, L("Localization.Editor.Saved", "Saved {0} {1} string overrides."), _strings.Count, LocalizationService.GetCultureDisplayName(_culture));
                 Logger.LogInformation("Saved {StringCount} localization overrides for culture {Culture}.", _strings.Count, _culture);
-                Notifications.Success(_status, "Translations saved", nameof(Localization));
+                Notifications.Success(_status, L("Localization.Editor.SavedTitle", "Translations saved"), nameof(Localization));
             }
             catch (Exception exception)
             {
                 Logger.LogError(exception, "Could not save localization overrides for culture {Culture}.", _culture);
                 _status = exception.Message;
-                Notifications.Error(exception.Message, "Translations were not saved", nameof(Localization));
+                Notifications.Error(exception.Message, L("Localization.Editor.SaveFailed", "Translations were not saved"), nameof(Localization));
             }
             finally { _saving = false; }
     
@@ -194,6 +194,24 @@
         {
             Logger.LogError(__componentMethodException, $"Component method {nameof(Localization)}.{nameof(SaveAsync)} failed.");
             throw;
+        }
+    }
+
+
+    /// <summary>Resolves one Translation Editor UI string through the existing file-localization service.</summary>
+    /// <param name="key">Localization catalog key.</param>
+    /// <param name="fallback">English fallback displayed when the catalog does not contain the key.</param>
+    /// <returns>The localized user-interface text.</returns>
+    private string L(string key, string fallback)
+    {
+        try
+        {
+            return LocalizationService.Get(key, CultureInfo.CurrentUICulture.Name, fallback);
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Translation Editor localization lookup failed for key {LocalizationKey}.", key);
+            return fallback;
         }
     }
 

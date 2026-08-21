@@ -1,20 +1,18 @@
-# PublisherStudio 2.9.1
+# PublisherStudio 2.9.2
 
-PublisherStudio 2.9.1 is a documentation-completeness release built forward from the 2.9.0 recovery-cancellation/WebM insertion source. It does not remove or replace the 2.9.0 runtime repairs.
+PublisherStudio 2.9.2 is the **Translation Editor Localization** release built forward from 2.9.1. It preserves the existing editor/runtime architecture and Panel Studio persistence behavior.
 
 ## Toolchain state retained
 
+- SDK policy: `10.0.301` with `latestFeature` roll-forward
 - Target framework: `net10.0`
 - DevExpress: `25.2.9`
-- dotnet-ef tool: `10.0.11`
-- Installer `Microsoft.Extensions.Logging`: `10.0.11`
-- SDK policy: `10.0.301` minimum with `latestFeature` roll-forward
 - LocalGPT 1-Wire protocol: `2.1.1`
 
-## Documentation completeness
+## Main changes
 
-PublisherStudio now enforces contextual XML documentation for maintained C# and Razor source, including private implementation members and individual enum values. Razor component partial classes and declarations inside `@code` blocks are part of the same source-quality gate. Empty contract tags are rejected.
+The Translation Editor now uses PublisherStudio's existing file-localization service for its own page title, labels, actions, status and notifications. Culture choices show localized culture display names instead of raw culture codes. Matching editor keys are present across the six maintained catalogs. Browser module cache identifiers were advanced with the application version.
 
-The release audit records 6,064 direct C# declarations and 3,311 explicit Razor `@code` declarations under the documentation gate.
+## Validation boundary
 
-See `CHANGELOG-v2.9.1-XML-DOCUMENTATION-COMPLETENESS.md` and `VALIDATION-v2.9.1-source.md`.
+This source package was not compiled with .NET/DevExpress in the preparation environment. Validation is source/static only. See `CHANGELOG-v2.9.2-TRANSLATION-EDITOR-LOCALIZATION.md` and `VALIDATION-v2.9.2-source.md`.

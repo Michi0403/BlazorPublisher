@@ -3290,5 +3290,20 @@
   "Text.Rendering␠the␠selected␠range␠with␠the␠current␠Video␠Studio␠layers␠and␠effects.␠The␠browser␠writes␠only␠the␠video␠canvas␠and␠audio␠stream;␠player␠controls␠and␠editor␠chrome␠are␠not␠captured.": "La plage sélectionnée est rendue avec les calques et effets actuels de Video Studio. Le navigateur n’écrit que le canevas vidéo et le flux audio ; les commandes du lecteur et l’interface de l’éditeur ne sont pas capturées.",
   "Text.Rendered␠video␠export␠could␠not␠start": "Impossible de démarrer l’export vidéo rendu",
   "Text.Rendered␠video␠exported": "Vidéo rendue exportée",
-  "Text.Rendered␠video␠export␠failed": "Échec de l’export vidéo rendu"
+  "Text.Rendered␠video␠export␠failed": "Échec de l’export vidéo rendu",
+  "Localization.Editor.PageTitle": "Traductions PublisherStudio",
+  "Localization.Editor.Title": "Éditeur de traductions",
+  "Localization.Editor.Intro": "Modifiez les textes du navigateur et de l’application sans changer les fichiers source livrés. Les remplacements sont stockés dans LocalAppData.",
+  "Localization.Editor.Back": "Retour à Publisher",
+  "Localization.Editor.Culture": "Langue",
+  "Localization.Editor.Filter": "Filtre",
+  "Localization.Editor.SearchPlaceholder": "Rechercher une clé ou un texte",
+  "Localization.Editor.Saving": "Enregistrement…",
+  "Localization.Editor.Save": "Enregistrer les remplacements",
+  "Localization.Editor.UseLanguage": "Utiliser cette langue",
+  "Localization.Editor.LoadFailed": "Les traductions n’ont pas pu être chargées",
+  "Localization.Editor.Loaded": "{0} textes chargés pour {1}.",
+  "Localization.Editor.Saved": "{0} remplacements enregistrés pour {1}.",
+  "Localization.Editor.SavedTitle": "Traductions enregistrées",
+  "Localization.Editor.SaveFailed": "Les traductions n’ont pas été enregistrées"
 }

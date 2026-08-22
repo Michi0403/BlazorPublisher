@@ -2,6 +2,7 @@
 @inject PanelDocumentService Panels
 @inject IPublisherTemplateLibraryService TemplateLibrary
 @inject IFileLocalizationService Localization
+@inject IUserNotificationService Notifications
 @inject ILogger<PanelLibrary> Logger
 
 <section class="panel-library-dock" aria-label='@LT("Panel and dashboard library")'>
@@ -116,6 +117,7 @@
             Logger.LogError(exception, "Panel Library local Div-template discovery failed.");
             _divTemplates = [];
             _templateError = LT("PublisherStudio could not read the local Div template library.");
+            Notifications.Error(_templateError, LT("Panel library"), nameof(PanelLibrary));
         }
     }
 

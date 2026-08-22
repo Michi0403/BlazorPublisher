@@ -1,9 +1,9 @@
-# PublisherStudio 2.9.5
+# PublisherStudio 2.9.7
 
-PublisherStudio 2.9.5 is the **Panel Studio Razor Parser Compatibility Fix** release.
+PublisherStudio 2.9.7 is the **Build and Architecture Compliance Repair** release.
 
-It retains the complete 2.9.4 DevExtreme 25.2.9 runtime-license provenance repair and the 2.9.3 Panel Studio behavior/object-interface work, while correcting Razor expressions in the new behavior inspector that failed the authoritative Windows build with RZ9979, RZ2005, RZ1011, RZ1002 and CS0149.
+It retains the complete 2.9.6 signal/media/template-library feature set while addressing the two defects exposed by the authoritative Windows build: the New-from-template component now satisfies the repository catch/log/user-notification boundary, and Panel Studio no longer declares colliding `templateId` locals that produced CS0136.
 
-The source targets .NET 10 and DevExpress/DevExtreme 25.2.9. This archive is **SOURCE-NOT-COMPILED**; the user's licensed Windows build remains authoritative.
+The source targets .NET 10 and DevExpress/DevExtreme 25.2.9. This archive is **SOURCE-NOT-COMPILED** in the preparation environment; the user's licensed Windows build remains authoritative.
 
-See `CHANGELOG-v2.9.5-PANEL-STUDIO-RAZOR-PARSER-COMPATIBILITY.md` and `VALIDATION-v2.9.5-source.md`.
+See `CHANGELOG-v2.9.7-BUILD-ARCHITECTURE-COMPLIANCE-REPAIR.md` and `VALIDATION-v2.9.7-source.md`.

@@ -1425,6 +1425,10 @@
         {
             _localDivTemplates = [];
             Logger.LogWarning(exception, "Panel Studio could not refresh the local Div template palette.");
+            Notifications.Warning(
+                "PublisherStudio could not read the local Div template library.",
+                "Panel Studio",
+                nameof(PanelStudio));
         }
     }
 
@@ -1439,14 +1443,14 @@
         {
             if (toolId.StartsWith("divtemplate:", StringComparison.OrdinalIgnoreCase))
             {
-                var templateId = toolId["divtemplate:".Length..];
+                var divTemplateId = toolId["divtemplate:".Length..];
                 _selectedTemplateId = null;
-                return TemplateLibrary.CreateDivTemplate(templateId, Document);
+                return TemplateLibrary.CreateDivTemplate(divTemplateId, Document);
             }
             if (toolId.StartsWith("template:", StringComparison.OrdinalIgnoreCase)
-                && Guid.TryParse(toolId["template:".Length..], out var templateId))
+                && Guid.TryParse(toolId["template:".Length..], out var componentTemplateId))
             {
-                var template = Document.ComponentTemplates.FirstOrDefault(item => item.Id == templateId);
+                var template = Document.ComponentTemplates.FirstOrDefault(item => item.Id == componentTemplateId);
                 if (template is null) return null;
                 _selectedTemplateId = template.Id;
                 var clone = Files.CloneElement(template.Prototype);

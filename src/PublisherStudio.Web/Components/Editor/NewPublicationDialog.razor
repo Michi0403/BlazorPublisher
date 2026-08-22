@@ -1,6 +1,7 @@
 @namespace PublisherStudio.Components.Editor
 @inject IPublisherTemplateLibraryService TemplateLibrary
 @inject IFileLocalizationService Localization
+@inject IUserNotificationService Notifications
 @inject ILogger<NewPublicationDialog> Logger
 
 @if (Visible)
@@ -120,6 +121,7 @@
             Logger.LogError(exception, "New-publication template discovery failed.");
             _templates = [];
             _error = LT("PublisherStudio could not read the local publication template library.");
+            Notifications.Error(_error, LT("New from template"), nameof(NewPublicationDialog));
         }
     }
 

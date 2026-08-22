@@ -83,12 +83,12 @@
     <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(AsyncContinuationScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
   </Target>
 
-  <!--<Target Name="AssertPublisherComponentDiagnostics"
+  <Target Name="AssertPublisherComponentDiagnostics"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherAsyncContinuationPolicy"
           Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipComponentDiagnosticsGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
     <Error Condition="!Exists('$(ComponentDiagnosticsScript)')" Text="Component diagnostics guard script is missing: $(ComponentDiagnosticsScript)" />
     <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(ComponentDiagnosticsScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
-  </Target>-->
+  </Target>
 
   <Target Name="AssertPublisherComponentSafety"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherComponentDiagnostics"

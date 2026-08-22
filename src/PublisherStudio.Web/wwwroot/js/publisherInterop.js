@@ -7812,7 +7812,7 @@ async function buildPublisherSingleHtml(mode, title, exportOptions = {}) { try {
                 throw new Error(`Prepared DevExtreme asset hash mismatch for ${manifestPath}. Clear browser cache and run Prepare-DevExpressAssets.cmd again.`);
             }
         }
-    } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:verifyPreparedTextAsset@2.9.6', __javascriptError); throw __javascriptError; } };
+    } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:verifyPreparedTextAsset@2.9.7', __javascriptError); throw __javascriptError; } };
     await Promise.all([
         verifyPreparedTextAsset('devextreme-dist/js/dx.all.js', devExtremeSource),
         verifyPreparedTextAsset('devextreme-dist/css/dx.light.css', devExtremeCss)

@@ -1,9 +1,18 @@
 @namespace PublisherStudio.Components.Editor
 @inject PanelDocumentService Panels
-
+@inject IPublisherTemplateLibraryService TemplateLibrary
+@inject IFileLocalizationService Localization
 @inject ILogger<PanelLibrary> Logger
-<section class="panel-library-dock" aria-label="Panel and dashboard library">
-    <header><div><strong>Panel library</strong><small>Reusable live views built from PublisherStudio components.</small></div><button type="button" class="window-close" @onclick="Close">×</button></header>
+
+<section class="panel-library-dock" aria-label='@LT("Panel and dashboard library")'>
+    <header>
+        <div><strong>@LT("Panel library")</strong><small>@LT("Reusable live views built from PublisherStudio components.")</small></div>
+        <button type="button" class="window-close" aria-label='@LT("Close Panel library")' @onclick="Close">×</button>
+    </header>
+    <div class="panel-library-section-heading">
+        <strong>@LT("Built-in panels")</strong>
+        <small>@LT("Maintained layouts included with PublisherStudio.")</small>
+    </div>
     <div class="panel-library-grid">
         @foreach (var preset in Panels.GetPresets())
         {
@@ -15,19 +24,111 @@
             </button>
         }
     </div>
+
+    <div class="panel-library-section-heading panel-library-local-heading">
+        <div>
+            <strong>@LT("Local Div templates")</strong>
+            <small>@LT("Reusable Panel / Div compositions loaded from your local template folder.")</small>
+        </div>
+        <button type="button" class="publisher-dialog-button" @onclick="ReloadTemplates">@LT("Reload templates")</button>
+    </div>
+    <code class="panel-library-template-path">@TemplateLibrary.DivTemplateDirectory</code>
+    @if (!string.IsNullOrWhiteSpace(_templateError))
+    {
+        <div class="panel-library-template-error" role="alert">@_templateError</div>
+    }
+    @if (_divTemplates.Count == 0)
+    {
+        <div class="panel-library-template-empty">@LT("Add PanelElement template JSON files to the DivTemplates folder, then reload.")</div>
+    }
+    else
+    {
+        <div class="panel-library-grid panel-library-template-grid">
+            @foreach (var template in _divTemplates)
+            {
+                <button type="button" class="panel-library-card" @onclick="() => InsertTemplate.InvokeAsync(template.Id)">
+                    <i class="@template.IconCssClass"></i>
+                    <strong>@template.Name</strong>
+                    <small>@template.Description</small>
+                    <span>@template.Category · @template.FileName</span>
+                </button>
+            }
+        </div>
+    }
 </section>
 
 @code {
+    /// <summary>Stores valid LocalApplicationData Div-template descriptors displayed beside built-in panel presets.</summary>
+    private IReadOnlyList<DivTemplateDescriptor> _divTemplates = [];
+    /// <summary>Stores a recoverable local Div-template discovery error for the library surface.</summary>
+    private string _templateError = string.Empty;
 
-    /// <summary>
-    /// Gets or sets the insert value that forms part of the panel library state consumed or produced by the surrounding workflow.
-    /// </summary>
-    /// <value>The insert value exposed by <see cref="PanelLibrary"/>.</value>
+    /// <summary>Gets or sets the callback used to insert one built-in Panel Library preset.</summary>
+    /// <value>The built-in preset insertion callback.</value>
     [Parameter] public EventCallback<string> Insert { get; set; }
-    /// <summary>
-    /// Gets or sets the close value that forms part of the panel library state consumed or produced by the surrounding workflow.
-    /// </summary>
-    /// <value>The close value exposed by <see cref="PanelLibrary"/>.</value>
+    /// <summary>Gets or sets the callback used to insert one LocalApplicationData Div template.</summary>
+    /// <value>The local Div-template insertion callback.</value>
+    [Parameter] public EventCallback<string> InsertTemplate { get; set; }
+    /// <summary>Gets or sets the callback used to close the Panel Library.</summary>
+    /// <value>The close callback exposed by <see cref="PanelLibrary"/>.</value>
     [Parameter] public EventCallback Close { get; set; }
 
+    /// <summary>Loads local Div-template descriptors when the Panel Library is initialized.</summary>
+    protected override void OnInitialized()
+    {
+        try
+        {
+            Logger.LogTrace("Initializing the Panel Library local Div-template catalog.");
+            LoadTemplates();
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Initializing the Panel Library local Div-template catalog failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Reloads local Div-template descriptors without disturbing the open publication.</summary>
+    private void ReloadTemplates()
+    {
+        try
+        {
+            Logger.LogTrace("Reloading the Panel Library local Div-template catalog.");
+            LoadTemplates();
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Reloading the Panel Library local Div-template catalog failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Loads valid local Div templates and turns directory-level failures into a visible, recoverable state.</summary>
+    private void LoadTemplates()
+    {
+        try
+        {
+            _divTemplates = TemplateLibrary.GetDivTemplates();
+            _templateError = string.Empty;
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Panel Library local Div-template discovery failed.");
+            _divTemplates = [];
+            _templateError = LT("PublisherStudio could not read the local Div template library.");
+        }
+    }
+
+    /// <summary>Localizes a maintained UI phrase with a stable English fallback.</summary>
+    /// <param name="text">English source phrase.</param>
+    /// <returns>The localized phrase.</returns>
+    private string LT(string text)
+    {
+        try { return Localization.GetText(text); }
+        catch (Exception exception)
+        {
+            Logger.LogDebug(exception, "Panel Library localization fallback used for {Text}.", text);
+            return text;
+        }
+    }
 }

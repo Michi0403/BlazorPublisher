@@ -7,6 +7,7 @@
 @inject PublicationFileService Files
 @inject PublicationComponentService Components
 @inject PublicationBehaviorService Behaviors
+@inject IPublisherTemplateLibraryService TemplateLibrary
 @inject IJSRuntime JS
 @inject IPublicationElementLayoutService Layout
 @inject IUserNotificationService Notifications
@@ -895,7 +896,9 @@
     /// Gets the palette tools collection maintained or exposed by this panel studio instance for downstream processing.
     /// </summary>
     /// <value>The palette tools value exposed by <see cref="PanelStudio"/>.</value>
-    private IReadOnlyList<PanelComponentToolDescriptor> PaletteTools => Panels.GetComponentTools(Document);
+    private IReadOnlyList<PanelComponentToolDescriptor> PaletteTools => BuildPaletteTools();
+    /// <summary>Stores reusable LocalApplicationData Div templates exposed as ordinary Panel Studio palette tools.</summary>
+    private IReadOnlyList<DivTemplateDescriptor> _localDivTemplates = [];
     /// <summary>
     /// Gets the panel picture target value that forms part of the panel studio state consumed or produced by the surrounding workflow.
     /// </summary>
@@ -950,6 +953,7 @@
             _interactionPreview = false;
             _previewSizeKey = "design";
             RefreshPreviewPresets();
+            RefreshLocalDivTemplates();
             RefreshAdvancedJson();
     
         }
@@ -1386,6 +1390,44 @@
         }
     }
 
+    /// <summary>Builds the Panel Studio palette from maintained component tools plus user-editable LocalApplicationData Div templates.</summary>
+    /// <returns>The complete palette tool list for the current Panel Studio session.</returns>
+    private IReadOnlyList<PanelComponentToolDescriptor> BuildPaletteTools()
+    {
+        try
+        {
+            Logger.LogTrace("Building Panel Studio palette tools with {DivTemplateCount} local Div templates.", _localDivTemplates.Count);
+            var tools = Panels.GetComponentTools(Document).ToList();
+            tools.AddRange(_localDivTemplates.Select(template => new PanelComponentToolDescriptor(
+                $"divtemplate:{template.Id}",
+                template.Name,
+                template.Description,
+                string.IsNullOrWhiteSpace(template.Category) ? "Div templates" : template.Category,
+                string.IsNullOrWhiteSpace(template.IconCssClass) ? "pub-icon pub-icon-panel" : template.IconCssClass,
+                string.IsNullOrWhiteSpace(template.PreviewKind) ? "panel" : template.PreviewKind)));
+            return tools;
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Building Panel Studio palette tools failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Refreshes LocalApplicationData Div templates when a Panel Studio session opens.</summary>
+    private void RefreshLocalDivTemplates()
+    {
+        try
+        {
+            _localDivTemplates = TemplateLibrary.GetDivTemplates();
+        }
+        catch (Exception exception)
+        {
+            _localDivTemplates = [];
+            Logger.LogWarning(exception, "Panel Studio could not refresh the local Div template palette.");
+        }
+    }
+
     /// <summary>
     /// Creates tool element for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
     /// </summary>
@@ -1395,6 +1437,12 @@
     {
         try
         {
+            if (toolId.StartsWith("divtemplate:", StringComparison.OrdinalIgnoreCase))
+            {
+                var templateId = toolId["divtemplate:".Length..];
+                _selectedTemplateId = null;
+                return TemplateLibrary.CreateDivTemplate(templateId, Document);
+            }
             if (toolId.StartsWith("template:", StringComparison.OrdinalIgnoreCase)
                 && Guid.TryParse(toolId["template:".Length..], out var templateId))
             {

@@ -380,6 +380,27 @@ public sealed class EditorStateService : IDisposable
     }
 
     /// <summary>
+    /// Loads a local publication template as a new unsaved document while reusing the ordinary document normalization path.
+    /// </summary>
+    /// <param name="json">Normalized publication JSON created by the local template library.</param>
+    public void LoadTemplate(string json)
+    {
+        try
+        {
+            logger.LogTrace("Entering EditorStateService.LoadTemplate.");
+            Load(json);
+            IsDirty = true;
+            Revision++;
+            Changed?.Invoke();
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.LoadTemplate failed: {exception.Message}");
+            throw;
+        }
+    }
+
+    /// <summary>
     /// Performs mark saved as part of the editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     public void MarkSaved()
@@ -778,6 +799,37 @@ public sealed class EditorStateService : IDisposable
         catch (Exception exception)
         {
             logger.LogError(exception, $"EditorStateService.AddPanel failed: {exception.Message}");
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Adds a detached Panel/Div template instance to the current page using the same placement, naming and undo rules as built-in panel presets.
+    /// </summary>
+    /// <param name="template">Detached panel template instance to insert.</param>
+    /// <param name="centerX">Optional insertion center X coordinate in millimeters.</param>
+    /// <param name="centerY">Optional insertion center Y coordinate in millimeters.</param>
+    /// <returns>The inserted panel element.</returns>
+    public PanelElement AddPanelTemplate(PanelElement template, double? centerX = null, double? centerY = null)
+    {
+        try
+        {
+            logger.LogTrace("Entering EditorStateService.AddPanelTemplate.");
+            ArgumentNullException.ThrowIfNull(template);
+            Capture();
+            var element = (PanelElement)_files.CloneElement(template);
+            _panels.Normalize(Document, element);
+            element.Name = NextName(element.Name);
+            element.ZIndex = NextZ();
+            PlaceAt(element, centerX, centerY);
+            CurrentPage.Elements.Add(element);
+            SetSelectionCore([element.Id], element.Id);
+            Notify();
+            return element;
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"EditorStateService.AddPanelTemplate failed: {exception.Message}");
             throw;
         }
     }

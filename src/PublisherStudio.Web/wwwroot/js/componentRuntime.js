@@ -461,7 +461,9 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
                     event.stopPropagation();
                     let actions = actionsFor(config, "ItemClick");
                     if (!actions.length) actions = [{ trigger: "ItemClick", action: "Navigate", openInNewWindow: true }];
-                    void executeActions(config, actions, eventContext(config, null, currentRows, { itemData: item, event }, item));
+                    const context = eventContext(config, null, currentRows, { itemData: item, event }, item);
+                    emitComponentEvent(config, "ItemClick", context);
+                    void executeActions(config, actions, context);
                  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:callback:button.addEventListener@454', __javascriptError); throw __javascriptError; }});
                 wrapper.append(button);
                 if (Array.isArray(item?.items) && item.items.length) {
@@ -755,6 +757,24 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
         return { config, instance, dataSource, host, event, data: eventData, itemData: event?.itemData || null, value: event?.value };
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:eventContext@733', __javascriptError); throw __javascriptError; }}
 
+    function emitComponentEvent(config, trigger, context) { try {
+        const host = context?.host || document.querySelector(`[data-ps-component-id="${CSS.escape(String(config?.id || ""))}"]`);
+        if (!host) return false;
+        const owner = host.closest?.("[data-publication-element],[data-panel-element]");
+        host.dispatchEvent(new CustomEvent("publisherstudio:component-event", {
+            bubbles: true,
+            composed: true,
+            detail: {
+                trigger: String(trigger || ""),
+                componentId: String(config?.id || ""),
+                elementId: String(owner?.dataset?.elementId || ""),
+                value: context?.value,
+                data: context?.data ?? null
+            }
+        }));
+        return true;
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:emitComponentEvent', __javascriptError); throw __javascriptError; }}
+
     function bindCommonActions(config, options, dataSource) { try {
         const handlers = [
             ["ItemClick", "onItemClick"],
@@ -772,11 +792,12 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
             let actions = actionsFor(config, trigger);
             if (!actions.length && trigger === "ItemClick" && ["menu", "contextmenu"].includes(lower(config.kind)))
                 actions = [{ trigger: "ItemClick", action: "Navigate", openInNewWindow: true }];
-            if (!actions.length) continue;
             const prior = options[eventName];
             options[eventName] = event => { try {
                 prior?.(event);
-                executeActions(config, actions, eventContext(config, event.component, dataSource, event));
+                const context = eventContext(config, event.component, dataSource, event);
+                emitComponentEvent(config, trigger, context);
+                if (actions.length) void executeActions(config, actions, context);
              } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:options[eventName]@764', __javascriptError); throw __javascriptError; }};
         }
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:bindCommonActions@745', __javascriptError); throw __javascriptError; }}
@@ -1637,7 +1658,7 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
                 const formData = clone(config.rows?.[0] || {});
                 const submitActions = actionsFor(config, "Submit");
                 const items = formItems(config);
-                if (submitActions.length) items.push({
+                items.push({
                     itemType: "button",
                     horizontalAlignment: "left",
                     buttonOptions: {
@@ -1649,7 +1670,10 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
                             const validation = form?.validate?.();
                             if (validation && validation.isValid === false) return;
                             const currentData = form?.option?.("formData") || formData;
-                            return executeActions(config, submitActions, eventContext(config, form, dataSource, event, currentData));
+                            const context = eventContext(config, form, dataSource, event, currentData);
+                            emitComponentEvent(config, "Submit", context);
+                            if (submitActions.length) return executeActions(config, submitActions, context);
+                            return true;
                          } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:onClick@1570', __javascriptError); throw __javascriptError; }}
                     }
                 });
@@ -1907,7 +1931,11 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
                 break;
             }
             case "Button":
-                options = { ...base, text: config.buttonText || config.title || "Run", type: "default", stylingMode: "contained", onClick: event => { try { return (executeActions(config, actionsFor(config, "Click"), eventContext(config, event.component, dataSource, event, clone(config.rows?.[0] || {})))); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:onClick@1833', __javascriptError); throw __javascriptError; } } };
+                options = { ...base, text: config.buttonText || config.title || "Run", type: "default", stylingMode: "contained", onClick: event => { try {
+                    const context = eventContext(config, event.component, dataSource, event, clone(config.rows?.[0] || {}));
+                    emitComponentEvent(config, "Click", context);
+                    return executeActions(config, actionsFor(config, "Click"), context);
+                } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:onClick@1833', __javascriptError); throw __javascriptError; } } };
                 break;
             default: throw new Error(`Unsupported PublisherStudio component: ${kind}`);
         }
@@ -2371,6 +2399,11 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
             (focusTarget || target).blur?.();
             return true;
         }
+        if (name === "change") {
+            const control = target.matches?.("input,select,textarea") ? target : target.querySelector?.("input,select,textarea");
+            (control || target).dispatchEvent?.(new Event("change", { bubbles: true, composed: true }));
+            return true;
+        }
         if (name === "show") return setPublicationObjectVisible(target, true);
         if (name === "hide") return setPublicationObjectVisible(target, false);
         if (name === "togglevisibility") {
@@ -2444,6 +2477,27 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
         }
         if (name === "pause") {
             media?.pause?.();
+            return true;
+        }
+        if (name === "toggleplayback") {
+            if (media?.paused) await media.play?.(); else media?.pause?.();
+            return true;
+        }
+        if (name === "mute" || name === "unmute") {
+            if (media) media.muted = name === "mute";
+            return true;
+        }
+        if (name === "setvolume") {
+            const volume = Number(value);
+            if (media && Number.isFinite(volume)) media.volume = Math.max(0, Math.min(1, volume));
+            return true;
+        }
+        if (name === "seek") {
+            const seconds = Number(value);
+            if (media && Number.isFinite(seconds)) {
+                const upper = Number.isFinite(media.duration) && media.duration > 0 ? media.duration : Math.max(0, seconds);
+                media.currentTime = Math.max(0, Math.min(upper, seconds));
+            }
             return true;
         }
         throw new Error(`Publication object method '${String(method || "")}' is not supported.`);
@@ -2571,6 +2625,11 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
         return "";
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:behaviorEventName', __javascriptError); throw __javascriptError; }}
 
+    function publicationNativeControlOwnsEvent(element, event) { try {
+        const control = event?.target?.closest?.('audio[controls],video[controls],button,a[href],input,select,textarea,option,[contenteditable="true"]');
+        return Boolean(control && control !== element && element?.contains?.(control));
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:publicationNativeControlOwnsEvent', __javascriptError); throw __javascriptError; }}
+
     function bindPublicationBehaviors(element) { try {
         const source = String(element?.dataset?.behaviors || "").trim();
         const previous = publicationBehaviorBindings.get(element);
@@ -2605,6 +2664,7 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
             }
             element.addEventListener(eventName, event => { try {
                 if (arranged()) return;
+                if ((eventName === "click" || eventName === "dblclick") && publicationNativeControlOwnsEvent(element, event)) return;
                 for (const rule of eventRules) executePublicationBehavior(element, rule, event);
              } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:publication-behavior-event', __javascriptError); }}, { signal: controller.signal });
         }

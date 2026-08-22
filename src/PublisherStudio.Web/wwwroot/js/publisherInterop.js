@@ -4875,6 +4875,26 @@ function signalConnectorRuntime(root = document, options = {}) { try {
     const effects = new Map();
     const timers = new Set();
     const pointerStates = new Map();
+    const signalMediaSuppression = new WeakMap();
+    const nativeControlOwnsEvent = event => { try {
+        return Boolean(event?.target?.closest?.('audio[controls],video[controls],button,a[href],input,select,textarea,option,[contenteditable="true"]'));
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:nativeControlOwnsEvent', __javascriptError); throw __javascriptError; }};
+    const eventMedia = event => { try {
+        const target = event?.target;
+        if (target?.matches?.('video,audio')) return target;
+        return target?.closest?.('video,audio') || null;
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:eventMedia', __javascriptError); throw __javascriptError; }};
+    const markSignalMedia = media => { try {
+        if (media) signalMediaSuppression.set(media, performance.now() + 350);
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:markSignalMedia', __javascriptError); throw __javascriptError; }};
+    const signalMediaIsSuppressed = event => { try {
+        const media = eventMedia(event);
+        if (!media) return false;
+        const until = signalMediaSuppression.get(media) || 0;
+        if (until >= performance.now()) return true;
+        signalMediaSuppression.delete(media);
+        return false;
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:signalMediaIsSuppressed', __javascriptError); throw __javascriptError; }};
     let observer = null;
     let disposed = false;
 
@@ -4960,6 +4980,7 @@ function signalConnectorRuntime(root = document, options = {}) { try {
         restoreAttribute(node, 'hidden', snapshot.hidden);
         restoreAttribute(node, 'data-publisher-signal-opacity', snapshot.signalOpacity);
         if (!snapshot.media || !node.matches?.('video,audio')) return;
+        markSignalMedia(node);
         node.pause();
         node.volume = snapshot.media.volume;
         node.playbackRate = snapshot.media.playbackRate;
@@ -5067,15 +5088,26 @@ function signalConnectorRuntime(root = document, options = {}) { try {
         else if (action === 'replayanimation') replayAnimations(target);
         else if (action === 'playmedia') {
             const media = target.matches?.('video,audio') ? target : target.querySelector?.('video,audio');
-            if (media) { capture(media); media.play?.().catch?.((__promiseError) => { try { publisherStudioDiagnostics.report('js/publisherInterop.js:promise-catch@4798', __promiseError);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:media.play?.().catch@4798', __javascriptError); throw __javascriptError; }}); }
+            if (media) { capture(media); markSignalMedia(media); media.play?.().catch?.((__promiseError) => { try { publisherStudioDiagnostics.report('js/publisherInterop.js:promise-catch@4798', __promiseError);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:media.play?.().catch@4798', __javascriptError); throw __javascriptError; }}); }
         }
         else if (action === 'pausemedia') {
             const media = target.matches?.('video,audio') ? target : target.querySelector?.('video,audio');
-            if (media) { capture(media); media.pause?.(); }
+            if (media) { capture(media); markSignalMedia(media); media.pause?.(); }
         }
         else if (action === 'togglemediaplayback') {
             const media = target.matches?.('video,audio') ? target : target.querySelector?.('video,audio');
-            if (media) { capture(media); media.paused ? media.play().catch((__promiseError) => { try { publisherStudioDiagnostics.report('js/publisherInterop.js:promise-catch@4806', __promiseError);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:media.play().catch@4806', __javascriptError); throw __javascriptError; }}) : media.pause(); }
+            if (media) { capture(media); markSignalMedia(media); media.paused ? media.play().catch((__promiseError) => { try { publisherStudioDiagnostics.report('js/publisherInterop.js:promise-catch@4806', __promiseError);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:media.play().catch@4806', __javascriptError); throw __javascriptError; }}) : media.pause(); }
+        } else if (action === 'callmethod') {
+            const method = String(settings.completionMethod || '').trim();
+            if (!method) return;
+            const media = target.matches?.('video,audio') ? target : target.querySelector?.('video,audio');
+            if (media && ['play','pause','toggleplayback','mute','unmute','setvolume','seek'].includes(lower(method))) markSignalMedia(media);
+            if (window.PublisherStudioComponentRuntime?.invokeObjectMethod)
+                await window.PublisherStudioComponentRuntime.invokeObjectMethod(target, method, value, pageFor(connector));
+            else {
+                const address = target.dataset?.objectAddress || target.dataset?.elementId || target;
+                await window.PublisherStudioPublicationRuntime?.call?.(address, method, value);
+            }
         } else if (action === 'highlight') {
             const color = value || '#facc15';
             const animation = trackEffect(target.animate?.([
@@ -5278,6 +5310,8 @@ function signalConnectorRuntime(root = document, options = {}) { try {
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:sourceContainsEvent@4998', __javascriptError); throw __javascriptError; }};
     const handleTrigger = (event, trigger) => { try {
         if (event?.publisherSignalSynthetic) return;
+        if ((trigger === 'onclick' || trigger === 'ondoubleclick') && nativeControlOwnsEvent(event)) return;
+        if (['onplay', 'onpause', 'onended'].includes(trigger) && signalMediaIsSuppressed(event)) return;
         signalsIn(host).forEach(connector => { try {
             const settings = parse(connector.dataset.signal);
             if (lower(settings.trigger) !== trigger) return;
@@ -5291,7 +5325,7 @@ function signalConnectorRuntime(root = document, options = {}) { try {
         const current = new Set(signalsIn(host));
         current.forEach(connector => { try {
             const settings = parse(connector.dataset.signal);
-            const needsPointerEvents = ['onclick', 'onhover'].includes(lower(settings.trigger))
+            const needsPointerEvents = ['onclick', 'ondoubleclick', 'onhover'].includes(lower(settings.trigger))
                 && settings.lineVisible !== false && connector.dataset.signalLineVisible !== 'false';
             if (needsPointerEvents && !pointerStates.has(connector)) {
                 pointerStates.set(connector, connector.style.pointerEvents);
@@ -5308,18 +5342,43 @@ function signalConnectorRuntime(root = document, options = {}) { try {
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:refreshConnectorHitTesting@5018', __javascriptError); throw __javascriptError; }};
     const bind = () => { try {
         const click = event => { try { return (handleTrigger(event, 'onclick')); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:click@5038', __javascriptError); throw __javascriptError; } };
+        const doubleClick = event => { try { return (handleTrigger(event, 'ondoubleclick')); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:doubleClick', __javascriptError); throw __javascriptError; } };
         const hover = event => { try { return (handleTrigger(event, 'onhover')); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:hover@5039', __javascriptError); throw __javascriptError; } };
+        const change = event => { try { return (handleTrigger(event, 'onchange')); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:changeTrigger', __javascriptError); throw __javascriptError; } };
+        const focus = event => { try { return (handleTrigger(event, 'onfocus')); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:focusTrigger', __javascriptError); throw __javascriptError; } };
+        const blur = event => { try { return (handleTrigger(event, 'onblur')); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:blurTrigger', __javascriptError); throw __javascriptError; } };
+        const play = event => { try { return (handleTrigger(event, 'onplay')); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:playTrigger', __javascriptError); throw __javascriptError; } };
+        const pause = event => { try { return (handleTrigger(event, 'onpause')); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:pauseTrigger', __javascriptError); throw __javascriptError; } };
+        const ended = event => { try { return (handleTrigger(event, 'onended')); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:endedTrigger', __javascriptError); throw __javascriptError; } };
+        const componentEvent = event => { try {
+            const componentTrigger = lower(event?.detail?.trigger);
+            if (componentTrigger) handleTrigger(event, `on${componentTrigger}`);
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:componentTrigger', __javascriptError); throw __javascriptError; } };
         const pageEnter = event => { try { return (startPage(event.target?.closest?.('[data-page-id]') || event.target)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:pageEnter@5040', __javascriptError); throw __javascriptError; } };
         host.addEventListener('click', click, true);
+        host.addEventListener('dblclick', doubleClick, true);
         host.addEventListener('pointerover', hover, true);
+        host.addEventListener('change', change, true);
+        host.addEventListener('focusin', focus, true);
+        host.addEventListener('focusout', blur, true);
+        host.addEventListener('play', play, true);
+        host.addEventListener('pause', pause, true);
+        host.addEventListener('ended', ended, true);
+        host.addEventListener('publisherstudio:component-event', componentEvent, true);
         host.addEventListener('publisher:page-enter', pageEnter);
-        bindings.push([host, 'click', click, true], [host, 'pointerover', hover, true], [host, 'publisher:page-enter', pageEnter, false]);
+        bindings.push(
+            [host, 'click', click, true], [host, 'dblclick', doubleClick, true], [host, 'pointerover', hover, true],
+            [host, 'change', change, true], [host, 'focusin', focus, true], [host, 'focusout', blur, true],
+            [host, 'play', play, true], [host, 'pause', pause, true], [host, 'ended', ended, true],
+            [host, 'publisherstudio:component-event', componentEvent, true], [host, 'publisher:page-enter', pageEnter, false]
+        );
         refreshConnectorHitTesting();
         if (typeof MutationObserver === 'function') {
             observer = new MutationObserver(refreshConnectorHitTesting);
             observer.observe(host, { subtree: true, childList: true, attributes: true, attributeFilter: ['data-signal', 'data-signal-enabled', 'data-signal-line-visible'] });
         }
-     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:bind@5037', __javascriptError); throw __javascriptError; }};
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:bind@5037', __javascriptError); throw __javascriptError; }}
+
     const dispose = () => { try {
         disposed = true;
         reset();
@@ -5675,6 +5734,9 @@ function websitePresentationRuntime() { try {
         const run = () => { try { return (configureMediaSegment(node, media, 0, true)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:run@5403', __javascriptError); throw __javascriptError; } };
         if (delay > 0) activeMediaTimers.push(setTimeout(run, delay * 1000)); else run();
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:playMediaNode@5400', __javascriptError); throw __javascriptError; }};
+    const nativePresentationControlOwnsClick = event => { try {
+        return Boolean(event?.target?.closest?.('audio[controls],video[controls],button,a[href],input,select,textarea,option,[contenteditable="true"]'));
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:nativePresentationControlOwnsClick', __javascriptError); throw __javascriptError; }};
     const toggleMediaNode = node => { try {
         const media = mediaFromNode(node);
         if (!media) return;
@@ -5834,6 +5896,7 @@ function websitePresentationRuntime() { try {
     pages.forEach((page, pageIndex) => { try {
         page.addEventListener('click', event => { try {
             if (event.defaultPrevented) return;
+            if (nativePresentationControlOwnsClick(event)) return;
             if (event.target?.closest?.('.ps-pointer-owner,[data-panel-root]')) return;
             if (runNextClickGroup()) return;
             if (bool(page.dataset.advanceOnClick)) goNext();
@@ -5842,7 +5905,7 @@ function websitePresentationRuntime() { try {
             const settings = parse(connector.dataset.signal, {});
             const trigger = lower(settings.trigger);
             const sourceId = String(connector.dataset.sourceElementId || '').trim();
-            return sourceId && ['onclick', 'onhover'].includes(trigger) ? [sourceId] : [];
+            return sourceId && ['onclick', 'ondoubleclick', 'onhover'].includes(trigger) ? [sourceId] : [];
          } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:[...page.querySelectorAll(\'[data-signal-enabled="true"][data-connector@5567', __javascriptError); throw __javascriptError; }}));
         for (const node of page.querySelectorAll('[data-publication-element]')) {
             const interaction = parse(node.dataset.interaction, {});
@@ -5859,6 +5922,7 @@ function websitePresentationRuntime() { try {
             if (node.dataset.mediaKind && lower(node.dataset.mediaTrigger) === 'onclick' && (!interactionAction || interactionAction === 'none')) {
                 node.classList.add('ps-interactive');
                 node.addEventListener('click', event => { try {
+                    if (event.target?.closest?.('audio[controls],video[controls]')) return;
                     event.preventDefault();
                     event.stopPropagation();
                     toggleMediaNode(node);
@@ -5868,6 +5932,7 @@ function websitePresentationRuntime() { try {
             node.classList.add('ps-interactive', 'ps-pointer-owner');
             node.classList.remove('ps-pointer-passive');
             node.addEventListener('click', event => { try {
+                if (nativePresentationControlOwnsClick(event)) return;
                 event.preventDefault();
                 event.stopPropagation();
                 const action = lower(interaction.action);
@@ -6077,13 +6142,17 @@ function websiteSiteRuntime() { try {
         routes: routes.map(route => { try { return (({ id: route.id, slug: route.slug, name: route.page.dataset.pageName || `Page ${route.index + 1}` })); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:routes.map@5803', __javascriptError); throw __javascriptError; } })
     };
 
+    const nativeSiteControlOwnsClick = event => { try {
+        return Boolean(event?.target?.closest?.('audio[controls],video[controls],button,a[href],input,select,textarea,option,[contenteditable="true"]'));
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:nativeSiteControlOwnsClick', __javascriptError); throw __javascriptError; }};
+
     for (const page of pages) {
         const signalSourceIds = new Set([...page.querySelectorAll('[data-signal-enabled="true"][data-connector-id]')].flatMap(connector => { try {
             let settings;
             try { settings = JSON.parse(connector.dataset.signal || '{}'); } catch { settings = {}; }
             const trigger = lower(settings.trigger);
             const sourceId = String(connector.dataset.sourceElementId || '').trim();
-            return sourceId && ['onclick', 'onhover'].includes(trigger) ? [sourceId] : [];
+            return sourceId && ['onclick', 'ondoubleclick', 'onhover'].includes(trigger) ? [sourceId] : [];
          } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:[...page.querySelectorAll(\'[data-signal-enabled="true"][data-connector@5807', __javascriptError); throw __javascriptError; }}));
         for (const node of page.querySelectorAll('[data-publication-element]')) {
             let interaction;
@@ -6102,6 +6171,7 @@ function websiteSiteRuntime() { try {
             node.classList.add('ps-interactive', 'ps-pointer-owner');
             node.classList.remove('ps-pointer-passive');
             node.addEventListener('click', event => { try {
+                if (nativeSiteControlOwnsClick(event)) return;
                 event.preventDefault();
                 event.stopPropagation();
                 if (action === 'nextpage') next();
@@ -7742,7 +7812,7 @@ async function buildPublisherSingleHtml(mode, title, exportOptions = {}) { try {
                 throw new Error(`Prepared DevExtreme asset hash mismatch for ${manifestPath}. Clear browser cache and run Prepare-DevExpressAssets.cmd again.`);
             }
         }
-    } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:verifyPreparedTextAsset@2.9.5', __javascriptError); throw __javascriptError; } };
+    } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:verifyPreparedTextAsset@2.9.6', __javascriptError); throw __javascriptError; } };
     await Promise.all([
         verifyPreparedTextAsset('devextreme-dist/js/dx.all.js', devExtremeSource),
         verifyPreparedTextAsset('devextreme-dist/css/dx.light.css', devExtremeCss)

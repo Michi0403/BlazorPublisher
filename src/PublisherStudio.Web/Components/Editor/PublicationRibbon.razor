@@ -11,6 +11,7 @@
 <DxRibbon CssClass="publication-ribbon categorized-ribbon" SizeMode="SizeMode.Medium" AdaptivityAutoCollapseItemsToGroups="true">
     <DxRibbonApplicationTab Text='@LT("File")'>
         <DxRibbonApplicationTabItem Text='@LT("New publication")' IconCssClass="pub-icon pub-icon-newpage" Click="RequestNew" />
+        <DxRibbonApplicationTabItem Text='@LT("New from template")' IconCssClass="pub-icon pub-icon-panels" Click="RequestNewFromTemplate" />
         <DxRibbonApplicationTabItem Text='@LT("Open publication")' IconCssClass="pub-icon pub-icon-open" Click="RequestOpen" />
         <DxRibbonApplicationTabItem Text='@LT("Import OpenDocument pages (ODG / ODP)")' IconCssClass="pub-icon pub-icon-open" Click="RequestImportOpenDocument" />
         <DxRibbonApplicationTabItem Text='@LT("Save publication")' IconCssClass="pub-icon pub-icon-save" Click="RequestSave" />
@@ -801,6 +802,11 @@
     /// <value>The on new value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback OnNew { get; set; }
     /// <summary>
+    /// Gets or sets the callback used to open the local publication-template chooser.
+    /// </summary>
+    /// <value>The New-from-template callback exposed by <see cref="PublicationRibbon"/>.</value>
+    [Parameter] public EventCallback OnNewFromTemplate { get; set; }
+    /// <summary>
     /// Gets or sets the on open value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The on open value exposed by <see cref="PublicationRibbon"/>.</value>
@@ -1188,6 +1194,22 @@
         catch (Exception __componentMethodException)
         {
             Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RequestNew)} failed.");
+            throw;
+        }
+    }
+    /// <summary>
+    /// Opens the maintained local publication-template chooser without changing the current document.
+    /// </summary>
+    /// <returns>A task that completes when the owning editor has opened the chooser.</returns>
+    private Task RequestNewFromTemplate()
+    {
+        try
+        {
+            return OnNewFromTemplate.InvokeAsync();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PublicationRibbon)}.{nameof(RequestNewFromTemplate)} failed.");
             throw;
         }
     }

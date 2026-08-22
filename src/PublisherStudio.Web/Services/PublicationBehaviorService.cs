@@ -168,7 +168,7 @@ public sealed class PublicationBehaviorService(ILogger<PublicationBehaviorServic
     {
         try
         {
-            var methods = new List<string> { "click", "focus", "blur", "show", "hide", "toggleVisibility" };
+            var methods = new List<string> { "click", "focus", "blur", "change", "show", "hide", "toggleVisibility" };
             if (element is DevExtremeComponentElement component)
             {
                 methods.AddRange(["repaint", "reset", "enable", "disable", "setValue"]);
@@ -196,7 +196,7 @@ public sealed class PublicationBehaviorService(ILogger<PublicationBehaviorServic
             }
             else if (element is PublicationMediaElement)
             {
-                methods.AddRange(["play", "pause"]);
+                methods.AddRange(["play", "pause", "togglePlayback", "mute", "unmute", "setVolume", "seek"]);
             }
             return methods.Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
         }

@@ -1,0 +1,171 @@
+@namespace PublisherStudio.Components.Editor
+@inject IPublisherTemplateLibraryService TemplateLibrary
+@inject IFileLocalizationService Localization
+@inject ILogger<NewPublicationDialog> Logger
+
+@if (Visible)
+{
+    <div class="editor-modal-backdrop new-publication-backdrop">
+        <section class="new-publication-dialog" role="dialog" aria-modal="true" aria-label='@LT("New from template")'>
+            <header class="new-publication-dialog-header">
+                <div>
+                    <strong>@LT("New from template")</strong>
+                    <small>@LT("Start with a complete multi-page publication and keep editing every object normally.")</small>
+                </div>
+                <button type="button" class="window-close" aria-label='@LT("Close template chooser")' @onclick="Cancel">×</button>
+            </header>
+            <div class="new-publication-dialog-toolbar">
+                <span>@LT("Publisher template folder")</span>
+                <code>@TemplateLibrary.PublisherTemplateDirectory</code>
+                <button type="button" class="publisher-dialog-button" @onclick="Reload">@LT("Reload templates")</button>
+            </div>
+            @if (!string.IsNullOrWhiteSpace(_error))
+            {
+                <div class="new-publication-template-error" role="alert">@_error</div>
+            }
+            @if (_templates.Count == 0)
+            {
+                <div class="new-publication-empty">
+                    <strong>@LT("No publication templates were found.")</strong>
+                    <span>@LT("Add PublisherStudio publication JSON files to the folder above, then reload.")</span>
+                </div>
+            }
+            else
+            {
+                <div class="new-publication-template-grid">
+                    @foreach (var template in _templates)
+                    {
+                        <article class="new-publication-template-card">
+                            <div class="new-publication-template-preview" aria-hidden="true">
+                                <i class="pub-icon pub-icon-page"></i>
+                                <span>@template.PageCount</span>
+                            </div>
+                            <div class="new-publication-template-copy">
+                                <strong>@template.Name</strong>
+                                <small>@template.Description</small>
+                                <span>@template.Category · @template.FileName</span>
+                            </div>
+                            <button type="button" class="publisher-dialog-button primary" @onclick="() => Choose(template.Id)">@LT("Create publication")</button>
+                        </article>
+                    }
+                </div>
+            }
+            <footer class="new-publication-dialog-footer">
+                <span>@LT("Local template files stay editable and PublisherStudio never overwrites an existing local template.")</span>
+                <button type="button" class="publisher-dialog-button" @onclick="Cancel">@LT("Cancel")</button>
+            </footer>
+        </section>
+    </div>
+}
+
+@code {
+    /// <summary>Stores the currently discovered local complete-publication templates shown by the chooser.</summary>
+    private IReadOnlyList<PublicationTemplateDescriptor> _templates = [];
+    /// <summary>Tracks the prior visibility state so discovery runs once when the chooser opens.</summary>
+    private bool _wasVisible;
+    /// <summary>Stores a recoverable template-library discovery error for the visible chooser.</summary>
+    private string _error = string.Empty;
+
+    /// <summary>Gets or sets whether the New-from-template chooser is visible.</summary>
+    /// <value><see langword="true"/> when the chooser is visible.</value>
+    [Parameter] public bool Visible { get; set; }
+    /// <summary>Gets or sets the callback invoked with the selected local template identifier.</summary>
+    /// <value>The selection callback supplied by the editor.</value>
+    [Parameter] public EventCallback<string> Selected { get; set; }
+    /// <summary>Gets or sets the callback invoked when the chooser is closed without creating a publication.</summary>
+    /// <value>The cancellation callback supplied by the editor.</value>
+    [Parameter] public EventCallback Cancelled { get; set; }
+
+    /// <summary>Refreshes template descriptors when the chooser transitions from closed to open.</summary>
+    protected override void OnParametersSet()
+    {
+        try
+        {
+            Logger.LogTrace("Applying NewPublicationDialog parameters with visibility {Visible}.", Visible);
+            if (Visible && !_wasVisible) LoadTemplates();
+            _wasVisible = Visible;
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Applying NewPublicationDialog parameters failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Reloads descriptors from the LocalApplicationData template library after an explicit user request.</summary>
+    private void Reload()
+    {
+        try
+        {
+            Logger.LogTrace("Reloading publication template descriptors from the chooser.");
+            LoadTemplates();
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Reloading publication template descriptors from the chooser failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Loads local template descriptors while keeping invalid individual files non-fatal.</summary>
+    private void LoadTemplates()
+    {
+        try
+        {
+            _templates = TemplateLibrary.GetPublicationTemplates();
+            _error = string.Empty;
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "New-publication template discovery failed.");
+            _templates = [];
+            _error = LT("PublisherStudio could not read the local publication template library.");
+        }
+    }
+
+    /// <summary>Forwards a validated descriptor identifier to the owning editor.</summary>
+    /// <param name="templateId">Descriptor identifier returned by the template library.</param>
+    /// <returns>A task that completes when the owning editor has handled the selected template.</returns>
+    private async Task Choose(string templateId)
+    {
+        try
+        {
+            Logger.LogTrace("Forwarding selected publication template {TemplateId}.", templateId);
+            await Selected.InvokeAsync(templateId).ConfigureAwait(false);
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Forwarding selected publication template {TemplateId} failed.", templateId);
+            throw;
+        }
+    }
+
+    /// <summary>Requests closure of the chooser without modifying the open publication.</summary>
+    /// <returns>A task that completes when the owning editor has closed the chooser.</returns>
+    private async Task Cancel()
+    {
+        try
+        {
+            Logger.LogTrace("Closing the New-from-template chooser.");
+            await Cancelled.InvokeAsync().ConfigureAwait(false);
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Closing the New-from-template chooser failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Localizes a maintained UI phrase with a stable English fallback.</summary>
+    /// <param name="text">English source phrase.</param>
+    /// <returns>The localized phrase.</returns>
+    private string LT(string text)
+    {
+        try { return Localization.GetText(text); }
+        catch (Exception exception)
+        {
+            Logger.LogDebug(exception, "Template chooser localization fallback used for {Text}.", text);
+            return text;
+        }
+    }
+}

@@ -83,6 +83,7 @@ public static class PublisherStudioServiceCollectionExtensions
         AddSingleton<PublicationWebDataService, PublicationWebDataService>(services);
         AddSingleton<IPublicationMarkupService, PublicationMarkupService>(services);
         AddSingleton<PublicationFileService, PublicationFileService>(services);
+        AddSingleton<IPublisherTemplateLibraryService, PublisherTemplateLibraryService>(services);
         AddSingleton<PublicationMediaAssetStore, PublicationMediaAssetStore>(services);
         AddSingleton<PublicationRecoveryService, PublicationRecoveryService>(services);
         AddSingleton<StreamingProfileStore, StreamingProfileStore>(services);

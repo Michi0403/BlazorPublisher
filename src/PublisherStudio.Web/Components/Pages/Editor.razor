@@ -3,6 +3,7 @@
 @implements IDisposable
 @inject EditorStateService State
 @inject PublicationFileService Files
+@inject IPublisherTemplateLibraryService TemplateLibrary
 @inject IPublisherDocumentFactory DocumentFactory
 @inject PublisherStudio.Services.Publication.Import.OpenDocumentImportService OpenDocumentImporter
 @inject PublicationMediaAssetStore MediaAssets
@@ -68,6 +69,7 @@
     <PublicationRibbon State="State"
                        TimelineVisible="_timelineVisible"
                        OnNew="NewDocument"
+                       OnNewFromTemplate="OpenNewPublicationTemplates"
                        OnOpen="OpenPublicationPicker"
                        OnImportOpenDocument="OpenOpenDocumentPicker"
                        OnSave="SavePublication"
@@ -198,7 +200,7 @@
 
     @if (State.Document.View.PanelLibraryVisible)
     {
-        <PanelLibrary Insert="InsertPanelPreset" Close="ClosePanelLibrary" />
+        <PanelLibrary Insert="InsertPanelPreset" InsertTemplate="InsertDivTemplate" Close="ClosePanelLibrary" />
     }
 
     <footer class="status-bar">
@@ -272,6 +274,7 @@
 <BarcodeEditor Visible="_barcodeEditorVisible" Item="@(State.SelectedElement as BarcodeElement)" Saved="SaveBarcode" Cancelled="CancelBarcode" />
 <StreamingStudio Visible="_streamingStudioVisible" Document="State.Document" Saved="SaveStreamingStudio" Cancelled="CloseStreamingStudio" />
 <PanelStudio Visible="_panelStudioVisible" Document="State.Document" CurrentPageId="State.SelectedPageId" InitialPanel="_panelStudioInitial" Saved="SavePanelStudio" Cancelled="ClosePanelStudio" />
+<NewPublicationDialog Visible="_newPublicationDialogVisible" Selected="CreatePublicationFromTemplate" Cancelled="CloseNewPublicationTemplates" />
 <MediaConverterStudio Visible="_mediaConverterVisible" InitialSource="_mediaConverterInitialSource" Closed="CloseMediaConverter" Inserted="InsertConvertedMedia" OpenedInStudio="OpenConvertedInStudio" />
 <PageEffectStudio Visible="_pageEffectStudioVisible" State="State" Closed="ClosePageEffectStudio" />
 
@@ -464,7 +467,7 @@
     private bool MainframeSelectionVisualsEnabled =>
         !_storyEditorVisible && !_spreadsheetEditorVisible && !_pictureEditorVisible &&
         !_dataVisualEditorVisible && !_componentEditorVisible && !_dataManagerVisible && !_mediaStudioVisible &&
-        !_barcodeEditorVisible && !_streamingStudioVisible && !_panelStudioVisible &&
+        !_barcodeEditorVisible && !_streamingStudioVisible && !_panelStudioVisible && !_newPublicationDialogVisible &&
         !_mediaConverterVisible && !_structuredWebsiteExportVisible && !_singleWebsiteExportVisible && !_selectedPictureExportVisible && !_pageEffectStudioVisible;
     /// <summary>
     /// Stores the internal story editor visible state used by <see cref="Editor"/> while executing its surrounding workflow.
@@ -530,6 +533,8 @@
     /// Stores the internal panel studio visible state used by <see cref="Editor"/> while executing its surrounding workflow.
     /// </summary>
     private bool _panelStudioVisible;
+    /// <summary>Stores whether the New-from-template chooser is currently visible.</summary>
+    private bool _newPublicationDialogVisible;
     /// <summary>
     /// Stores the internal media converter visible state used by <see cref="Editor"/> while executing its surrounding workflow.
     /// </summary>
@@ -849,6 +854,55 @@
             throw;
         }
     }
+    /// <summary>Opens the local publication-template chooser without changing the current document.</summary>
+    private void OpenNewPublicationTemplates()
+    {
+        try
+        {
+            _newPublicationDialogVisible = true;
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Opening the publication-template chooser failed.");
+            _error = exception.Message;
+            Notifications.Error(exception.Message, "PublisherStudio operation failed", nameof(Editor));
+        }
+    }
+
+    /// <summary>Closes the local publication-template chooser while preserving the current publication.</summary>
+    private void CloseNewPublicationTemplates()
+    {
+        try
+        {
+            Logger.LogTrace("Closing the local publication-template chooser.");
+            _newPublicationDialogVisible = false;
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Closing the local publication-template chooser failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Creates a fresh unsaved publication from the selected LocalApplicationData template.</summary>
+    /// <param name="templateId">Template descriptor identifier returned by the local template library.</param>
+    private void CreatePublicationFromTemplate(string templateId)
+    {
+        try
+        {
+            var json = TemplateLibrary.CreatePublicationJson(templateId);
+            State.LoadTemplate(json);
+            _newPublicationDialogVisible = false;
+            ShowNotice($"{LT("Created from local publisher template")}: {State.Document.Name}");
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Creating a publication from local template {TemplateId} failed.", templateId);
+            _error = exception.Message;
+            Notifications.Error(exception.Message, "PublisherStudio operation failed", nameof(Editor));
+        }
+    }
+
     /// <summary>
     /// Adds text quick for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
     /// </summary>
@@ -982,6 +1036,24 @@
             throw;
         }
     }
+    /// <summary>Inserts a reusable local Div template through the ordinary editor state and undo workflow.</summary>
+    /// <param name="templateId">Template descriptor identifier returned by the local template library.</param>
+    private void InsertDivTemplate(string templateId)
+    {
+        try
+        {
+            var panel = TemplateLibrary.CreateDivTemplate(templateId, State.Document);
+            var inserted = State.AddPanelTemplate(panel);
+            ShowNotice($"{LT("Inserted from local Div template")}: {inserted.Name}");
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Inserting local Div template {TemplateId} failed.", templateId);
+            _error = exception.Message;
+            Notifications.Error(exception.Message, "PublisherStudio operation failed", nameof(Editor));
+        }
+    }
+
     /// <summary>
     /// Performs toggle panel library for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
     /// </summary>
@@ -3353,7 +3425,7 @@
                 var bytes = buffer.ToArray();
                 if (bytes.Length == 0) throw new InvalidDataException("The selected media file is empty.");
 
-                module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=2.9.5").ConfigureAwait(true);
+                module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=2.9.6").ConfigureAwait(true);
                 temporaryAssetId = Guid.NewGuid();
                 var inspectionUrl = MediaAssets.RegisterBytes(temporaryAssetId, bytes, mimeType);
                 MediaSourceInfo info;

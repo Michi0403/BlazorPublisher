@@ -1,5 +1,6 @@
 @namespace PublisherStudio.Components.Editor
 @inject PublicationMediaAssetStore MediaAssets
+@inject PublicationBehaviorService Behaviors
 
 @inject ILogger<PrintPublication> Logger
 @inject PublicationEditorTextService EditorText
@@ -69,7 +70,9 @@
                      data-media-autoplay="@(element is PublicationMediaElement mediaAuto ? mediaAuto.AutoPlay.ToString().ToLowerInvariant() : null)"
                      data-media-trigger="@(element is PublicationMediaElement mediaTrigger ? mediaTrigger.PlaybackTrigger.ToString() : null)"
                      data-media-fade-in="@(element is PublicationMediaElement mediaFadeIn ? Inv(mediaFadeIn.FadeInSeconds) : null)"
-                     data-media-fade-out="@(element is PublicationMediaElement mediaFadeOut ? Inv(mediaFadeOut.FadeOutSeconds) : null)">
+                     data-media-fade-out="@(element is PublicationMediaElement mediaFadeOut ? Inv(mediaFadeOut.FadeOutSeconds) : null)"
+                     data-object-address="@Behaviors.Address(Document, element)"
+                     data-behaviors="@Behaviors.Serialize(element)">
                         @switch (element)
                         {
                             case TextFrameElement text:

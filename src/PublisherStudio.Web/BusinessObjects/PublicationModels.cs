@@ -377,7 +377,53 @@ public enum ConnectorEndpointKind { Element, Canvas }
 /// <summary>
 /// Defines the supported signal connector trigger values used to select or describe behavior in the surrounding workflow.
 /// </summary>
-public enum SignalConnectorTrigger { OnPageEnter, OnClick, OnHover, Manual }
+public enum SignalConnectorTrigger
+{
+    /// <summary>Runs when the containing publication page becomes active.</summary>
+    OnPageEnter,
+    /// <summary>Runs for an authored object click that is not owned by a native control surface.</summary>
+    OnClick,
+    /// <summary>Runs for an authored object double-click.</summary>
+    OnDoubleClick,
+    /// <summary>Runs when the pointer enters the authored object interaction surface.</summary>
+    OnHover,
+    /// <summary>Runs when a native or component value reports a generic change.</summary>
+    OnChange,
+    /// <summary>Runs when the authored object or component receives focus.</summary>
+    OnFocus,
+    /// <summary>Runs when the authored object or component loses focus.</summary>
+    OnBlur,
+    /// <summary>Runs when native audio or video playback starts.</summary>
+    OnPlay,
+    /// <summary>Runs when native audio or video playback pauses.</summary>
+    OnPause,
+    /// <summary>Runs when native audio or video playback reaches the end.</summary>
+    OnEnded,
+    /// <summary>Runs when a maintained component reports an item click.</summary>
+    OnItemClick,
+    /// <summary>Runs when a maintained component reports a selection change.</summary>
+    OnSelectionChanged,
+    /// <summary>Runs when a maintained component reports a value change.</summary>
+    OnValueChanged,
+    /// <summary>Runs when a maintained form component submits.</summary>
+    OnSubmit,
+    /// <summary>Runs after a maintained data component inserts a row.</summary>
+    OnRowInserted,
+    /// <summary>Runs after a maintained data component updates a row.</summary>
+    OnRowUpdated,
+    /// <summary>Runs after a maintained data component removes a row.</summary>
+    OnRowRemoved,
+    /// <summary>Runs after a maintained scheduler component adds an appointment.</summary>
+    OnAppointmentAdded,
+    /// <summary>Runs after a maintained scheduler component updates an appointment.</summary>
+    OnAppointmentUpdated,
+    /// <summary>Runs after a maintained scheduler component deletes an appointment.</summary>
+    OnAppointmentDeleted,
+    /// <summary>Runs when a maintained chat component reports a newly entered message.</summary>
+    OnMessageEntered,
+    /// <summary>Runs only when explicitly invoked by authored automation.</summary>
+    Manual
+}
 /// <summary>
 /// Defines the supported signal connector visual values used to select or describe behavior in the surrounding workflow.
 /// </summary>
@@ -402,7 +448,7 @@ public enum SignalCompletionAction
     /// <summary>
     /// Selects the toggle CSS class option for <see cref="SignalCompletionAction"/>, giving callers a named value for that supported mode or state.
     /// </summary>
-    ToggleCssClass, RunSignal
+    ToggleCssClass, RunSignal, CallMethod
 }
 /// <summary>
 /// Defines the supported image mask shape values used to select or describe behavior in the surrounding workflow.
@@ -1469,6 +1515,11 @@ public sealed class SignalConnectorSettings
     /// </summary>
     /// <value>The completion action value exposed by <see cref="SignalConnectorSettings"/>.</value>
     public SignalCompletionAction CompletionAction { get; set; }
+    /// <summary>
+    /// Gets or sets the allow-listed publication object method invoked when the completion action is <see cref="SignalCompletionAction.CallMethod"/>.
+    /// </summary>
+    /// <value>The public object-interface method name selected for the completion target.</value>
+    public string CompletionMethod { get; set; } = string.Empty;
     /// <summary>
     /// Gets or sets the completion value value that forms part of the signal connector state consumed or produced by the surrounding workflow.
     /// </summary>

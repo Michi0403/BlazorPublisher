@@ -8,6 +8,7 @@
 @inject PublisherStudio.Services.Configuration.IFileLocalizationService Localization
 @inject NavigationManager Navigation
 @inject PublicationComponentService Components
+@inject PublicationBehaviorService Behaviors
 @inject IPagePresetCatalog PagePresets
 
 @inject ILogger<InspectorPanel> Logger
@@ -896,8 +897,19 @@
                             }
                         </select>
                     </label>
+                    @if (connector.Signal.CompletionAction == SignalCompletionAction.CallMethod)
+                    {
+                        <label>@LT("Method")
+                            <select value="@connector.Signal.CompletionMethod" @onchange="ChangeSignalCompletionMethod">
+                                @foreach (var method in SignalCompletionMethods(connector))
+                                {
+                                    <option value="@method">@Friendly(method)</option>
+                                }
+                            </select>
+                        </label>
+                    }
                     <label>@LT("Action value")
-                        <input value="@connector.Signal.CompletionValue" placeholder="Opacity, CSS class, or highlight color" @onchange="ChangeSignalCompletionValue" />
+                        <input value="@connector.Signal.CompletionValue" placeholder="Method argument, opacity, CSS class, or highlight color" @onchange="ChangeSignalCompletionValue" />
                     </label>
                     <label>@LT("Action duration (s)")
                         <input type="number" min=".01" max="3600" step=".05" value="@Inv(connector.Signal.CompletionDurationSeconds)" @onchange="ChangeSignalCompletionDuration" />
@@ -3471,11 +3483,84 @@
     private IEnumerable<PublicationElement> SignalTargetElements(ConnectorElement connector) {
         try
         {
-            return State.CurrentPage.Elements.Where(item => item is not ConnectorElement).OrderBy(item => item.Name);
+            var seen = new HashSet<Guid>();
+            return State.CurrentPage.Elements
+                .Where(item => item is not ConnectorElement)
+                .SelectMany(FlattenSignalTarget)
+                .Where(item => seen.Add(item.Id))
+                .OrderBy(item => item.Name, StringComparer.CurrentCultureIgnoreCase)
+                .ThenBy(item => item.Kind);
         }
         catch (Exception __componentMethodException)
         {
             Logger.LogError(__componentMethodException, $"Component method {nameof(InspectorPanel)}.{nameof(SignalTargetElements)} failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Recursively exposes Panel Studio children to the same signal target catalog used by top-level publication objects.</summary>
+    /// <param name="element">Top-level or nested publication element.</param>
+    /// <returns>The element and every nested panel child.</returns>
+    private IReadOnlyList<PublicationElement> FlattenSignalTarget(PublicationElement element)
+    {
+        try
+        {
+            Logger.LogTrace("Collecting signal targets from publication element {ElementId}.", element.Id);
+            var result = new List<PublicationElement> { element };
+            if (element is not PanelElement panel) return result;
+            foreach (var view in panel.Views)
+            foreach (var child in view.Elements)
+                result.AddRange(FlattenSignalTarget(child));
+            return result;
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Collecting signal targets from publication element {ElementId} failed.", element.Id);
+            throw;
+        }
+    }
+
+    /// <summary>Returns the maintained public object methods appropriate to the selected signal completion target.</summary>
+    /// <param name="connector">Signal connector being edited.</param>
+    /// <returns>Allow-listed methods supported by the target object.</returns>
+    private IReadOnlyList<string> SignalCompletionMethods(ConnectorElement connector)
+    {
+        try
+        {
+            var targetId = connector.Signal.CompletionTargetElementId;
+            if (targetId is null && connector.Target.Kind == ConnectorEndpointKind.Element) targetId = connector.Target.ElementId;
+            var target = targetId is { } id ? SignalTargetElements(connector).FirstOrDefault(item => item.Id == id) : null;
+            return target is null
+                ? ["click", "focus", "blur", "change", "show", "hide", "toggleVisibility"]
+                : Behaviors.CommonMethods(target);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(InspectorPanel)}.{nameof(SignalCompletionMethods)} failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Keeps a signal Call Method selection valid after the action or completion target changes.</summary>
+    /// <param name="connector">Signal connector being edited.</param>
+    private void NormalizeSignalCompletionMethod(ConnectorElement connector)
+    {
+        try
+        {
+            Logger.LogTrace("Normalizing signal completion method for connector {ConnectorId}.", connector.Id);
+            if (connector.Signal.CompletionAction != SignalCompletionAction.CallMethod) return;
+            var methods = SignalCompletionMethods(connector);
+            if (methods.Count == 0)
+            {
+                connector.Signal.CompletionMethod = string.Empty;
+                return;
+            }
+            if (!methods.Contains(connector.Signal.CompletionMethod, StringComparer.OrdinalIgnoreCase))
+                connector.Signal.CompletionMethod = methods[0];
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Normalizing signal completion method for connector {ConnectorId} failed.", connector.Id);
             throw;
         }
     }
@@ -3674,7 +3759,8 @@
     private void ChangeSignalCompletionAction(ChangeEventArgs args) {
         try
         {
-     if (Enum.TryParse<SignalCompletionAction>(args.Value?.ToString(), out var value)) UpdateSignal(signal => signal.CompletionAction = value); 
+            if (Enum.TryParse<SignalCompletionAction>(args.Value?.ToString(), out var value) && State.SelectedElement is ConnectorElement connector)
+                State.UpdateSelected(_ => { connector.Signal.CompletionAction = value; NormalizeSignalCompletionMethod(connector); });
         }
         catch (Exception __componentMethodException)
         {
@@ -3704,7 +3790,8 @@
     private void ChangeSignalCompletionTarget(ChangeEventArgs args) {
         try
         {
-            UpdateSignal(signal => signal.CompletionTargetElementId = ParseGuid(args));
+            if (State.SelectedElement is ConnectorElement connector)
+                State.UpdateSelected(_ => { connector.Signal.CompletionTargetElementId = ParseGuid(args); NormalizeSignalCompletionMethod(connector); });
         }
         catch (Exception __componentMethodException)
         {
@@ -3787,6 +3874,25 @@
             throw;
         }
     }
+    /// <summary>Changes the allow-listed public object method executed by a signal Call Method completion.</summary>
+    /// <param name="args">Method selection change event.</param>
+    private void ChangeSignalCompletionMethod(ChangeEventArgs args)
+    {
+        try
+        {
+            var method = args.Value?.ToString() ?? string.Empty;
+            if (State.SelectedElement is not ConnectorElement connector) return;
+            var methods = SignalCompletionMethods(connector);
+            if (!methods.Contains(method, StringComparer.OrdinalIgnoreCase)) return;
+            UpdateSignal(signal => signal.CompletionMethod = method);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(InspectorPanel)}.{nameof(ChangeSignalCompletionMethod)} failed.");
+            throw;
+        }
+    }
+
     /// <summary>
     /// Performs change signal completion value for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
     /// </summary>
@@ -5408,7 +5514,7 @@
             var poster = string.Empty;
             try
             {
-                _mediaModule ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=2.9.5").ConfigureAwait(true);
+                _mediaModule ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=2.9.6").ConfigureAwait(true);
                 var localUrl = MediaAssets.RegisterBytes(inspectionId, bytes, mimeType);
                 try
                 {

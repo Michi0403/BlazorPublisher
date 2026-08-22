@@ -13,6 +13,7 @@ using PublisherStudio.Components;
 using PublisherStudio.Diagnostics;
 using PublisherStudio.Services;
 using PublisherStudio.Services.Configuration;
+using PublisherStudio.Services.Publication;
 
 namespace PublisherStudio;
 
@@ -180,6 +181,7 @@ public static class Program
             ]
         });
         app.Services.GetRequiredService<IApplicationPathService>().EnsureDirectories();
+        app.Services.GetRequiredService<IPublisherTemplateLibraryService>().EnsureTemplateDirectories();
 
         app.UseDevExpressControls();
         app.UseStaticFiles();

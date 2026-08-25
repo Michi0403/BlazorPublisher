@@ -513,6 +513,10 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
                     context.restore();
                 }
             }
+            if (typeof currentConfig.onFrameRendered === 'function' && video.readyState >= 2) {
+                try { currentConfig.onFrameRendered(Math.max(0, Number(video.currentTime) || 0)); }
+                catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/videoEffectRuntime.js:onFrameRendered', __caughtJavaScriptError); }
+            }
             if (!video.paused && !video.ended) {
                 if (typeof video.requestVideoFrameCallback === 'function') {
                     frameKind = 'video';

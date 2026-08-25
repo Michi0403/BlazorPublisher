@@ -6901,25 +6901,36 @@ function initializeStoryEditorLayout(shellId, hostId, dotNetReference = null) { 
         return;
     }
     let timer = 0;
+    let lastShellWidth = -1;
     const refresh = () => { try {
         timer = 0;
-        if (!shell.isConnected || !host.isConnected) return;
-        host.style.maxWidth = `${Math.max(1, shell.clientWidth)}px`;
-        host.scrollLeft = 0;
-        const richRoot = host.firstElementChild;
+        const currentHost = state?.host || host;
+        if (!shell.isConnected || !currentHost?.isConnected) {
+            state?.resizeObserver?.disconnect?.();
+            return;
+        }
+        const shellWidth = Math.max(1, shell.clientWidth);
+        const layoutChanged = shellWidth !== lastShellWidth;
+        lastShellWidth = shellWidth;
+        currentHost.style.maxWidth = `${shellWidth}px`;
+        const richRoot = currentHost.firstElementChild;
         if (richRoot instanceof HTMLElement) {
             richRoot.style.width = '100%';
             richRoot.style.maxWidth = '100%';
             richRoot.style.minWidth = '0';
         }
-        window.dispatchEvent(new Event('resize'));
+        // DevExpress RichEdit reacts to a global resize by recalculating its viewport and caret.
+        // Dispatch only for a real shell-size change. Repeated resize events after an export
+        // otherwise create a ResizeObserver/RichEdit feedback loop that makes the caret jump.
+        if (layoutChanged) window.dispatchEvent(new Event('resize'));
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:refresh@6560', __javascriptError); throw __javascriptError; }};
     const schedule = () => { try {
         if (timer) clearTimeout(timer);
         timer = window.setTimeout(refresh, 40);
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:schedule@6573', __javascriptError); throw __javascriptError; }};
     const click = event => { try {
-        const printCommand = reserveStoryPrintPreviewFromEvent(event, host);
+        const currentHost = state?.host || host;
+        const printCommand = reserveStoryPrintPreviewFromEvent(event, currentHost);
         if (printCommand === 'rich-edit') {
             event.preventDefault();
             event.stopPropagation();
@@ -6935,7 +6946,8 @@ function initializeStoryEditorLayout(shellId, hostId, dotNetReference = null) { 
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:click@6577', __javascriptError); throw __javascriptError; }};
     const keydown = event => { try {
         if (!(event.ctrlKey || event.metaKey) || event.altKey || String(event.key || '').toLowerCase() !== 'p') return;
-        if (!host.contains(event.target)) return;
+        const currentHost = state?.host || host;
+        if (!currentHost?.contains(event.target)) return;
         const current = storyPrintPreviews.get(reservedStoryPrintPreviewId);
         if (!current?.previewWindow || current.previewWindow.closed)
             reservedStoryPrintPreviewId = openStoryPrintPreview('Story print preview');
@@ -6948,8 +6960,9 @@ function initializeStoryEditorLayout(shellId, hostId, dotNetReference = null) { 
     shell.addEventListener('click', click, true);
     shell.addEventListener('keydown', keydown, true);
     const resizeObserver = typeof ResizeObserver === 'function' ? new ResizeObserver(schedule) : null;
+    // Observe only the owning shell. Observing RichEdit's host creates a self-triggering loop
+    // because RichEdit changes its own measurements while handling resize.
     resizeObserver?.observe(shell);
-    resizeObserver?.observe(host);
     state = { host, schedule, resizeObserver, click, keydown, dotNet: dotNetReference };
     storyEditorLayouts.set(shell, state);
     schedule();
@@ -7812,7 +7825,7 @@ async function buildPublisherSingleHtml(mode, title, exportOptions = {}) { try {
                 throw new Error(`Prepared DevExtreme asset hash mismatch for ${manifestPath}. Clear browser cache and run Prepare-DevExpressAssets.cmd again.`);
             }
         }
-    } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:verifyPreparedTextAsset@2.9.7', __javascriptError); throw __javascriptError; } };
+    } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:verifyPreparedTextAsset@2.9.8', __javascriptError); throw __javascriptError; } };
     await Promise.all([
         verifyPreparedTextAsset('devextreme-dist/js/dx.all.js', devExtremeSource),
         verifyPreparedTextAsset('devextreme-dist/css/dx.light.css', devExtremeCss)

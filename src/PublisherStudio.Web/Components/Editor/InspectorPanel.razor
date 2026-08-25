@@ -27,7 +27,7 @@
     else if (_tab == "layers")
     {
         <div class="layers-panel">
-            <div class="layer-help"><strong>@LT("Objects are layers")</strong><span>@LT("Higher rows appear in front. Use the eye and lock buttons per object.")</span></div>
+            <div class="layer-help"><strong>@LT("Objects are layers")</strong><span>@LT("Higher rows appear in front. Drag rows to reorder layers; use the eye and lock buttons per object.")</span></div>
             <div class="layer-create-bar">
                 <button title='@LT("Add text box")' @onclick="AddText"><i class="pub-icon pub-icon-text" aria-hidden="true"></i></button>
                 <button title='@LT("Add WordArt")' @onclick="AddWordArt"><i class="pub-icon pub-icon-wordart" aria-hidden="true"></i></button>
@@ -56,9 +56,16 @@
             <div class="layers-list">
                 @foreach (var item in State.CurrentPage.Elements.OrderByDescending(element => element.ZIndex))
                 {
-                    <div class="layer-row @(State.IsSelected(item.Id) ? "selected" : null) @(item.Id == State.SelectedElementId ? "selection-primary" : null)"
+                    <div class="layer-row @(State.IsSelected(item.Id) ? "selected" : null) @(item.Id == State.SelectedElementId ? "selection-primary" : null) @(_draggedLayerId == item.Id ? "layer-dragging" : null) @(_layerDropTargetId == item.Id ? "layer-drop-target" : null)"
+                         draggable="true"
+                         @ondragstart="() => BeginLayerDrag(item)"
+                         @ondragenter="() => EnterLayerDropTarget(item)"
+                         @ondragover:preventDefault
+                         @ondrop="() => DropLayer(item)"
+                         @ondragend="EndLayerDrag"
                          @oncontextmenu="args => ShowLayerContextMenu(item, args)" @oncontextmenu:preventDefault>
                         <button class="layer-select" title="@($"{LT("Select")} {item.Name}")" @onclick="args => SelectLayer(item, args)">
+                            <span class="layer-drag-handle" title='@LT("Drag to reorder layer")' aria-hidden="true">⋮⋮</span>
                             <span class="layer-kind"><i class="@KindIconCss(item)" aria-hidden="true"></i></span>
                             <span class="layer-name">@item.Name</span>
                         </button>
@@ -1180,6 +1187,10 @@
     /// Stores the internal context layer identifier state used by <see cref="InspectorPanel"/> while executing its surrounding workflow.
     /// </summary>
     private Guid? _contextLayerId;
+    /// <summary>Tracks the Mainframe layer currently being dragged in the Layers panel.</summary>
+    private Guid? _draggedLayerId;
+    /// <summary>Tracks the layer row currently accepting a Mainframe layer drop.</summary>
+    private Guid? _layerDropTargetId;
     /// <summary>
     /// Gets the context layer value that forms part of the inspector panel state consumed or produced by the surrounding workflow.
     /// </summary>
@@ -1708,6 +1719,77 @@
         {
             Logger.LogError(__componentMethodException, $"Component method {nameof(InspectorPanel)}.{nameof(SelectLayer)} failed.");
             throw;
+        }
+    }
+
+    /// <summary>Begins a drag reorder operation for a Mainframe layer.</summary>
+    /// <param name="item">Layer being dragged.</param>
+    private void BeginLayerDrag(PublicationElement item)
+    {
+        try
+        {
+            if (!State.IsSelected(item.Id)) State.SelectElement(item.Id);
+            _draggedLayerId = item.Id;
+            _layerDropTargetId = item.Id;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Beginning layer drag failed for {LayerId}.", item.Id);
+            OperationalNotifications.Error(ex.Message, LT("Layer reorder failed"), nameof(InspectorPanel));
+        }
+    }
+
+    /// <summary>Marks a Mainframe layer row as the active drop target.</summary>
+    /// <param name="item">Layer row under the pointer.</param>
+    private void EnterLayerDropTarget(PublicationElement item)
+    {
+        try
+        {
+            if (_draggedLayerId.HasValue) _layerDropTargetId = item.Id;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Updating the layer drop target failed for {LayerId}.", item.Id);
+            OperationalNotifications.Error(ex.Message, LT("Layer reorder failed"), nameof(InspectorPanel));
+        }
+    }
+
+    /// <summary>Drops the selected layer block at the requested front-to-back row.</summary>
+    /// <param name="target">Layer row receiving the drop.</param>
+    private void DropLayer(PublicationElement target)
+    {
+        try
+        {
+            if (!_draggedLayerId.HasValue || State.IsSelected(target.Id)) return;
+            var frontToBack = State.CurrentPage.Elements.OrderByDescending(element => element.ZIndex).ToList();
+            var displayIndex = frontToBack.FindIndex(element => element.Id == target.Id);
+            if (displayIndex < 0) return;
+            var oneBasedBackToFrontPosition = Math.Max(1, frontToBack.Count - displayIndex);
+            State.SetSelectedLayerPosition(oneBasedBackToFrontPosition);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Dropping layer {LayerId} onto {TargetLayerId} failed.", _draggedLayerId, target.Id);
+            OperationalNotifications.Error(ex.Message, LT("Layer reorder failed"), nameof(InspectorPanel));
+        }
+        finally
+        {
+            EndLayerDrag();
+        }
+    }
+
+    /// <summary>Clears transient Mainframe layer drag state.</summary>
+    private void EndLayerDrag()
+    {
+        try
+        {
+            _draggedLayerId = null;
+            _layerDropTargetId = null;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Ending the layer drag operation failed.");
+            OperationalNotifications.Error(ex.Message, LT("Layer reorder failed"), nameof(InspectorPanel));
         }
     }
 
@@ -5514,7 +5596,7 @@
             var poster = string.Empty;
             try
             {
-                _mediaModule ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=2.9.7").ConfigureAwait(true);
+                _mediaModule ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=2.9.8").ConfigureAwait(true);
                 var localUrl = MediaAssets.RegisterBytes(inspectionId, bytes, mimeType);
                 try
                 {

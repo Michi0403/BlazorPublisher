@@ -1782,6 +1782,7 @@ function normalizedRecordingOptions(options) { try {
         height: positiveInteger(options?.height),
         frameRate: positiveInteger(options?.frameRate),
         maximumFrameRate: positiveInteger(options?.maximumFrameRate),
+        bitrateFrameRate: positiveInteger(options?.bitrateFrameRate),
         videoBitsPerSecond: positiveInteger(options?.videoBitsPerSecond),
         audioBitsPerSecond: positiveInteger(options?.audioBitsPerSecond),
         recorderChunkMilliseconds: Math.min(5000, Math.max(100, positiveInteger(options?.recorderChunkMilliseconds) || 500)),
@@ -1827,7 +1828,7 @@ function adaptiveVideoBitsPerSecond(settings, source, mimeType, options) { try {
     if (!policy.enabled || !policy.adaptVideo) return options.videoBitsPerSecond;
     const width = Math.max(1, Number(settings?.width) || options.width || 0);
     const height = Math.max(1, Number(settings?.height) || options.height || 0);
-    let frameRate = Math.max(1, Number(settings?.frameRate) || options.maximumFrameRate || 0);
+    let frameRate = Math.max(1, Number(options.bitrateFrameRate) || Number(settings?.frameRate) || options.maximumFrameRate || 0);
     if (!width || !height || !frameRate) return 0;
     const ceiling = options.maximumFrameRate > 0 ? options.maximumFrameRate : policy.maximumAutomaticFrameRate;
     if (ceiling > 0) frameRate = Math.min(frameRate, ceiling);
@@ -1855,6 +1856,35 @@ function adaptiveAudioBitsPerSecond(stream, options) { try {
     if (policy.maximumAudioBitrateKbps > 0) kbps = Math.min(kbps, policy.maximumAudioBitrateKbps);
     return Math.max(1, Math.round(kbps * 1000));
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:adaptiveAudioBitsPerSecond', __javascriptError); return options.audioBitsPerSecond || 0; }}
+
+let mediaCapabilitiesRecordProbeSupported = null;
+
+function recordEncodingProbeUnsupported(error) { try {
+    if (!(error instanceof Error) && !error) return false;
+    const name = String(error?.name || '');
+    const message = String(error?.message || error || '').toLowerCase();
+    return name === 'TypeError' && (message.includes('mediaencodingtype') || message.includes('valid enum') || message.includes('record'));
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:recordEncodingProbeUnsupported', __javascriptError); return false; }}
+
+async function tryRecordEncodingInfo(capabilityRequest) { try {
+    if (mediaCapabilitiesRecordProbeSupported === false) return null;
+    try {
+        const capability = await navigator.mediaCapabilities.encodingInfo(capabilityRequest);
+        mediaCapabilitiesRecordProbeSupported = true;
+        return capability;
+    } catch (error) {
+        if (recordEncodingProbeUnsupported(error)) {
+            // Some Chromium/Edge builds expose MediaCapabilities.encodingInfo but reject the
+            // standards-defined MediaRecorder `record` encoding type. Treat that as an absent
+            // optional probe and fall back to MediaRecorder.isTypeSupported instead of flooding
+            // diagnostics once for every codec candidate.
+            mediaCapabilitiesRecordProbeSupported = false;
+            return null;
+        }
+        publisherStudioDiagnostics.report('js/mediaStudioInterop.js:probeAdaptiveRecordingProfile:encodingInfo', error);
+        return null;
+    }
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:tryRecordEncodingInfo', __javascriptError); return null; }}
 
 async function probeAdaptiveRecordingProfile(stream, source, options) { try {
     const videoTrack = stream?.getVideoTracks?.()[0];
@@ -1890,9 +1920,9 @@ async function probeAdaptiveRecordingProfile(stream, source, options) { try {
                     };
                     const audioConfiguration = mediaCapabilitiesAudioConfiguration(stream, audioBitsPerSecond);
                     if (audioConfiguration) capabilityRequest.audio = audioConfiguration;
-                    capability = await navigator.mediaCapabilities.encodingInfo(capabilityRequest);
+                    capability = await tryRecordEncodingInfo(capabilityRequest);
                 } catch (__capabilityError) {
-                    publisherStudioDiagnostics.report('js/mediaStudioInterop.js:probeAdaptiveRecordingProfile:encodingInfo', __capabilityError);
+                    publisherStudioDiagnostics.report('js/mediaStudioInterop.js:probeAdaptiveRecordingProfile:encodingInfo-wrapper', __capabilityError);
                 }
             }
             const supported = capability ? capability.supported !== false : true;
@@ -1985,7 +2015,10 @@ async function streamFor(kind, source, options) { try {
             try {
                 const microphone = await navigator.mediaDevices.getUserMedia({ audio: true });
                 for (const track of microphone.getAudioTracks()) stream.addTrack(track);
-            } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:streamFor:screen-microphone-fallback', __caughtJavaScriptError);  }
+            } catch (__caughtJavaScriptError) {
+                if (__caughtJavaScriptError?.name !== 'NotAllowedError' && __caughtJavaScriptError?.name !== 'AbortError')
+                    publisherStudioDiagnostics.report('js/mediaStudioInterop.js:streamFor:screen-microphone-fallback', __caughtJavaScriptError);
+            }
         }
         return stream;
     }
@@ -1995,7 +2028,11 @@ async function streamFor(kind, source, options) { try {
         return stream;
     }
     return navigator.mediaDevices.getUserMedia({ audio: true });
- } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:streamFor', __javascriptError); throw __javascriptError; }}
+ } catch (__javascriptError) {
+    if (__javascriptError?.name !== 'NotAllowedError' && __javascriptError?.name !== 'AbortError')
+        publisherStudioDiagnostics.report('js/mediaStudioInterop.js:streamFor', __javascriptError);
+    throw __javascriptError;
+ }}
 
 async function enrichRetainedRecordingMetadata(state, retainedBlob, retainedUrl, retainedInfo, kind) { try {
     const preview = mediaElement(state.id);
@@ -2120,7 +2157,13 @@ export async function embedRetainedRecording(id) { try {
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:embedRetainedRecording@1338', __javascriptError); throw __javascriptError; }}
 
 function renderedVideoFileName(sourceName, mimeType) { try {
-    const extension = String(mimeType || '').toLowerCase().includes('webm') ? '.webm' : '.webm';
+    const normalizedMimeType = baseMimeType(mimeType, '').toLowerCase();
+    const sourceExtensionMatch = String(sourceName || '').match(/(\.[a-z0-9]{1,8})$/i);
+    const extension = normalizedMimeType.includes('mp4') ? '.mp4'
+        : normalizedMimeType.includes('ogg') ? '.ogv'
+        : normalizedMimeType.includes('quicktime') ? '.mov'
+        : normalizedMimeType.includes('webm') ? '.webm'
+        : sourceExtensionMatch?.[1]?.toLowerCase() || '.webm';
     const cleaned = String(sourceName || 'video')
         .replace(/\.[a-z0-9]{1,8}$/i, '')
         .replace(/[\\/:*?"<>|]+/g, '-')
@@ -2151,6 +2194,120 @@ function stopRenderedVideoExportJob(job) { try {
     try { job.video?.pause?.(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:render-export:pause', __caughtJavaScriptError); }
     try { if (job.recorder && job.recorder.state !== 'inactive') job.recorder.stop(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:render-export:recorder-stop', __caughtJavaScriptError); }
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:stopRenderedVideoExportJob', __javascriptError); }}
+
+function videoEffectConfigurationNeedsCanvas(effectConfig) { try {
+    const layers = Array.isArray(effectConfig?.layers) ? effectConfig.layers.filter(layer => layer && layer.visible !== false) : [];
+    if (layers.length === 0) return false;
+    if (layers.length !== 1) return true;
+    const layer = layers[0];
+    const kind = String(layer.kind || '').trim().toLowerCase();
+    const blendMode = String(layer.blendMode || 'normal').trim().toLowerCase();
+    const filters = Array.isArray(layer.filters) ? layer.filters.filter(filter => filter && filter.enabled !== false) : [];
+    const points = Array.isArray(layer.region?.points) ? layer.region.points : [];
+    const morphPoints = Array.isArray(layer.morphRegion?.points) ? layer.morphRegion.points : [];
+    return (kind && kind !== 'basevideo' && kind !== 'base')
+        || Number(layer.opacity ?? 1) < .999
+        || (blendMode !== 'normal' && blendMode !== 'source-over')
+        || layer.hasTemporalRange === true
+        || layer.morphEnabled === true
+        || layer.animateMorph === true
+        || points.length >= 3
+        || morphPoints.length >= 3
+        || filters.length > 0;
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:videoEffectConfigurationNeedsCanvas', __javascriptError); return true; }}
+
+async function downloadUnmodifiedRenderedSource(video, sourceName, dotnet, outputWidth, outputHeight, duration) { try {
+    const sourceUrl = String(video.currentSrc || video.src || '').trim();
+    if (!sourceUrl) return false;
+    const response = await fetch(sourceUrl);
+    if (!response.ok) return false;
+    const blob = await response.blob();
+    if (!blob.size) return false;
+    const mimeType = baseMimeType(blob.type, 'video/webm');
+    const fileName = renderedVideoFileName(sourceName, mimeType);
+    downloadBlob(blob, fileName);
+    try {
+        await dotnet?.invokeMethodAsync('RenderedVideoExportReady', fileName, mimeType, blob.size, outputWidth, outputHeight, duration);
+    } catch (__callbackError) {
+        const message = String(__callbackError?.message || __callbackError || '').toLowerCase();
+        if (message.includes('disconnected') || message.includes('disposed') || message.includes('connection') || message.includes('circuit'))
+            console.debug('PublisherStudio rendered-source completion callback ended with the Blazor circuit.', __callbackError);
+        else
+            publisherStudioDiagnostics.report('js/mediaStudioInterop.js:render-export:direct-source-ready-callback', __callbackError);
+    }
+    return true;
+ } catch (__javascriptError) {
+    publisherStudioDiagnostics.report('js/mediaStudioInterop.js:downloadUnmodifiedRenderedSource', __javascriptError);
+    return false;
+ }}
+
+async function estimateDecodedVideoFrameRate(video, startSeconds, job) { try {
+    if (typeof video.requestVideoFrameCallback !== 'function') return 0;
+    const start = Math.max(0, Number(startSeconds) || 0);
+    const previousMuted = video.muted;
+    const previousRate = video.playbackRate;
+    video.muted = true;
+    video.playbackRate = 1;
+    video.currentTime = start;
+    await new Promise((resolve, reject) => { try {
+        if (Math.abs((Number(video.currentTime) || 0) - start) <= .03 && video.readyState >= 2) { resolve(); return; }
+        const cleanup = () => { video.removeEventListener('seeked', ready); video.removeEventListener('error', failed); };
+        const ready = () => { cleanup(); resolve(); };
+        const failed = () => { cleanup(); reject(new Error('The browser could not seek while probing source frame rate.')); };
+        video.addEventListener('seeked', ready, { once: true });
+        video.addEventListener('error', failed, { once: true });
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:estimate-frame-rate:seek', __javascriptError); reject(__javascriptError); }});
+    if (job?.cancelled) return 0;
+
+    const mediaTimes = [];
+    let callbackId = 0;
+    let timeoutId = 0;
+    const samplePromise = new Promise(resolve => { try {
+        let settled = false;
+        const finish = () => {
+            if (settled) return;
+            settled = true;
+            if (timeoutId) clearTimeout(timeoutId);
+            if (callbackId && typeof video.cancelVideoFrameCallback === 'function') {
+                try { video.cancelVideoFrameCallback(callbackId); }
+                catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:estimate-frame-rate:cancel-callback', __caughtJavaScriptError); }
+            }
+            resolve();
+        };
+        const sample = (_now, metadata) => { try {
+            callbackId = 0;
+            if (job?.cancelled) { finish(); return; }
+            const mediaTime = Number(metadata?.mediaTime);
+            if (Number.isFinite(mediaTime)) mediaTimes.push(mediaTime);
+            if (mediaTimes.length >= 8 || video.ended) { finish(); return; }
+            callbackId = video.requestVideoFrameCallback(sample);
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:estimate-frame-rate:sample', __javascriptError); finish(); }};
+        callbackId = video.requestVideoFrameCallback(sample);
+        timeoutId = window.setTimeout(finish, 800);
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:estimate-frame-rate:promise', __javascriptError); resolve(); }});
+    try { await video.play(); }
+    catch (__playError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:estimate-frame-rate:play', __playError); }
+    await samplePromise;
+    video.pause();
+    video.muted = previousMuted;
+    video.playbackRate = previousRate;
+
+    const deltas = [];
+    for (let index = 1; index < mediaTimes.length; index++) {
+        const delta = mediaTimes[index] - mediaTimes[index - 1];
+        if (Number.isFinite(delta) && delta > .0001 && delta < .2) deltas.push(delta);
+    }
+    if (deltas.length === 0) return 0;
+    deltas.sort((left, right) => left - right);
+    const median = deltas[Math.floor(deltas.length / 2)];
+    const estimated = median > 0 ? 1 / median : 0;
+    if (!Number.isFinite(estimated) || estimated < 1) return 0;
+    return Math.min(240, Math.max(1, estimated));
+ } catch (__javascriptError) {
+    publisherStudioDiagnostics.report('js/mediaStudioInterop.js:estimateDecodedVideoFrameRate', __javascriptError);
+    try { video.pause(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:estimate-frame-rate:cleanup-pause', __caughtJavaScriptError); }
+    return 0;
+ }}
 
 async function runRenderedVideoExport(state, sourceId, dotnet, effectConfig, rawRecordingOptions, startSeconds, endSeconds, playbackRate, audioGain, sourceName) { try {
     const source = mediaElement(sourceId);
@@ -2191,10 +2348,60 @@ async function runRenderedVideoExport(state, sourceId, dotnet, effectConfig, raw
         const sourceHeight = Math.max(2, Math.trunc(Number(video.videoHeight) || 2));
         const outputWidth = options.width > 0 ? options.width : sourceWidth;
         const outputHeight = options.height > 0 ? options.height : sourceHeight;
-        const frameRate = options.frameRate > 0 ? options.frameRate : options.maximumFrameRate;
-        const renderConfig = { ...(effectConfig || {}), outputWidth, outputHeight, maximumPixels: 0, forceCanvas: true };
+        const requestedFrameRate = options.frameRate > 0 ? options.frameRate : options.maximumFrameRate;
+        const playback = Math.max(.1, Number(playbackRate) || 1);
+        const gain = Math.max(0, Math.min(1, Number(audioGain) || 0));
+        const fullSourceRange = start <= .002 && end >= duration - .002;
+        const sourceDimensionsPreserved = outputWidth === sourceWidth && outputHeight === sourceHeight;
+        const noVisualBake = !videoEffectConfigurationNeedsCanvas(effectConfig);
+        if (fullSourceRange && sourceDimensionsPreserved && noVisualBake && Math.abs(playback - 1) <= .001 && Math.abs(gain - 1) <= .001) {
+            if (await downloadUnmodifiedRenderedSource(video, sourceName, dotnet, sourceWidth, sourceHeight, duration)) return;
+        }
+
+        let estimatedSourceFrameRate = 0;
+        if (requestedFrameRate <= 0 && typeof video.requestVideoFrameCallback === 'function')
+            estimatedSourceFrameRate = await estimateDecodedVideoFrameRate(video, start, job);
+        if (job.cancelled) return;
+        const fallbackFrameRate = Math.max(24, Math.min(240, requestedFrameRate > 0 ? requestedFrameRate : estimatedSourceFrameRate > 0 ? estimatedSourceFrameRate : 60));
         canvas.width = outputWidth;
         canvas.height = outputHeight;
+
+        // Native/source mode must not silently fall back to the browser's canvas default cadence.
+        // A zero-rate canvas track is advanced explicitly after each decoded frame. If this browser
+        // lacks CanvasCaptureMediaStreamTrack.requestFrame, use the measured source cadence instead.
+        let canvasVideoTrack = null;
+        let canFollowSourceFrames = false;
+        if (requestedFrameRate <= 0 && typeof video.requestVideoFrameCallback === 'function') {
+            stream = canvas.captureStream(0);
+            canvasVideoTrack = stream.getVideoTracks?.()[0] || null;
+            canFollowSourceFrames = typeof canvasVideoTrack?.requestFrame === 'function';
+            if (!canFollowSourceFrames) {
+                try { for (const track of stream.getTracks?.() || []) track.stop(); }
+                catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:render-export:replace-zero-rate-track', __caughtJavaScriptError); }
+                stream = canvas.captureStream(fallbackFrameRate);
+                canvasVideoTrack = stream.getVideoTracks?.()[0] || null;
+            }
+        } else {
+            stream = canvas.captureStream(fallbackFrameRate);
+            canvasVideoTrack = stream.getVideoTracks?.()[0] || null;
+        }
+        job.stream = stream;
+        let lastCapturedMediaTime = -1;
+        const renderConfig = {
+            ...(effectConfig || {}),
+            outputWidth,
+            outputHeight,
+            maximumPixels: 0,
+            forceCanvas: true,
+            onFrameRendered: canFollowSourceFrames
+                ? mediaTime => { try {
+                    const normalizedTime = Math.max(0, Number(mediaTime) || 0);
+                    if (Math.abs(normalizedTime - lastCapturedMediaTime) <= .000001) return;
+                    lastCapturedMediaTime = normalizedTime;
+                    canvasVideoTrack.requestFrame();
+                 } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:render-export:request-source-frame', __javascriptError); }}
+                : null
+        };
         window.publisherVideoEffects.install(runtimeKey, video, canvas, renderConfig);
 
         video.currentTime = start;
@@ -2209,9 +2416,6 @@ async function runRenderedVideoExport(state, sourceId, dotnet, effectConfig, raw
         await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
         if (job.cancelled) return;
 
-        stream = frameRate > 0 ? canvas.captureStream(frameRate) : canvas.captureStream();
-        job.stream = stream;
-        const gain = Math.max(0, Math.min(1, Number(audioGain) || 0));
         if (gain > 0) {
             const AudioContextType = window.AudioContext || window.webkitAudioContext;
             if (AudioContextType) {
@@ -2227,7 +2431,20 @@ async function runRenderedVideoExport(state, sourceId, dotnet, effectConfig, raw
             }
         }
 
-        const adaptiveProfile = await probeAdaptiveRecordingProfile(stream, 'mixed', options);
+        const exportProfileOptions = {
+            ...options,
+            width: outputWidth,
+            height: outputHeight,
+            maximumFrameRate: fallbackFrameRate,
+            bitrateFrameRate: fallbackFrameRate,
+            adaptive: {
+                ...options.adaptive,
+                preserveNativeResolution: true,
+                allowFrameRateReduction: false,
+                allowResolutionReduction: false
+            }
+        };
+        const adaptiveProfile = await probeAdaptiveRecordingProfile(stream, 'mixed', exportProfileOptions);
         if (job.cancelled) return;
         const mimeType = adaptiveProfile?.mimeType || preferredMime('video', options.codecPreference, options.adaptive.codecPreferenceOrder);
         const recorderOptions = {};
@@ -2253,7 +2470,7 @@ async function runRenderedVideoExport(state, sourceId, dotnet, effectConfig, raw
              } catch (error) { reject(error); } }, { once: true });
          } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:render-export:blob-promise', __javascriptError); reject(__javascriptError); }});
 
-        video.playbackRate = Math.max(.1, Number(playbackRate) || 1);
+        video.playbackRate = playback;
         recorder.start(options.recorderChunkMilliseconds);
         await video.play();
         await new Promise((resolve, reject) => { try {
@@ -2276,7 +2493,17 @@ async function runRenderedVideoExport(state, sourceId, dotnet, effectConfig, raw
         const finalMimeType = baseMimeType(blob.type || recorder.mimeType, 'video/webm');
         const fileName = renderedVideoFileName(sourceName, finalMimeType);
         downloadBlob(blob, fileName);
-        await dotnet?.invokeMethodAsync('RenderedVideoExportReady', fileName, finalMimeType, blob.size, outputWidth, outputHeight, Math.max(.001, (end - start) / Math.max(.1, Number(playbackRate) || 1)));
+        try {
+            await dotnet?.invokeMethodAsync('RenderedVideoExportReady', fileName, finalMimeType, blob.size, outputWidth, outputHeight, Math.max(.001, (end - start) / playback));
+        } catch (__callbackError) {
+            // The video is already complete and downloaded. A circuit teardown or disposed .NET
+            // callback must not reclassify a successful render as a failed browser render.
+            const callbackMessage = String(__callbackError?.message || __callbackError || '').toLowerCase();
+            if (callbackMessage.includes('disconnected') || callbackMessage.includes('disposed') || callbackMessage.includes('connection') || callbackMessage.includes('circuit'))
+                console.debug('PublisherStudio rendered-video completion callback ended with the Blazor circuit.', __callbackError);
+            else
+                publisherStudioDiagnostics.report('js/mediaStudioInterop.js:render-export:ready-callback', __callbackError);
+        }
     } finally {
         try { video.pause(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:render-export:cleanup-pause', __caughtJavaScriptError); }
         try { window.publisherVideoEffects?.dispose(runtimeKey); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:render-export:cleanup-runtime', __caughtJavaScriptError); }
@@ -2328,6 +2555,24 @@ export function downloadRetainedRecording(id, requestedFileName) { try {
     anchor.click();
     anchor.remove();
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:downloadRetainedRecording@1366', __javascriptError); throw __javascriptError; }}
+
+export async function downloadCurrentMedia(id, requestedFileName) { try {
+    const state = stateFor(id);
+    const retained = state.retainedRecordingBlob;
+    if (retained instanceof Blob && retained.size) {
+        downloadBlob(retained, String(requestedFileName || state.retainedRecordingFileName || recordingFileName(state.retainedRecordingKind, state.retainedRecordingMimeType)));
+        return true;
+    }
+    const element = mediaElement(id);
+    const source = String(element.currentSrc || element.src || '').trim();
+    if (!source) throw new Error('The selected media has no browser-readable source to download.');
+    const response = await fetch(source);
+    if (!response.ok) throw new Error(`The selected media source returned HTTP ${response.status}.`);
+    const blob = await response.blob();
+    if (!blob.size) throw new Error('The selected media source is empty.');
+    downloadBlob(blob, String(requestedFileName || 'publisherstudio-media'));
+    return true;
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:downloadCurrentMedia', __javascriptError); throw __javascriptError; }}
 
 export function clearRetainedRecording(id) { try {
     const state = stateFor(id);
@@ -2439,7 +2684,11 @@ export async function startMediaRecording(id, kind, source, dotnet, options = nu
         videoBitsPerSecond: Number(state.recorder?.videoBitsPerSecond) || selectedVideoBitsPerSecond || 0,
         audioBitsPerSecond: Number(state.recorder?.audioBitsPerSecond) || selectedAudioBitsPerSecond || 0
     };
- } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:startMediaRecording', __javascriptError); throw __javascriptError; }}
+ } catch (__javascriptError) {
+    if (__javascriptError?.name !== 'NotAllowedError' && __javascriptError?.name !== 'AbortError')
+        publisherStudioDiagnostics.report('js/mediaStudioInterop.js:startMediaRecording', __javascriptError);
+    throw __javascriptError;
+ }}
 
 export function stopMediaRecording(id, dotnet) { try {
     const state = stateFor(id);

@@ -128,7 +128,7 @@
                 }
                 <DxRibbonTab Text='@LT("Output")'>
                     <DxRibbonGroup Text='@LT("Recording")' IconCssClass="pub-icon pub-icon-download">
-                        <DxRibbonItem Text='@LT("Download recording")' IconCssClass="pub-icon pub-icon-download" Enabled="@HasRetainedRecording" Click="DownloadRecording" />
+                        <DxRibbonItem Text="@DownloadMediaText" IconCssClass="pub-icon pub-icon-download" Enabled="@CanDownloadCurrentMedia" Click="DownloadRecording" />
                     </DxRibbonGroup>
                     @if (IsVideo)
                     {
@@ -255,6 +255,28 @@
                                                 <time>@Time(_pendingInsertTimelineSeconds ?? _pendingInsertSourceSeconds)</time>
                                                 <button type="button" @onclick="ConfirmPendingInsert">@LT("Insert here")</button>
                                                 <button type="button" @onclick="CancelPendingInsert">@LT("Cancel")</button>
+                                            </div>
+                                        </div>
+                                    }
+                                    @if (_recordingPlacementRequired && HasRetainedRecording)
+                                    {
+                                        <div class="media-video-insert-placement media-recording-placement" data-video-time-control @onpointerdown:stopPropagation @onclick:stopPropagation>
+                                            <div>
+                                                <b>@LT("Place new recording")</b>
+                                                <span>@LT("Choose where the completed recording belongs in the existing video sequence.")</span>
+                                            </div>
+                                            <label>
+                                                @LT("Recording position")
+                                                <select value="@_recordingPlacementBoundary" @onchange="ChangeRecordingPlacementBoundary">
+                                                    @for (var boundary = 0; boundary <= _segments.Count; boundary++)
+                                                    {
+                                                        <option value="@boundary">@RecordingPlacementLabel(boundary)</option>
+                                                    }
+                                                </select>
+                                            </label>
+                                            <div class="media-video-insert-actions">
+                                                <button type="button" disabled="@_embedding" @onclick="ConfirmRecordingPlacement">@LT("Insert recording")</button>
+                                                <button type="button" disabled="@_embedding" @onclick="CancelRecordingPlacement">@LT("Keep uninserted")</button>
                                             </div>
                                         </div>
                                     }
@@ -811,12 +833,12 @@
             <footer class="media-studio-footer">
                 <span>@FooterStatus</span>
                 <div>
-                    @if (HasRetainedRecording)
+                    @if (CanDownloadCurrentMedia)
                     {
-                        <DxButton Text='@LT("Download recording")' Click="DownloadRecording" />
+                        <DxButton Text="@DownloadMediaText" Click="DownloadRecording" />
                     }
                     <DxButton Text='@LT("Cancel")' Click="Cancel" />
-                    <DxButton Text="@ApplyButtonText" Enabled="@(HasSource && !_recording && !_recordingStopping && !_renderingVideoExport && !_saving && !_embedding)" Click="Save" RenderStyle="ButtonRenderStyle.Primary" />
+                    <DxButton Text="@ApplyButtonText" Enabled="@(HasSource && !_recording && !_recordingStopping && !_recordingPlacementRequired && !_renderingVideoExport && !_saving && !_embedding)" Click="Save" RenderStyle="ButtonRenderStyle.Primary" />
                 </div>
             </footer>
         </section>
@@ -839,7 +861,7 @@
             <DxContextMenuItem Text='@LT("Generate example tone")' Enabled="@(!_recording && !_recordingStopping)" Click="GenerateTone" />
         }
         <DxContextMenuItem Text='@LT("Stop recording")' Enabled="@(_recording && !_recordingStopping)" Click="StopRecording" />
-        <DxContextMenuItem Text='@LT("Download completed recording")' Enabled="@HasRetainedRecording" Click="DownloadRecording" />
+        <DxContextMenuItem Text="@DownloadMediaText" Enabled="@CanDownloadCurrentMedia" Click="DownloadRecording" />
         <DxContextMenuItem Text='@LT("Play selected range")' Enabled="@HasSource" BeginGroup="true" Click="PlaySelection" />
         <DxContextMenuItem Text='@LT("Pause")' Enabled="@HasSource" Click="PausePreview" />
         <DxContextMenuItem Text='@LT("Jump to trim start")' Enabled="@HasSource" Click="SeekStart" />
@@ -1305,6 +1327,12 @@
     /// Stores the internal pending drop is point state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
     /// </summary>
     private bool _pendingDropIsPoint;
+    /// <summary>Stores whether a newly completed video recording is waiting for an explicit sequence boundary choice.</summary>
+    private bool _recordingPlacementRequired;
+    /// <summary>Stores the zero-based sequence boundary chosen for a newly completed video recording.</summary>
+    private int _recordingPlacementBoundary;
+    /// <summary>Stores the canonical sequence time at which the next embedded recording must be inserted.</summary>
+    private double? _pendingRecordingInsertTimelineSeconds;
     /// <summary>
     /// Stores the internal video project state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
     /// </summary>
@@ -1328,6 +1356,12 @@
     /// </summary>
     /// <value>The has retained recording value exposed by <see cref="MediaStudio"/>.</value>
     private bool HasRetainedRecording => _hasRetainedRecording && _retainedRecordingSizeBytes > 0;
+    /// <summary>Gets whether the browser-retained recording or the currently selected embedded media can be downloaded.</summary>
+    /// <value><see langword="true"/> when a downloadable current media source exists; otherwise <see langword="false"/>.</value>
+    private bool CanDownloadCurrentMedia => HasRetainedRecording || (SelectedSegment is { IsGap: false } && !string.IsNullOrWhiteSpace(_previewSource));
+    /// <summary>Gets the output command label that distinguishes a fresh recording from an embedded selected source.</summary>
+    /// <value>The localized download command text for the active source.</value>
+    private string DownloadMediaText => HasRetainedRecording ? LT("Download recording") : LT("Download selected source");
     /// <summary>
     /// Gets the recording policy value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
@@ -2109,6 +2143,7 @@
                             || _recordingStopping
                             || !string.Equals(_retainedRecordingObjectUrl, retainedRecording.ObjectUrl, StringComparison.Ordinal);
                         ApplyRetainedRecordingInfo(retainedRecording);
+                        RequireRecordingPlacementIfNeeded();
                         stateChanged |= changed;
                         if (changed)
                         {
@@ -2213,7 +2248,7 @@
         try
         {
             if (_disposed) throw new ObjectDisposedException(nameof(MediaStudio));
-            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=2.9.7").ConfigureAwait(true);
+            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=2.9.8").ConfigureAwait(true);
             _self ??= DotNetObjectReference.Create(this);
             if (SessionId != Guid.Empty)
             {
@@ -2536,11 +2571,13 @@
     /// <summary>
     /// Performs current fields as segment for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
     /// </summary>
+    /// <param name="inheritSelectedEdits">Value indicating whether cut sections and video layers should be cloned from the selected segment.</param>
     /// <returns>The publication media segment produced by the operation.</returns>
-    private PublicationMediaSegment CurrentFieldsAsSegment()
+    private PublicationMediaSegment CurrentFieldsAsSegment(bool inheritSelectedEdits = true)
     {
         try
         {
+            var selected = inheritSelectedEdits ? SelectedSegment : null;
             var segment = new PublicationMediaSegment
             {
                 Name = _name,
@@ -2555,9 +2592,9 @@
                 TemporalSelectionIsPoint = _videoSelectionIsPoint,
                 TemporalSelectionStartSeconds = VideoSelectionStart,
                 TemporalSelectionEndSeconds = VideoSelectionEnd,
-                CutSections = SelectedSegment?.CutSections.Select(CloneTemporalSection).ToList() ?? [],
+                CutSections = selected?.CutSections.Select(CloneTemporalSection).ToList() ?? [],
                 VideoLayers = IsVideo
-                    ? (SelectedSegment?.VideoLayers.Select(TimelineEdits.CloneVideoLayer).ToList() ?? [TimelineEdits.CreateDefaultVideoLayer(_name)])
+                    ? (selected?.VideoLayers.Select(TimelineEdits.CloneVideoLayer).ToList() ?? [TimelineEdits.CreateDefaultVideoLayer(_name)])
                     : [],
                 WaveformSamples = [.. _waveform]
             };
@@ -6577,6 +6614,8 @@
             {
                 _renderingVideoExport = false;
                 _error = $"{LT("Rendered video export could not start")}: {ex.Message}";
+                Logger.LogError(ex, "Rendered Video Studio export could not start for session {SessionId}.", SessionId);
+                OperationalNotifications.Error(_error, LT("Rendered video export failed"), nameof(MediaStudio));
             }
     
         }
@@ -6658,6 +6697,7 @@
             _renderingVideoExport = false;
             _error = $"{LT("Rendered video export failed")}: {message}";
             Logger.LogError("Rendered Video Studio export failed: {RenderError}", message);
+            OperationalNotifications.Error(_error, LT("Rendered video export failed"), nameof(MediaStudio));
             await InvokeAsync(StateHasChanged).ConfigureAwait(true);
     
         }
@@ -6838,6 +6878,9 @@
             _retainedRecordingObjectUrl = string.Empty;
             _embedding = false;
             _embeddingProgress = 0;
+            _recordingPlacementRequired = false;
+            _recordingPlacementBoundary = 0;
+            _pendingRecordingInsertTimelineSeconds = null;
     
         }
         catch (Exception __componentMethodException)
@@ -6918,6 +6961,118 @@
         }
     }
 
+    /// <summary>Requires an explicit sequence boundary for a new video recording when clips already exist.</summary>
+    private void RequireRecordingPlacementIfNeeded()
+    {
+        try
+        {
+            if (!IsVideo || _segments.Count == 0 || !HasRetainedRecording || !string.IsNullOrWhiteSpace(_dataUrl)) return;
+            _recordingPlacementRequired = true;
+            _recordingPlacementBoundary = SelectedSegmentIndex >= 0
+                ? Math.Clamp(SelectedSegmentIndex + 1, 0, _segments.Count)
+                : _segments.Count;
+            _warning = LT("Recording completed. Choose whether it belongs first, between existing clips, or last.");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Preparing the completed recording placement failed for session {SessionId}.", SessionId);
+            OperationalNotifications.Error(ex.Message, LT("Recording placement failed"), nameof(MediaStudio));
+        }
+    }
+
+    /// <summary>Formats one insertion boundary in the existing video sequence.</summary>
+    /// <param name="boundary">Zero-based boundary between existing sequence elements.</param>
+    /// <returns>A human-readable placement label.</returns>
+    private string RecordingPlacementLabel(int boundary)
+    {
+        try
+        {
+            if (_segments.Count == 0) return LT("Only video");
+            if (boundary <= 0) return $"{LT("First")} — {LT("before")} {_segments[0].Name}";
+            if (boundary >= _segments.Count) return $"{LT("Last")} — {LT("after")} {_segments[^1].Name}";
+            return $"{LT("Between")} {_segments[boundary - 1].Name} / {_segments[boundary].Name}";
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Formatting recording placement boundary {Boundary} failed.", boundary);
+            return LT("Recording position");
+        }
+    }
+
+    /// <summary>Changes the requested sequence boundary for the new recording.</summary>
+    /// <param name="args">Browser change event containing the selected boundary.</param>
+    private void ChangeRecordingPlacementBoundary(ChangeEventArgs args)
+    {
+        try
+        {
+            if (int.TryParse(args.Value?.ToString(), out var boundary))
+                _recordingPlacementBoundary = Math.Clamp(boundary, 0, _segments.Count);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Changing the recording placement boundary failed.");
+            OperationalNotifications.Error(ex.Message, LT("Recording placement failed"), nameof(MediaStudio));
+        }
+    }
+
+    /// <summary>Embeds the retained browser recording and inserts it at the explicitly chosen sequence boundary.</summary>
+    /// <returns>A task that completes when the recording has been embedded or the operation has failed safely.</returns>
+    private async Task ConfirmRecordingPlacement()
+    {
+        try
+        {
+            if (!_recordingPlacementRequired || !HasRetainedRecording || _embedding) return;
+            var boundary = Math.Clamp(_recordingPlacementBoundary, 0, _segments.Count);
+            _pendingRecordingInsertTimelineSeconds = boundary <= 0
+                ? 0
+                : boundary >= _segments.Count
+                    ? SequenceDuration
+                    : TimelineEdits.SegmentTimelineStart(_segments, boundary, _playbackRate);
+            _recordingPlacementRequired = false;
+            _embedding = true;
+            _embeddingProgress = 0;
+            _error = null;
+            _warning = LT("Embedding the recording at the chosen sequence boundary…");
+            await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+            try
+            {
+                var module = await EnsureMediaModuleAsync().ConfigureAwait(true);
+                await module.InvokeAsync<bool>("embedRetainedRecording", "media-studio-preview").ConfigureAwait(true);
+            }
+            catch (Exception ex)
+            {
+                _embedding = false;
+                _pendingRecordingInsertTimelineSeconds = null;
+                _recordingPlacementRequired = true;
+                Logger.LogError(ex, "Embedding the newly placed recording failed for session {SessionId}.", SessionId);
+                _error = $"{LT("The recording could not be inserted.")} {ex.Message}";
+                OperationalNotifications.Error(_error, LT("Recording placement failed"), nameof(MediaStudio));
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Confirming the recording placement failed for session {SessionId}.", SessionId);
+            _error = ex.Message;
+            OperationalNotifications.Error(ex.Message, LT("Recording placement failed"), nameof(MediaStudio));
+        }
+    }
+
+    /// <summary>Keeps the completed browser recording downloadable without inserting it into the current sequence.</summary>
+    private void CancelRecordingPlacement()
+    {
+        try
+        {
+            _recordingPlacementRequired = false;
+            _pendingRecordingInsertTimelineSeconds = null;
+            _warning = LT("Recording kept outside the sequence. Download it now or record again; applying closes the Studio without inserting it.");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Cancelling recording placement failed for session {SessionId}.", SessionId);
+            OperationalNotifications.Error(ex.Message, LT("Recording placement failed"), nameof(MediaStudio));
+        }
+    }
+
     /// <summary>
     /// Performs media recording ready for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
     /// </summary>
@@ -6931,6 +7086,7 @@
             try
             {
                 ApplyRetainedRecordingInfo(info);
+                RequireRecordingPlacementIfNeeded();
                 Logger.LogInformation(
                     "Browser retained Media Studio {MediaKind} recording {FileName} ({SizeBytes} bytes) for session {SessionId}.",
                     IsVideo ? "video" : "audio",
@@ -7132,7 +7288,25 @@
             _embedding = false;
             _embeddingProgress = 100;
             _warning = "Recording embedded. The original browser recording is still available for download until this studio closes.";
-            ReplaceOrAddCurrentSegment();
+            if (_pendingRecordingInsertTimelineSeconds.HasValue)
+            {
+                var insertionTimeline = Math.Clamp(_pendingRecordingInsertTimelineSeconds.Value, 0, SequenceDuration);
+                var recordedSegment = CurrentFieldsAsSegment(inheritSelectedEdits: false);
+                recordedSegment.Id = Guid.NewGuid();
+                TimelineEdits.InsertAt(_segments, _playbackRate, insertionTimeline, recordedSegment);
+                _pendingRecordingInsertTimelineSeconds = null;
+                _recordingPlacementRequired = false;
+                var insertedIndex = _segments.FindIndex(segment => segment.Id == recordedSegment.Id);
+                SelectSegment(recordedSegment.Id, seek: false);
+                _playhead = insertedIndex >= 0
+                    ? TimelineEdits.SegmentTimelineStart(_segments, insertedIndex, _playbackRate)
+                    : Math.Clamp(insertionTimeline, 0, SequenceDuration);
+                _warning = $"Inserted recording at {Time(insertionTimeline)} without replacing the existing video sequence.";
+            }
+            else
+            {
+                ReplaceOrAddCurrentSegment();
+            }
             RefreshPreviewSource();
             await InvokeAsync(StateHasChanged).ConfigureAwait(true);
     
@@ -8043,22 +8217,27 @@
     {
         try
         {
-            if (!HasRetainedRecording) return;
+            if (!CanDownloadCurrentMedia) return;
             try
             {
                 var module = await EnsureMediaModuleAsync().ConfigureAwait(true);
-                await module.InvokeVoidAsync("downloadRetainedRecording", "media-studio-preview", _retainedRecordingFileName).ConfigureAwait(true);
+                var fileName = HasRetainedRecording
+                    ? _retainedRecordingFileName
+                    : SelectedSegment?.Name ?? _name;
+                await module.InvokeAsync<bool>("downloadCurrentMedia", "media-studio-preview", fileName).ConfigureAwait(true);
                 Logger.LogInformation(
-                    "Downloaded retained Media Studio recording {FileName} ({SizeBytes} bytes) for session {SessionId}.",
-                    _retainedRecordingFileName,
-                    _retainedRecordingSizeBytes,
-                    SessionId);
-                _warning = $"Downloaded {_retainedRecordingFileName} ({FormatBytes(_retainedRecordingSizeBytes)}).";
+                    "Downloaded Media Studio source {FileName} for session {SessionId}; retained browser recording: {RetainedRecording}.",
+                    fileName,
+                    SessionId,
+                    HasRetainedRecording);
+                _warning = $"Downloaded {fileName}.";
+                OperationalNotifications.Success(_warning, LT("Media downloaded"), nameof(MediaStudio));
             }
             catch (Exception ex)
             {
-                Logger.LogError(ex, "Downloading retained Media Studio recording failed for session {SessionId}.", SessionId);
-                _error = $"The completed recording could not be downloaded: {ex.Message}";
+                Logger.LogError(ex, "Downloading the current Media Studio source failed for session {SessionId}.", SessionId);
+                _error = $"The selected media could not be downloaded: {ex.Message}";
+                OperationalNotifications.Error(_error, LT("Media download failed"), nameof(MediaStudio));
             }
     
         }
@@ -8078,6 +8257,12 @@
         try
         {
             if (_saving || _embedding || !HasSource || _recording) return;
+            if (_recordingPlacementRequired)
+            {
+                _warning = LT("Choose where the completed recording belongs before applying the Video Studio changes.");
+                OperationalNotifications.Warning(_warning, LT("Recording position required"), nameof(MediaStudio));
+                return;
+            }
             _saving = true;
             _error = null;
             var applied = false;

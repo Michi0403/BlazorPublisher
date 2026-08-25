@@ -325,7 +325,11 @@ button { cursor: pointer; }
 .layer-row { display: grid; grid-template-columns: minmax(0,1fr) 28px 28px; align-items: stretch; width: 100%; border-bottom: 1px solid #e1e4e8; background: white; }
 .layer-row:hover { background: #eef6fc; }
 .layer-row.selected { background: #dcecf9; box-shadow: inset 3px 0 #2f75b5; }
-.layer-select { display: grid; grid-template-columns: 25px minmax(0,1fr); align-items: center; gap: 7px; min-width: 0; padding: 7px 8px; border: 0; background: transparent; text-align: left; }
+.layer-row[draggable="true"] { cursor: grab; user-select: none; }
+.layer-row.layer-dragging { opacity: .52; cursor: grabbing; }
+.layer-row.layer-drop-target { box-shadow: inset 0 3px #2f75b5, inset 3px 0 #2f75b5; }
+.layer-drag-handle { color: #73808c; font-size: 13px; letter-spacing: -3px; cursor: grab; }
+.layer-select { display: grid; grid-template-columns: 14px 25px minmax(0,1fr); align-items: center; gap: 7px; min-width: 0; padding: 7px 8px; border: 0; background: transparent; text-align: left; }
 .layer-toggle { padding: 0; border: 0; border-left: 1px solid #e1e4e8; background: transparent; font-size: 11px; }
 .layer-toggle:hover { background: #d5e9f8; }
 .layer-kind { display: grid; place-items: center; width: 21px; height: 21px; border: 1px solid #aab1ba; background: #f7f8fa; font-size: 10px; font-weight: 700; }

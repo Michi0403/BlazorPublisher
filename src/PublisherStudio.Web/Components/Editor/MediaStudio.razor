@@ -7,6 +7,7 @@
 @inject VideoProjectImportService VideoProjectImporter
 @inject VideoLayerInterchangeService VideoLayerInterchange
 @inject IPublisherRuntimePolicyDataService RuntimePolicy
+@inject IPanelStudioPreviewPresetService PreviewPresets
 @inject IFileLocalizationService Localization
 @inject ILogger<MediaStudio> Logger
 @inject PublicationEditorTextService EditorText
@@ -32,12 +33,12 @@
                         {
                             <DxRibbonItem Text='@LT("Import project…")' IconCssClass="pub-icon pub-icon-open" Enabled="@(!_recording && !_recordingStopping)" Click="OpenVideoProjectPicker" />
                             <DxRibbonItem Text='@LT("Relink media…")' IconCssClass="pub-icon pub-icon-refresh" Enabled="@HasVideoProject" Click="OpenVideoProjectMediaPicker" />
-                            <DxRibbonItem Text='@LT("Record camera")' IconCssClass="pub-icon pub-icon-video" Enabled="@(!_recording && !_recordingStopping)" Click="RecordCamera" />
-                            <DxRibbonItem Text='@LT("Record screen")' IconCssClass="pub-icon pub-icon-video" Enabled="@(!_recording && !_recordingStopping)" Click="RecordScreen" />
+                            <DxRibbonItem Text='@LT("Record camera")' IconCssClass="pub-icon pub-icon-video" Enabled="@(!_recording && !_recordingStopping && !_recordingPlacementRequired && !_recordingStartPlacementRequired)" Click="RecordCamera" />
+                            <DxRibbonItem Text='@LT("Record screen")' IconCssClass="pub-icon pub-icon-video" Enabled="@(!_recording && !_recordingStopping && !_recordingPlacementRequired && !_recordingStartPlacementRequired)" Click="RecordScreen" />
                         }
                         else
                         {
-                            <DxRibbonItem Text='@LT("Record microphone")' IconCssClass="pub-icon pub-icon-audio" Enabled="@(!_recording && !_recordingStopping)" Click="RecordMicrophone" />
+                            <DxRibbonItem Text='@LT("Record microphone")' IconCssClass="pub-icon pub-icon-audio" Enabled="@(!_recording && !_recordingStopping && !_recordingPlacementRequired)" Click="RecordMicrophone" />
                             <DxRibbonItem Text='@LT("Generate tone")' IconCssClass="pub-icon pub-icon-audio" Enabled="@(!_recording && !_recordingStopping)" Click="GenerateTone" />
                         }
                         <DxRibbonItem Text='@LT("Stop recording")' IconCssClass="pub-icon pub-icon-stop" Enabled="@(_recording && !_recordingStopping)" Click="StopRecording" />
@@ -255,6 +256,28 @@
                                                 <time>@Time(_pendingInsertTimelineSeconds ?? _pendingInsertSourceSeconds)</time>
                                                 <button type="button" @onclick="ConfirmPendingInsert">@LT("Insert here")</button>
                                                 <button type="button" @onclick="CancelPendingInsert">@LT("Cancel")</button>
+                                            </div>
+                                        </div>
+                                    }
+                                    @if (_recordingStartPlacementRequired && IsVideo)
+                                    {
+                                        <div class="media-video-insert-placement media-recording-placement" data-video-time-control @onpointerdown:stopPropagation @onclick:stopPropagation>
+                                            <div>
+                                                <b>@LT("Place next recording")</b>
+                                                <span>@LT("Choose the sequence boundary before the browser starts recording. The finished recording will keep this position selected for insertion.")</span>
+                                            </div>
+                                            <label>
+                                                @LT("Recording position")
+                                                <select value="@_recordingStartPlacementBoundary" @onchange="ChangeRecordingStartPlacementBoundary">
+                                                    @for (var boundary = 0; boundary <= _segments.Count; boundary++)
+                                                    {
+                                                        <option value="@boundary">@RecordingPlacementLabel(boundary)</option>
+                                                    }
+                                                </select>
+                                            </label>
+                                            <div class="media-video-insert-actions">
+                                                <button type="button" @onclick="ConfirmRecordingStartPlacement">@LT("Start recording here")</button>
+                                                <button type="button" @onclick="CancelRecordingStartPlacement">@LT("Cancel")</button>
                                             </div>
                                         </div>
                                     }
@@ -789,10 +812,36 @@
                                 </div>
                             }
                             <label>@LT("Capture size")
-                                <select @bind="_recordingSizeMode" disabled="@(_recording || _recordingStopping)">
-                                    <option value="source">@LT("Source/native")</option>
-                                    <option value="master">@LT("Streaming master") · @RecordingPolicy.MasterWidth × @RecordingPolicy.MasterHeight</option>
-                                    <option value="output">@LT("Streaming output") · @RecordingPolicy.OutputWidth × @RecordingPolicy.OutputHeight</option>
+                                <select value="@_recordingSizeMode" @onchange="ChangeRecordingSizeMode" disabled="@(_recording || _recordingStopping)">
+                                    <optgroup label='@LT("Source")'>
+                                        <option value="source">@LT("Source/native")</option>
+                                    </optgroup>
+                                    <optgroup label='@LT("Video standards")'>
+                                        <option value="video-8k">8K UHD · 7680 × 4320 · 16:9</option>
+                                        <option value="video-4k">4K UHD · 3840 × 2160 · 16:9</option>
+                                        <option value="video-dci4k">DCI 4K · 4096 × 2160 · 256:135</option>
+                                        <option value="video-uwqhd">UWQHD · 3440 × 1440 · 43:18</option>
+                                        <option value="video-qhd">QHD · 2560 × 1440 · 16:9</option>
+                                        <option value="video-fhd">Full HD · 1920 × 1080 · 16:9</option>
+                                        <option value="video-hd">HD · 1280 × 720 · 16:9</option>
+                                        <option value="video-vertical4k">@LT("Vertical 4K") · 2160 × 3840 · 9:16</option>
+                                        <option value="video-verticalfhd">@LT("Vertical Full HD") · 1080 × 1920 · 9:16</option>
+                                        <option value="video-square2k">@LT("Square 2K") · 2160 × 2160 · 1:1</option>
+                                        <option value="video-square">@LT("Square Full HD") · 1080 × 1080 · 1:1</option>
+                                    </optgroup>
+                                    @if (_recordingViewportPresets.Count > 0)
+                                    {
+                                        <optgroup label='@LT("Panel / Div viewport presets")'>
+                                            @foreach (var preset in _recordingViewportPresets)
+                                            {
+                                                <option value="@RecordingViewportPresetValue(preset.Key)">@LT(preset.Name) · @preset.Width × @preset.Height · @AspectRatioLabel(preset.Width, preset.Height)</option>
+                                            }
+                                        </optgroup>
+                                    }
+                                    <optgroup label='@LT("Streaming presets")'>
+                                        <option value="master">@LT("Streaming master") · @RecordingPolicy.MasterWidth × @RecordingPolicy.MasterHeight · @AspectRatioLabel(RecordingPolicy.MasterWidth, RecordingPolicy.MasterHeight)</option>
+                                        <option value="output">@LT("Streaming output") · @RecordingPolicy.OutputWidth × @RecordingPolicy.OutputHeight · @AspectRatioLabel(RecordingPolicy.OutputWidth, RecordingPolicy.OutputHeight)</option>
+                                    </optgroup>
                                     <option value="custom">@LT("Custom")</option>
                                 </select>
                             </label>
@@ -804,7 +853,30 @@
                                 </div>
                             }
                             <div class="property-grid two">
-                                <label>@(_recordingAdaptiveQuality ? LT("Automatic FPS ceiling (0 = source)") : LT("Capture frame rate"))<input type="number" min="@(_recordingAdaptiveQuality ? 0 : RecordingPolicy.MinimumFrameRate)" max="@RecordingPolicy.MaximumFrameRate" step="1" @bind="_recordingFrameRate" disabled="@(_recording || _recordingStopping)" /></label>
+                                <label>@LT("Frame-rate preset")
+                                    <select value="@RecordingFrameRatePresetKey" @onchange="ChangeRecordingFrameRatePreset" disabled="@(_recording || _recordingStopping)">
+                                        @if (_recordingAdaptiveQuality)
+                                        {
+                                            <option value="source">@LT("Source/native FPS")</option>
+                                        }
+                                        <option value="23.976">23.976 fps</option>
+                                        <option value="24">24 fps</option>
+                                        <option value="25">25 fps</option>
+                                        <option value="29.97">29.97 fps</option>
+                                        <option value="30">30 fps</option>
+                                        <option value="48">48 fps</option>
+                                        <option value="50">50 fps</option>
+                                        <option value="59.94">59.94 fps</option>
+                                        <option value="60">60 fps</option>
+                                        <option value="90">90 fps</option>
+                                        <option value="120">120 fps</option>
+                                        <option value="144">144 fps</option>
+                                        <option value="165">165 fps</option>
+                                        <option value="240">240 fps</option>
+                                        <option value="custom">@LT("Custom FPS")</option>
+                                    </select>
+                                </label>
+                                <label>@(_recordingAdaptiveQuality ? LT("Automatic FPS ceiling (0 = source)") : LT("Capture frame rate"))<input type="number" min="@(_recordingAdaptiveQuality ? 0 : RecordingPolicy.MinimumFrameRate)" max="@RecordingPolicy.MaximumFrameRate" step="0.001" value="@Inv(_recordingFrameRate)" @onchange="ChangeRecordingFrameRate" disabled="@(_recording || _recordingStopping)" /></label>
                                 <label>@LT("Recording codec")
                                     <select @bind="_recordingCodecPreference" disabled="@(_recording || _recordingStopping)">
                                         <option value="auto">@LT("Auto (browser-capability ranked)")</option>
@@ -838,7 +910,7 @@
                         <DxButton Text="@DownloadMediaText" Click="DownloadRecording" />
                     }
                     <DxButton Text='@LT("Cancel")' Click="Cancel" />
-                    <DxButton Text="@ApplyButtonText" Enabled="@(HasSource && !_recording && !_recordingStopping && !_recordingPlacementRequired && !_renderingVideoExport && !_saving && !_embedding)" Click="Save" RenderStyle="ButtonRenderStyle.Primary" />
+                    <DxButton Text="@ApplyButtonText" Enabled="@(HasSource && !_recording && !_recordingStopping && !_recordingPlacementRequired && !_recordingStartPlacementRequired && !_renderingVideoExport && !_saving && !_embedding)" Click="Save" RenderStyle="ButtonRenderStyle.Primary" />
                 </div>
             </footer>
         </section>
@@ -852,12 +924,12 @@
         {
             <DxContextMenuItem Text='@LT("Import open video project…")' Enabled="@(!_recording && !_recordingStopping)" Click="OpenVideoProjectPicker" />
             <DxContextMenuItem Text='@LT("Relink project media…")' Enabled="@HasVideoProject" Click="OpenVideoProjectMediaPicker" />
-            <DxContextMenuItem Text='@LT("Record camera…")' Enabled="@(!_recording && !_recordingStopping)" Click="RecordCamera" />
-            <DxContextMenuItem Text='@LT("Record screen…")' Enabled="@(!_recording && !_recordingStopping)" Click="RecordScreen" />
+            <DxContextMenuItem Text='@LT("Record camera…")' Enabled="@(!_recording && !_recordingStopping && !_recordingPlacementRequired && !_recordingStartPlacementRequired)" Click="RecordCamera" />
+            <DxContextMenuItem Text='@LT("Record screen…")' Enabled="@(!_recording && !_recordingStopping && !_recordingPlacementRequired && !_recordingStartPlacementRequired)" Click="RecordScreen" />
         }
         else
         {
-            <DxContextMenuItem Text='@LT("Record microphone…")' Enabled="@(!_recording && !_recordingStopping)" Click="RecordMicrophone" />
+            <DxContextMenuItem Text='@LT("Record microphone…")' Enabled="@(!_recording && !_recordingStopping && !_recordingPlacementRequired)" Click="RecordMicrophone" />
             <DxContextMenuItem Text='@LT("Generate example tone")' Enabled="@(!_recording && !_recordingStopping)" Click="GenerateTone" />
         }
         <DxContextMenuItem Text='@LT("Stop recording")' Enabled="@(_recording && !_recordingStopping)" Click="StopRecording" />
@@ -1115,6 +1187,8 @@
     /// Stores the internal recording size mode state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
     /// </summary>
     private string _recordingSizeMode = "source";
+    /// <summary>Stores Panel Studio viewport presets that are valid capture-size choices for the current Media Studio policy.</summary>
+    private List<PanelStudioPreviewPreset> _recordingViewportPresets = [];
     /// <summary>
     /// Stores the internal recording custom width state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
     /// </summary>
@@ -1126,7 +1200,7 @@
     /// <summary>
     /// Stores the internal recording frame rate state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
     /// </summary>
-    private int _recordingFrameRate;
+    private double _recordingFrameRate;
     /// <summary>
     /// Stores the internal recording video bitrate kbps state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
     /// </summary>
@@ -1327,10 +1401,20 @@
     /// Stores the internal pending drop is point state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
     /// </summary>
     private bool _pendingDropIsPoint;
+    /// <summary>Stores whether the next video recording is waiting for a sequence boundary choice before capture starts.</summary>
+    private bool _recordingStartPlacementRequired;
+    /// <summary>Stores the zero-based sequence boundary selected for the next recording before capture starts.</summary>
+    private int _recordingStartPlacementBoundary;
+    /// <summary>Stores the browser recording source that will start after pre-recording placement is confirmed.</summary>
+    private string _pendingRecordingSource = string.Empty;
+    /// <summary>Stores the preselected sequence boundary that should remain selected when the new recording finishes.</summary>
+    private int? _plannedRecordingPlacementBoundary;
     /// <summary>Stores whether a newly completed video recording is waiting for an explicit sequence boundary choice.</summary>
     private bool _recordingPlacementRequired;
     /// <summary>Stores the zero-based sequence boundary chosen for a newly completed video recording.</summary>
     private int _recordingPlacementBoundary;
+    /// <summary>Stores whether the browser-retained recording has already been embedded into the canonical sequence.</summary>
+    private bool _retainedRecordingCommittedToSequence;
     /// <summary>Stores the canonical sequence time at which the next embedded recording must be inserted.</summary>
     private double? _pendingRecordingInsertTimelineSeconds;
     /// <summary>
@@ -1371,35 +1455,29 @@
     /// Gets the recording target width value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The recording target width value exposed by <see cref="MediaStudio"/>.</value>
-    private int RecordingTargetWidth => _recordingSizeMode switch
-    {
-        "master" => RecordingPolicy.MasterWidth,
-        "output" => RecordingPolicy.OutputWidth,
-        "custom" => _recordingCustomWidth,
-        _ => 0
-    };
+    private int RecordingTargetWidth => ResolveRecordingSizeSelection(_recordingSizeMode).Width;
     /// <summary>
     /// Gets the recording target height value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The recording target height value exposed by <see cref="MediaStudio"/>.</value>
-    private int RecordingTargetHeight => _recordingSizeMode switch
-    {
-        "master" => RecordingPolicy.MasterHeight,
-        "output" => RecordingPolicy.OutputHeight,
-        "custom" => _recordingCustomHeight,
-        _ => 0
-    };
+    private int RecordingTargetHeight => ResolveRecordingSizeSelection(_recordingSizeMode).Height;
     /// <summary>
     /// Gets the recording size summary value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The recording size summary value exposed by <see cref="MediaStudio"/>.</value>
-    private string RecordingSizeSummary => _recordingSizeMode switch
+    private string RecordingSizeSummary
     {
-        "master" => $"{LT("Streaming master")} · {RecordingPolicy.MasterWidth} × {RecordingPolicy.MasterHeight}",
-        "output" => $"{LT("Streaming output")} · {RecordingPolicy.OutputWidth} × {RecordingPolicy.OutputHeight}",
-        "custom" => $"{LT("Custom")} · {_recordingCustomWidth} × {_recordingCustomHeight}",
-        _ => LT("Source/native")
-    };
+        get
+        {
+            var selection = ResolveRecordingSizeSelection(_recordingSizeMode);
+            return selection.Width > 0 && selection.Height > 0
+                ? $"{selection.Name} · {selection.Width} × {selection.Height} · {AspectRatioLabel(selection.Width, selection.Height)}"
+                : selection.Name;
+        }
+    }
+    /// <summary>Gets the frame-rate preset key that best represents the current capture frame-rate value.</summary>
+    /// <value>The source, standard-rate, or custom frame-rate preset key.</value>
+    private string RecordingFrameRatePresetKey => GetRecordingFrameRatePresetKey();
     /// <summary>
     /// Gets a value indicating whether video project applies to the media studio state.
     /// </summary>
@@ -1985,6 +2063,20 @@
             _recordingAllowFrameRateReduction = RecordingPolicy.AdaptiveQuality.AllowFrameRateReduction;
             _recordingAllowResolutionReduction = RecordingPolicy.AdaptiveQuality.AllowResolutionReduction;
             _recordingSizeMode = "source";
+            try
+            {
+                _recordingViewportPresets = PreviewPresets.GetPresets()
+                    .Where(preset => preset.Width >= RecordingPolicy.MinimumWidth
+                        && preset.Width <= RecordingPolicy.MaximumWidth
+                        && preset.Height >= RecordingPolicy.MinimumHeight
+                        && preset.Height <= RecordingPolicy.MaximumHeight)
+                    .ToList();
+            }
+            catch (Exception presetError)
+            {
+                _recordingViewportPresets = [];
+                Logger.LogWarning(presetError, "Panel Studio viewport presets could not be reused by Media Studio; video standards and custom sizes remain available.");
+            }
             _recordingCustomWidth = Math.Clamp(RecordingPolicy.MasterWidth, RecordingPolicy.MinimumWidth, RecordingPolicy.MaximumWidth);
             _recordingCustomHeight = Math.Clamp(RecordingPolicy.MasterHeight, RecordingPolicy.MinimumHeight, RecordingPolicy.MaximumHeight);
             _recordingFrameRate = RecordingPolicy.AdaptiveQuality.MaximumAutomaticFrameRate > 0
@@ -2000,6 +2092,14 @@
             _embedding = false;
             _embeddingProgress = 0;
             _hasRetainedRecording = false;
+            _retainedRecordingCommittedToSequence = false;
+            _recordingStartPlacementRequired = false;
+            _recordingStartPlacementBoundary = 0;
+            _pendingRecordingSource = string.Empty;
+            _plannedRecordingPlacementBoundary = null;
+            _recordingPlacementRequired = false;
+            _recordingPlacementBoundary = 0;
+            _pendingRecordingInsertTimelineSeconds = null;
             _retainedRecordingSizeBytes = 0;
             _retainedRecordingFileName = string.Empty;
             _retainedRecordingObjectUrl = string.Empty;
@@ -2248,7 +2348,7 @@
         try
         {
             if (_disposed) throw new ObjectDisposedException(nameof(MediaStudio));
-            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=2.9.8").ConfigureAwait(true);
+            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=2.9.9").ConfigureAwait(true);
             _self ??= DotNetObjectReference.Create(this);
             if (SessionId != Guid.Empty)
             {
@@ -6396,7 +6496,7 @@
     private Task RecordCamera() {
         try
         {
-            return StartRecording("camera");
+            return RequestVideoRecording("camera");
         }
         catch (Exception __componentMethodException)
         {
@@ -6411,7 +6511,7 @@
     private Task RecordScreen() {
         try
         {
-            return StartRecording("screen");
+            return RequestVideoRecording("screen");
         }
         catch (Exception __componentMethodException)
         {
@@ -6435,6 +6535,100 @@
         }
     }
 
+    /// <summary>Requests a camera or screen recording without allowing a retained recording to be silently replaced.</summary>
+    /// <param name="source">Browser capture source to start after any sequence placement choice.</param>
+    /// <returns>A task that completes after the request has started or the placement UI has been shown.</returns>
+    private Task RequestVideoRecording(string source)
+    {
+        try
+        {
+            if (!IsVideo) return StartRecording(source);
+            if (HasRetainedRecording && !_retainedRecordingCommittedToSequence)
+            {
+                _recordingPlacementRequired = true;
+                _recordingPlacementBoundary = Math.Clamp(_recordingPlacementBoundary, 0, _segments.Count);
+                _warning = LT("Insert or explicitly keep the completed recording before starting another recording so no captured media is lost.");
+                OperationalNotifications.Warning(_warning, LT("Recording position required"), nameof(MediaStudio));
+                return InvokeAsync(StateHasChanged);
+            }
+            if (_segments.Count == 0)
+            {
+                _plannedRecordingPlacementBoundary = null;
+                return StartRecording(source);
+            }
+
+            _recordingStartPlacementRequired = true;
+            _pendingRecordingSource = source;
+            _recordingStartPlacementBoundary = SelectedSegmentIndex >= 0
+                ? Math.Clamp(SelectedSegmentIndex + 1, 0, _segments.Count)
+                : _segments.Count;
+            _warning = LT("Choose where the next recording belongs before opening the browser capture picker.");
+            return InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Preparing Media Studio video recording placement failed for session {SessionId}.", SessionId);
+            OperationalNotifications.Error(ex.Message, LT("Recording placement failed"), nameof(MediaStudio));
+            throw;
+        }
+    }
+
+    /// <summary>Changes the pre-recording sequence boundary for the next video capture.</summary>
+    /// <param name="args">Browser change event containing the selected boundary.</param>
+    private void ChangeRecordingStartPlacementBoundary(ChangeEventArgs args)
+    {
+        try
+        {
+            if (int.TryParse(args.Value?.ToString(), out var boundary))
+                _recordingStartPlacementBoundary = Math.Clamp(boundary, 0, _segments.Count);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Changing the pre-recording sequence boundary failed.");
+            OperationalNotifications.Error(ex.Message, LT("Recording placement failed"), nameof(MediaStudio));
+        }
+    }
+
+    /// <summary>Confirms the pre-recording sequence boundary and starts the browser capture picker.</summary>
+    /// <returns>A task that completes when the recording start request has finished.</returns>
+    private Task ConfirmRecordingStartPlacement()
+    {
+        try
+        {
+            if (!_recordingStartPlacementRequired || string.IsNullOrWhiteSpace(_pendingRecordingSource)) return Task.CompletedTask;
+            var source = _pendingRecordingSource;
+            _plannedRecordingPlacementBoundary = Math.Clamp(_recordingStartPlacementBoundary, 0, _segments.Count);
+            _recordingStartPlacementRequired = false;
+            _pendingRecordingSource = string.Empty;
+            _warning = LT("The new recording will keep the selected sequence position when capture completes.");
+            return StartRecording(source);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Confirming the pre-recording sequence boundary failed for session {SessionId}.", SessionId);
+            OperationalNotifications.Error(ex.Message, LT("Recording placement failed"), nameof(MediaStudio));
+            throw;
+        }
+    }
+
+    /// <summary>Cancels the pending pre-recording sequence boundary without changing the current sequence.</summary>
+    private void CancelRecordingStartPlacement()
+    {
+        try
+        {
+            _recordingStartPlacementRequired = false;
+            _recordingStartPlacementBoundary = 0;
+            _pendingRecordingSource = string.Empty;
+            _plannedRecordingPlacementBoundary = null;
+            _warning = null;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Cancelling the pre-recording sequence boundary failed for session {SessionId}.", SessionId);
+            OperationalNotifications.Error(ex.Message, LT("Recording placement failed"), nameof(MediaStudio));
+        }
+    }
+
     /// <summary>
     /// Performs change recording quality mode for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
     /// </summary>
@@ -6450,6 +6644,170 @@
         {
             Logger.LogError(__componentMethodException, $"Component method {nameof(MediaStudio)}.{nameof(ChangeRecordingQualityMode)} failed.");
             throw;
+        }
+    }
+
+    /// <summary>Changes the capture-size preset while preserving the explicit custom dimensions for later reuse.</summary>
+    /// <param name="args">Browser change event containing the selected capture-size key.</param>
+    private void ChangeRecordingSizeMode(ChangeEventArgs args)
+    {
+        try
+        {
+            var requested = args.Value?.ToString()?.Trim().ToLowerInvariant();
+            _recordingSizeMode = string.IsNullOrWhiteSpace(requested) ? "source" : requested;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Changing the Media Studio capture-size preset failed.");
+            OperationalNotifications.Error(ex.Message, LT("Recording quality failed"), nameof(MediaStudio));
+        }
+    }
+
+    /// <summary>Changes the standard or source-native frame-rate preset used for browser capture.</summary>
+    /// <param name="args">Browser change event containing the selected frame-rate key.</param>
+    private void ChangeRecordingFrameRatePreset(ChangeEventArgs args)
+    {
+        try
+        {
+            var value = args.Value?.ToString()?.Trim() ?? string.Empty;
+            if (string.Equals(value, "source", StringComparison.OrdinalIgnoreCase))
+            {
+                _recordingFrameRate = 0;
+                return;
+            }
+            if (string.Equals(value, "custom", StringComparison.OrdinalIgnoreCase)) return;
+            if (double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var frameRate) && double.IsFinite(frameRate))
+                _recordingFrameRate = Math.Clamp(frameRate, RecordingPolicy.MinimumFrameRate, RecordingPolicy.MaximumFrameRate);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Changing the Media Studio frame-rate preset failed.");
+            OperationalNotifications.Error(ex.Message, LT("Recording quality failed"), nameof(MediaStudio));
+        }
+    }
+
+    /// <summary>Changes the explicit capture frame rate, including fractional cinema and NTSC rates.</summary>
+    /// <param name="args">Browser change event containing the requested frame rate.</param>
+    private void ChangeRecordingFrameRate(ChangeEventArgs args)
+    {
+        try
+        {
+            if (!TryDouble(args, out var frameRate)) return;
+            _recordingFrameRate = _recordingAdaptiveQuality && frameRate <= 0
+                ? 0
+                : Math.Clamp(frameRate, RecordingPolicy.MinimumFrameRate, RecordingPolicy.MaximumFrameRate);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Changing the Media Studio capture frame rate failed.");
+            OperationalNotifications.Error(ex.Message, LT("Recording quality failed"), nameof(MediaStudio));
+        }
+    }
+
+    /// <summary>Resolves a capture-size key into pixel dimensions and a human-readable label.</summary>
+    /// <param name="mode">Capture-size key selected in the Video Studio.</param>
+    /// <returns>The width, height, and label represented by the selected capture-size key.</returns>
+    private (int Width, int Height, string Name) ResolveRecordingSizeSelection(string? mode)
+    {
+        try
+        {
+            var normalized = mode?.Trim().ToLowerInvariant() ?? "source";
+            if (normalized.StartsWith("viewport:", StringComparison.Ordinal))
+            {
+                var key = normalized["viewport:".Length..];
+                var preset = _recordingViewportPresets.FirstOrDefault(item => string.Equals(item.Key, key, StringComparison.OrdinalIgnoreCase));
+                if (preset is not null) return (preset.Width, preset.Height, $"{LT("Panel / Div preset")} · {LT(preset.Name)}");
+            }
+
+            return normalized switch
+            {
+                "video-8k" => (7680, 4320, "8K UHD"),
+                "video-4k" => (3840, 2160, "4K UHD"),
+                "video-dci4k" => (4096, 2160, "DCI 4K"),
+                "video-uwqhd" => (3440, 1440, "UWQHD"),
+                "video-qhd" => (2560, 1440, "QHD"),
+                "video-fhd" => (1920, 1080, "Full HD"),
+                "video-hd" => (1280, 720, "HD"),
+                "video-vertical4k" => (2160, 3840, LT("Vertical 4K")),
+                "video-verticalfhd" => (1080, 1920, LT("Vertical Full HD")),
+                "video-square2k" => (2160, 2160, LT("Square 2K")),
+                "video-square" => (1080, 1080, LT("Square Full HD")),
+                "master" => (RecordingPolicy.MasterWidth, RecordingPolicy.MasterHeight, LT("Streaming master")),
+                "output" => (RecordingPolicy.OutputWidth, RecordingPolicy.OutputHeight, LT("Streaming output")),
+                "custom" => (_recordingCustomWidth, _recordingCustomHeight, LT("Custom")),
+                _ => (0, 0, LT("Source/native"))
+            };
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Resolving Media Studio capture-size preset {CaptureSizeMode} failed.", mode);
+            return (0, 0, LT("Source/native"));
+        }
+    }
+
+    /// <summary>Formats one Panel Studio viewport key for reuse by the Video Studio capture-size selector.</summary>
+    /// <param name="key">Stable Panel Studio preview-preset key.</param>
+    /// <returns>The Video Studio capture-size key.</returns>
+    private string RecordingViewportPresetValue(string key)
+    {
+        try
+        {
+            return $"viewport:{key}";
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Formatting a Panel Studio viewport preset for Video Studio failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Formats pixel dimensions as their reduced integer aspect ratio.</summary>
+    /// <param name="width">Pixel width.</param>
+    /// <param name="height">Pixel height.</param>
+    /// <returns>A reduced width-to-height ratio such as 16:9 or 9:16.</returns>
+    private string AspectRatioLabel(int width, int height)
+    {
+        try
+        {
+            var left = Math.Max(1, Math.Abs(width));
+            var right = Math.Max(1, Math.Abs(height));
+            var a = left;
+            var b = right;
+            while (b != 0)
+            {
+                var remainder = a % b;
+                a = b;
+                b = remainder;
+            }
+            var divisor = Math.Max(1, a);
+            return $"{left / divisor}:{right / divisor}";
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Formatting Media Studio aspect ratio {Width}x{Height} failed.", width, height);
+            return $"{Math.Max(1, width)}:{Math.Max(1, height)}";
+        }
+    }
+
+    /// <summary>Returns the standard frame-rate key that matches the current frame rate, or custom when no standard matches.</summary>
+    /// <returns>The source, standard frame-rate, or custom key for the current capture setting.</returns>
+    private string GetRecordingFrameRatePresetKey()
+    {
+        try
+        {
+            if (_recordingAdaptiveQuality && _recordingFrameRate <= .0005) return "source";
+            double[] standards = [23.976, 24, 25, 29.97, 30, 48, 50, 59.94, 60, 90, 120, 144, 165, 240];
+            foreach (var standard in standards)
+            {
+                if (Math.Abs(_recordingFrameRate - standard) <= .005)
+                    return standard.ToString("0.###", CultureInfo.InvariantCulture);
+            }
+            return "custom";
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Resolving the Media Studio frame-rate preset failed.");
+            return "custom";
         }
     }
 
@@ -6881,6 +7239,7 @@
             _recordingPlacementRequired = false;
             _recordingPlacementBoundary = 0;
             _pendingRecordingInsertTimelineSeconds = null;
+            _retainedRecordingCommittedToSequence = false;
     
         }
         catch (Exception __componentMethodException)
@@ -6939,6 +7298,7 @@
                 ? RecordingName(info.MimeType, IsVideo)
                 : info.FileName;
             _retainedRecordingObjectUrl = info.ObjectUrl ?? string.Empty;
+            _retainedRecordingCommittedToSequence = _retainedRecordingCommittedToSequence || info.CommittedToSequence;
             _previewSource = _retainedRecordingObjectUrl;
             _mimeType = NormalizeMimeType(info.MimeType, IsVideo ? "video/webm" : "audio/webm");
             _name = _retainedRecordingFileName;
@@ -6961,17 +7321,21 @@
         }
     }
 
-    /// <summary>Requires an explicit sequence boundary for a new video recording when clips already exist.</summary>
+    /// <summary>Requires every newly completed video recording to become an explicit sequence clip before another capture can replace its browser-retained Blob.</summary>
     private void RequireRecordingPlacementIfNeeded()
     {
         try
         {
-            if (!IsVideo || _segments.Count == 0 || !HasRetainedRecording || !string.IsNullOrWhiteSpace(_dataUrl)) return;
+            if (!IsVideo || !HasRetainedRecording || _retainedRecordingCommittedToSequence) return;
             _recordingPlacementRequired = true;
-            _recordingPlacementBoundary = SelectedSegmentIndex >= 0
-                ? Math.Clamp(SelectedSegmentIndex + 1, 0, _segments.Count)
-                : _segments.Count;
-            _warning = LT("Recording completed. Choose whether it belongs first, between existing clips, or last.");
+            _recordingPlacementBoundary = _plannedRecordingPlacementBoundary.HasValue
+                ? Math.Clamp(_plannedRecordingPlacementBoundary.Value, 0, _segments.Count)
+                : SelectedSegmentIndex >= 0
+                    ? Math.Clamp(SelectedSegmentIndex + 1, 0, _segments.Count)
+                    : _segments.Count;
+            _warning = _segments.Count == 0
+                ? LT("Recording completed. Insert it as the first sequence clip before recording again.")
+                : LT("Recording completed. Choose whether it belongs first, between existing clips, or last.");
         }
         catch (Exception ex)
         {
@@ -7064,7 +7428,8 @@
         {
             _recordingPlacementRequired = false;
             _pendingRecordingInsertTimelineSeconds = null;
-            _warning = LT("Recording kept outside the sequence. Download it now or record again; applying closes the Studio without inserting it.");
+            _plannedRecordingPlacementBoundary = null;
+            _warning = LT("Recording kept for download outside the sequence. PublisherStudio will ask for a sequence position again before another video recording can start.");
         }
         catch (Exception ex)
         {
@@ -7156,6 +7521,7 @@
 
                 if (!string.IsNullOrWhiteSpace(info.PosterDataUrl)) _posterDataUrl = info.PosterDataUrl;
                 if (info.WaveformSamples is { Count: > 0 }) _waveform = info.WaveformSamples;
+                if (info.CommittedToSequence) _retainedRecordingCommittedToSequence = true;
                 _warning = string.IsNullOrWhiteSpace(info.MetadataWarning)
                     ? "Recording completed. Browser metadata was resolved without blocking Save, Insert, Replace, or Download."
                     : $"Recording completed and remains editable. Browser metadata warning: {info.MetadataWarning}";
@@ -7296,6 +7662,9 @@
                 TimelineEdits.InsertAt(_segments, _playbackRate, insertionTimeline, recordedSegment);
                 _pendingRecordingInsertTimelineSeconds = null;
                 _recordingPlacementRequired = false;
+                _recordingStartPlacementRequired = false;
+                _retainedRecordingCommittedToSequence = true;
+                _plannedRecordingPlacementBoundary = null;
                 var insertedIndex = _segments.FindIndex(segment => segment.Id == recordedSegment.Id);
                 SelectSegment(recordedSegment.Id, seek: false);
                 _playhead = insertedIndex >= 0
@@ -7303,9 +7672,15 @@
                     : Math.Clamp(insertionTimeline, 0, SequenceDuration);
                 _warning = $"Inserted recording at {Time(insertionTimeline)} without replacing the existing video sequence.";
             }
+            else if (IsVideo)
+            {
+                _recordingPlacementRequired = true;
+                throw new InvalidOperationException(LT("A video recording must have an explicit sequence position before it can be embedded."));
+            }
             else
             {
                 ReplaceOrAddCurrentSegment();
+                _retainedRecordingCommittedToSequence = true;
             }
             RefreshPreviewSource();
             await InvokeAsync(StateHasChanged).ConfigureAwait(true);
@@ -8791,6 +9166,11 @@
         /// </summary>
         /// <value>The poster data URL value exposed by <see cref="RetainedMediaRecordingInfo"/>.</value>
         public string PosterDataUrl { get; set; } = string.Empty;
+        /// <summary>
+        /// Gets or sets a value indicating whether this retained browser recording has already been committed as a canonical media-sequence clip.
+        /// </summary>
+        /// <value><see langword="true"/> when starting another capture may safely release the retained browser Blob because the sequence already owns the media.</value>
+        public bool CommittedToSequence { get; set; }
         /// <summary>
         /// Gets or sets the metadata warning value that forms part of the retained media recording info state consumed or produced by the surrounding workflow.
         /// </summary>

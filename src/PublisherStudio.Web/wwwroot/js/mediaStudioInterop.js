@@ -361,6 +361,7 @@ function stateFor(id) { try {
             retainedRecordingMimeType: '',
             retainedRecordingFileName: '',
             retainedRecordingInfo: null,
+            retainedRecordingCommitted: false,
             recordingFinalizationError: '',
             recordingStopRequested: false,
             recordingFinalizing: false,
@@ -425,6 +426,7 @@ function releaseRetainedRecording(state) { try {
     state.retainedRecordingMimeType = '';
     state.retainedRecordingFileName = '';
     state.retainedRecordingInfo = null;
+    state.retainedRecordingCommitted = false;
     state.recordingFinalizationError = '';
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:releaseRetainedRecording@236', __javascriptError); throw __javascriptError; }}
 
@@ -1777,12 +1779,16 @@ function normalizedRecordingOptions(options) { try {
         const number = Math.trunc(Number(value));
         return Number.isFinite(number) && number > 0 ? number : 0;
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:normalizedRecordingOptions:positiveInteger', __javascriptError); return 0; }};
+    const positiveNumber = value => { try {
+        const number = Number(value);
+        return Number.isFinite(number) && number > 0 ? number : 0;
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:normalizedRecordingOptions:positiveNumber', __javascriptError); return 0; }};
     return {
         width: positiveInteger(options?.width),
         height: positiveInteger(options?.height),
-        frameRate: positiveInteger(options?.frameRate),
-        maximumFrameRate: positiveInteger(options?.maximumFrameRate),
-        bitrateFrameRate: positiveInteger(options?.bitrateFrameRate),
+        frameRate: positiveNumber(options?.frameRate),
+        maximumFrameRate: positiveNumber(options?.maximumFrameRate),
+        bitrateFrameRate: positiveNumber(options?.bitrateFrameRate),
         videoBitsPerSecond: positiveInteger(options?.videoBitsPerSecond),
         audioBitsPerSecond: positiveInteger(options?.audioBitsPerSecond),
         recorderChunkMilliseconds: Math.min(5000, Math.max(100, positiveInteger(options?.recorderChunkMilliseconds) || 500)),
@@ -1993,7 +1999,8 @@ function recordingVideoConstraints(options) { try {
     const constraints = {};
     if (normalized.width > 0) constraints.width = { ideal: normalized.width };
     if (normalized.height > 0) constraints.height = { ideal: normalized.height };
-    if (normalized.frameRate > 0) constraints.frameRate = { ideal: normalized.frameRate };
+    const requestedFrameRate = normalized.frameRate > 0 ? normalized.frameRate : normalized.maximumFrameRate;
+    if (requestedFrameRate > 0) constraints.frameRate = { ideal: requestedFrameRate };
     return Object.keys(constraints).length ? constraints : true;
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:recordingVideoConstraints', __javascriptError); throw __javascriptError; }}
 
@@ -2061,6 +2068,7 @@ async function enrichRetainedRecordingMetadata(state, retainedBlob, retainedUrl,
         durationSeconds: Math.max(.01, Number(info.durationSeconds) || Number(retainedInfo.durationSeconds) || .01),
         waveformSamples: info.waveformSamples || [],
         posterDataUrl: info.posterDataUrl || '',
+        committedToSequence: Boolean(state.retainedRecordingCommitted || retainedInfo.committedToSequence),
         metadataWarning
     };
     state.retainedRecordingInfo = enrichedInfo;
@@ -2081,6 +2089,7 @@ async function retainRecording(state, blob, kind) { try {
     state.retainedRecordingKind = kind;
     state.retainedRecordingMimeType = mimeType;
     state.retainedRecordingFileName = recordingFileName(kind, mimeType);
+    state.retainedRecordingCommitted = false;
 
     const stopAt = state.recordingStopRequestedAtMs > 0 ? state.recordingStopRequestedAtMs : performance.now();
     const startedAt = state.recordingStartedAtMs > 0 ? state.recordingStartedAtMs : stopAt - 10;
@@ -2093,6 +2102,7 @@ async function retainRecording(state, blob, kind) { try {
         durationSeconds: estimatedDurationSeconds,
         waveformSamples: [],
         posterDataUrl: '',
+        committedToSequence: false,
         metadataWarning: 'Browser metadata analysis is continuing in the background.'
     };
     state.retainedRecordingInfo = retainedInfo;
@@ -2153,6 +2163,9 @@ export async function embedRetainedRecording(id) { try {
             await state.dotnet.invokeMethodAsync('MediaRecordingTransferProgress', transferred, embeddedBlob.size);
     }
     await state.dotnet.invokeMethodAsync('CompleteMediaRecordingTransfer', transferId);
+    state.retainedRecordingCommitted = true;
+    if (state.retainedRecordingInfo)
+        state.retainedRecordingInfo = { ...state.retainedRecordingInfo, committedToSequence: true };
     return true;
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:embedRetainedRecording@1338', __javascriptError); throw __javascriptError; }}
 

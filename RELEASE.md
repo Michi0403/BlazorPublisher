@@ -1,9 +1,9 @@
-# PublisherStudio 2.9.8
+# PublisherStudio 2.9.9
 
-PublisherStudio 2.9.8 is the **Story Caret, Layer Drag and Video Quality Repair** release.
+PublisherStudio 2.9.9 is the **Video Sequence and Capture Presets Repair** release.
 
-It preserves the 2.9.7 working baseline while repairing the Story Editor RichEdit resize/caret feedback loop, adding canonical Mainframe layer drag/drop, making completed video recording placement explicit inside existing sequences, restoring download access for retained/current media, and removing the pathological low-frame-rate/native-quality downgrade from Video Studio rendering. The optional Edge `MediaCapabilities` recording probe now degrades cleanly to MediaRecorder support checks instead of flooding diagnostics.
+It preserves the 2.9.8 Story Editor caret repair, Mainframe layer dragging, recording download repair, Edge MediaCapabilities fallback and source-frame-driven video rendering. It closes the remaining repeated-recording loss path by making every completed video recording explicitly sequence-owned before another browser capture may replace the retained Blob, and adds first/between/last pre-capture placement for subsequent recordings.
 
-The source targets .NET 10 and DevExpress/DevExtreme 25.2.9. This archive is **SOURCE-NOT-COMPILED** in the preparation environment; the user's licensed Windows build remains authoritative.
+Video Studio also gains standard landscape, vertical and square resolution presets, reuses Panel / Div Studio viewport presets, and supports fractional cinema/NTSC and high-refresh frame-rate choices through 240 FPS within the existing runtime policy.
 
-See `CHANGELOG-v2.9.8-STORY-CARET-LAYERS-VIDEO-QUALITY-REPAIR.md` and `VALIDATION-v2.9.8-source.md`.
+See `CHANGELOG-v2.9.9-VIDEO-SEQUENCE-CAPTURE-PRESETS.md` and `VALIDATION-v2.9.9-source.md`.

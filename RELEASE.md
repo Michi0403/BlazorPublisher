@@ -1,7 +1,7 @@
-# PublisherStudio 3.0.4
+# PublisherStudio 3.0.5
 
-PublisherStudio 3.0.4 is the **Native Discovery Compile and Platform Warning Repair** release.
+PublisherStudio 3.0.5 is the **Native Discovery Resolution Hardening** release.
 
-It follows 3.0.3 and keeps the cross-platform backend boundaries while repairing the first real compiler findings from the macOS RID-neutral build: runtime-pattern namespace resolution, nullable path comparison, and the Unix file-mode analyzer boundary.
+It keeps the 3.0.4 compiler repairs and hardens them so the native discovery code no longer relies on a namespace import for `PublisherRuntimePattern`. The two runtime-pattern references are fully qualified, and the Unix file-mode code now rejects Windows before entering the Unix-only API call, giving the platform analyzer an explicit supported-path boundary.
 
-This handoff is source-only and was not built with .NET or executed with PowerShell in the packaging environment. See `CHANGELOG-v3.0.4-NATIVE-DISCOVERY-COMPILE-PLATFORM-WARNING-REPAIR.md` and `VALIDATION-v3.0.4-source.md`.
+This handoff is source-only. No .NET build and no GitHub/network source access were used while preparing it. See `CHANGELOG-v3.0.5-NATIVE-DISCOVERY-RESOLUTION-HARDENING.md` and `VALIDATION-v3.0.5-source.md`.

@@ -78,7 +78,7 @@ public sealed class WindowsNativeDeviceDiscoveryPlatformService(
                 cancellationToken).ConfigureAwait(false);
             var result = new List<DiscoveredNativeMediaDeviceInfo>();
             var kind = string.Empty;
-            var pattern = runtimePatterns.GetRegex(PublisherRuntimePattern.NativeDirectShowDevice);
+            var pattern = runtimePatterns.GetRegex(global::PublisherStudio.BusinessObjects.PublisherRuntimePattern.NativeDirectShowDevice);
             foreach (var raw in output.Split('\n'))
             {
                 var line = raw.Trim();
@@ -246,7 +246,7 @@ public sealed class UnixNativeDeviceDiscoveryPlatformService(
                 cancellationToken).ConfigureAwait(false);
             var result = new List<DiscoveredNativeMediaDeviceInfo>();
             var kind = string.Empty;
-            var pattern = runtimePatterns.GetRegex(PublisherRuntimePattern.NativeAvFoundationDevice);
+            var pattern = runtimePatterns.GetRegex(global::PublisherStudio.BusinessObjects.PublisherRuntimePattern.NativeAvFoundationDevice);
             foreach (var raw in output.Split('\n'))
             {
                 var line = raw.Trim();

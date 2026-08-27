@@ -3,49 +3,52 @@
     {
       "src": [
         {
-          "files": ["PublisherStudio.Web.dll"],
+          "files": [
+            "PublisherStudio.Web.dll"
+          ],
           "src": "input"
         }
       ],
       "dest": "api",
-      "filter": "filterConfig.yml",
-      "disableGitFeatures": true,
       "namespaceLayout": "nested",
-      "memberLayout": "samePage"
+      "memberLayout": "samePage",
+      "outputFormat": "mref"
     }
   ],
   "build": {
     "content": [
       {
         "files": [
-          "index.md",
-          "toc.yml",
-          "articles/**/*.md",
-          "guide/toc.yml",
-          "api/**/*.yml",
-          "api/**/*.md",
-          "pdf/toc.yml"
+          "**/*.{md,yml}"
         ],
-        "exclude": ["_site/**", "input/**", ".tools/**", ".print-book/**"]
+        "exclude": [
+          "_site/**",
+          "input/**",
+          "templates/**",
+          ".tools/**",
+          "internal-notes/**",
+          ".print-book/**"
+        ]
       }
     ],
     "resource": [
       {
-        "files": ["media/**", "styles/**", "pdf-cover.html", "PublisherStudio-*.pdf"]
+        "files": [
+          "pdf-cover.html",
+          "PublisherStudio-*.pdf"
+        ]
       }
     ],
-    "output": "_site",
-    "template": ["default", "modern", "templates/publisherstudio"],
+    "dest": "_site",
+    "template": [
+      "default",
+      "modern"
+    ],
     "globalMetadata": {
-      "_appName": "PublisherStudio",
+      "_appName": "PublisherStudio Documentation",
       "_appTitle": "PublisherStudio Documentation",
-      "_appFooter": "PublisherStudio 2.9.9 Â· generated documentation",
-      "_enableSearch": true,
-      "_disableContribution": true,
-      "_disableTocFilter": false,
-      "_disableNextArticle": false,
-      "_lang": "en",
-      "publisherstudioVersion": "2.9.9"
+      "_appFooter": "PublisherStudio 3.0.1 · generated documentation",
+      "publisherstudioVersion": "3.0.1"
     }
   }
 }

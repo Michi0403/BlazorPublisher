@@ -8,7 +8,7 @@ namespace PublisherStudio.Services.Streaming.Hotkeys;
 /// <param name="nativeService">Windows hotkey native service dependency used by the global hotkey workflow to provide the corresponding application capability.</param>
 /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class GlobalHotkeyService(
-    IWindowsHotkeyNativeService nativeService,
+    IGlobalHotkeyNativeService nativeService,
     ILogger<GlobalHotkeyService> logger) : IDisposable
 {
     /// <summary>
@@ -82,7 +82,7 @@ public sealed class GlobalHotkeyService(
     {
     try
     {
-            if (!OperatingSystem.IsWindows() || !nativeService.IsAvailable) return Task.CompletedTask;
+            if (!nativeService.IsAvailable) return Task.CompletedTask;
             _thread = new Thread(MessageLoop) { IsBackground = true, Name = "PublisherStudio global hotkeys" };
             _thread.Start();
             _started.Wait(cancellationToken);
@@ -133,7 +133,7 @@ public sealed class GlobalHotkeyService(
     {
     try
     {
-            if (!OperatingSystem.IsWindows() || !nativeService.IsAvailable) return;
+            if (!nativeService.IsAvailable) return;
             Enqueue(() =>
             {
                 RemoveCore(sessionId);
@@ -166,7 +166,7 @@ public sealed class GlobalHotkeyService(
     {
     try
     {
-            if (!OperatingSystem.IsWindows() || !nativeService.IsAvailable) return;
+            if (!nativeService.IsAvailable) return;
             Enqueue(() => RemoveCore(sessionId));
             _events.TryRemove(sessionId, out _);
     

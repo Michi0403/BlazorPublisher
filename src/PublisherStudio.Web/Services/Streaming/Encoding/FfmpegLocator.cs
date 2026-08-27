@@ -11,6 +11,7 @@ namespace PublisherStudio.Services.Streaming.Encoding;
 /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class FfmpegLocator(
     IPublisherRuntimePolicyDataService runtimePolicy,
+    IPublisherPlatformRuntimeService platform,
     ILogger<FfmpegLocator> logger)
 {
     /// <summary>
@@ -31,10 +32,7 @@ public sealed class FfmpegLocator(
                 return null;
             }
 
-            var bundledPaths = runtimePolicy.GetCollection(
-                OperatingSystem.IsWindows()
-                    ? PublisherRuntimeCollection.FfmpegWindowsBundledPaths
-                    : PublisherRuntimeCollection.FfmpegUnixBundledPaths);
+            var bundledPaths = runtimePolicy.GetCollection(platform.FfmpegBundledPathCollection);
             foreach (var relativePath in bundledPaths)
             {
                 var candidate = Path.Combine(
@@ -48,9 +46,7 @@ public sealed class FfmpegLocator(
 
             var command = runtimePolicy
                 .GetCollection(PublisherRuntimeCollection.AllowedFfmpegExecutableNames)
-                .FirstOrDefault(name => OperatingSystem.IsWindows()
-                    ? name.EndsWith(".exe", StringComparison.OrdinalIgnoreCase)
-                    : !name.EndsWith(".exe", StringComparison.OrdinalIgnoreCase));
+                .FirstOrDefault(platform.IsFfmpegExecutableNameForHost);
             return !string.IsNullOrWhiteSpace(command) && TryResolveCommand(command, out var resolved)
                 ? resolved
                 : null;
@@ -118,91 +114,18 @@ public sealed class FfmpegLocator(
     }
 
     /// <summary>
-    /// Performs known install locations for <see cref="FfmpegLocator"/>, keeping the operation consistent with the state and invariants of the surrounding FFmpeg locator workflow.
+    /// Enumerates platform-owned FFmpeg installation locations without leaking host-specific path policy into the common locator.
     /// </summary>
-    /// <returns>The collection produced by the operation.</returns>
     private IEnumerable<string> KnownInstallLocations()
     {
-        logger.LogTrace($"Enumerating known FFmpeg installation locations.");
         try
         {
-            if (OperatingSystem.IsWindows())
-            {
-                var local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-                var profile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-                var chocolatey = Environment.GetEnvironmentVariable("ChocolateyInstall");
-                if (!string.IsNullOrWhiteSpace(local))
-                {
-                    yield return Path.Combine(local, "Microsoft", "WinGet", "Links", "ffmpeg.exe");
-                    foreach (var candidate in FindWinGetPackageExecutables(local))
-                        yield return candidate;
-                }
-                if (!string.IsNullOrWhiteSpace(profile))
-                    yield return Path.Combine(profile, "scoop", "shims", "ffmpeg.exe");
-                if (!string.IsNullOrWhiteSpace(chocolatey))
-                    yield return Path.Combine(chocolatey, "bin", "ffmpeg.exe");
-                yield break;
-            }
-
-            foreach (var path in runtimePolicy.GetCollection(PublisherRuntimeCollection.FfmpegUnixInstallPaths))
-                yield return path;
-        }
-        finally
-        {
-            logger.LogTrace($"Completed enumeration of known FFmpeg installation locations.");
-        }
-    }
-
-    /// <summary>
-    /// Finds win get package executables for <see cref="FfmpegLocator"/>, keeping the operation consistent with the state and invariants of the surrounding FFmpeg locator workflow.
-    /// </summary>
-    /// <param name="localAppData">Local app data value supplied to the FFmpeg locator operation and used when producing its result.</param>
-    /// <returns>The collection produced by the operation.</returns>
-    private IEnumerable<string> FindWinGetPackageExecutables(string localAppData)
-    {
-        try
-        {
-            logger.LogTrace("Collecting WinGet FFmpeg package executables.");
-            var packagesRoot = Path.Combine(localAppData, "Microsoft", "WinGet", "Packages");
-            if (!Directory.Exists(packagesRoot)) return Array.Empty<string>();
-
-            string[] packageDirectories;
-            try
-            {
-                packageDirectories = Directory
-                    .EnumerateDirectories(packagesRoot, "Gyan.FFmpeg*", SearchOption.TopDirectoryOnly)
-                    .ToArray();
-            }
-            catch (Exception exception)
-            {
-                logger.LogWarning(exception, "Could not enumerate WinGet FFmpeg package directories.");
-                return Array.Empty<string>();
-            }
-
-            var matches = new List<string>();
-            foreach (var packageDirectory in packageDirectories)
-            {
-                try
-                {
-                    matches.AddRange(Directory
-                        .EnumerateFiles(packageDirectory, "ffmpeg.exe", SearchOption.AllDirectories)
-                        .OrderByDescending(path => path.Contains(
-                            $"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}",
-                            StringComparison.OrdinalIgnoreCase))
-                        .Take(runtimePolicy.InstallerDownloadAttempts));
-                }
-                catch (Exception exception)
-                {
-                    logger.LogWarning(exception, "Could not enumerate FFmpeg executables under '{PackageDirectory}'.", packageDirectory);
-                }
-            }
-
-            logger.LogTrace("Collected {ExecutableCount} WinGet FFmpeg executable candidates.", matches.Count);
-            return matches;
+            logger.LogTrace("Enumerating known FFmpeg installation locations for {HostPlatform}.", platform.HostPlatform);
+            return platform.EnumerateKnownFfmpegInstallLocations(runtimePolicy);
         }
         catch (Exception exception)
         {
-            logger.LogError(exception, "Could not collect WinGet FFmpeg package executables.");
+            logger.LogError(exception, "Could not enumerate host-specific FFmpeg installation locations.");
             throw;
         }
     }
@@ -226,10 +149,7 @@ public sealed class FfmpegLocator(
                 return true;
             }
 
-            var extensions = OperatingSystem.IsWindows()
-                ? (Environment.GetEnvironmentVariable("PATHEXT") ?? ".EXE;.CMD;.BAT;.COM")
-                    .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-                : [string.Empty];
+            var extensions = platform.GetCommandExtensions();
             var hasExtension = Path.HasExtension(command);
             foreach (var directory in (Environment.GetEnvironmentVariable("PATH") ?? string.Empty)
                          .Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))

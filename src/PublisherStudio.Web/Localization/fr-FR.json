@@ -3368,5 +3368,14 @@
   "Text.Panel␠/␠Div␠preset": "Préréglage Panel / Div",
   "Text.Recording␠completed.␠Insert␠it␠as␠the␠first␠sequence␠clip␠before␠recording␠again.": "Enregistrement terminé. Insérez-le comme premier clip de la séquence avant de recommencer à enregistrer.",
   "Text.Recording␠kept␠for␠download␠outside␠the␠sequence.␠PublisherStudio␠will␠ask␠for␠a␠sequence␠position␠again␠before␠another␠video␠recording␠can␠start.": "L’enregistrement est conservé pour téléchargement hors de la séquence. PublisherStudio redemandera une position avant de pouvoir démarrer un autre enregistrement vidéo.",
-  "Text.A␠video␠recording␠must␠have␠an␠explicit␠sequence␠position␠before␠it␠can␠be␠embedded.": "Un enregistrement vidéo doit avoir une position de séquence explicite avant de pouvoir être intégré."
+  "Text.A␠video␠recording␠must␠have␠an␠explicit␠sequence␠position␠before␠it␠can␠be␠embedded.": "Un enregistrement vidéo doit avoir une position de séquence explicite avant de pouvoir être intégré.",
+  "Text.Export␠selected␠ranges␠separately…": "Exporter les plages sélectionnées séparément…",
+  "Text.Export␠selected␠ranges␠combined…": "Exporter les plages sélectionnées ensemble…",
+  "Text.Exporting␠selected␠ranges…": "Export des plages sélectionnées…",
+  "Text.Selected␠ranges": "Plages sélectionnées",
+  "Text.Exported␠selected␠ranges␠combined": "Plages sélectionnées exportées ensemble",
+  "Text.Exported␠selected␠ranges␠separately": "Plages sélectionnées exportées séparément",
+  "Text.Selected␠range␠export␠failed": "Échec de l’export des plages sélectionnées",
+  "Text.files": "fichiers",
+  "Text.Selected␠range␠export␠cancelled.": "Export des plages sélectionnées annulé."
 }

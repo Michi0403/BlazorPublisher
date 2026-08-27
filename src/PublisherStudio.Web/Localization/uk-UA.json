@@ -3368,5 +3368,14 @@
   "Text.Panel␠/␠Div␠preset": "Шаблон Panel / Div",
   "Text.Recording␠completed.␠Insert␠it␠as␠the␠first␠sequence␠clip␠before␠recording␠again.": "Запис завершено. Вставте його як перший кліп послідовності перед наступним записом.",
   "Text.Recording␠kept␠for␠download␠outside␠the␠sequence.␠PublisherStudio␠will␠ask␠for␠a␠sequence␠position␠again␠before␠another␠video␠recording␠can␠start.": "Запис збережено для завантаження поза послідовністю. PublisherStudio знову попросить вибрати позицію перед початком наступного відеозапису.",
-  "Text.A␠video␠recording␠must␠have␠an␠explicit␠sequence␠position␠before␠it␠can␠be␠embedded.": "Відеозапис повинен мати явну позицію в послідовності, перш ніж його можна буде вбудувати."
+  "Text.A␠video␠recording␠must␠have␠an␠explicit␠sequence␠position␠before␠it␠can␠be␠embedded.": "Відеозапис повинен мати явну позицію в послідовності, перш ніж його можна буде вбудувати.",
+  "Text.Export␠selected␠ranges␠separately…": "Експортувати вибрані діапазони окремо…",
+  "Text.Export␠selected␠ranges␠combined…": "Експортувати вибрані діапазони разом…",
+  "Text.Exporting␠selected␠ranges…": "Експорт вибраних діапазонів…",
+  "Text.Selected␠ranges": "Вибрані діапазони",
+  "Text.Exported␠selected␠ranges␠combined": "Вибрані діапазони експортовано разом",
+  "Text.Exported␠selected␠ranges␠separately": "Вибрані діапазони експортовано окремо",
+  "Text.Selected␠range␠export␠failed": "Не вдалося експортувати вибрані діапазони",
+  "Text.files": "файлів",
+  "Text.Selected␠range␠export␠cancelled.": "Експорт вибраних діапазонів скасовано."
 }

@@ -12,6 +12,7 @@ namespace PublisherStudio.Services.OrganicPlugins;
 /// </summary>
 /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class OrganicRuntimeSecurityService(
+    IPublisherPlatformRuntimeService platform,
     ILogger<OrganicRuntimeSecurityService> logger) : IOrganicRuntimeSecurityService
 {
     /// <summary>
@@ -499,29 +500,16 @@ public sealed class OrganicRuntimeSecurityService(
     /// <param name="path">Path value supplied to the organic runtime security operation and used when producing its result.</param>
     private void TryRestrictSecretPermissions(string path)
     {
-    try
-    {
-            if (OperatingSystem.IsWindows()) return;
-            try
-            {
-                File.SetUnixFileMode(path, UnixFileMode.UserRead | UnixFileMode.UserWrite);
-            }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or PlatformNotSupportedException)
-            {
-                // Persistence still succeeds on filesystems that do not support Unix modes; the frontend shows the path
-                // so the owner can apply platform-specific ACLs. Never write private material to logs.
-            }
-    
+        try
+        {
+            platform.RestrictSecretFilePermissions(path, logger);
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Could not apply host-specific secret file permissions.");
+            throw;
+        }
     }
-    catch (Exception __serviceMethodException)
-    {
-        if (__serviceMethodException is OperationCanceledException)
-            logger.LogDebug(__serviceMethodException, $"Service method {nameof(OrganicRuntimeSecurityService)}.{nameof(TryRestrictSecretPermissions)} was canceled.");
-        else
-            logger.LogError(__serviceMethodException, $"Service method {nameof(OrganicRuntimeSecurityService)}.{nameof(TryRestrictSecretPermissions)} failed.");
-        throw;
-    }
-}
 
     /// <summary>
     /// Resolves secret path as part of the organic runtime security service workflow, applying the service's runtime policy, state management, and diagnostics as required.

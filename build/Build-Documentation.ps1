@@ -16,6 +16,12 @@ if (-not (Test-Path -LiteralPath $namespaceRepairScript -PathType Leaf)) {
 }
 . $namespaceRepairScript
 
+$nodeRuntimeScript = Join-Path $PSScriptRoot "NodeRuntime.Common.ps1"
+if (-not (Test-Path -LiteralPath $nodeRuntimeScript -PathType Leaf)) {
+    throw "PublisherStudio cross-platform Node.js runtime helper was not found: $nodeRuntimeScript"
+}
+. $nodeRuntimeScript
+
 function Set-Utf8TextFileIdempotent {
     param(
         [Parameter(Mandatory = $true)][string]$Path,
@@ -59,6 +65,7 @@ $printBookPath = Join-Path $printBookRoot "PublisherStudio-$Version-complete.htm
 $pdfName = "PublisherStudio-$Version.pdf"
 $pdfLinkStubPath = Join-Path $docsRoot $pdfName
 $pdfLinkStubCreated = $false
+$htmlPreflightValidated = $false
 $websiteThemeAssetCount = 0
 $warnings = [System.Collections.Generic.List[string]]::new()
 $documentationMode = "static-fallback"
@@ -87,21 +94,17 @@ $minimumCompletePdfBytes = 1048576
 $minimumNodeMajor = 20
 $maximumPreferredNodeMajor = 22
 $provisionedNodeVersion = "22.23.2"
-$provisionedNodeArchiveName = "node-v$provisionedNodeVersion-win-x64.zip"
-$provisionedNodeArchiveSha256 = "1177b4137ba5adaa56354ae40f1080c7450e8ae09cecb47da459d1c52ac99f97"
 $localApplicationData = [Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)
 $documentationToolCacheRoot = if ([string]::IsNullOrWhiteSpace($localApplicationData)) {
     Join-Path $fallbackToolRoot "runtime"
 }
 else {
-    Join-Path $localApplicationData "PublisherStudio\DocumentationTools"
+    Join-Path (Join-Path $localApplicationData "PublisherStudio") "DocumentationTools"
 }
-$provisionedNodeRoot = Join-Path $documentationToolCacheRoot "node-v$provisionedNodeVersion-win-x64"
-$provisionedNodeExecutable = Join-Path $provisionedNodeRoot "node.exe"
 $playwrightBrowserRoot = Join-Path $documentationToolCacheRoot "ms-playwright-docfx-2.78.5"
 $documentationLockRoot = Join-Path $documentationToolCacheRoot "locks"
 $documentationLockPath = Join-Path $documentationLockRoot "PublisherStudio-documentation.lock"
-$documentationWorkRoot = Join-Path $documentationToolCacheRoot ("work\" + [Guid]::NewGuid().ToString('N'))
+$documentationWorkRoot = Join-Path (Join-Path $documentationToolCacheRoot "work") ([Guid]::NewGuid().ToString('N'))
 $polishedXmlPath = Join-Path $documentationWorkRoot "PublisherStudio.Web.xml"
 $documentationLockStream = $null
 $nodeVersionUsed = ""
@@ -397,6 +400,30 @@ function Get-PublisherStudioRelativePath {
     return $pathFull
 }
 
+
+function Assert-PublisherStudioGeneratedHtmlPreflight {
+    param([Parameter(Mandatory)][string]$SiteRoot)
+
+    $validator = Join-Path $RepositoryRoot ".github/scripts/prepare-pages-artifact.py"
+    if (-not (Test-Path -LiteralPath $validator -PathType Leaf)) {
+        throw "The PublisherStudio documentation HTML preflight validator was not found: $validator"
+    }
+
+    $python = Get-Command python -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
+    if ($null -eq $python) {
+        $python = Get-Command python3 -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
+    }
+    if ($null -eq $python) {
+        throw "Python 3 is required to validate generated documentation HTML before the long PDF render."
+    }
+
+    Write-Host "Validating generated DocFX HTML accessibility and local links before the long PDF render..." -ForegroundColor DarkCyan
+    & $python.Source $validator --source $SiteRoot --html-only
+    if ($LASTEXITCODE -ne 0) {
+        throw "Generated DocFX HTML failed the pre-PDF accessibility/link validation. PDF rendering was skipped so the release fails fast."
+    }
+    Write-Host "Generated DocFX HTML preflight passed before PDF rendering." -ForegroundColor DarkGreen
+}
 
 function New-PublisherStudioDocfxPdfLinkStub {
     param([Parameter(Mandatory)][string]$Path)
@@ -1586,6 +1613,8 @@ function Invoke-PublisherStudioBrowserPdf {
                 "--disable-features=BackForwardCache,CalculateNativeWinOcclusion,MediaRouter,OptimizationHints,Translate,msEdgeStartupBoost,msEdgeBackgroundMode",
                 "--print-to-pdf-no-header",
                 "--no-pdf-header-footer",
+                "--export-tagged-pdf",
+                "--generate-pdf-document-outline",
                 "--user-data-dir=$profileRoot",
                 "--print-to-pdf=$PdfPath",
                 $inputUri
@@ -1736,181 +1765,21 @@ function Optimize-PublisherStudioPdf {
     return [pscustomobject]@{ Applied = $false; Mode = "none"; BeforeBytes = [long]$source.Length; AfterBytes = [long]$source.Length; SavedBytes = 0L; Diagnostic = "Ghostscript exit code $exitCode; $tail" }
 }
 
-function Get-PublisherStudioNodeInfo {
-    param(
-        [Parameter(Mandatory)][string]$Path,
-        [bool]$Provisioned = $false
-    )
-
-    if ([string]::IsNullOrWhiteSpace($Path) -or -not (Test-Path -LiteralPath $Path -PathType Leaf)) {
-        return $null
-    }
-
-    try {
-        $versionOutput = @(& $Path --version 2>$null)
-        $exitCode = [int]$LASTEXITCODE
-        if ($exitCode -ne 0 -or $versionOutput.Count -eq 0) { return $null }
-
-        $versionText = ([string]($versionOutput | Select-Object -First 1)).Trim()
-        $versionMatch = [regex]::Match($versionText, '^v?(?<major>\d+)\.')
-        if (-not $versionMatch.Success) { return $null }
-
-        $major = [int]$versionMatch.Groups['major'].Value
-        if ($major -lt $minimumNodeMajor) { return $null }
-
-        return [pscustomobject]@{
-            Path = [IO.Path]::GetFullPath($Path)
-            Version = $versionText
-            Major = $major
-            Provisioned = $Provisioned
-        }
-    }
-    catch {
-        return $null
-    }
-}
-
-function Find-PublisherStudioNode {
-    $candidates = [System.Collections.Generic.List[string]]::new()
-    if (-not [string]::IsNullOrWhiteSpace($env:PLAYWRIGHT_NODEJS_PATH)) {
-        $candidates.Add($env:PLAYWRIGHT_NODEJS_PATH)
-    }
-
-    $nodeCommand = Get-Command node -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
-    if ($null -ne $nodeCommand) {
-        $commandPath = if (-not [string]::IsNullOrWhiteSpace([string]$nodeCommand.Source)) {
-            [string]$nodeCommand.Source
-        }
-        else {
-            [string]$nodeCommand.Path
-        }
-        if (-not [string]::IsNullOrWhiteSpace($commandPath)) { $candidates.Add($commandPath) }
-    }
-
-    if (-not [string]::IsNullOrWhiteSpace($env:ProgramFiles)) {
-        $candidates.Add((Join-Path $env:ProgramFiles "nodejs\node.exe"))
-    }
-    $programFilesX86 = [Environment]::GetEnvironmentVariable("ProgramFiles(x86)")
-    if (-not [string]::IsNullOrWhiteSpace($programFilesX86)) {
-        $candidates.Add((Join-Path $programFilesX86 "nodejs\node.exe"))
-    }
-    if (-not [string]::IsNullOrWhiteSpace($localApplicationData)) {
-        $candidates.Add((Join-Path $localApplicationData "Programs\nodejs\node.exe"))
-    }
-    $candidates.Add($provisionedNodeExecutable)
-
-    $visited = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
-    foreach ($candidate in $candidates) {
-        if ([string]::IsNullOrWhiteSpace($candidate)) { continue }
-        try {
-            $fullPath = [IO.Path]::GetFullPath($candidate)
-        }
-        catch {
-            continue
-        }
-        if (-not $visited.Add($fullPath)) { continue }
-        $isProvisioned = [string]::Equals($fullPath, $provisionedNodeExecutable, [StringComparison]::OrdinalIgnoreCase)
-        $nodeInfo = Get-PublisherStudioNodeInfo -Path $fullPath -Provisioned $isProvisioned
-        if ($null -ne $nodeInfo) { return $nodeInfo }
-    }
-
-    return $null
-}
-
-function Install-PublisherStudioNode {
-    New-Item -ItemType Directory -Path $documentationToolCacheRoot -Force | Out-Null
-
-    $existing = Get-PublisherStudioNodeInfo -Path $provisionedNodeExecutable -Provisioned $true
-    if ($null -ne $existing) { return $existing }
-
-    $archivePath = Join-Path $documentationToolCacheRoot $provisionedNodeArchiveName
-    $downloadPath = "$archivePath.download"
-    $extractRoot = Join-Path $documentationToolCacheRoot ".node-v$provisionedNodeVersion-extract"
-    $downloadUri = "https://nodejs.org/download/release/v$provisionedNodeVersion/$provisionedNodeArchiveName"
-
-    if (Test-Path -LiteralPath $archivePath -PathType Leaf) {
-        $archiveHash = (Get-FileHash -LiteralPath $archivePath -Algorithm SHA256).Hash.ToLowerInvariant()
-        if (-not [string]::Equals($archiveHash, $provisionedNodeArchiveSha256, [StringComparison]::OrdinalIgnoreCase)) {
-            Remove-Item -LiteralPath $archivePath -Force
-        }
-    }
-
-    if (-not (Test-Path -LiteralPath $archivePath -PathType Leaf)) {
-        Write-Host "Node.js $minimumNodeMajor+ was not found. Downloading verified Node.js $provisionedNodeVersion for DocFX PDF generation..." -ForegroundColor Cyan
-        Remove-Item -LiteralPath $downloadPath -Force -ErrorAction SilentlyContinue
-        try {
-            try {
-                [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
-            }
-            catch { }
-            Invoke-WebRequest -Uri $downloadUri -OutFile $downloadPath -UseBasicParsing
-            $downloadHash = (Get-FileHash -LiteralPath $downloadPath -Algorithm SHA256).Hash.ToLowerInvariant()
-            if (-not [string]::Equals($downloadHash, $provisionedNodeArchiveSha256, [StringComparison]::OrdinalIgnoreCase)) {
-                throw "Node.js archive checksum mismatch. Expected $provisionedNodeArchiveSha256 but received $downloadHash."
-            }
-            Move-Item -LiteralPath $downloadPath -Destination $archivePath -Force
-        }
-        catch {
-            Remove-Item -LiteralPath $downloadPath -Force -ErrorAction SilentlyContinue
-            throw "Node.js $provisionedNodeVersion could not be provisioned for the complete DocFX PDF: $($_.Exception.Message)"
-        }
-    }
-
-    Remove-Item -LiteralPath $extractRoot -Recurse -Force -ErrorAction SilentlyContinue
-    New-Item -ItemType Directory -Path $extractRoot -Force | Out-Null
-    try {
-        Expand-Archive -LiteralPath $archivePath -DestinationPath $extractRoot -Force
-        $expandedRoot = Join-Path $extractRoot "node-v$provisionedNodeVersion-win-x64"
-        $expandedNode = Join-Path $expandedRoot "node.exe"
-        if (-not (Test-Path -LiteralPath $expandedNode -PathType Leaf)) {
-            throw "The verified Node.js archive did not contain node.exe."
-        }
-
-        Remove-Item -LiteralPath $provisionedNodeRoot -Recurse -Force -ErrorAction SilentlyContinue
-        Move-Item -LiteralPath $expandedRoot -Destination $provisionedNodeRoot -Force
-    }
-    finally {
-        Remove-Item -LiteralPath $extractRoot -Recurse -Force -ErrorAction SilentlyContinue
-    }
-
-    $installed = Get-PublisherStudioNodeInfo -Path $provisionedNodeExecutable -Provisioned $true
-    if ($null -eq $installed) {
-        throw "The provisioned Node.js runtime could not be executed: $provisionedNodeExecutable"
-    }
-
-    return $installed
-}
-
 function Resolve-PublisherStudioNode {
     param(
         [switch]$AllowProvisioning,
         [switch]$PreferCompatibleLts
     )
 
-    $nodeInfo = Find-PublisherStudioNode
-    if ($PreferCompatibleLts) {
-        $cachedLts = Get-PublisherStudioNodeInfo -Path $provisionedNodeExecutable -Provisioned $true
-        if ($null -ne $cachedLts) { return $cachedLts }
-        if ($null -ne $nodeInfo -and $nodeInfo.Major -le $maximumPreferredNodeMajor) { return $nodeInfo }
-
-        if ($AllowProvisioning) {
-            try {
-                return Install-PublisherStudioNode
-            }
-            catch {
-                if ($null -ne $nodeInfo) {
-                    Write-Warning "Compatible Node.js $provisionedNodeVersion provisioning failed; falling back to installed $($nodeInfo.Version): $($_.Exception.Message)"
-                    return $nodeInfo
-                }
-                throw
-            }
-        }
+    $arguments = @{
+        CacheRoot = $documentationToolCacheRoot
+        Version = $provisionedNodeVersion
+        MinimumMajor = $minimumNodeMajor
+        MaximumPreferredMajor = $maximumPreferredNodeMajor
     }
-
-    if ($null -eq $nodeInfo -and $AllowProvisioning) {
-        $nodeInfo = Install-PublisherStudioNode
-    }
-    return $nodeInfo
+    if ($AllowProvisioning) { $arguments.AllowProvisioning = $true }
+    if ($PreferCompatibleLts) { $arguments.PreferCompatibleLts = $true }
+    return Resolve-PublisherStudioNodeRuntime @arguments
 }
 
 
@@ -2262,6 +2131,19 @@ Use the grouped API navigation to browse namespaces, types, properties, methods,
     else {
         $documentationMode = "docfx"
         Copy-Item -LiteralPath $polishedXmlPath -Destination (Join-Path $siteRoot "PublisherStudio.Web.xml") -Force
+        $preflightPdfStubPath = Join-Path $siteRoot $pdfName
+        if ($pdfLinkStubCreated) {
+            Copy-Item -LiteralPath $pdfLinkStubPath -Destination $preflightPdfStubPath -Force
+        }
+        try {
+            Assert-PublisherStudioGeneratedHtmlPreflight -SiteRoot $siteRoot
+            $htmlPreflightValidated = $true
+        }
+        finally {
+            if ($pdfLinkStubCreated) {
+                Remove-Item -LiteralPath $preflightPdfStubPath -Force -ErrorAction SilentlyContinue
+            }
+        }
     }
 
     # Publish the current HTML tree before the long PDF render. This mirrors the proven LocalGPT
@@ -2398,17 +2280,27 @@ Use the grouped API navigation to browse namespaces, types, properties, methods,
         }
 
         if ($pdfGenerated) {
-            $compression = Optimize-PublisherStudioPdf -Path $pdfPath -MinimumBytes $minimumCompletePdfBytes
-            $pdfCompressionMode = [string]$compression.Mode
-            $pdfBytesBeforeCompression = [long]$compression.BeforeBytes
-            $pdfCompressionSavedBytes = [long]$compression.SavedBytes
-            if ($compression.Applied) {
-                $pdfFileSize = [long]$compression.AfterBytes
-                Write-Host "Compressed the documentation PDF from $pdfBytesBeforeCompression to $pdfFileSize bytes without downsampling content." -ForegroundColor Green
+            if ($pdfMode -eq "html-browser-print") {
+                # Preserve Chromium's tagged PDF structure. Ghostscript pdfwrite may discard
+                # or rewrite accessibility structure metadata even when visual output is unchanged.
+                $pdfBytesBeforeCompression = (Get-Item -LiteralPath $pdfPath).Length
+                $pdfFileSize = $pdfBytesBeforeCompression
+                $pdfCompressionMode = "skipped-preserve-tagging"
+                $pdfCompressionSavedBytes = 0
             }
-            elseif (-not [string]::IsNullOrWhiteSpace([string]$compression.Diagnostic)) {
-                $warnings.Add([string]$compression.Diagnostic)
-                $pdfFileSize = (Get-Item -LiteralPath $pdfPath).Length
+            else {
+                $compression = Optimize-PublisherStudioPdf -Path $pdfPath -MinimumBytes $minimumCompletePdfBytes
+                $pdfCompressionMode = [string]$compression.Mode
+                $pdfBytesBeforeCompression = [long]$compression.BeforeBytes
+                $pdfCompressionSavedBytes = [long]$compression.SavedBytes
+                if ($compression.Applied) {
+                    $pdfFileSize = [long]$compression.AfterBytes
+                    Write-Host "Compressed the documentation PDF from $pdfBytesBeforeCompression to $pdfFileSize bytes without downsampling content." -ForegroundColor Green
+                }
+                elseif (-not [string]::IsNullOrWhiteSpace([string]$compression.Diagnostic)) {
+                    $warnings.Add([string]$compression.Diagnostic)
+                    $pdfFileSize = (Get-Item -LiteralPath $pdfPath).Length
+                }
             }
         }
     }
@@ -2457,6 +2349,7 @@ foreach ($publishRoot in $publishRoots) {
         xmlDocumentationFileName = "PublisherStudio.Web.xml"
         documentationMode = $documentationMode
         pdfMode = $pdfMode
+        pdfAccessibilityMode = if ($pdfMode -eq "docfx-pdf-plugin") { "html-accessibility-fallback" } else { "tagged-pdf-required" }
         docfxVersion = "2.78.5"
         toolSource = $toolSource
         articleSourceCount = $articleSourceCount
@@ -2478,6 +2371,7 @@ foreach ($publishRoot in $publishRoots) {
         minimumCompletePdfBytes = $minimumCompletePdfBytes
         nodeVersion = $nodeVersionUsed
         nodeProvisioned = $nodeProvisioned
+        htmlPreflightValidated = $htmlPreflightValidated
         pdfTimeoutMilliseconds = $pdfTimeoutMilliseconds
         completeApiReference = $documentationMode -eq "docfx" -and $apiYamlCount -gt 1 -and $apiHtmlCount -gt 1
         warnings = @($warnings)

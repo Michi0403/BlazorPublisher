@@ -64,6 +64,7 @@ public interface ILanStreamingServerFactory
 public sealed class LanStreamingServerFactory(
     ILoggerFactory loggerFactory,
     ISupervisedTaskRunner taskRunner,
+    IPublisherPlatformRuntimeService platform,
     ILogger<LanStreamingServerFactory> logger) : ILanStreamingServerFactory
 {
     /// <summary>
@@ -76,7 +77,7 @@ public sealed class LanStreamingServerFactory(
         try
         {
             logger.LogTrace("Creating the LAN streaming server for media session {SessionId}.", session.Id);
-            return new LanStreamingServer(session, taskRunner, loggerFactory.CreateLogger<LanStreamingServer>());
+            return new LanStreamingServer(session, taskRunner, platform, loggerFactory.CreateLogger<LanStreamingServer>());
         }
         catch (Exception exception)
         {

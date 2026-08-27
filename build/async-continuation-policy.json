@@ -78,6 +78,7 @@
       "DisposeAsync",
       "DownloadRecording",
       "EnsureMediaModuleAsync",
+      "ExportSelectedTimelineRanges",
       "FrameOverlayPointerDown",
       "GenerateTone",
       "InsertSelectedLayerIntoMainframe",

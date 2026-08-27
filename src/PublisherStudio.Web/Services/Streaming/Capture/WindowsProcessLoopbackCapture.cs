@@ -7,10 +7,10 @@ namespace PublisherStudio.Services.Streaming.Capture;
 /// <summary>
 /// Defines the contract for windows process loopback capture behavior, allowing callers to depend on the capability without coupling to a concrete implementation.
 /// </summary>
-public interface IWindowsProcessLoopbackCapture : IDisposable
+public interface IProcessLoopbackCapture : IDisposable
 {
     /// <summary>
-    /// Performs start for <see cref="IWindowsProcessLoopbackCapture"/>, keeping the operation consistent with the state and invariants of the surrounding windows process loopback capture workflow.
+    /// Performs start for <see cref="IProcessLoopbackCapture"/>, keeping the operation consistent with the state and invariants of the surrounding windows process loopback capture workflow.
     /// </summary>
     void Start();
 }
@@ -18,16 +18,16 @@ public interface IWindowsProcessLoopbackCapture : IDisposable
 /// <summary>
 /// Defines the contract for windows process loopback capture behavior, allowing callers to depend on the capability without coupling to a concrete implementation.
 /// </summary>
-public interface IWindowsProcessLoopbackCaptureFactory
+public interface IProcessLoopbackCaptureFactory
 {
     /// <summary>
-    /// Performs create using the configuration and dependencies owned by <see cref="IWindowsProcessLoopbackCaptureFactory"/>.
+    /// Performs create using the configuration and dependencies owned by <see cref="IProcessLoopbackCaptureFactory"/>.
     /// </summary>
     /// <param name="processId">Identifier of the process to use for this operation.</param>
     /// <param name="destination">Destination value supplied to the windows process loopback capture operation and used when producing its result.</param>
     /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
     /// <returns>The i windows process loopback capture produced by the operation.</returns>
-    IWindowsProcessLoopbackCapture Create(uint processId, Stream destination, CancellationToken cancellationToken);
+    IProcessLoopbackCapture Create(uint processId, Stream destination, CancellationToken cancellationToken);
 }
 
 /// <summary>
@@ -38,10 +38,10 @@ public interface IWindowsProcessLoopbackCaptureFactory
 /// <param name="loggerFactory">Logger factory dependency used by the windows process loopback capture workflow to provide the corresponding application capability.</param>
 /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class WindowsProcessLoopbackCaptureFactory(
-    IWindowsProcessLoopbackNativeService nativeService,
+    IProcessLoopbackNativeService nativeService,
     IPublisherRuntimePolicyDataService runtimePolicy,
     ILoggerFactory loggerFactory,
-    ILogger<WindowsProcessLoopbackCaptureFactory> logger) : IWindowsProcessLoopbackCaptureFactory
+    ILogger<WindowsProcessLoopbackCaptureFactory> logger) : IProcessLoopbackCaptureFactory
 {
     /// <summary>
     /// Performs create using the configuration and dependencies owned by <see cref="WindowsProcessLoopbackCaptureFactory"/>.
@@ -50,7 +50,7 @@ public sealed class WindowsProcessLoopbackCaptureFactory(
     /// <param name="destination">Destination value supplied to the windows process loopback capture operation and used when producing its result.</param>
     /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
     /// <returns>The i windows process loopback capture produced by the operation.</returns>
-    public IWindowsProcessLoopbackCapture Create(uint processId, Stream destination, CancellationToken cancellationToken)
+    public IProcessLoopbackCapture Create(uint processId, Stream destination, CancellationToken cancellationToken)
     {
         if (!OperatingSystem.IsWindows())
             throw new PlatformNotSupportedException("Process audio loopback is available only on Windows.");
@@ -81,7 +81,7 @@ public sealed class WindowsProcessLoopbackCaptureFactory(
 /// stereo, 16-bit PCM into the integrated streaming runtime's FFmpeg stdin instead of a WAV file.
 /// </summary>
 [SupportedOSPlatform("windows")]
-internal sealed class WindowsProcessLoopbackCapture : IWindowsProcessLoopbackCapture
+internal sealed class WindowsProcessLoopbackCapture : IProcessLoopbackCapture
 {
     /// <summary>
     /// Defines the virtual audio device process loopback constant used by <see cref="WindowsProcessLoopbackCapture"/> so callers and internal logic share the same stable value.
@@ -127,7 +127,7 @@ internal sealed class WindowsProcessLoopbackCapture : IWindowsProcessLoopbackCap
     /// <summary>
     /// Stores the windows process loopback native service dependency used by <see cref="WindowsProcessLoopbackCapture"/> to delegate that application responsibility to its owning collaborator.
     /// </summary>
-    private readonly IWindowsProcessLoopbackNativeService _nativeService;
+    private readonly IProcessLoopbackNativeService _nativeService;
     /// <summary>
     /// Stores the internal process identifier state used by <see cref="WindowsProcessLoopbackCapture"/> while executing its surrounding workflow.
     /// </summary>
@@ -171,7 +171,7 @@ internal sealed class WindowsProcessLoopbackCapture : IWindowsProcessLoopbackCap
         uint processId,
         Stream destination,
         CancellationToken cancellationToken,
-        IWindowsProcessLoopbackNativeService nativeService,
+        IProcessLoopbackNativeService nativeService,
         Guid audioClientInterfaceId,
         Guid audioCaptureClientInterfaceId,
         ILogger<WindowsProcessLoopbackCapture> logger)

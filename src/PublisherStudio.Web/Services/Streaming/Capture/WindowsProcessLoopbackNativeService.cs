@@ -5,12 +5,12 @@ namespace PublisherStudio.Services.Streaming.Capture;
 /// <summary>
 /// Defines the contract for windows process loopback native behavior, allowing callers to depend on the capability without coupling to a concrete implementation.
 /// </summary>
-public interface IWindowsProcessLoopbackNativeService
+public interface IProcessLoopbackNativeService
 {
     /// <summary>
     /// Gets a value indicating whether available applies to the windows process loopback native state.
     /// </summary>
-    /// <value>The is available value exposed by <see cref="IWindowsProcessLoopbackNativeService"/>.</value>
+    /// <value>The is available value exposed by <see cref="IProcessLoopbackNativeService"/>.</value>
     bool IsAvailable { get; }
     /// <summary>
     /// Performs initialize multithreaded apartment as part of the windows process loopback native service workflow, applying the service's runtime policy, state management, and diagnostics as required.
@@ -42,7 +42,7 @@ public interface IWindowsProcessLoopbackNativeService
 /// Instance-owned binding for the Windows process-loopback activation APIs.
 /// It replaces static DllImport declarations while preserving the COM activation flow.
 /// </summary>
-public sealed class WindowsProcessLoopbackNativeService : IWindowsProcessLoopbackNativeService, IDisposable
+public sealed class WindowsProcessLoopbackNativeService : IProcessLoopbackNativeService, IDisposable
 {
     /// <summary>
     /// Stores the logger used by <see cref="WindowsProcessLoopbackNativeService"/> to record operational diagnostics without coupling callers to logging details.

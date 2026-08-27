@@ -43,8 +43,8 @@
                 <DxRangeSelectorScale StartValue="@(0d)"
                                       EndValue="@TimelineDuration"
                                       ValueType="ChartAxisDataType.Numeric"
-                                      TickInterval="@MajorTick"
-                                      MinorTickInterval="@MinorTick"
+                                      TickInterval="@OverviewMajorTick"
+                                      MinorTickInterval="@OverviewMinorTick"
                                       MinRange="@(0.5d)">
                     <DxRangeSelectorScaleLabel Overlap="RangeSelectorLabelOverlap.Hide" TopIndent="2" />
                     <DxRangeSelectorScaleMarker Visible="false" />
@@ -286,6 +286,20 @@
     /// </summary>
     /// <value>The minor tick value exposed by <see cref="PublicationTimeline"/>.</value>
     private double MinorTick => Math.Max(.05, MajorTick / 5);
+    /// <summary>Gets a scale interval sized for the full overview duration rather than the current zoom window.</summary>
+    private double OverviewMajorTick
+    {
+        get
+        {
+            var target = Math.Max(.1, TimelineDuration / 12d);
+            var magnitude = Math.Pow(10, Math.Floor(Math.Log10(target)));
+            var normalized = target / magnitude;
+            var factor = normalized <= 1 ? 1 : normalized <= 2 ? 2 : normalized <= 5 ? 5 : 10;
+            return Math.Max(.1, factor * magnitude);
+        }
+    }
+    /// <summary>Gets a bounded minor interval for the full overview scale so DevExpress does not emit W2003 while zoomed in.</summary>
+    private double OverviewMinorTick => Math.Max(.05, OverviewMajorTick / 5);
     /// <summary>
     /// Gets the ticks collection maintained or exposed by this publication timeline instance for downstream processing.
     /// </summary>

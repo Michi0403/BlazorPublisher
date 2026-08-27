@@ -1,11 +1,13 @@
 order: 200
 pdf: true
-pdfFileName: PublisherStudio-2.9.9.pdf
+pdfFileName: PublisherStudio-3.0.1.pdf
 pdfTocPage: true
-pdfCoverPage: pdf-cover.html
+pdfCoverPage: ../pdf-cover.html
 pdfPrintBackground: true
 items:
 - name: PublisherStudio documentation
+  href: ../index.md
+- name: Guide
   href: ../guide/toc.yml
 - name: API reference
   href: ../api/toc.yml

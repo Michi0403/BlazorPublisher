@@ -3368,5 +3368,14 @@
   "Text.Panel␠/␠Div␠preset": "Panel-/Div-Vorgabe",
   "Text.Recording␠completed.␠Insert␠it␠as␠the␠first␠sequence␠clip␠before␠recording␠again.": "Aufnahme abgeschlossen. Fügen Sie sie als ersten Sequenzclip ein, bevor Sie erneut aufnehmen.",
   "Text.Recording␠kept␠for␠download␠outside␠the␠sequence.␠PublisherStudio␠will␠ask␠for␠a␠sequence␠position␠again␠before␠another␠video␠recording␠can␠start.": "Die Aufnahme bleibt außerhalb der Sequenz zum Download erhalten. PublisherStudio fragt erneut nach einer Sequenzposition, bevor eine weitere Videoaufnahme starten kann.",
-  "Text.A␠video␠recording␠must␠have␠an␠explicit␠sequence␠position␠before␠it␠can␠be␠embedded.": "Eine Videoaufnahme benötigt eine eindeutige Sequenzposition, bevor sie eingebettet werden kann."
+  "Text.A␠video␠recording␠must␠have␠an␠explicit␠sequence␠position␠before␠it␠can␠be␠embedded.": "Eine Videoaufnahme benötigt eine eindeutige Sequenzposition, bevor sie eingebettet werden kann.",
+  "Text.Export␠selected␠ranges␠separately…": "Ausgewählte Bereiche einzeln exportieren…",
+  "Text.Export␠selected␠ranges␠combined…": "Ausgewählte Bereiche kombiniert exportieren…",
+  "Text.Exporting␠selected␠ranges…": "Ausgewählte Bereiche werden exportiert…",
+  "Text.Selected␠ranges": "Ausgewählte Bereiche",
+  "Text.Exported␠selected␠ranges␠combined": "Ausgewählte Bereiche kombiniert exportiert",
+  "Text.Exported␠selected␠ranges␠separately": "Ausgewählte Bereiche einzeln exportiert",
+  "Text.Selected␠range␠export␠failed": "Export der ausgewählten Bereiche fehlgeschlagen",
+  "Text.files": "Dateien",
+  "Text.Selected␠range␠export␠cancelled.": "Export der ausgewählten Bereiche abgebrochen."
 }

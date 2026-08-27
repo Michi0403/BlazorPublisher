@@ -25,5 +25,6 @@ Application language and publication language are separate: the global selector 
 
 The application listens on the local loopback interface. It does not need LocalGPT to create or publish documents. The optional LocalGPT page remains quiet until you choose to connect it.
 
-> [!NOTE]
-> The first source build needs the prepared DevExpress browser assets. End-user release packages already contain the runtime assets they need.
+##### Note
+
+The first source build needs the prepared DevExpress browser assets. End-user release packages already contain the runtime assets they need.

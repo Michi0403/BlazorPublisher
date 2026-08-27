@@ -3368,5 +3368,14 @@
   "Text.Panel␠/␠Div␠preset": "Panel / Div preset",
   "Text.Recording␠completed.␠Insert␠it␠as␠the␠first␠sequence␠clip␠before␠recording␠again.": "Recording completed. Insert it as the first sequence clip before recording again.",
   "Text.Recording␠kept␠for␠download␠outside␠the␠sequence.␠PublisherStudio␠will␠ask␠for␠a␠sequence␠position␠again␠before␠another␠video␠recording␠can␠start.": "Recording kept for download outside the sequence. PublisherStudio will ask for a sequence position again before another video recording can start.",
-  "Text.A␠video␠recording␠must␠have␠an␠explicit␠sequence␠position␠before␠it␠can␠be␠embedded.": "A video recording must have an explicit sequence position before it can be embedded."
+  "Text.A␠video␠recording␠must␠have␠an␠explicit␠sequence␠position␠before␠it␠can␠be␠embedded.": "A video recording must have an explicit sequence position before it can be embedded.",
+  "Text.Export␠selected␠ranges␠separately…": "Export selected ranges separately…",
+  "Text.Export␠selected␠ranges␠combined…": "Export selected ranges combined…",
+  "Text.Exporting␠selected␠ranges…": "Exporting selected ranges…",
+  "Text.Selected␠ranges": "Selected ranges",
+  "Text.Exported␠selected␠ranges␠combined": "Exported selected ranges combined",
+  "Text.Exported␠selected␠ranges␠separately": "Exported selected ranges separately",
+  "Text.Selected␠range␠export␠failed": "Selected range export failed",
+  "Text.files": "files",
+  "Text.Selected␠range␠export␠cancelled.": "Selected range export cancelled."
 }

@@ -14,6 +14,8 @@ $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
+& (Join-Path $root ([IO.Path]::Combine('build', 'Assert-SourcePackagePrerequisites.ps1'))) -RepositoryRoot $root
+& (Join-Path $root ([IO.Path]::Combine('build', 'Assert-CrossPlatformBoundaries.ps1'))) -RepositoryRoot $root
 Write-Host "Refreshing reviewed PublisherStudio frontend SHA-256 inventory before the ordered CLI build..." -ForegroundColor DarkCyan
 & (Join-Path $root 'build\Update-JavaScriptDiagnosticsManifest.ps1')
 & (Join-Path $root 'build\Assert-JavaScriptDiagnostics.ps1')
@@ -195,6 +197,9 @@ function Assert-PublisherStudioDocumentationPayload {
     }
     if ([string]$status.documentationMode -ne "docfx") { throw "Published PublisherStudio documentation did not use the DocFX modern site." }
     if ([string]$status.pdfMode -notin @("html-browser-print", "docfx-pdf-plugin")) { throw "Published PublisherStudio documentation does not contain the complete HTML-backed documentation PDF." }
+    if (-not ([bool]$status.htmlPreflightValidated)) { throw "Published PublisherStudio documentation did not pass the generated HTML accessibility/link preflight before PDF rendering." }
+    $expectedPdfAccessibilityMode = if ([string]$status.pdfMode -eq "docfx-pdf-plugin") { "html-accessibility-fallback" } else { "tagged-pdf-required" }
+    if (-not [string]::Equals([string]$status.pdfAccessibilityMode, $expectedPdfAccessibilityMode, [StringComparison]::Ordinal)) { throw "Published PublisherStudio documentation has an unexpected PDF accessibility mode '$($status.pdfAccessibilityMode)' for PDF mode '$($status.pdfMode)'." }
     if ([string]$status.pdfMode -eq "html-browser-print" -and [int]$status.pdfSourcePageCount -lt 10) { throw "The PublisherStudio documentation PDF did not include the expected HTML page set." }
     if ([string]$status.pdfMode -eq "html-browser-print" -and [int]$status.apiHtmlCount -gt 0 -and [int]$status.pdfSourcePageCount -lt [int]$status.apiHtmlCount) { throw "The PublisherStudio documentation PDF omitted generated API pages." }
     if (-not ([bool]$status.completeApiReference)) { throw "Published PublisherStudio documentation is missing the complete XML-generated API reference." }

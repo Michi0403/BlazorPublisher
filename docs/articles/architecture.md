@@ -13,7 +13,7 @@ PublisherStudio is a dependency-injection-oriented modular monolith. The design 
 
 Reusable work flows toward Services and BusinessObjects. Services do not depend on Components, Controllers, Hubs, or HostedServices. Specialized use cases stay in a `UseCases` subnamespace below their owning service area rather than becoming a competing application root.
 
-```mermaid
+```
 flowchart LR
   UI[Blazor Components] --> S[Reusable Services]
   C[Controllers: backend request entry] --> S
@@ -32,7 +32,7 @@ P/Invoke and native exports belong behind injected lifetime services. Records, D
 
 The native publication model is authoritative. External formats are adapters:
 
-```text
+```
 external input → parse → temporary canonical model → validate → commit
 canonical model → capability analysis → map → external output
 ```

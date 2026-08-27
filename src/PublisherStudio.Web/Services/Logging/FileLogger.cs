@@ -41,6 +41,16 @@ public sealed class FileLogger : ILogger, IDisposable
             realPath = string.IsNullOrWhiteSpace(options.FilePath)
                 ? Path.Combine(Directory.GetCurrentDirectory(), "PublisherStudio.log")
                 : Path.GetFullPath(Environment.ExpandEnvironmentVariables(options.FilePath));
+            try
+            {
+                var directory = Path.GetDirectoryName(realPath);
+                if (!string.IsNullOrWhiteSpace(directory) && !Directory.Exists(directory)) Directory.CreateDirectory(directory);
+                using (File.Open(realPath, FileMode.Append, FileAccess.Write, FileShare.ReadWrite)) { }
+            }
+            catch (Exception fileInitializationError) when (fileInitializationError is IOException or UnauthorizedAccessException)
+            {
+                System.Diagnostics.Trace.TraceWarning($"PublisherStudio could not pre-create log file '{realPath}': {fileInitializationError.Message}");
+            }
 
             loggingThread = new Thread(ProcessLogQueue)
             {

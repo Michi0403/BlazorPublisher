@@ -12,6 +12,7 @@ namespace PublisherStudio.Services.Documentation;
 /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class PublisherDocumentationCatalogService(
     IWebHostEnvironment environment,
+    IPublisherPlatformRuntimeService platform,
     ILogger<PublisherDocumentationCatalogService> logger) : IPublisherDocumentationCatalogService
 {
     /// <summary>
@@ -88,9 +89,9 @@ public sealed class PublisherDocumentationCatalogService(
             var segments = normalized.Split('/', StringSplitOptions.RemoveEmptyEntries);
             if (segments.Any(segment => segment is "." or "..")) return null;
 
-            var rootPath = Path.GetFullPath(root).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
+            var rootPath = Path.GetFullPath(root);
             var candidate = Path.GetFullPath(Path.Combine(root, Path.Combine(segments)));
-            if (!candidate.StartsWith(rootPath, StringComparison.OrdinalIgnoreCase)) return null;
+            if (!platform.IsSameOrDescendantPath(rootPath, candidate)) return null;
             if (Directory.Exists(candidate)) candidate = Path.Combine(candidate, "index.html");
             return File.Exists(candidate) ? candidate : null;
     
@@ -174,7 +175,7 @@ public sealed class PublisherDocumentationCatalogService(
         lock (synchronization)
         {
             if (commentCache is not null &&
-                string.Equals(commentCachePath, path, StringComparison.OrdinalIgnoreCase) &&
+                platform.PathsEqual(commentCachePath, path) &&
                 commentCacheWriteUtc == writeUtc)
                 return commentCache;
 

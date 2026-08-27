@@ -10,7 +10,7 @@
 
 ## First source build
 
-```powershell
+```
 .\Prepare-DevExpressAssets.cmd
 .\Build-LocalDevelopment.ps1 -Configuration Debug
 ```
@@ -19,13 +19,13 @@ The preparation command restores the pinned browser packages and generates the p
 
 ## Release build
 
-```powershell
+```
 .\Build-Release.ps1 -Runtime win-x64
 ```
 
 All supported runtimes can be built sequentially with:
 
-```powershell
+```
 .\Build-AllRuntimes.ps1
 ```
 

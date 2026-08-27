@@ -1,9 +1,13 @@
-# PublisherStudio 2.9.9
+# PublisherStudio 3.0.1
 
-PublisherStudio 2.9.9 is the **Video Sequence and Capture Presets Repair** release.
+PublisherStudio 3.0.1 is the **Cross-platform Backend Boundaries** release.
 
-It preserves the 2.9.8 Story Editor caret repair, Mainframe layer dragging, recording download repair, Edge MediaCapabilities fallback and source-frame-driven video rendering. It closes the remaining repeated-recording loss path by making every completed video recording explicitly sequence-owned before another browser capture may replace the retained Blob, and adds first/between/last pre-capture placement for subsequent recordings.
+The application remains the existing PublisherStudio architecture. This release removes unused Windows-only package baggage and moves host-sensitive filesystem, executable discovery, font, capture, hotkey, process-loopback and permission behavior behind neutral interfaces with Windows and Unix implementations selected once by dependency injection.
 
-Video Studio also gains standard landscape, vertical and square resolution presets, reuses Panel / Div Studio viewport presets, and supports fractional cinema/NTSC and high-refresh frame-rate choices through 240 FPS within the existing runtime policy.
+The source audit did not find a maintained GDI+/`System.Drawing` rendering backend that would justify rewriting PublisherStudio or introducing a replacement graphics library. `System.Drawing.Common` is therefore removed rather than replaced. External cross-platform libraries remain a last resort.
 
-See `CHANGELOG-v2.9.9-VIDEO-SEQUENCE-CAPTURE-PRESETS.md` and `VALIDATION-v2.9.9-source.md`.
+The release tooling is cross-platform hardened as well: the PublisherStudio authored DocFX source payload is included, Node.js can be resolved/provisioned on Windows/macOS/Linux, generated HTML is accessibility/link checked before the expensive PDF render, and Pages validation records the difference between a genuinely tagged browser PDF and the DocFX plugin's HTML-accessibility fallback.
+
+Release and local-development entry points now fail fast on incomplete source packages and run the cross-platform boundary guard before the long build.
+
+This handoff is source-only and was not built with .NET or PowerShell in the packaging environment. See `CHANGELOG-v3.0.1-CROSS-PLATFORM-BACKEND-BOUNDARIES.md` and `VALIDATION-v3.0.1-source.md`.

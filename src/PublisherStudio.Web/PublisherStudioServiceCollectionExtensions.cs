@@ -22,6 +22,7 @@ using PublisherStudio.Services.VideoStudio.Import;
 using PublisherStudio.Services.Streaming;
 using PublisherStudio.Services.Streaming.Capture;
 using PublisherStudio.Services.Streaming.Encoding;
+using PublisherStudio.Services.Streaming.Hotkeys;
 using PublisherStudio.Services.Streaming.Metadata;
 
 namespace PublisherStudio.Services;
@@ -51,6 +52,24 @@ public static class PublisherStudioServiceCollectionExtensions
         services.AddSingleton(Microsoft.Extensions.Options.Options.Create(configurationDocument.PublisherStudio.Paths));
         services.AddSingleton(Microsoft.Extensions.Options.Options.Create(configurationDocument.OrganicPlugins));
         services.AddSingleton(Microsoft.Extensions.Options.Options.Create(configurationDocument.PublisherStudio.RuntimeValueStores.PanelTextPatterns));
+        var runningOnWindows = OperatingSystem.IsWindows();
+        if (runningOnWindows)
+        {
+            AddSingleton<IPublisherPlatformRuntimeService, WindowsPublisherPlatformRuntimeService>(services);
+            AddSingleton<IGlobalHotkeyNativeService, WindowsHotkeyNativeService>(services);
+            AddSingleton<IProcessLoopbackNativeService, WindowsProcessLoopbackNativeService>(services);
+            AddSingleton<IProcessLoopbackCaptureFactory, WindowsProcessLoopbackCaptureFactory>(services);
+            AddSingleton<INativeDeviceDiscoveryPlatformService, WindowsNativeDeviceDiscoveryPlatformService>(services);
+        }
+        else
+        {
+            AddSingleton<IPublisherPlatformRuntimeService, UnixPublisherPlatformRuntimeService>(services);
+            AddSingleton<IGlobalHotkeyNativeService, UnixGlobalHotkeyNativeService>(services);
+            AddSingleton<IProcessLoopbackNativeService, UnixProcessLoopbackNativeService>(services);
+            AddSingleton<IProcessLoopbackCaptureFactory, UnixProcessLoopbackCaptureFactory>(services);
+            AddSingleton<INativeDeviceDiscoveryPlatformService, UnixNativeDeviceDiscoveryPlatformService>(services);
+        }
+
         AddSingleton<IPublisherRuntimePatternService, PublisherRuntimePatternService>(services);
         AddSingleton<ISupervisedTaskRunner, SupervisedTaskRunner>(services);
 

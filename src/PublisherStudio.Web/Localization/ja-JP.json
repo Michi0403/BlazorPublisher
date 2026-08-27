@@ -3368,5 +3368,14 @@
   "Text.Panel␠/␠Div␠preset": "Panel / Div プリセット",
   "Text.Recording␠completed.␠Insert␠it␠as␠the␠first␠sequence␠clip␠before␠recording␠again.": "録画が完了しました。再度録画する前に、最初のシーケンスクリップとして挿入してください。",
   "Text.Recording␠kept␠for␠download␠outside␠the␠sequence.␠PublisherStudio␠will␠ask␠for␠a␠sequence␠position␠again␠before␠another␠video␠recording␠can␠start.": "録画はシーケンス外でダウンロード用に保持されています。次のビデオ録画を開始する前に、PublisherStudio が再度シーケンス位置を確認します。",
-  "Text.A␠video␠recording␠must␠have␠an␠explicit␠sequence␠position␠before␠it␠can␠be␠embedded.": "ビデオ録画を埋め込むには、明示的なシーケンス位置が必要です。"
+  "Text.A␠video␠recording␠must␠have␠an␠explicit␠sequence␠position␠before␠it␠can␠be␠embedded.": "ビデオ録画を埋め込むには、明示的なシーケンス位置が必要です。",
+  "Text.Export␠selected␠ranges␠separately…": "選択範囲を個別にエクスポート…",
+  "Text.Export␠selected␠ranges␠combined…": "選択範囲を結合してエクスポート…",
+  "Text.Exporting␠selected␠ranges…": "選択範囲をエクスポート中…",
+  "Text.Selected␠ranges": "選択範囲",
+  "Text.Exported␠selected␠ranges␠combined": "選択範囲を結合してエクスポートしました",
+  "Text.Exported␠selected␠ranges␠separately": "選択範囲を個別にエクスポートしました",
+  "Text.Selected␠range␠export␠failed": "選択範囲のエクスポートに失敗しました",
+  "Text.files": "ファイル",
+  "Text.Selected␠range␠export␠cancelled.": "選択範囲のエクスポートをキャンセルしました。"
 }

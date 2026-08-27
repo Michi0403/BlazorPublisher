@@ -6,13 +6,13 @@ PublisherStudio uses the same simple deployment shape as LocalGPT. The setup is 
 
 The installation root is:
 
-```text
+```
 %LOCALAPPDATA%\PublisherStudio
 ```
 
 Application and setup releases keep their runtime wrappers inside that root:
 
-```text
+```
 PublisherStudio\
   winx64\
     PublisherStudio.Web.exe
@@ -38,7 +38,6 @@ Double-clicking `PublisherStudio.Setup.exe` performs the normal install/update p
 
 No command-line argument is required.
 The setup queries the newest published GitHub release and requires exact runtime assets. On Windows x64 those assets are `winx64.zip` and `setupwinx64.zip`; a missing pair is an error rather than permission to install another architecture.
-
 
 ## Updates
 

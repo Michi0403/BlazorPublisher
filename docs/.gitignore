@@ -1,0 +1,7 @@
+_site/
+api/*.yml
+api/toc.yml
+input/
+.tools/
+.print-book/
+PublisherStudio-*.pdf

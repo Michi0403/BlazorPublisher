@@ -20,6 +20,8 @@ public sealed class LanStreamingServer : IAsyncDisposable
     private readonly ILogger<LanStreamingServer> _logger;
     /// <summary>Observes RTSP client work created by this LAN server.</summary>
     private readonly ISupervisedTaskRunner _taskRunner;
+    /// <summary>Provides host-correct physical path comparison semantics.</summary>
+    private readonly IPublisherPlatformRuntimeService _platform;
     /// <summary>
     /// Stores the synchronization primitive that protects concurrent access to viewer gate state owned by <see cref="LanStreamingServer"/>.
     /// </summary>
@@ -47,10 +49,11 @@ public sealed class LanStreamingServer : IAsyncDisposable
     /// <param name="session">Session value supplied to the LAN streaming server operation and used when producing its result.</param>
     /// <param name="taskRunner">Supervised task runner used by the LAN/RTSP server lifetime.</param>
     /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
-    public LanStreamingServer(MediaSession session, ISupervisedTaskRunner taskRunner, ILogger<LanStreamingServer> logger)
+    public LanStreamingServer(MediaSession session, ISupervisedTaskRunner taskRunner, IPublisherPlatformRuntimeService platform, ILogger<LanStreamingServer> logger)
     {
         _session = session;
         _taskRunner = taskRunner;
+        _platform = platform;
         _logger = logger;
         _viewerGate = new SemaphoreSlim(Math.Clamp(session.LanDefinition.ViewerLimit, 1, 10_000));
         AccessToken = session.LanDefinition.RequireAccessToken
@@ -488,10 +491,9 @@ public sealed class LanStreamingServer : IAsyncDisposable
     try
     {
             var root = Path.GetFullPath(rootDirectory);
-            var rootWithSeparator = root.EndsWith(Path.DirectorySeparatorChar) ? root : root + Path.DirectorySeparatorChar;
             var relative = string.IsNullOrWhiteSpace(asset) ? "index.m3u8" : asset.Replace('/', Path.DirectorySeparatorChar);
             var candidate = Path.GetFullPath(Path.Combine(root, relative));
-            return candidate.StartsWith(rootWithSeparator, StringComparison.OrdinalIgnoreCase) ? candidate : null;
+            return _platform.IsSameOrDescendantPath(root, candidate) ? candidate : null;
     
     }
     catch (Exception __serviceMethodException)

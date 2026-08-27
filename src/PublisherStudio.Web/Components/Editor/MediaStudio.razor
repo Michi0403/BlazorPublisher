@@ -134,8 +134,10 @@
                     @if (IsVideo)
                     {
                         <DxRibbonGroup Text='@LT("Rendered video")' IconCssClass="pub-icon pub-icon-effects">
-                            <DxRibbonItem Text='@LT("Render selected range to video…")' IconCssClass="pub-icon pub-icon-download" Enabled="@(HasSource && !_renderingVideoExport)" Click="RenderEffectsToVideo" />
-                            <DxRibbonItem Text='@LT("Cancel rendered export")' IconCssClass="pub-icon pub-icon-stop" Enabled="@_renderingVideoExport" Click="CancelRenderedVideoExport" />
+                            <DxRibbonItem Text='@LT("Render selected range to video…")' IconCssClass="pub-icon pub-icon-download" Enabled="@(HasSource && !_renderingVideoExport && !_renderingTimelineSelectionExport)" Click="RenderEffectsToVideo" />
+                            <DxRibbonItem Text='@LT("Export selected ranges separately…")' IconCssClass="pub-icon pub-icon-download" Enabled="@CanExportSelectedTimelineRanges" Click="ExportSelectedTimelineRangesSeparately" />
+                            <DxRibbonItem Text='@LT("Export selected ranges combined…")' IconCssClass="pub-icon pub-icon-download" Enabled="@CanExportSelectedTimelineRanges" Click="ExportSelectedTimelineRangesCombined" />
+                            <DxRibbonItem Text='@LT("Cancel rendered export")' IconCssClass="pub-icon pub-icon-stop" Enabled="@(_renderingVideoExport || _renderingTimelineSelectionExport)" Click="CancelRenderedVideoExport" />
                         </DxRibbonGroup>
                     }
                     <DxRibbonGroup Text='@LT("Convert")' IconCssClass="pub-icon pub-icon-media">
@@ -381,14 +383,14 @@
                                  @oncontextmenu="ShowTimelineContextMenu" @oncontextmenu:preventDefault>
                                 @foreach (var segment in _segments)
                                 {
-                                    <button type="button" class="media-sequence-segment @(segment.Id == _selectedSegmentId ? "selected" : null) @(segment.IsGap ? "gap" : string.IsNullOrWhiteSpace(segment.DataUrl) ? "offline" : null)"
+                                    <button type="button" class="media-sequence-segment @(_selectedSegmentIds.Contains(segment.Id) ? "selected" : null) @(segment.Id == _selectedSegmentId ? "primary-selected" : null) @(segment.IsGap ? "gap" : string.IsNullOrWhiteSpace(segment.DataUrl) ? "offline" : null)"
                                             style="@SegmentStyle(segment)" title="@SegmentTitle(segment)"
                                             data-media-segment-id="@segment.Id"
                                             data-media-segment-name="@segment.Name"
                                             data-media-segment-mime="@segment.MimeType"
                                             draggable="@(!segment.IsGap)"
                                             @onpointerdown:stopPropagation
-                                            @onclick="() => SelectTimelineSegment(segment.Id)">
+                                            @onclick="(MouseEventArgs args) => SelectTimelineSegment(segment.Id, args)">
                                         <span>@segment.Name</span>
                                     </button>
                                 }
@@ -1285,6 +1287,16 @@
     /// Stores the in-memory segments collection maintained internally by <see cref="MediaStudio"/> for its current workflow state.
     /// </summary>
     private readonly List<PublicationMediaSegment> _segments = [];
+    /// <summary>Stores the timeline clip identifiers selected by plain, Ctrl/Command, or Shift click.</summary>
+    private readonly HashSet<Guid> _selectedSegmentIds = [];
+    /// <summary>Stores the anchor clip used when Shift extends a timeline selection.</summary>
+    private Guid? _timelineSelectionAnchorId;
+    /// <summary>Stores transient preview asset identifiers that may still be referenced by the currently rendered browser DOM.</summary>
+    private readonly HashSet<Guid> _previewAssetIds = [];
+    /// <summary>Stores preview asset identifiers whose DOM references were replaced and can be released after the next render completes.</summary>
+    private readonly HashSet<Guid> _retiredPreviewAssetIds = [];
+    /// <summary>Tracks the multi-clip selected-range export that is currently running in the browser.</summary>
+    private bool _renderingTimelineSelectionExport;
     /// <summary>
     /// Stores the internal selected segment identifier state used by <see cref="MediaStudio"/> while executing its surrounding workflow.
     /// </summary>
@@ -1538,6 +1550,15 @@
     /// </summary>
     /// <value>The selected segment value exposed by <see cref="MediaStudio"/>.</value>
     private PublicationMediaSegment? SelectedSegment => _segments.FirstOrDefault(segment => segment.Id == _selectedSegmentId);
+    /// <summary>Gets the timeline-selected clips in canonical sequence order.</summary>
+    private IReadOnlyList<PublicationMediaSegment> SelectedTimelineSegments => _segments
+        .Where(segment => _selectedSegmentIds.Contains(segment.Id))
+        .ToList();
+    /// <summary>Gets whether one or more playable selected clips can be exported as selected ranges.</summary>
+    private bool CanExportSelectedTimelineRanges => IsVideo
+        && !_renderingVideoExport
+        && !_renderingTimelineSelectionExport
+        && SelectedTimelineSegments.Any(IsPlayableSegment);
     /// <summary>
     /// Gets the selected video layers collection maintained or exposed by this media studio instance for downstream processing.
     /// </summary>
@@ -1960,7 +1981,9 @@
     /// </summary>
     /// <value>The selected section summary value exposed by <see cref="MediaStudio"/>.</value>
     private string SelectedSectionSummary => SelectedSegment is { } segment
-        ? $"{segment.Name} · {Time(segment.SourceLengthSeconds / Math.Max(.1, _playbackRate))}"
+        ? _selectedSegmentIds.Count > 1
+            ? $"{_selectedSegmentIds.Count} {LT("sections")} · {segment.Name}"
+            : $"{segment.Name} · {Time(segment.SourceLengthSeconds / Math.Max(.1, _playbackRate))}"
         : LT("None");
     /// <summary>
     /// Gets the import menu text value that forms part of the media studio state consumed or produced by the surrounding workflow.
@@ -1981,7 +2004,9 @@
     /// Gets the source status value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The source status value exposed by <see cref="MediaStudio"/>.</value>
-    private string SourceStatus => _renderingVideoExport
+    private string SourceStatus => _renderingTimelineSelectionExport
+        ? LT("Exporting selected ranges…")
+        : _renderingVideoExport
         ? LT("Rendering effects to video…")
         : _recordingStopping
         ? LT("Finalizing recording…")
@@ -2046,14 +2071,15 @@
             if (!Visible || SessionId == Guid.Empty || SessionId == _loadedSession) return;
             _loadedSession = SessionId;
             _recordingRecoveryAttemptedSession = Guid.Empty;
-            MediaAssets.Remove(_previewAssetId);
-            _previewAssetId = Guid.NewGuid();
+            RetirePreviewAssets();
+            _previewAssetId = Guid.Empty;
             _previewSource = string.Empty;
             _error = null;
             _warning = null;
             _recording = false;
             _recordingStopping = false;
             _renderingVideoExport = false;
+            _renderingTimelineSelectionExport = false;
             _recordingAdaptiveQuality = RecordingPolicy.AdaptiveQuality.Enabled;
             _recordingAdaptiveProfile = NormalizeAdaptiveProfile(RecordingPolicy.AdaptiveQuality.DefaultProfile);
             _recordingAdaptVideo = true;
@@ -2104,6 +2130,8 @@
             _retainedRecordingFileName = string.Empty;
             _retainedRecordingObjectUrl = string.Empty;
             _segments.Clear();
+            _selectedSegmentIds.Clear();
+            _timelineSelectionAnchorId = null;
             _selectedSegmentId = null;
             _playhead = 0;
             _mouseMode = MediaStudioMouseMode.SelectSection;
@@ -2222,6 +2250,9 @@
     {
         try
         {
+            // OnAfterRender runs only after Blazor has applied the latest DOM. Old preview URLs
+            // are therefore no longer browser-visible and can be removed without a stale-src 404 race.
+            ReleaseRetiredPreviewAssets();
             if (!Visible || _disposed || SessionId == Guid.Empty) return;
             var stateChanged = false;
             try
@@ -2348,7 +2379,7 @@
         try
         {
             if (_disposed) throw new ObjectDisposedException(nameof(MediaStudio));
-            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=2.9.9").ConfigureAwait(true);
+            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=3.0.1").ConfigureAwait(true);
             _self ??= DotNetObjectReference.Create(this);
             if (SessionId != Guid.Empty)
             {
@@ -2563,21 +2594,24 @@
     /// <param name="id">Identifier of the resource to use for this operation.</param>
     /// <param name="seek">Value indicating whether seek should apply to this operation.</param>
     /// <param name="forceReload">Value indicating whether force reload should apply to this operation.</param>
-    private void SelectSegment(Guid id, bool seek = true, bool forceReload = false)
+    private void SelectSegment(Guid id, bool seek = true, bool forceReload = false, bool commitCurrent = true, bool preserveTimelineSelection = false)
     {
         try
         {
             var reloadingCurrent = _selectedSegmentId == id && SelectedSegment is not null;
             if (reloadingCurrent && !forceReload)
             {
+                if (!preserveTimelineSelection) SetSingleTimelineSelection(id);
                 if (seek) TaskRunner.Run(nameof(MediaStudio), nameof(SelectSegment), async _ => await InvokeAsync(SeekSelectedAtPlayheadAsync).ConfigureAwait(false));
                 return;
             }
             if (_pendingInsertSegment is not null) ClearPendingInsert();
-            if (!reloadingCurrent) CommitSelectedSegment();
+            if (!reloadingCurrent && commitCurrent) CommitSelectedSegment();
             var segment = _segments.FirstOrDefault(item => item.Id == id);
             if (segment is null) return;
             _selectedSegmentId = segment.Id;
+            if (!preserveTimelineSelection) SetSingleTimelineSelection(segment.Id);
+            else _selectedSegmentIds.Add(segment.Id);
             _name = segment.Name;
             _dataUrl = segment.DataUrl;
             _mimeType = segment.MimeType;
@@ -2598,7 +2632,7 @@
             SelectInitialVideoLayer(segment);
             RefreshPreviewSource();
             if (seek) TaskRunner.Run(nameof(MediaStudio), nameof(SelectSegment), async _ => await InvokeAsync(SeekSelectedAtPlayheadAsync).ConfigureAwait(false));
-    
+
         }
         catch (Exception __componentMethodException)
         {
@@ -2607,21 +2641,76 @@
         }
     }
 
-    /// <summary>
-    /// Performs select timeline segment for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
-    /// </summary>
-    /// <param name="id">Identifier of the resource to use for this operation.</param>
-    /// <returns>A task that completes when the operation has finished.</returns>
-    private async Task SelectTimelineSegment(Guid id)
+    /// <summary>Replaces the timeline multi-selection with one clip and moves the Shift anchor to that clip.</summary>
+    private void SetSingleTimelineSelection(Guid id)
     {
         try
         {
-            SelectSegment(id, seek: false);
+            _selectedSegmentIds.Clear();
+            _selectedSegmentIds.Add(id);
+            _timelineSelectionAnchorId = id;
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Could not replace the Media Studio timeline selection with segment {SegmentId}.", id);
+            throw;
+        }
+    }
+
+    /// <summary>Applies plain, Ctrl/Command, and Shift timeline-selection semantics without losing the primary inspector clip.</summary>
+    private void ApplyTimelineSelection(Guid id, bool shiftKey, bool additive)
+    {
+        try
+        {
+            var targetIndex = _segments.FindIndex(segment => segment.Id == id);
+            if (targetIndex < 0) return;
+            if (shiftKey)
+            {
+                var anchorId = _timelineSelectionAnchorId ?? _selectedSegmentId ?? id;
+                var anchorIndex = _segments.FindIndex(segment => segment.Id == anchorId);
+                if (anchorIndex < 0) anchorIndex = targetIndex;
+                if (!additive) _selectedSegmentIds.Clear();
+                var first = Math.Min(anchorIndex, targetIndex);
+                var last = Math.Max(anchorIndex, targetIndex);
+                for (var index = first; index <= last; index++) _selectedSegmentIds.Add(_segments[index].Id);
+                _timelineSelectionAnchorId ??= anchorId;
+                return;
+            }
+
+            if (additive)
+            {
+                if (_selectedSegmentIds.Contains(id) && _selectedSegmentIds.Count > 1) _selectedSegmentIds.Remove(id);
+                else _selectedSegmentIds.Add(id);
+                _timelineSelectionAnchorId = id;
+                return;
+            }
+
+            SetSingleTimelineSelection(id);
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Could not apply Media Studio timeline selection semantics for segment {SegmentId}.", id);
+            throw;
+        }
+    }
+
+    /// <summary>Handles timeline selection, including contiguous Shift selection and additive Ctrl/Command selection.</summary>
+    private async Task SelectTimelineSegment(Guid id, MouseEventArgs args)
+    {
+        try
+        {
+            CommitSelectedSegment();
+            ApplyTimelineSelection(id, args.ShiftKey, args.CtrlKey || args.MetaKey);
+            var primaryId = _selectedSegmentIds.Contains(id)
+                ? id
+                : _segments.FirstOrDefault(segment => _selectedSegmentIds.Contains(segment.Id))?.Id;
+            if (!primaryId.HasValue) return;
+            SelectSegment(primaryId.Value, seek: false, commitCurrent: false, preserveTimelineSelection: true);
             if (SelectedSegment is null) return;
             _playhead = TimelineEdits.SegmentTimelineStart(_segments, SelectedSegmentIndex, _playbackRate);
             await SeekSelectedAtPlayheadAsync().ConfigureAwait(true);
             await InvokeAsync(StateHasChanged).ConfigureAwait(true);
-    
+
         }
         catch (Exception __componentMethodException)
         {
@@ -2638,6 +2727,8 @@
         try
         {
             _selectedSegmentId = null;
+            _selectedSegmentIds.Clear();
+            _timelineSelectionAnchorId = null;
             _name = IsVideo ? "Untitled Video" : "Untitled Audio";
             _dataUrl = string.Empty;
             _mimeType = string.Empty;
@@ -3009,6 +3100,23 @@
             if (args.Button != 0 || !HasSource) return;
             var module = await EnsureMediaModuleAsync().ConfigureAwait(true);
             var ratio = await module.InvokeAsync<double>("horizontalRatio", "media-studio-sequence-timeline", args.ClientX).ConfigureAwait(true);
+            if (args.ShiftKey || args.CtrlKey || args.MetaKey)
+            {
+                CommitSelectedSegment();
+                _playhead = Math.Clamp(ratio, 0, 1) * SequenceDuration;
+                var index = TimelineEdits.SegmentIndexAt(_segments, _playbackRate, _playhead);
+                if (index < 0) return;
+                var targetId = _segments[index].Id;
+                ApplyTimelineSelection(targetId, args.ShiftKey, args.CtrlKey || args.MetaKey);
+                var primaryId = _selectedSegmentIds.Contains(targetId)
+                    ? targetId
+                    : _segments.FirstOrDefault(segment => _selectedSegmentIds.Contains(segment.Id))?.Id;
+                if (!primaryId.HasValue) return;
+                SelectSegment(primaryId.Value, seek: false, commitCurrent: false, preserveTimelineSelection: true);
+                await SeekSelectedAtPlayheadAsync().ConfigureAwait(true);
+                await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+                return;
+            }
             await ActivateTimelinePosition(ratio, allowCut: true).ConfigureAwait(true);
     
         }
@@ -6932,6 +7040,106 @@
         }
     }
 
+    /// <summary>Exports each selected timeline clip range into its own rendered file.</summary>
+    private Task ExportSelectedTimelineRangesSeparately()
+    {
+        try
+        {
+            return ExportSelectedTimelineRanges(combined: false);
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Could not start separate selected-range export.");
+            throw;
+        }
+    }
+
+    /// <summary>Exports the selected timeline clip ranges in sequence order into one rendered file.</summary>
+    private Task ExportSelectedTimelineRangesCombined()
+    {
+        try
+        {
+            return ExportSelectedTimelineRanges(combined: true);
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Could not start combined selected-range export.");
+            throw;
+        }
+    }
+
+    /// <summary>Builds browser-safe selected-range payloads and delegates the actual rendering to the Media Studio module.</summary>
+    private async Task ExportSelectedTimelineRanges(bool combined)
+    {
+        if (!CanExportSelectedTimelineRanges) return;
+        CommitSelectedSegment();
+        var selected = SelectedTimelineSegments.Where(IsPlayableSegment).ToList();
+        if (selected.Count == 0) return;
+        _error = null;
+        _renderingTimelineSelectionExport = true;
+        try
+        {
+            var clips = selected.Select(segment =>
+            {
+                var trimStart = Math.Max(0, segment.TrimStartSeconds);
+                var trimEnd = Math.Max(trimStart + .001, segment.EffectiveTrimEndSeconds);
+                var useSelection = segment.HasTemporalSelection
+                    && segment.TemporalSelectionCommitted
+                    && !segment.TemporalSelectionIsPoint
+                    && segment.TemporalSelectionEndSeconds > segment.TemporalSelectionStartSeconds + .001;
+                var maximumRangeStart = Math.Max(trimStart, trimEnd - .001);
+                var rangeStart = useSelection ? Math.Clamp(segment.TemporalSelectionStartSeconds, trimStart, maximumRangeStart) : trimStart;
+                var rangeEnd = useSelection ? Math.Clamp(segment.TemporalSelectionEndSeconds, rangeStart + .001, trimEnd) : trimEnd;
+                return new
+                {
+                    id = segment.Id.ToString("D"),
+                    name = segment.Name,
+                    source = MediaAssets.GetOrRegister(segment),
+                    mimeType = segment.MimeType,
+                    startSeconds = rangeStart,
+                    endSeconds = rangeEnd,
+                    playbackRate = Math.Max(.1, _playbackRate * Math.Max(.1, Math.Abs(segment.Speed))),
+                    audioGain = _muted ? 0 : Math.Clamp(_volume, 0, 1),
+                    effectConfig = new
+                    {
+                        fitMode = _videoFitMode.ToString().ToLowerInvariant(),
+                        layers = VideoLayerPayload(segment.VideoLayers)
+                    }
+                };
+            }).ToArray();
+            var module = await EnsureMediaModuleAsync().ConfigureAwait(true);
+            var result = await module.InvokeAsync<TimelineSelectionExportResult>(
+                "exportSelectedTimelineRanges",
+                "media-studio-preview",
+                clips,
+                BuildBrowserRecordingOptions(),
+                combined,
+                LT("Selected ranges")).ConfigureAwait(true);
+            if (result.Cancelled)
+            {
+                _warning = LT("Selected range export cancelled.");
+                return;
+            }
+            _warning = combined
+                ? $"{LT("Exported selected ranges combined")}: {result.FileName} · {result.ClipCount} {LT("sections")} · {FormatBytes(result.SizeBytes)}."
+                : $"{LT("Exported selected ranges separately")}: {result.FileCount} {LT("files")} · {result.ClipCount} {LT("sections")} · {FormatBytes(result.SizeBytes)}.";
+            Logger.LogInformation(
+                "Exported {ClipCount} selected Video Studio ranges as {FileCount} file(s), combined={Combined}, total bytes={SizeBytes}.",
+                result.ClipCount, result.FileCount, combined, result.SizeBytes);
+        }
+        catch (Exception ex)
+        {
+            _error = $"{LT("Selected range export failed")}: {ex.Message}";
+            Logger.LogError(ex, "Selected Video Studio range export failed for session {SessionId}.", SessionId);
+            OperationalNotifications.Error(_error, LT("Selected range export failed"), nameof(MediaStudio));
+        }
+        finally
+        {
+            _renderingTimelineSelectionExport = false;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+        }
+    }
+
     /// <summary>
     /// Performs render effects to video for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
     /// </summary>
@@ -7003,6 +7211,7 @@
             finally
             {
                 _renderingVideoExport = false;
+                _renderingTimelineSelectionExport = false;
                 await InvokeAsync(StateHasChanged).ConfigureAwait(true);
             }
     
@@ -7260,6 +7469,7 @@
         {
             ClearRetainedRecordingState();
             _dataUrl = string.Empty;
+            RetirePreviewAssets();
             _previewSource = string.Empty;
             _duration = 0;
             _trimStart = 0;
@@ -7268,7 +7478,6 @@
             _waveform = [];
             _fadeIn = 0;
             _fadeOut = 0;
-            MediaAssets.Remove(_previewAssetId);
             return InvokeAsync(StateHasChanged);
     
         }
@@ -7666,7 +7875,7 @@
                 _retainedRecordingCommittedToSequence = true;
                 _plannedRecordingPlacementBoundary = null;
                 var insertedIndex = _segments.FindIndex(segment => segment.Id == recordedSegment.Id);
-                SelectSegment(recordedSegment.Id, seek: false);
+                SelectSegment(recordedSegment.Id, seek: false, commitCurrent: false);
                 _playhead = insertedIndex >= 0
                     ? TimelineEdits.SegmentTimelineStart(_segments, insertedIndex, _playbackRate)
                     : Math.Clamp(insertionTimeline, 0, SequenceDuration);
@@ -7735,6 +7944,52 @@
         }
     }
 
+    /// <summary>Moves browser-visible preview assets into a deferred-release set until the DOM replacement render has completed.</summary>
+    private void RetirePreviewAssets()
+    {
+        try
+        {
+            foreach (var id in _previewAssetIds) _retiredPreviewAssetIds.Add(id);
+            _previewAssetIds.Clear();
+            _previewAssetId = Guid.Empty;
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Could not retire Media Studio preview assets.");
+            throw;
+        }
+    }
+
+    /// <summary>Releases preview assets that were retired before the render that has just completed.</summary>
+    private void ReleaseRetiredPreviewAssets()
+    {
+        try
+        {
+            foreach (var id in _retiredPreviewAssetIds) MediaAssets.Remove(id);
+            _retiredPreviewAssetIds.Clear();
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Could not release retired Media Studio preview assets.");
+            throw;
+        }
+    }
+
+    /// <summary>Releases every preview asset during final component teardown.</summary>
+    private void ReleaseAllPreviewAssets()
+    {
+        try
+        {
+            RetirePreviewAssets();
+            ReleaseRetiredPreviewAssets();
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Could not release all Media Studio preview assets.");
+            throw;
+        }
+    }
+
     /// <summary>
     /// Refreshes preview source for <see cref="MediaStudio"/>, keeping the operation consistent with the state and invariants of the surrounding media studio workflow.
     /// </summary>
@@ -7742,13 +7997,15 @@
     {
         try
         {
-            MediaAssets.Remove(_previewAssetId);
+            // Keep the previous URL alive until the render that replaces the media src has completed.
+            RetirePreviewAssets();
             if (string.IsNullOrWhiteSpace(_dataUrl))
             {
                 _previewSource = string.Empty;
                 return;
             }
             _previewAssetId = Guid.NewGuid();
+            _previewAssetIds.Add(_previewAssetId);
             _previewSource = MediaAssets.Register(_previewAssetId, _dataUrl, _mimeType);
     
         }
@@ -8716,14 +8973,18 @@
                     FrameClipPolygon = CloneFramePoints(normalizedSegments.FirstOrDefault(segment => !segment.IsGap)?.VideoLayers.FirstOrDefault()?.Region?.Points)
                 }).ConfigureAwait(true);
                 applied = true;
-                MediaAssets.Remove(_previewAssetId);
                 try
                 {
                     await module.InvokeVoidAsync("disposeMediaStudio", "media-studio-preview").ConfigureAwait(true);
-                    _initializedSession = Guid.Empty;
                 }
                 catch (JSException) { }
                 catch (TaskCanceledException) { }
+                finally
+                {
+                    _initializedSession = Guid.Empty;
+                    // Do not remove the current preview URL until the parent render has removed/replaced it.
+                    RetirePreviewAssets();
+                }
             }
             catch (JSDisconnectedException)
             {
@@ -9178,6 +9439,21 @@
         public string MetadataWarning { get; set; } = string.Empty;
     }
 
+    /// <summary>Represents the compact result returned by a multi-clip selected-range browser export.</summary>
+    private sealed class TimelineSelectionExportResult
+    {
+        /// <summary>Gets or sets the number of source clips included in the export.</summary>
+        public int ClipCount { get; set; }
+        /// <summary>Gets or sets the number of files downloaded by the browser.</summary>
+        public int FileCount { get; set; }
+        /// <summary>Gets or sets the combined byte count of the generated files.</summary>
+        public long SizeBytes { get; set; }
+        /// <summary>Gets or sets the combined output file name when a single file was requested.</summary>
+        public string FileName { get; set; } = string.Empty;
+        /// <summary>Gets or sets whether the browser export was cancelled before files were produced.</summary>
+        public bool Cancelled { get; set; }
+    }
+
     /// <summary>
     /// Represents a media recording start info helper type nested within <see cref="MediaStudio"/>, grouping the state or behavior used only by that containing workflow.
     /// </summary>
@@ -9224,7 +9500,6 @@
         try
         {
             _disposed = true;
-            MediaAssets.Remove(_previewAssetId);
             try
             {
                 if (_module is not null) await _module.InvokeVoidAsync("disposeMediaStudio", "media-studio-preview").ConfigureAwait(true);
@@ -9235,6 +9510,8 @@
             catch (InvalidOperationException) { }
             finally
             {
+                // Browser-side media teardown happens first; only then invalidate its backing URLs.
+                ReleaseAllPreviewAssets();
                 _self?.Dispose();
             }
 

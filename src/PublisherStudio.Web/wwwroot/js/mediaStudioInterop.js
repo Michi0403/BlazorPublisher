@@ -2531,6 +2531,349 @@ async function runRenderedVideoExport(state, sourceId, dotnet, effectConfig, raw
     }
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:runRenderedVideoExport', __javascriptError); throw __javascriptError; }}
 
+async function seekVideoForTimelineExport(video, seconds, context) { try {
+    const target = Math.max(0, Number(seconds) || 0);
+    if (Math.abs((Number(video.currentTime) || 0) - target) <= .02 && video.readyState >= 2) return;
+    await new Promise((resolve, reject) => { try {
+        const cleanup = () => { video.removeEventListener('seeked', ready); video.removeEventListener('error', failed); };
+        const ready = () => { cleanup(); resolve(); };
+        const failed = () => { cleanup(); reject(new Error('The browser could not seek a selected timeline clip.')); };
+        video.addEventListener('seeked', ready, { once: true });
+        video.addEventListener('error', failed, { once: true });
+        video.currentTime = target;
+     } catch (error) { reject(error); }});
+ } catch (__javascriptError) { publisherStudioDiagnostics.report(context || 'js/mediaStudioInterop.js:seekVideoForTimelineExport', __javascriptError); throw __javascriptError; }}
+
+async function recordSelectedTimelineClip(clip, rawRecordingOptions, job) { try {
+    if (job?.cancelled) return null;
+    if (typeof MediaRecorder === 'undefined') throw new Error('This browser does not support MediaRecorder selected-range export.');
+    if (typeof HTMLCanvasElement.prototype.captureStream !== 'function') throw new Error('This browser cannot capture a selected-range render canvas.');
+    if (!window.publisherVideoEffects?.install) throw new Error('The Video Studio effect renderer is not available.');
+    const sourceUrl = String(clip?.source || '').trim();
+    if (!sourceUrl) throw new Error(`The selected clip '${String(clip?.name || 'video')}' has no browser-readable source.`);
+
+    const options = normalizedRecordingOptions(rawRecordingOptions);
+    const video = document.createElement('video');
+    const canvas = document.createElement('canvas');
+    const runtimeKey = `media-studio-selection-export-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    video.preload = 'auto';
+    video.playsInline = true;
+    video.src = sourceUrl;
+    video.style.cssText = 'position:fixed;left:-100000px;top:-100000px;width:2px;height:2px;opacity:0;pointer-events:none';
+    canvas.style.cssText = video.style.cssText;
+    document.body.append(video, canvas);
+    job.video = video;
+    job.canvas = canvas;
+    job.runtimeKey = runtimeKey;
+
+    let stream = null;
+    let recorder = null;
+    let audioContext = null;
+    let audioSource = null;
+    let gainNode = null;
+    let audioDestination = null;
+    try {
+        await waitForMetadata(video);
+        if (job.cancelled) return null;
+        const sourceDuration = Math.max(.01, Number(video.duration) || 0);
+        const start = Math.max(0, Math.min(sourceDuration, Number(clip?.startSeconds) || 0));
+        const requestedEnd = Number(clip?.endSeconds);
+        const end = Math.max(start + .001, Math.min(sourceDuration, Number.isFinite(requestedEnd) && requestedEnd > start ? requestedEnd : sourceDuration));
+        const playback = Math.max(.1, Number(clip?.playbackRate) || 1);
+        const gain = Math.max(0, Math.min(1, Number(clip?.audioGain) || 0));
+        const width = options.width > 0 ? options.width : Math.max(2, Math.trunc(Number(video.videoWidth) || 2));
+        const height = options.height > 0 ? options.height : Math.max(2, Math.trunc(Number(video.videoHeight) || 2));
+        const frameRate = Math.max(24, Math.min(240, options.frameRate > 0 ? options.frameRate : options.maximumFrameRate > 0 ? options.maximumFrameRate : 60));
+        canvas.width = width;
+        canvas.height = height;
+        stream = canvas.captureStream(frameRate);
+        job.stream = stream;
+
+        const renderConfig = {
+            ...(clip?.effectConfig || {}),
+            outputWidth: width,
+            outputHeight: height,
+            maximumPixels: 0,
+            forceCanvas: true
+        };
+        window.publisherVideoEffects.install(runtimeKey, video, canvas, renderConfig);
+        await seekVideoForTimelineExport(video, start, 'js/mediaStudioInterop.js:selected-range-export:seek');
+        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+        if (job.cancelled) return null;
+
+        if (gain > 0) {
+            const AudioContextType = window.AudioContext || window.webkitAudioContext;
+            if (AudioContextType) {
+                audioContext = new AudioContextType();
+                try { await audioContext.resume(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:selected-range-export:audio-resume', __caughtJavaScriptError); }
+                audioSource = audioContext.createMediaElementSource(video);
+                gainNode = audioContext.createGain();
+                gainNode.gain.value = gain;
+                audioDestination = audioContext.createMediaStreamDestination();
+                audioSource.connect(gainNode);
+                gainNode.connect(audioDestination);
+                for (const track of audioDestination.stream.getAudioTracks()) stream.addTrack(track);
+            }
+        }
+
+        const profileOptions = {
+            ...options,
+            width,
+            height,
+            maximumFrameRate: frameRate,
+            bitrateFrameRate: frameRate,
+            adaptive: {
+                ...options.adaptive,
+                preserveNativeResolution: true,
+                allowFrameRateReduction: false,
+                allowResolutionReduction: false
+            }
+        };
+        const adaptiveProfile = await probeAdaptiveRecordingProfile(stream, 'mixed', profileOptions);
+        if (job.cancelled) return null;
+        const mimeType = adaptiveProfile?.mimeType || preferredMime('video', options.codecPreference, options.adaptive.codecPreferenceOrder);
+        const recorderOptions = {};
+        if (mimeType) recorderOptions.mimeType = mimeType;
+        const videoBitsPerSecond = options.adaptive.enabled && options.adaptive.adaptVideo
+            ? Number(adaptiveProfile?.videoBitsPerSecond) || 0
+            : options.videoBitsPerSecond;
+        const audioBitsPerSecond = options.adaptive.enabled && options.adaptive.adaptAudio
+            ? Number(adaptiveProfile?.audioBitsPerSecond) || 0
+            : options.audioBitsPerSecond;
+        if (videoBitsPerSecond > 0) recorderOptions.videoBitsPerSecond = videoBitsPerSecond;
+        if (stream.getAudioTracks().length && audioBitsPerSecond > 0) recorderOptions.audioBitsPerSecond = audioBitsPerSecond;
+        recorder = Object.keys(recorderOptions).length ? new MediaRecorder(stream, recorderOptions) : new MediaRecorder(stream);
+        job.recorder = recorder;
+        const chunks = [];
+        const blobPromise = new Promise((resolve, reject) => { try {
+            recorder.addEventListener('dataavailable', event => { if (event.data?.size) chunks.push(event.data); });
+            recorder.addEventListener('error', event => reject(event.error || new Error('The browser recorder failed while exporting a selected range.')), { once: true });
+            recorder.addEventListener('stop', () => { try {
+                const blob = new Blob(chunks, { type: recorder.mimeType || mimeType || 'video/webm' });
+                if (!job.cancelled && !blob.size) reject(new Error('A selected-range export produced an empty video file.'));
+                else resolve(blob);
+             } catch (error) { reject(error); } }, { once: true });
+         } catch (error) { reject(error); }});
+
+        video.playbackRate = playback;
+        recorder.start(options.recorderChunkMilliseconds);
+        await video.play();
+        await new Promise((resolve, reject) => { try {
+            job.resolvePlayback = resolve;
+            const tick = () => { try {
+                if (job.cancelled || video.ended || Number(video.currentTime) >= end - .001) { resolve(); return; }
+                if (video.error) { reject(new Error('A selected source video failed during export.')); return; }
+                job.frame = requestAnimationFrame(tick);
+             } catch (error) { reject(error); }};
+            tick();
+         } catch (error) { reject(error); }});
+        job.resolvePlayback = null;
+        if (job.frame) cancelAnimationFrame(job.frame);
+        job.frame = 0;
+        video.pause();
+        if (recorder.state !== 'inactive') recorder.stop();
+        const blob = await blobPromise;
+        if (job.cancelled) return null;
+        return {
+            blob,
+            width,
+            height,
+            durationSeconds: Math.max(.001, (end - start) / playback),
+            mimeType: baseMimeType(blob.type || recorder.mimeType, 'video/webm'),
+            sourceName: String(clip?.name || 'video')
+        };
+    } finally {
+        try { video.pause(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:selected-range-export:cleanup-pause', __caughtJavaScriptError); }
+        try { window.publisherVideoEffects?.dispose(runtimeKey); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:selected-range-export:cleanup-runtime', __caughtJavaScriptError); }
+        try { for (const track of stream?.getTracks?.() || []) track.stop(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:selected-range-export:cleanup-tracks', __caughtJavaScriptError); }
+        try { audioSource?.disconnect?.(); gainNode?.disconnect?.(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:selected-range-export:cleanup-audio', __caughtJavaScriptError); }
+        try { await audioContext?.close?.(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:selected-range-export:cleanup-audio-context', __caughtJavaScriptError); }
+        video.removeAttribute('src');
+        try { video.load(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:selected-range-export:cleanup-load', __caughtJavaScriptError); }
+        video.remove();
+        canvas.remove();
+        job.video = null;
+        job.canvas = null;
+        job.stream = null;
+        job.recorder = null;
+        job.runtimeKey = '';
+    }
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:recordSelectedTimelineClip', __javascriptError); throw __javascriptError; }}
+
+function drawVideoContained(context, video, width, height) { try {
+    const sourceWidth = Math.max(1, Number(video.videoWidth) || width);
+    const sourceHeight = Math.max(1, Number(video.videoHeight) || height);
+    const scale = Math.min(width / sourceWidth, height / sourceHeight);
+    const drawWidth = sourceWidth * scale;
+    const drawHeight = sourceHeight * scale;
+    const x = (width - drawWidth) / 2;
+    const y = (height - drawHeight) / 2;
+    context.clearRect(0, 0, width, height);
+    context.fillStyle = '#000';
+    context.fillRect(0, 0, width, height);
+    context.drawImage(video, x, y, drawWidth, drawHeight);
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:drawVideoContained', __javascriptError); throw __javascriptError; }}
+
+async function combineSelectedTimelineBlobs(renderedClips, rawRecordingOptions, job, combinedName) { try {
+    if (!Array.isArray(renderedClips) || renderedClips.length === 0) throw new Error('No rendered selected ranges are available to combine.');
+    const options = normalizedRecordingOptions(rawRecordingOptions);
+    const first = renderedClips[0];
+    const width = options.width > 0 ? options.width : Math.max(2, Number(first.width) || 2);
+    const height = options.height > 0 ? options.height : Math.max(2, Number(first.height) || 2);
+    const frameRate = Math.max(24, Math.min(240, options.frameRate > 0 ? options.frameRate : options.maximumFrameRate > 0 ? options.maximumFrameRate : 60));
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    canvas.style.cssText = 'position:fixed;left:-100000px;top:-100000px;width:2px;height:2px;opacity:0;pointer-events:none';
+    document.body.appendChild(canvas);
+    const context = canvas.getContext('2d', { alpha: false });
+    if (!context) throw new Error('The browser could not create a canvas context for combined selected-range export.');
+    let stream = canvas.captureStream(frameRate);
+    job.canvas = canvas;
+    job.stream = stream;
+    let audioContext = null;
+    let audioDestination = null;
+    try {
+        const AudioContextType = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextType) {
+            audioContext = new AudioContextType();
+            try { await audioContext.resume(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:combined-selection-export:audio-resume', __caughtJavaScriptError); }
+            audioDestination = audioContext.createMediaStreamDestination();
+            for (const track of audioDestination.stream.getAudioTracks()) stream.addTrack(track);
+        }
+        const profileOptions = {
+            ...options,
+            width,
+            height,
+            maximumFrameRate: frameRate,
+            bitrateFrameRate: frameRate,
+            adaptive: { ...options.adaptive, preserveNativeResolution: true, allowFrameRateReduction: false, allowResolutionReduction: false }
+        };
+        const adaptiveProfile = await probeAdaptiveRecordingProfile(stream, 'mixed', profileOptions);
+        if (job.cancelled) return null;
+        const mimeType = adaptiveProfile?.mimeType || preferredMime('video', options.codecPreference, options.adaptive.codecPreferenceOrder);
+        const recorderOptions = {};
+        if (mimeType) recorderOptions.mimeType = mimeType;
+        const videoBitsPerSecond = options.adaptive.enabled && options.adaptive.adaptVideo ? Number(adaptiveProfile?.videoBitsPerSecond) || 0 : options.videoBitsPerSecond;
+        const audioBitsPerSecond = options.adaptive.enabled && options.adaptive.adaptAudio ? Number(adaptiveProfile?.audioBitsPerSecond) || 0 : options.audioBitsPerSecond;
+        if (videoBitsPerSecond > 0) recorderOptions.videoBitsPerSecond = videoBitsPerSecond;
+        if (stream.getAudioTracks().length && audioBitsPerSecond > 0) recorderOptions.audioBitsPerSecond = audioBitsPerSecond;
+        const recorder = Object.keys(recorderOptions).length ? new MediaRecorder(stream, recorderOptions) : new MediaRecorder(stream);
+        job.recorder = recorder;
+        const chunks = [];
+        const blobPromise = new Promise((resolve, reject) => { try {
+            recorder.addEventListener('dataavailable', event => { if (event.data?.size) chunks.push(event.data); });
+            recorder.addEventListener('error', event => reject(event.error || new Error('The browser recorder failed while combining selected ranges.')), { once: true });
+            recorder.addEventListener('stop', () => { try {
+                const blob = new Blob(chunks, { type: recorder.mimeType || mimeType || 'video/webm' });
+                if (!job.cancelled && !blob.size) reject(new Error('The combined selected-range export produced an empty video file.'));
+                else resolve(blob);
+             } catch (error) { reject(error); } }, { once: true });
+         } catch (error) { reject(error); }});
+        recorder.start(options.recorderChunkMilliseconds);
+
+        for (const rendered of renderedClips) {
+            if (job.cancelled) break;
+            const objectUrl = URL.createObjectURL(rendered.blob);
+            const video = document.createElement('video');
+            let sourceNode = null;
+            let gainNode = null;
+            try {
+                video.preload = 'auto';
+                video.playsInline = true;
+                video.src = objectUrl;
+                video.style.cssText = 'position:fixed;left:-100000px;top:-100000px;width:2px;height:2px;opacity:0;pointer-events:none';
+                document.body.appendChild(video);
+                job.video = video;
+                await waitForMetadata(video);
+                if (audioContext && audioDestination) {
+                    sourceNode = audioContext.createMediaElementSource(video);
+                    gainNode = audioContext.createGain();
+                    gainNode.gain.value = 1;
+                    sourceNode.connect(gainNode);
+                    gainNode.connect(audioDestination);
+                }
+                drawVideoContained(context, video, width, height);
+                await video.play();
+                await new Promise((resolve, reject) => { try {
+                    job.resolvePlayback = resolve;
+                    const tick = () => { try {
+                        if (job.cancelled || video.ended) { resolve(); return; }
+                        if (video.error) { reject(new Error('A rendered selected range failed while combining files.')); return; }
+                        drawVideoContained(context, video, width, height);
+                        job.frame = requestAnimationFrame(tick);
+                     } catch (error) { reject(error); }};
+                    tick();
+                 } catch (error) { reject(error); }});
+                job.resolvePlayback = null;
+                if (job.frame) cancelAnimationFrame(job.frame);
+                job.frame = 0;
+                video.pause();
+                drawVideoContained(context, video, width, height);
+            } finally {
+                try { sourceNode?.disconnect?.(); gainNode?.disconnect?.(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:combined-selection-export:disconnect', __caughtJavaScriptError); }
+                video.removeAttribute('src');
+                try { video.load(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:combined-selection-export:video-load', __caughtJavaScriptError); }
+                video.remove();
+                URL.revokeObjectURL(objectUrl);
+                job.video = null;
+            }
+        }
+        if (recorder.state !== 'inactive') recorder.stop();
+        const blob = await blobPromise;
+        if (job.cancelled) return null;
+        const finalMimeType = baseMimeType(blob.type || recorder.mimeType, 'video/webm');
+        return {
+            blob,
+            fileName: renderedVideoFileName(combinedName || 'Selected ranges', finalMimeType),
+            mimeType: finalMimeType,
+            width,
+            height,
+            durationSeconds: renderedClips.reduce((total, clip) => total + Math.max(0, Number(clip.durationSeconds) || 0), 0)
+        };
+    } finally {
+        try { if (job.recorder && job.recorder.state !== 'inactive') job.recorder.stop(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:combined-selection-export:cleanup-recorder', __caughtJavaScriptError); }
+        try { for (const track of stream?.getTracks?.() || []) track.stop(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:combined-selection-export:cleanup-tracks', __caughtJavaScriptError); }
+        try { await audioContext?.close?.(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:combined-selection-export:cleanup-audio-context', __caughtJavaScriptError); }
+        canvas.remove();
+        job.canvas = null;
+        job.stream = null;
+        job.recorder = null;
+    }
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:combineSelectedTimelineBlobs', __javascriptError); throw __javascriptError; }}
+
+export async function exportSelectedTimelineRanges(id, clips, recordingOptions, combined, combinedName) { try {
+    const state = stateFor(id);
+    if (state.renderExport) throw new Error('A rendered Video Studio export is already running.');
+    const selected = Array.isArray(clips) ? clips.filter(clip => clip && String(clip.source || '').trim()) : [];
+    if (selected.length === 0) throw new Error('No playable selected timeline ranges are available to export.');
+    const job = { cancelled: false, recorder: null, video: null, canvas: null, stream: null, runtimeKey: '', frame: 0, resolvePlayback: null };
+    state.renderExport = job;
+    const rendered = [];
+    let totalBytes = 0;
+    try {
+        for (const clip of selected) {
+            const result = await recordSelectedTimelineClip(clip, recordingOptions, job);
+            if (job.cancelled || !result) return { clipCount: rendered.length, fileCount: 0, sizeBytes: totalBytes, fileName: '', cancelled: true };
+            rendered.push(result);
+        }
+        if (combined) {
+            const result = await combineSelectedTimelineBlobs(rendered, recordingOptions, job, combinedName);
+            if (job.cancelled || !result) return { clipCount: rendered.length, fileCount: 0, sizeBytes: totalBytes, fileName: '', cancelled: true };
+            downloadBlob(result.blob, result.fileName);
+            return { clipCount: rendered.length, fileCount: 1, sizeBytes: result.blob.size, fileName: result.fileName, cancelled: false };
+        }
+        for (const result of rendered) {
+            const fileName = renderedVideoFileName(result.sourceName, result.mimeType);
+            downloadBlob(result.blob, fileName);
+            totalBytes += result.blob.size;
+        }
+        return { clipCount: rendered.length, fileCount: rendered.length, sizeBytes: totalBytes, fileName: '', cancelled: false };
+    } finally {
+        if (state.renderExport === job) state.renderExport = null;
+    }
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:exportSelectedTimelineRanges', __javascriptError); throw __javascriptError; }}
+
 export function startRenderedVideoExport(id, dotnet, effectConfig, recordingOptions, startSeconds, endSeconds, playbackRate, audioGain, sourceName) { try {
     const state = stateFor(id);
     if (state.renderExport) return false;

@@ -1,5 +1,4 @@
 using System.Buffers.Binary;
-using System.Diagnostics;
 using System.Text;
 
 namespace PublisherStudio.Services;
@@ -10,7 +9,9 @@ namespace PublisherStudio.Services;
 /// Users may still type a font family that is not in this catalog.
 /// </summary>
 /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
-public sealed class SystemFontCatalog(ILogger<SystemFontCatalog> logger)
+public sealed class SystemFontCatalog(
+    IPublisherPlatformRuntimeService platform,
+    ILogger<SystemFontCatalog> logger)
 {
     /// <summary>
     /// Stores the internal emergency fallback fonts state used by <see cref="SystemFontCatalog"/> while executing its surrounding workflow.
@@ -72,9 +73,10 @@ public sealed class SystemFontCatalog(ILogger<SystemFontCatalog> logger)
         {
             logger.LogTrace($"Entering SystemFontCatalog.DiscoverFontFamilies.");
                     var families = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                    ReadFontConfigFamilies(families);
+                    foreach (var platformFamily in platform.EnumeratePlatformFontFamilies())
+                        AddFamily(families, platformFamily);
 
-                    foreach (var directory in EnumerateFontDirectories())
+                    foreach (var directory in platform.EnumerateFontDirectories())
                         ReadFontDirectory(directory, families);
 
                     // Always merge the safe local fallback set. A damaged or partially readable font
@@ -91,111 +93,6 @@ public sealed class SystemFontCatalog(ILogger<SystemFontCatalog> logger)
         catch (Exception exception)
         {
             logger.LogError(exception, $"SystemFontCatalog.DiscoverFontFamilies failed: {exception.Message}");
-            throw;
-        }
-    }
-
-    /// <summary>
-    /// Performs enumerate font directories in the system font directory so callers observe a consistent, authoritative runtime view.
-    /// </summary>
-    /// <returns>The collection produced by the operation.</returns>
-    private IEnumerable<string> EnumerateFontDirectories()
-    {
-        try
-        {
-            logger.LogTrace($"Entering SystemFontCatalog.EnumerateFontDirectories.");
-                    var paths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                    void Add(string? path)
-                    {
-                        if (!string.IsNullOrWhiteSpace(path)) paths.Add(path);
-                    }
-
-                    if (OperatingSystem.IsWindows())
-                    {
-                        var windowsDirectory = Environment.GetEnvironmentVariable("WINDIR");
-                        if (string.IsNullOrWhiteSpace(windowsDirectory))
-                        {
-                            var systemDirectory = Environment.GetFolderPath(Environment.SpecialFolder.System);
-                            windowsDirectory = string.IsNullOrWhiteSpace(systemDirectory) ? null : Directory.GetParent(systemDirectory)?.FullName;
-                        }
-                        Add(string.IsNullOrWhiteSpace(windowsDirectory) ? null : Path.Combine(windowsDirectory, "Fonts"));
-                        var localData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-                        Add(string.IsNullOrWhiteSpace(localData) ? null : Path.Combine(localData, "Microsoft", "Windows", "Fonts"));
-                    }
-                    else if (OperatingSystem.IsMacOS())
-                    {
-                        Add("/System/Library/Fonts");
-                        Add("/Library/Fonts");
-                        var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-                        Add(string.IsNullOrWhiteSpace(home) ? null : Path.Combine(home, "Library", "Fonts"));
-                    }
-                    else
-                    {
-                        Add("/usr/share/fonts");
-                        Add("/usr/local/share/fonts");
-                        var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-                        Add(string.IsNullOrWhiteSpace(home) ? null : Path.Combine(home, ".fonts"));
-                        Add(string.IsNullOrWhiteSpace(home) ? null : Path.Combine(home, ".local", "share", "fonts"));
-                    }
-
-                    return paths;
-    
-        }
-        catch (Exception exception)
-        {
-            logger.LogError(exception, $"SystemFontCatalog.EnumerateFontDirectories failed: {exception.Message}");
-            throw;
-        }
-    }
-
-    /// <summary>
-    /// Reads font config families in the system font directory so callers observe a consistent, authoritative runtime view.
-    /// </summary>
-    /// <param name="families">String dependency used by the system font workflow to provide the corresponding application capability.</param>
-    private void ReadFontConfigFamilies(ISet<string> families)
-    {
-        try
-        {
-            logger.LogTrace($"Entering SystemFontCatalog.ReadFontConfigFamilies.");
-                    if (OperatingSystem.IsWindows()) return;
-                    try
-                    {
-                        using var process = Process.Start(new ProcessStartInfo
-                        {
-                            FileName = "fc-list",
-                            Arguments = "--format=%{family}\\n",
-                            UseShellExecute = false,
-                            CreateNoWindow = true,
-                            RedirectStandardOutput = true,
-                            RedirectStandardError = true
-                        });
-                        if (process is null) return;
-
-                        var outputTask = process.StandardOutput.ReadToEndAsync();
-                        var errorTask = process.StandardError.ReadToEndAsync();
-                        if (!process.WaitForExit(4000))
-                        {
-                            try { process.Kill(entireProcessTree: true); } catch { }
-                            return;
-                        }
-
-                        var output = outputTask.GetAwaiter().GetResult();
-                        _ = errorTask.GetAwaiter().GetResult();
-                        foreach (var line in output.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
-                        {
-                            foreach (var alias in line.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
-                                AddFamily(families, alias);
-                        }
-                    }
-                    catch
-                    {
-                        // Fontconfig is optional. The OpenType parser below remains the portable fallback.
-                    }
-    
-        }
-        catch (Exception exception)
-        {
-            logger.LogError(exception, $"SystemFontCatalog.ReadFontConfigFamilies failed: {exception.Message}");
             throw;
         }
     }

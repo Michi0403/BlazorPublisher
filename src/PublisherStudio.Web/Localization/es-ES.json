@@ -3368,5 +3368,14 @@
   "Text.Panel␠/␠Div␠preset": "Preajuste Panel / Div",
   "Text.Recording␠completed.␠Insert␠it␠as␠the␠first␠sequence␠clip␠before␠recording␠again.": "Grabación terminada. Insértala como primer clip de la secuencia antes de volver a grabar.",
   "Text.Recording␠kept␠for␠download␠outside␠the␠sequence.␠PublisherStudio␠will␠ask␠for␠a␠sequence␠position␠again␠before␠another␠video␠recording␠can␠start.": "La grabación se conserva para descargar fuera de la secuencia. PublisherStudio volverá a pedir una posición antes de iniciar otra grabación de vídeo.",
-  "Text.A␠video␠recording␠must␠have␠an␠explicit␠sequence␠position␠before␠it␠can␠be␠embedded.": "Una grabación de vídeo debe tener una posición de secuencia explícita antes de poder incrustarse."
+  "Text.A␠video␠recording␠must␠have␠an␠explicit␠sequence␠position␠before␠it␠can␠be␠embedded.": "Una grabación de vídeo debe tener una posición de secuencia explícita antes de poder incrustarse.",
+  "Text.Export␠selected␠ranges␠separately…": "Exportar los intervalos seleccionados por separado…",
+  "Text.Export␠selected␠ranges␠combined…": "Exportar los intervalos seleccionados combinados…",
+  "Text.Exporting␠selected␠ranges…": "Exportando los intervalos seleccionados…",
+  "Text.Selected␠ranges": "Intervalos seleccionados",
+  "Text.Exported␠selected␠ranges␠combined": "Intervalos seleccionados exportados combinados",
+  "Text.Exported␠selected␠ranges␠separately": "Intervalos seleccionados exportados por separado",
+  "Text.Selected␠range␠export␠failed": "Error al exportar los intervalos seleccionados",
+  "Text.files": "archivos",
+  "Text.Selected␠range␠export␠cancelled.": "Exportación de los intervalos seleccionados cancelada."
 }

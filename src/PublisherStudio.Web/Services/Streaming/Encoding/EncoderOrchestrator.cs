@@ -1615,6 +1615,7 @@ public sealed class FfmpegEncoderSet(
 /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class FfmpegEncoderResolver(
     FfmpegLocator ffmpegLocator,
+    IPublisherPlatformRuntimeService platform,
     ILogger<FfmpegEncoderResolver> logger)
 {
     /// <summary>
@@ -1679,8 +1680,7 @@ public sealed class FfmpegEncoderResolver(
                         3 => new[] { "qsv", "software" },
                         4 => new[] { "amf", "software" },
                         5 => new[] { "videotoolbox", "software" },
-                        _ when OperatingSystem.IsMacOS() => new[] { "videotoolbox", "nvenc", "qsv", "amf", "software" },
-                        _ => new[] { "nvenc", "qsv", "amf", "videotoolbox", "software" }
+                        _ => platform.PreferredHardwareEncoderBackends
                     };
 
                     foreach (var family in families)

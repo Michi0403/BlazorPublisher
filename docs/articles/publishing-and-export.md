@@ -22,8 +22,9 @@ The structured exporter validates archive paths, preserves original media when o
 
 Video export renders publication timing into a media file. Keep the native publication beside the export so the sequence can be revised later.
 
-> [!TIP]
-> Publish for the audience, but save for your future self. The native project is the editable keepsake. 🎀
+##### Tip
+
+Publish for the audience, but save for your future self. The native project is the editable keepsake. 🎀
 
 ## Structured website media policy
 

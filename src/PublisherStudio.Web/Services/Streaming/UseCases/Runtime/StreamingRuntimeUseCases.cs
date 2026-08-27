@@ -9,11 +9,11 @@ public sealed class StreamingRuntimeUseCases
     /// <summary>
     /// Stores the windows hotkey native service dependency used by <see cref="StreamingRuntimeUseCases"/> to delegate that application responsibility to its owning collaborator.
     /// </summary>
-    private readonly IWindowsHotkeyNativeService hotkeyNativeService;
+    private readonly IGlobalHotkeyNativeService hotkeyNativeService;
     /// <summary>
     /// Stores the windows process loopback native service dependency used by <see cref="StreamingRuntimeUseCases"/> to delegate that application responsibility to its owning collaborator.
     /// </summary>
-    private readonly IWindowsProcessLoopbackNativeService processLoopbackNativeService;
+    private readonly IProcessLoopbackNativeService processLoopbackNativeService;
     /// <summary>
     /// Stores the internal native device discovery state used by <see cref="StreamingRuntimeUseCases"/> while executing its surrounding workflow.
     /// </summary>
@@ -36,8 +36,8 @@ public sealed class StreamingRuntimeUseCases
     /// <param name="nowPlayingReader">Now playing reader value supplied to the streaming runtime use cases operation and used when producing its result.</param>
     /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
     public StreamingRuntimeUseCases(
-        IWindowsHotkeyNativeService hotkeyNativeService,
-        IWindowsProcessLoopbackNativeService processLoopbackNativeService,
+        IGlobalHotkeyNativeService hotkeyNativeService,
+        IProcessLoopbackNativeService processLoopbackNativeService,
         NativeDeviceDiscovery nativeDeviceDiscovery,
         NowPlayingReader nowPlayingReader,
         ILogger<StreamingRuntimeUseCases> logger)

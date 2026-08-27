@@ -1,7 +1,3 @@
-using System.Diagnostics;
-using PublisherStudio.BusinessObjects;
-using PublisherStudio.Services.Configuration;
-using PublisherStudio.Services.Streaming.Encoding;
 
 namespace PublisherStudio.Services.Streaming.Capture;
 
@@ -23,240 +19,27 @@ public sealed record DiscoveredNativeMediaDeviceInfo(
     string? WindowTitle = null);
 
 /// <summary>
-/// Represents a native device discovery application type, grouping the state and behavior that belong to that domain concept.
+/// Platform-neutral facade for native media-device discovery. Host-specific DirectShow, AVFoundation,
+/// V4L2 and process-loopback details are owned by the injected platform implementation.
 /// </summary>
-/// <param name="ffmpegLocator">Ffmpeg locator value supplied to the native device discovery operation and used when producing its result.</param>
-/// <param name="runtimePatterns">Publisher runtime pattern service dependency used by the native device discovery workflow to provide the corresponding application capability.</param>
-/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class NativeDeviceDiscovery(
-    FfmpegLocator ffmpegLocator,
-    IPublisherRuntimePatternService runtimePatterns,
+    INativeDeviceDiscoveryPlatformService platformDiscovery,
     ILogger<NativeDeviceDiscovery> logger)
 {
-    /// <summary>
-    /// Performs discover for <see cref="NativeDeviceDiscovery"/>, keeping the operation consistent with the state and invariants of the surrounding native device discovery workflow.
-    /// </summary>
-    /// <param name="ffmpegPath">Ffmpeg path value supplied to the native device discovery operation and used when producing its result.</param>
-    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
-    /// <returns>The collection produced by the operation.</returns>
     public async Task<IReadOnlyList<DiscoveredNativeMediaDeviceInfo>> DiscoverAsync(
         string? ffmpegPath,
         CancellationToken cancellationToken)
     {
         try
         {
-            var result = new List<DiscoveredNativeMediaDeviceInfo>();
-            if (OperatingSystem.IsWindows())
-            {
-                result.AddRange(await DiscoverDirectShowAsync(ffmpegPath, cancellationToken).ConfigureAwait(false));
-                result.AddRange(DiscoverWindowsProcesses());
-            }
-            else if (OperatingSystem.IsMacOS())
-            {
-                result.AddRange(await DiscoverAvFoundationAsync(ffmpegPath, cancellationToken).ConfigureAwait(false));
-            }
-            else if (OperatingSystem.IsLinux())
-            {
-                foreach (var path in Directory.Exists("/dev") ? Directory.EnumerateFiles("/dev", "video*") : [])
-                    result.Add(new DiscoveredNativeMediaDeviceInfo(path, Path.GetFileName(path), "CaptureDevice", "v4l2"));
-            }
-
-            var discovered = result
-                .GroupBy(item => $"{item.Backend}|{item.Kind}|{item.Id}", StringComparer.OrdinalIgnoreCase)
-                .Select(group => group.First())
-                .OrderBy(item => item.Kind, StringComparer.OrdinalIgnoreCase)
-                .ThenBy(item => item.Name, StringComparer.OrdinalIgnoreCase)
-                .ToArray();
-            logger.LogInformation($"Discovered {discovered.Length} native media devices.");
+            var discovered = await platformDiscovery.DiscoverAsync(ffmpegPath, cancellationToken).ConfigureAwait(false);
+            logger.LogInformation("Discovered {DeviceCount} native media devices.", discovered.Count);
             return discovered;
         }
         catch (Exception exception)
         {
-            logger.LogError(exception, $"Could not discover native media devices.");
+            logger.LogError(exception, "Could not discover native media devices.");
             throw;
-        }
-    }
-
-    /// <summary>
-    /// Discovers direct show for <see cref="NativeDeviceDiscovery"/>, keeping the operation consistent with the state and invariants of the surrounding native device discovery workflow.
-    /// </summary>
-    /// <param name="ffmpegPath">Ffmpeg path value supplied to the native device discovery operation and used when producing its result.</param>
-    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
-    /// <returns>The collection produced by the operation.</returns>
-    private async Task<IReadOnlyList<DiscoveredNativeMediaDeviceInfo>> DiscoverDirectShowAsync(
-        string? ffmpegPath,
-        CancellationToken cancellationToken)
-    {
-        try
-        {
-            var output = await RunFfmpegAsync(
-                ffmpegPath,
-                ["-hide_banner", "-list_devices", "true", "-f", "dshow", "-i", "dummy"],
-                cancellationToken).ConfigureAwait(false);
-            var result = new List<DiscoveredNativeMediaDeviceInfo>();
-            var kind = string.Empty;
-            var pattern = runtimePatterns.GetRegex(PublisherRuntimePattern.NativeDirectShowDevice);
-            foreach (var raw in output.Split('\n'))
-            {
-                var line = raw.Trim();
-                if (line.Contains("DirectShow video devices", StringComparison.OrdinalIgnoreCase))
-                {
-                    kind = "CaptureDevice";
-                    continue;
-                }
-                if (line.Contains("DirectShow audio devices", StringComparison.OrdinalIgnoreCase))
-                {
-                    kind = "Microphone";
-                    continue;
-                }
-                if (line.Contains("Alternative name", StringComparison.OrdinalIgnoreCase)) continue;
-                var match = pattern.Match(line);
-                if (kind.Length == 0 || !match.Success) continue;
-                var name = match.Groups["name"].Value;
-                result.Add(new DiscoveredNativeMediaDeviceInfo(name, name, kind, "dshow"));
-            }
-            logger.LogTrace($"Discovered {result.Count} DirectShow devices.");
-            return result;
-        }
-        catch (Exception exception)
-        {
-            logger.LogError(exception, $"Could not discover DirectShow devices.");
-            throw;
-        }
-    }
-
-    /// <summary>
-    /// Discovers av foundation for <see cref="NativeDeviceDiscovery"/>, keeping the operation consistent with the state and invariants of the surrounding native device discovery workflow.
-    /// </summary>
-    /// <param name="ffmpegPath">Ffmpeg path value supplied to the native device discovery operation and used when producing its result.</param>
-    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
-    /// <returns>The collection produced by the operation.</returns>
-    private async Task<IReadOnlyList<DiscoveredNativeMediaDeviceInfo>> DiscoverAvFoundationAsync(
-        string? ffmpegPath,
-        CancellationToken cancellationToken)
-    {
-        try
-        {
-            var output = await RunFfmpegAsync(
-                ffmpegPath,
-                ["-hide_banner", "-f", "avfoundation", "-list_devices", "true", "-i", string.Empty],
-                cancellationToken).ConfigureAwait(false);
-            var result = new List<DiscoveredNativeMediaDeviceInfo>();
-            var kind = string.Empty;
-            var pattern = runtimePatterns.GetRegex(PublisherRuntimePattern.NativeAvFoundationDevice);
-            foreach (var raw in output.Split('\n'))
-            {
-                var line = raw.Trim();
-                if (line.Contains("AVFoundation video devices", StringComparison.OrdinalIgnoreCase))
-                {
-                    kind = "CaptureDevice";
-                    continue;
-                }
-                if (line.Contains("AVFoundation audio devices", StringComparison.OrdinalIgnoreCase))
-                {
-                    kind = "Microphone";
-                    continue;
-                }
-                var match = pattern.Match(line);
-                if (kind.Length == 0 || !match.Success) continue;
-                result.Add(new DiscoveredNativeMediaDeviceInfo(
-                    match.Groups["index"].Value,
-                    match.Groups["name"].Value.Trim(),
-                    kind,
-                    "avfoundation"));
-            }
-            logger.LogTrace($"Discovered {result.Count} AVFoundation devices.");
-            return result;
-        }
-        catch (Exception exception)
-        {
-            logger.LogError(exception, $"Could not discover AVFoundation devices.");
-            throw;
-        }
-    }
-
-    /// <summary>
-    /// Discovers windows processes for <see cref="NativeDeviceDiscovery"/>, keeping the operation consistent with the state and invariants of the surrounding native device discovery workflow.
-    /// </summary>
-    /// <returns>The collection produced by the operation.</returns>
-    private IReadOnlyList<DiscoveredNativeMediaDeviceInfo> DiscoverWindowsProcesses()
-    {
-        try
-        {
-            var result = new List<DiscoveredNativeMediaDeviceInfo>();
-            foreach (var process in Process.GetProcesses())
-            {
-                try
-                {
-                    if (process.Id <= 4 || string.IsNullOrWhiteSpace(process.ProcessName)) continue;
-                    var title = process.MainWindowTitle;
-                    if (string.IsNullOrWhiteSpace(title)) continue;
-                    var processId = process.Id.ToString(System.Globalization.CultureInfo.InvariantCulture);
-                    result.Add(new DiscoveredNativeMediaDeviceInfo(
-                        processId,
-                        process.ProcessName,
-                        "ApplicationAudio",
-                        "wasapi-process-loopback",
-                        processId,
-                        title));
-                }
-                catch (Exception exception)
-                {
-                    logger.LogDebug(exception, $"Could not inspect process {process.Id} during native-device discovery.");
-                }
-                finally
-                {
-                    process.Dispose();
-                }
-            }
-            logger.LogTrace($"Discovered {result.Count} windowed Windows processes.");
-            return result;
-        }
-        catch (Exception exception)
-        {
-            logger.LogError(exception, $"Could not discover Windows process capture targets.");
-            throw;
-        }
-    }
-
-    /// <summary>
-    /// Performs run FFmpeg for <see cref="NativeDeviceDiscovery"/>, keeping the operation consistent with the state and invariants of the surrounding native device discovery workflow.
-    /// </summary>
-    /// <param name="ffmpegPath">Ffmpeg path value supplied to the native device discovery operation and used when producing its result.</param>
-    /// <param name="arguments">String dependency used by the native device discovery workflow to provide the corresponding application capability.</param>
-    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
-    /// <returns>The string produced by the operation.</returns>
-    private async Task<string> RunFfmpegAsync(
-        string? ffmpegPath,
-        IReadOnlyList<string> arguments,
-        CancellationToken cancellationToken)
-    {
-        try
-        {
-            var executable = ffmpegLocator.Resolve(ffmpegPath);
-            if (executable is null) return string.Empty;
-            var startInfo = new ProcessStartInfo
-            {
-                FileName = executable,
-                UseShellExecute = false,
-                CreateNoWindow = true,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true
-            };
-            foreach (var argument in arguments) startInfo.ArgumentList.Add(argument);
-            using var process = Process.Start(startInfo);
-            if (process is null) return string.Empty;
-            var stdout = process.StandardOutput.ReadToEndAsync(cancellationToken);
-            var stderr = process.StandardError.ReadToEndAsync(cancellationToken);
-            await process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
-            var output = (await stdout.ConfigureAwait(false)) + "\n" + (await stderr.ConfigureAwait(false));
-            logger.LogTrace($"Executed FFmpeg native-device discovery with {arguments.Count} arguments.");
-            return output;
-        }
-        catch (Exception exception)
-        {
-            logger.LogError(exception, $"Could not execute FFmpeg native-device discovery.");
-            return string.Empty;
         }
     }
 }

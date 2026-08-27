@@ -6,7 +6,7 @@
     <InvariantGlobalization>false</InvariantGlobalization>
     <RootNamespace>PublisherStudio</RootNamespace>
     <AssemblyName>PublisherStudio.Web</AssemblyName>
-    <Version>2.9.9</Version>
+    <Version>3.0.1</Version>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);1591</NoWarn>
     <ApplicationIcon>..\..\assets\PublisherStudio.ico</ApplicationIcon>
@@ -22,6 +22,9 @@
     <DevExtremeRuntimeLicenseMetadata>$(MSBuildProjectDirectory)\wwwroot\vendor\devextreme-license.meta.json</DevExtremeRuntimeLicenseMetadata>
     <DevExtremeRuntimeKeyGeneratorVersionFile>$(MSBuildProjectDirectory)\wwwroot\vendor\devextreme-license.version</DevExtremeRuntimeKeyGeneratorVersionFile>
     <DevExtremeClientAssetMetadata>$(MSBuildProjectDirectory)\wwwroot\vendor\devextreme-assets.meta.json</DevExtremeClientAssetMetadata>
+    <PublisherStudioPowerShellHost Condition="'$(OS)' == 'Windows_NT'">powershell</PublisherStudioPowerShellHost>
+    <PublisherStudioPowerShellHost Condition="'$(OS)' != 'Windows_NT'">pwsh</PublisherStudioPowerShellHost>
+    <PublisherStudioPrepareDevExpressAssetsScript>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)/../../Prepare-DevExpressAssets.ps1'))</PublisherStudioPrepareDevExpressAssetsScript>
   </PropertyGroup>
   <ItemGroup>
     <!-- 2.7.5 upgrade compatibility: ignore the transient 2.7.4 logger location if an in-place source update leaves it behind. -->
@@ -43,9 +46,7 @@
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="10.0.11" />
     <PackageReference Include="System.CodeDom" Version="10.0.11" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="10.0.11" />
-    <PackageReference Include="System.Drawing.Common" Version="10.0.11" />
     <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.11" />
-    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="10.0.11" />
     <PackageReference Include="System.ServiceModel.Http" Version="10.0.652802" />
     <PackageReference Include="System.ServiceModel.NetTcp" Version="10.0.652802" />
     <PackageReference Include="System.ServiceModel.Primitives" Version="10.0.652802" />
@@ -71,7 +72,7 @@
       dotnet build -p:PrepareSpreadsheetAssetsOnBuild=true
   -->
   <Target Name="PrepareSpreadsheetClientAssets" BeforeTargets="PrepareForBuild" Condition="'$(DesignTimeBuild)' != 'true' and '$(PrepareSpreadsheetAssetsOnBuild)' == 'true' and (!Exists('$(SpreadsheetClientAsset)') or !Exists('$(DevExtremeRuntimeLicenseAsset)') or !Exists('$(DevExtremeRuntimeLicenseMetadata)') or !Exists('$(DevExtremeRuntimeKeyGeneratorVersionFile)') or !Exists('$(DevExtremeClientAssetMetadata)'))">
-    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\..\..\Prepare-DevExpressAssets.ps1&quot;" WorkingDirectory="$(MSBuildProjectDirectory)" />
+    <Exec Command="$(PublisherStudioPowerShellHost) -NoProfile -ExecutionPolicy Bypass -File &quot;$(PublisherStudioPrepareDevExpressAssetsScript)&quot;" WorkingDirectory="$(MSBuildProjectDirectory)" />
   </Target>
 
   <Target Name="SpreadsheetClientAssetBuildNotice" BeforeTargets="PrepareForBuild" Condition="'$(DesignTimeBuild)' != 'true' and '$(PrepareSpreadsheetAssetsOnBuild)' != 'true' and (!Exists('$(SpreadsheetClientAsset)') or !Exists('$(DevExtremeRuntimeLicenseAsset)') or !Exists('$(DevExtremeRuntimeLicenseMetadata)') or !Exists('$(DevExtremeRuntimeKeyGeneratorVersionFile)') or !Exists('$(DevExtremeClientAssetMetadata)'))">

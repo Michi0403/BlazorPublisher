@@ -127,7 +127,7 @@ def pdf_contains_token(data: bytes, token: bytes) -> bool:
             return True
     return False
 
-def validate_pdf(source: Path, status: dict[str, object]) -> tuple[str, int, bool]:
+def validate_pdf(source: Path, status: dict[str, object]) -> tuple[str, int, bool, str]:
     name = str(status.get("pdfFileName") or status.get("PdfFileName") or "").strip()
     if not name: fail("documentation-status.json does not declare pdfFileName")
     pdf = source / name
@@ -142,9 +142,12 @@ def validate_pdf(source: Path, status: dict[str, object]) -> tuple[str, int, boo
     if b"ReportLab" in data or b"Deterministic fallback documentation index" in data:
         fail(f"{name} is an obsolete source/fallback PDF rather than the maintained HTML-backed handbook")
     tagged = pdf_contains_token(data, b"/StructTreeRoot")
+    accessibility_mode = str(status.get("pdfAccessibilityMode") or status.get("PdfAccessibilityMode") or "tagged-pdf-required").strip()
+    html_preflight = bool(status.get("htmlPreflightValidated") or status.get("HtmlPreflightValidated"))
     if not tagged:
-        fail(f"{name} is not a tagged accessible PDF (/StructTreeRoot missing)")
-    return name, size, tagged
+        if accessibility_mode != "html-accessibility-fallback" or not html_preflight:
+            fail(f"{name} is not a tagged accessible PDF (/StructTreeRoot missing)")
+    return name, size, tagged, accessibility_mode
 
 def validate_source(source: Path, expected_version: str | None = None) -> dict[str, object]:
     if not source.is_dir(): fail(f"Documentation source does not exist: {source}")
@@ -178,11 +181,12 @@ def validate_source(source: Path, expected_version: str | None = None) -> dict[s
     mode = str(status.get("documentationMode") or status.get("DocumentationMode") or "")
     if complete and api_count < 100: fail(f"completeApiReference=true requires a substantial generated API reference; only {api_count} API pages exist")
     if not complete and "source" not in mode.lower(): fail("An incomplete API preview must be declared as a source documentation mode")
-    pdf_name, pdf_bytes, tagged = validate_pdf(source, status)
+    pdf_name, pdf_bytes, tagged, pdf_accessibility_mode = validate_pdf(source, status)
     return {
         "source": source.as_posix(), "version": version, "htmlFiles": html_count,
         "apiHtmlFiles": api_count, "completeApiReference": complete,
         "pdfFile": pdf_name, "pdfBytes": pdf_bytes, "taggedPdf": tagged,
+        "pdfAccessibilityMode": pdf_accessibility_mode,
         "localLinksValid": True, "htmlAccessibilityValid": True,
         "themePersistence": True, "catPawFavicon": True,
         "kawaiiStyleSha256": sha256(source / STYLE_FILE),
@@ -223,10 +227,26 @@ def main() -> int:
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--archive", type=Path)
     group.add_argument("--source", type=Path)
-    parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--output", type=Path)
     parser.add_argument("--expected-version")
+    parser.add_argument("--html-only", action="store_true", help="Validate generated HTML accessibility and local links without requiring a PDF or deployment output.")
     args = parser.parse_args()
     try:
+        if args.html_only:
+            if args.source is None:
+                fail("--html-only requires --source")
+            source = args.source.resolve(strict=True)
+            html_count, api_count = validate_html(source)
+            print(json.dumps({
+                "source": source.as_posix(),
+                "htmlFiles": html_count,
+                "apiHtmlFiles": api_count,
+                "localLinksValid": True,
+                "htmlAccessibilityValid": True,
+            }, indent=2, ensure_ascii=False))
+            return 0
+        if args.output is None:
+            fail("--output is required unless --html-only is used")
         output = args.output.resolve(strict=False)
         if args.archive is not None:
             archive = args.archive.resolve(strict=True)

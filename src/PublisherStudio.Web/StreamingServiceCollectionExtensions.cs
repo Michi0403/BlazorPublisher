@@ -21,9 +21,6 @@ public static class StreamingServiceCollectionExtensions
     {
         try
         {
-        services.AddSingleton<IWindowsHotkeyNativeService, WindowsHotkeyNativeService>();
-        services.AddSingleton<IWindowsProcessLoopbackNativeService, WindowsProcessLoopbackNativeService>();
-        services.AddSingleton<IWindowsProcessLoopbackCaptureFactory, WindowsProcessLoopbackCaptureFactory>();
         services.AddSingleton<GlobalHotkeyService>();
         services.AddHostedService<GlobalHotkeyHostedService>();
         services.AddSingleton<EncoderOrchestrator>();

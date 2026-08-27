@@ -5,12 +5,12 @@ namespace PublisherStudio.Services.Streaming.Hotkeys;
 /// <summary>
 /// Defines the contract for windows hotkey native behavior, allowing callers to depend on the capability without coupling to a concrete implementation.
 /// </summary>
-public interface IWindowsHotkeyNativeService
+public interface IGlobalHotkeyNativeService
 {
     /// <summary>
     /// Gets a value indicating whether available applies to the windows hotkey native state.
     /// </summary>
-    /// <value>The is available value exposed by <see cref="IWindowsHotkeyNativeService"/>.</value>
+    /// <value>The is available value exposed by <see cref="IGlobalHotkeyNativeService"/>.</value>
     bool IsAvailable { get; }
     /// <summary>
     /// Attempts to initialize message queue as part of the windows hotkey native service workflow, applying the service's runtime policy, state management, and diagnostics as required.
@@ -39,7 +39,7 @@ public interface IWindowsHotkeyNativeService
     /// </summary>
     /// <param name="message">Message value supplied to the windows hotkey native operation and used when producing its result.</param>
     /// <returns>The int produced by the operation.</returns>
-    int ReadMessage(out WindowsHotkeyNativeMessage message);
+    int ReadMessage(out GlobalHotkeyNativeMessage message);
     /// <summary>
     /// Attempts to post thread message as part of the windows hotkey native service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
@@ -55,34 +55,34 @@ public interface IWindowsHotkeyNativeService
 /// Represents a windows hotkey native message application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
 [StructLayout(LayoutKind.Sequential)]
-public struct WindowsHotkeyNativeMessage
+public struct GlobalHotkeyNativeMessage
 {
     /// <summary>
-    /// Stores the internal window handle state used by <see cref="WindowsHotkeyNativeMessage"/> while executing its surrounding workflow.
+    /// Stores the internal window handle state used by <see cref="GlobalHotkeyNativeMessage"/> while executing its surrounding workflow.
     /// </summary>
     public IntPtr WindowHandle;
     /// <summary>
-    /// Stores the internal message state used by <see cref="WindowsHotkeyNativeMessage"/> while executing its surrounding workflow.
+    /// Stores the internal message state used by <see cref="GlobalHotkeyNativeMessage"/> while executing its surrounding workflow.
     /// </summary>
     public uint Message;
     /// <summary>
-    /// Stores the internal word parameter state used by <see cref="WindowsHotkeyNativeMessage"/> while executing its surrounding workflow.
+    /// Stores the internal word parameter state used by <see cref="GlobalHotkeyNativeMessage"/> while executing its surrounding workflow.
     /// </summary>
     public UIntPtr WordParameter;
     /// <summary>
-    /// Stores the internal long parameter state used by <see cref="WindowsHotkeyNativeMessage"/> while executing its surrounding workflow.
+    /// Stores the internal long parameter state used by <see cref="GlobalHotkeyNativeMessage"/> while executing its surrounding workflow.
     /// </summary>
     public IntPtr LongParameter;
     /// <summary>
-    /// Stores the internal time state used by <see cref="WindowsHotkeyNativeMessage"/> while executing its surrounding workflow.
+    /// Stores the internal time state used by <see cref="GlobalHotkeyNativeMessage"/> while executing its surrounding workflow.
     /// </summary>
     public uint Time;
     /// <summary>
-    /// Stores the internal point state used by <see cref="WindowsHotkeyNativeMessage"/> while executing its surrounding workflow.
+    /// Stores the internal point state used by <see cref="GlobalHotkeyNativeMessage"/> while executing its surrounding workflow.
     /// </summary>
-    public WindowsHotkeyNativePoint Point;
+    public GlobalHotkeyNativePoint Point;
     /// <summary>
-    /// Stores the internal private state used by <see cref="WindowsHotkeyNativeMessage"/> while executing its surrounding workflow.
+    /// Stores the internal private state used by <see cref="GlobalHotkeyNativeMessage"/> while executing its surrounding workflow.
     /// </summary>
     public uint Private;
 }
@@ -91,14 +91,14 @@ public struct WindowsHotkeyNativeMessage
 /// Represents a windows hotkey native point application type, grouping the state and behavior that belong to that domain concept.
 /// </summary>
 [StructLayout(LayoutKind.Sequential)]
-public struct WindowsHotkeyNativePoint
+public struct GlobalHotkeyNativePoint
 {
     /// <summary>
-    /// Stores the internal x state used by <see cref="WindowsHotkeyNativePoint"/> while executing its surrounding workflow.
+    /// Stores the internal x state used by <see cref="GlobalHotkeyNativePoint"/> while executing its surrounding workflow.
     /// </summary>
     public int X;
     /// <summary>
-    /// Stores the internal y state used by <see cref="WindowsHotkeyNativePoint"/> while executing its surrounding workflow.
+    /// Stores the internal y state used by <see cref="GlobalHotkeyNativePoint"/> while executing its surrounding workflow.
     /// </summary>
     public int Y;
 }
@@ -108,7 +108,7 @@ public struct WindowsHotkeyNativePoint
 /// Native exports are resolved once per application lifetime so application code
 /// does not require static P/Invoke declarations.
 /// </summary>
-public sealed class WindowsHotkeyNativeService : IWindowsHotkeyNativeService, IDisposable
+public sealed class WindowsHotkeyNativeService : IGlobalHotkeyNativeService, IDisposable
 {
     /// <summary>
     /// Stores the logger used by <see cref="WindowsHotkeyNativeService"/> to record operational diagnostics without coupling callers to logging details.
@@ -271,7 +271,7 @@ public sealed class WindowsHotkeyNativeService : IWindowsHotkeyNativeService, ID
     /// </summary>
     /// <param name="message">Message value supplied to the windows hotkey native operation and used when producing its result.</param>
     /// <returns>The int produced by the operation.</returns>
-    public int ReadMessage(out WindowsHotkeyNativeMessage message)
+    public int ReadMessage(out GlobalHotkeyNativeMessage message)
     {
         try
         {
@@ -409,14 +409,14 @@ public sealed class WindowsHotkeyNativeService : IWindowsHotkeyNativeService, ID
     /// Defines the callback signature used to report or process int information between collaborating components.
     /// </summary>
     [UnmanagedFunctionPointer(CallingConvention.Winapi, SetLastError = true)]
-    private delegate int GetMessageDelegate(out WindowsHotkeyNativeMessage message, IntPtr windowHandle, uint minimumFilter, uint maximumFilter);
+    private delegate int GetMessageDelegate(out GlobalHotkeyNativeMessage message, IntPtr windowHandle, uint minimumFilter, uint maximumFilter);
 
     /// <summary>
     /// Defines the callback signature used to report or process bool information between collaborating components.
     /// </summary>
     [UnmanagedFunctionPointer(CallingConvention.Winapi, SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
-    private delegate bool PeekMessageDelegate(out WindowsHotkeyNativeMessage message, IntPtr windowHandle, uint minimumFilter, uint maximumFilter, uint removeMessage);
+    private delegate bool PeekMessageDelegate(out GlobalHotkeyNativeMessage message, IntPtr windowHandle, uint minimumFilter, uint maximumFilter, uint removeMessage);
 
     /// <summary>
     /// Defines the callback signature used to report or process bool information between collaborating components.

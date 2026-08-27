@@ -33,7 +33,8 @@ public interface INativeCaptureSessionFactory
 public sealed class NativeCaptureSessionFactory(
     IPublisherRuntimePolicyDataService runtimePolicy,
     FfmpegLocator ffmpegLocator,
-    IWindowsProcessLoopbackCaptureFactory processLoopbackFactory,
+    IProcessLoopbackCaptureFactory processLoopbackFactory,
+    IPublisherPlatformRuntimeService platform,
     ISupervisedTaskRunner taskRunner,
     ILoggerFactory loggerFactory,
     ILogger<NativeCaptureSessionFactory> logger) : INativeCaptureSessionFactory
@@ -53,6 +54,7 @@ public sealed class NativeCaptureSessionFactory(
                 runtimePolicy,
                 ffmpegLocator,
                 processLoopbackFactory,
+                platform,
                 taskRunner,
                 loggerFactory.CreateLogger<NativeCaptureSession>());
         }
@@ -189,7 +191,9 @@ public sealed class NativeCaptureSession : IDisposable
     /// <summary>
     /// Stores the windows process loopback capture factory dependency used by <see cref="NativeCaptureSession"/> to delegate that application responsibility to its owning collaborator.
     /// </summary>
-    private readonly IWindowsProcessLoopbackCaptureFactory _processLoopbackFactory;
+    private readonly IProcessLoopbackCaptureFactory _processLoopbackFactory;
+    /// <summary>Owns host-specific capture availability and backend selection.</summary>
+    private readonly IPublisherPlatformRuntimeService _platform;
     /// <summary>
     /// Stores the logger used by <see cref="NativeCaptureSession"/> to record operational diagnostics without coupling callers to logging details.
     /// </summary>
@@ -213,7 +217,7 @@ public sealed class NativeCaptureSession : IDisposable
     /// <summary>
     /// Stores the windows process loopback capture dependency used by <see cref="NativeCaptureSession"/> to delegate that application responsibility to its owning collaborator.
     /// </summary>
-    private IWindowsProcessLoopbackCapture? _processLoopback;
+    private IProcessLoopbackCapture? _processLoopback;
     /// <summary>
     /// Stores the internal initialization state used by <see cref="NativeCaptureSession"/> while executing its surrounding workflow.
     /// </summary>
@@ -238,7 +242,8 @@ public sealed class NativeCaptureSession : IDisposable
         NativeCaptureRequest request,
         IPublisherRuntimePolicyDataService runtimePolicy,
         FfmpegLocator ffmpegLocator,
-        IWindowsProcessLoopbackCaptureFactory processLoopbackFactory,
+        IProcessLoopbackCaptureFactory processLoopbackFactory,
+        IPublisherPlatformRuntimeService platform,
         ISupervisedTaskRunner taskRunner,
         ILogger<NativeCaptureSession> logger)
     {
@@ -246,6 +251,7 @@ public sealed class NativeCaptureSession : IDisposable
         _runtimePolicy = runtimePolicy;
         _ffmpegLocator = ffmpegLocator;
         _processLoopbackFactory = processLoopbackFactory;
+        _platform = platform;
         _taskRunner = taskRunner;
         this.logger = logger;
         Id = Guid.NewGuid();
@@ -315,7 +321,7 @@ public sealed class NativeCaptureSession : IDisposable
                     if (_request.Kind.Equals("ApplicationAudio", StringComparison.OrdinalIgnoreCase)
                         && ResolveBackend("applicationaudio") == "wasapi-process-loopback")
                     {
-                        if (!OperatingSystem.IsWindows()) throw new PlatformNotSupportedException("Per-application audio capture requires Windows.");
+                        if (!_platform.SupportsProcessAudioLoopback) throw new PlatformNotSupportedException("Per-application audio capture is not supported by this host platform.");
                         var processText = string.IsNullOrWhiteSpace(_request.ApplicationId) ? _request.DeviceId : _request.ApplicationId;
                         if (!uint.TryParse(processText, NumberStyles.Integer, CultureInfo.InvariantCulture, out var processId) || processId <= 4)
                             throw new InvalidOperationException("Select a valid Windows process for application audio capture.");
@@ -447,10 +453,10 @@ public sealed class NativeCaptureSession : IDisposable
                     }
                     else if (kind == "applicationaudio" && backend == "wasapi-process-loopback")
                     {
-                        if (!OperatingSystem.IsWindows()) throw new PlatformNotSupportedException("Per-application WASAPI capture requires Windows.");
+                        if (!_platform.SupportsProcessAudioLoopback) throw new PlatformNotSupportedException("Per-application process loopback is not supported by this host platform.");
                         args.AddRange(["-f", "s16le", "-ar", "48000", "-ac", "2", "-i", "pipe:0"]);
                     }
-                    else if (OperatingSystem.IsWindows() && backend == "dshow")
+                    else if (backend == "dshow" && _platform.SupportsNativeCaptureBackend(backend))
                     {
                         if (string.IsNullOrWhiteSpace(_request.DeviceId)) throw new InvalidOperationException("Select a native DirectShow device.");
                         args.AddRange(["-f", "dshow"]);
@@ -463,7 +469,7 @@ public sealed class NativeCaptureSession : IDisposable
                         }
                         else args.AddRange(["-i", $"audio={_request.DeviceId}"]);
                     }
-                    else if (OperatingSystem.IsMacOS() && backend == "avfoundation")
+                    else if (backend == "avfoundation" && _platform.SupportsNativeCaptureBackend(backend))
                     {
                         if (string.IsNullOrWhiteSpace(_request.DeviceId)) throw new InvalidOperationException("Select an AVFoundation device.");
                         var avInput = IsAudioOnly
@@ -471,7 +477,7 @@ public sealed class NativeCaptureSession : IDisposable
                             : $"{_request.DeviceId}:{(_request.IncludeAudio && !string.IsNullOrWhiteSpace(_request.AudioDeviceId) ? _request.AudioDeviceId : "none")}";
                         args.AddRange(["-f", "avfoundation", "-framerate", Math.Clamp(_request.FrameRate, 15, 120).ToString(CultureInfo.InvariantCulture), "-i", avInput]);
                     }
-                    else if (OperatingSystem.IsLinux() && backend == "v4l2" && !IsAudioOnly)
+                    else if (backend == "v4l2" && _platform.SupportsNativeCaptureBackend(backend) && !IsAudioOnly)
                     {
                         if (string.IsNullOrWhiteSpace(_request.DeviceId)) throw new InvalidOperationException("Select a V4L2 device.");
                         args.AddRange(["-f", "v4l2", "-video_size", $"{ClampEven(_request.Width)}x{ClampEven(_request.Height)}", "-framerate", Math.Clamp(_request.FrameRate, 15, 120).ToString(CultureInfo.InvariantCulture), "-i", _request.DeviceId]);
@@ -517,11 +523,9 @@ public sealed class NativeCaptureSession : IDisposable
         {
             logger.LogTrace($"Entering NativeCaptureSession.ResolveBackend.");
                     if (!string.IsNullOrWhiteSpace(_request.NativeBackend)) return _request.NativeBackend.Trim().ToLowerInvariant();
-                    if (kind == "applicationaudio") return "wasapi-process-loopback";
-                    if (OperatingSystem.IsWindows()) return "dshow";
-                    if (OperatingSystem.IsMacOS()) return "avfoundation";
-                    if (OperatingSystem.IsLinux()) return "v4l2";
-                    return "unknown";
+                    if (kind == "applicationaudio")
+                        return _platform.SupportsProcessAudioLoopback ? "wasapi-process-loopback" : "unsupported-process-loopback";
+                    return _platform.DefaultNativeCaptureBackend;
     
         }
         catch (Exception exception)

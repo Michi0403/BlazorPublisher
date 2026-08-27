@@ -6,7 +6,9 @@ namespace PublisherStudio.Services.Streaming.UseCases.Lan;
 /// Resolves LAN status, safe HLS assets and the local watch page without coupling controllers to session internals.
 /// </summary>
 /// <param name="sessions">Media session registry dependency used by the streaming LAN use cases workflow to provide the corresponding application capability.</param>
-public sealed class StreamingLanUseCases(MediaSessionRegistry sessions)
+public sealed class StreamingLanUseCases(
+    MediaSessionRegistry sessions,
+    IPublisherPlatformRuntimeService platform)
 {
     /// <summary>
     /// Stores the media session registry dependency used by <see cref="StreamingLanUseCases"/> to delegate that application responsibility to its owning collaborator.
@@ -55,10 +57,9 @@ public sealed class StreamingLanUseCases(MediaSessionRegistry sessions)
     {
             if (!_sessions.TryGet(sessionId, out var session) || string.IsNullOrWhiteSpace(session.HlsDirectory)) return null;
             var root = Path.GetFullPath(session.HlsDirectory);
-            var rootWithSeparator = root.EndsWith(Path.DirectorySeparatorChar) ? root : root + Path.DirectorySeparatorChar;
             var relative = string.IsNullOrWhiteSpace(asset) ? "index.m3u8" : asset.Replace('/', Path.DirectorySeparatorChar);
             var candidate = Path.GetFullPath(Path.Combine(root, relative));
-            if (!candidate.StartsWith(rootWithSeparator, StringComparison.OrdinalIgnoreCase) || !File.Exists(candidate)) return null;
+            if (!platform.IsSameOrDescendantPath(root, candidate) || !File.Exists(candidate)) return null;
             var contentType = Path.GetExtension(candidate).ToLowerInvariant() switch
             {
                 ".m3u8" => "application/vnd.apple.mpegurl",

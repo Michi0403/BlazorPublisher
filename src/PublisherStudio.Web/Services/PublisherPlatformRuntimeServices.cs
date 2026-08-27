@@ -8,9 +8,21 @@ namespace PublisherStudio.Services;
 /// <summary>Stable host platform identities used by platform-neutral PublisherStudio services.</summary>
 public enum PublisherHostPlatformKind
 {
+    /// <summary>
+    /// Selects the other option for <see cref="PublisherHostPlatformKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Other,
+    /// <summary>
+    /// Selects the windows option for <see cref="PublisherHostPlatformKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Windows,
+    /// <summary>
+    /// Selects the mac OS option for <see cref="PublisherHostPlatformKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     MacOS,
+    /// <summary>
+    /// Selects the linux option for <see cref="PublisherHostPlatformKind"/>, giving callers a named value for that supported mode or state.
+    /// </summary>
     Linux
 }
 
@@ -21,40 +33,159 @@ public enum PublisherHostPlatformKind
 /// </summary>
 public interface IPublisherPlatformRuntimeService
 {
+    /// <summary>
+    /// Gets the host platform value that forms part of the publisher platform runtime state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The host platform value exposed by <see cref="IPublisherPlatformRuntimeService"/>.</value>
     PublisherHostPlatformKind HostPlatform { get; }
+    /// <summary>
+    /// Gets the path comparer used by this publisher platform runtime instance to locate the associated file-system resource.
+    /// </summary>
+    /// <value>The path comparer value exposed by <see cref="IPublisherPlatformRuntimeService"/>.</value>
     StringComparer PathComparer { get; }
+    /// <summary>
+    /// Gets the path comparison used by this publisher platform runtime instance to locate the associated file-system resource.
+    /// </summary>
+    /// <value>The path comparison value exposed by <see cref="IPublisherPlatformRuntimeService"/>.</value>
     StringComparison PathComparison { get; }
+    /// <summary>
+    /// Gets a value indicating whether global hotkeys applies to the publisher platform runtime state.
+    /// </summary>
+    /// <value>The supports global hotkeys value exposed by <see cref="IPublisherPlatformRuntimeService"/>.</value>
     bool SupportsGlobalHotkeys { get; }
+    /// <summary>
+    /// Gets a value indicating whether process audio loopback applies to the publisher platform runtime state.
+    /// </summary>
+    /// <value>The supports process audio loopback value exposed by <see cref="IPublisherPlatformRuntimeService"/>.</value>
     bool SupportsProcessAudioLoopback { get; }
+    /// <summary>
+    /// Gets the default native capture backend value that forms part of the publisher platform runtime state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The default native capture backend value exposed by <see cref="IPublisherPlatformRuntimeService"/>.</value>
     string DefaultNativeCaptureBackend { get; }
+    /// <summary>
+    /// Gets the preferred hardware encoder backends collection maintained or exposed by this publisher platform runtime instance for downstream processing.
+    /// </summary>
+    /// <value>The preferred hardware encoder backends value exposed by <see cref="IPublisherPlatformRuntimeService"/>.</value>
     IReadOnlyList<string> PreferredHardwareEncoderBackends { get; }
+    /// <summary>
+    /// Gets the FFmpeg bundled path collection used by this publisher platform runtime instance to locate the associated file-system resource.
+    /// </summary>
+    /// <value>The FFmpeg bundled path collection value exposed by <see cref="IPublisherPlatformRuntimeService"/>.</value>
     PublisherRuntimeCollection FfmpegBundledPathCollection { get; }
 
+    /// <summary>
+    /// Performs paths equal as part of the publisher platform runtime service workflow, applying the service's runtime policy, state management, and diagnostics as required.
+    /// </summary>
+    /// <param name="left">Left value supplied to the publisher platform runtime operation and used when producing its result.</param>
+    /// <param name="right">Right value supplied to the publisher platform runtime operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     bool PathsEqual(string left, string right);
+    /// <summary>
+    /// Determines whether same or descendant path as part of the publisher platform runtime service workflow, applying the service's runtime policy, state management, and diagnostics as required.
+    /// </summary>
+    /// <param name="root">Root value supplied to the publisher platform runtime operation and used when producing its result.</param>
+    /// <param name="candidate">Candidate value supplied to the publisher platform runtime operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     bool IsSameOrDescendantPath(string root, string candidate);
+    /// <summary>
+    /// Determines whether FFmpeg executable name for host as part of the publisher platform runtime service workflow, applying the service's runtime policy, state management, and diagnostics as required.
+    /// </summary>
+    /// <param name="executableName">Executable name value supplied to the publisher platform runtime operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     bool IsFfmpegExecutableNameForHost(string executableName);
+    /// <summary>
+    /// Retrieves command extensions as part of the publisher platform runtime service workflow, applying the service's runtime policy, state management, and diagnostics as required.
+    /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     IReadOnlyList<string> GetCommandExtensions();
+    /// <summary>
+    /// Performs enumerate known FFmpeg install locations as part of the publisher platform runtime service workflow, applying the service's runtime policy, state management, and diagnostics as required.
+    /// </summary>
+    /// <param name="runtimePolicy">Publisher runtime policy data service dependency used by the publisher platform runtime workflow to provide the corresponding application capability.</param>
+    /// <returns>The collection produced by the operation.</returns>
     IEnumerable<string> EnumerateKnownFfmpegInstallLocations(IPublisherRuntimePolicyDataService runtimePolicy);
+    /// <summary>
+    /// Performs enumerate font directories as part of the publisher platform runtime service workflow, applying the service's runtime policy, state management, and diagnostics as required.
+    /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     IReadOnlyList<string> EnumerateFontDirectories();
+    /// <summary>
+    /// Performs enumerate platform font families as part of the publisher platform runtime service workflow, applying the service's runtime policy, state management, and diagnostics as required.
+    /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     IReadOnlyList<string> EnumeratePlatformFontFamilies();
+    /// <summary>
+    /// Performs enumerate native video device paths as part of the publisher platform runtime service workflow, applying the service's runtime policy, state management, and diagnostics as required.
+    /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     IReadOnlyList<string> EnumerateNativeVideoDevicePaths();
+    /// <summary>
+    /// Performs supports native capture backend as part of the publisher platform runtime service workflow, applying the service's runtime policy, state management, and diagnostics as required.
+    /// </summary>
+    /// <param name="backend">Backend value supplied to the publisher platform runtime operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     bool SupportsNativeCaptureBackend(string backend);
+    /// <summary>
+    /// Performs restrict secret file permissions as part of the publisher platform runtime service workflow, applying the service's runtime policy, state management, and diagnostics as required.
+    /// </summary>
+    /// <param name="path">Path value supplied to the publisher platform runtime operation and used when producing its result.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
     void RestrictSecretFilePermissions(string path, ILogger logger);
 }
 
 /// <summary>Windows implementation for PublisherStudio host-sensitive behavior.</summary>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class WindowsPublisherPlatformRuntimeService(
     ILogger<WindowsPublisherPlatformRuntimeService> logger) : IPublisherPlatformRuntimeService
 {
+    /// <summary>
+    /// Gets the host platform value that forms part of the windows publisher platform runtime state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The host platform value exposed by <see cref="WindowsPublisherPlatformRuntimeService"/>.</value>
     public PublisherHostPlatformKind HostPlatform => PublisherHostPlatformKind.Windows;
+    /// <summary>
+    /// Gets the path comparer used by this windows publisher platform runtime instance to locate the associated file-system resource.
+    /// </summary>
+    /// <value>The path comparer value exposed by <see cref="WindowsPublisherPlatformRuntimeService"/>.</value>
     public StringComparer PathComparer => StringComparer.OrdinalIgnoreCase;
+    /// <summary>
+    /// Gets the path comparison used by this windows publisher platform runtime instance to locate the associated file-system resource.
+    /// </summary>
+    /// <value>The path comparison value exposed by <see cref="WindowsPublisherPlatformRuntimeService"/>.</value>
     public StringComparison PathComparison => StringComparison.OrdinalIgnoreCase;
+    /// <summary>
+    /// Gets a value indicating whether global hotkeys applies to the windows publisher platform runtime state.
+    /// </summary>
+    /// <value>The supports global hotkeys value exposed by <see cref="WindowsPublisherPlatformRuntimeService"/>.</value>
     public bool SupportsGlobalHotkeys => true;
+    /// <summary>
+    /// Gets a value indicating whether process audio loopback applies to the windows publisher platform runtime state.
+    /// </summary>
+    /// <value>The supports process audio loopback value exposed by <see cref="WindowsPublisherPlatformRuntimeService"/>.</value>
     public bool SupportsProcessAudioLoopback => true;
+    /// <summary>
+    /// Gets the default native capture backend value that forms part of the windows publisher platform runtime state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The default native capture backend value exposed by <see cref="WindowsPublisherPlatformRuntimeService"/>.</value>
     public string DefaultNativeCaptureBackend => "dshow";
+    /// <summary>
+    /// Gets the preferred hardware encoder backends collection maintained or exposed by this windows publisher platform runtime instance for downstream processing.
+    /// </summary>
+    /// <value>The preferred hardware encoder backends value exposed by <see cref="WindowsPublisherPlatformRuntimeService"/>.</value>
     public IReadOnlyList<string> PreferredHardwareEncoderBackends { get; } = ["nvenc", "qsv", "amf", "videotoolbox", "software"];
+    /// <summary>
+    /// Gets the FFmpeg bundled path collection used by this windows publisher platform runtime instance to locate the associated file-system resource.
+    /// </summary>
+    /// <value>The FFmpeg bundled path collection value exposed by <see cref="WindowsPublisherPlatformRuntimeService"/>.</value>
     public PublisherRuntimeCollection FfmpegBundledPathCollection => PublisherRuntimeCollection.FfmpegWindowsBundledPaths;
 
+    /// <summary>
+    /// Performs paths equal as part of the windows publisher platform runtime service workflow, applying the service's runtime policy, state management, and diagnostics as required.
+    /// </summary>
+    /// <param name="left">Left value supplied to the windows publisher platform runtime operation and used when producing its result.</param>
+    /// <param name="right">Right value supplied to the windows publisher platform runtime operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool PathsEqual(string left, string right)
     {
         try
@@ -71,6 +202,12 @@ public sealed class WindowsPublisherPlatformRuntimeService(
         }
     }
 
+    /// <summary>
+    /// Determines whether same or descendant path as part of the windows publisher platform runtime service workflow, applying the service's runtime policy, state management, and diagnostics as required.
+    /// </summary>
+    /// <param name="root">Root value supplied to the windows publisher platform runtime operation and used when producing its result.</param>
+    /// <param name="candidate">Candidate value supplied to the windows publisher platform runtime operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool IsSameOrDescendantPath(string root, string candidate)
     {
         try
@@ -90,6 +227,11 @@ public sealed class WindowsPublisherPlatformRuntimeService(
         }
     }
 
+    /// <summary>
+    /// Determines whether FFmpeg executable name for host as part of the windows publisher platform runtime service workflow, applying the service's runtime policy, state management, and diagnostics as required.
+    /// </summary>
+    /// <param name="executableName">Executable name value supplied to the windows publisher platform runtime operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool IsFfmpegExecutableNameForHost(string executableName)
     {
         try
@@ -103,6 +245,10 @@ public sealed class WindowsPublisherPlatformRuntimeService(
         }
     }
 
+    /// <summary>
+    /// Retrieves command extensions as part of the windows publisher platform runtime service workflow, applying the service's runtime policy, state management, and diagnostics as required.
+    /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     public IReadOnlyList<string> GetCommandExtensions()
     {
         try
@@ -117,6 +263,11 @@ public sealed class WindowsPublisherPlatformRuntimeService(
         }
     }
 
+    /// <summary>
+    /// Performs enumerate known FFmpeg install locations as part of the windows publisher platform runtime service workflow, applying the service's runtime policy, state management, and diagnostics as required.
+    /// </summary>
+    /// <param name="runtimePolicy">Publisher runtime policy data service dependency used by the windows publisher platform runtime workflow to provide the corresponding application capability.</param>
+    /// <returns>The collection produced by the operation.</returns>
     public IEnumerable<string> EnumerateKnownFfmpegInstallLocations(IPublisherRuntimePolicyDataService runtimePolicy)
     {
         try
@@ -164,6 +315,10 @@ public sealed class WindowsPublisherPlatformRuntimeService(
         }
     }
 
+    /// <summary>
+    /// Performs enumerate font directories as part of the windows publisher platform runtime service workflow, applying the service's runtime policy, state management, and diagnostics as required.
+    /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     public IReadOnlyList<string> EnumerateFontDirectories()
     {
         try
@@ -187,6 +342,10 @@ public sealed class WindowsPublisherPlatformRuntimeService(
         }
     }
 
+    /// <summary>
+    /// Performs enumerate platform font families as part of the windows publisher platform runtime service workflow, applying the service's runtime policy, state management, and diagnostics as required.
+    /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     public IReadOnlyList<string> EnumeratePlatformFontFamilies()
     {
         try
@@ -201,6 +360,10 @@ public sealed class WindowsPublisherPlatformRuntimeService(
         }
     }
 
+    /// <summary>
+    /// Performs enumerate native video device paths as part of the windows publisher platform runtime service workflow, applying the service's runtime policy, state management, and diagnostics as required.
+    /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     public IReadOnlyList<string> EnumerateNativeVideoDevicePaths()
     {
         try
@@ -215,6 +378,11 @@ public sealed class WindowsPublisherPlatformRuntimeService(
         }
     }
 
+    /// <summary>
+    /// Performs supports native capture backend as part of the windows publisher platform runtime service workflow, applying the service's runtime policy, state management, and diagnostics as required.
+    /// </summary>
+    /// <param name="backend">Backend value supplied to the windows publisher platform runtime operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool SupportsNativeCaptureBackend(string backend)
     {
         try
@@ -229,6 +397,11 @@ public sealed class WindowsPublisherPlatformRuntimeService(
         }
     }
 
+    /// <summary>
+    /// Performs restrict secret file permissions as part of the windows publisher platform runtime service workflow, applying the service's runtime policy, state management, and diagnostics as required.
+    /// </summary>
+    /// <param name="path">Path value supplied to the windows publisher platform runtime operation and used when producing its result.</param>
+    /// <param name="callerLogger">Logger dependency used by the windows publisher platform runtime workflow to provide the corresponding application capability.</param>
     public void RestrictSecretFilePermissions(string path, ILogger callerLogger)
     {
         try
@@ -244,22 +417,67 @@ public sealed class WindowsPublisherPlatformRuntimeService(
 }
 
 /// <summary>Unix implementation for macOS/Linux host-sensitive behavior.</summary>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class UnixPublisherPlatformRuntimeService(
     ILogger<UnixPublisherPlatformRuntimeService> logger) : IPublisherPlatformRuntimeService
 {
+    /// <summary>
+    /// Stores the internal is mac OS state used by <see cref="UnixPublisherPlatformRuntimeService"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly bool isMacOS = RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
+    /// <summary>
+    /// Stores the internal is linux state used by <see cref="UnixPublisherPlatformRuntimeService"/> while executing its surrounding workflow.
+    /// </summary>
     private readonly bool isLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+    /// <summary>
+    /// Gets the host platform value that forms part of the unix publisher platform runtime state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The host platform value exposed by <see cref="UnixPublisherPlatformRuntimeService"/>.</value>
     public PublisherHostPlatformKind HostPlatform => isMacOS ? PublisherHostPlatformKind.MacOS : isLinux ? PublisherHostPlatformKind.Linux : PublisherHostPlatformKind.Other;
+    /// <summary>
+    /// Gets the path comparer used by this unix publisher platform runtime instance to locate the associated file-system resource.
+    /// </summary>
+    /// <value>The path comparer value exposed by <see cref="UnixPublisherPlatformRuntimeService"/>.</value>
     public StringComparer PathComparer => StringComparer.Ordinal;
+    /// <summary>
+    /// Gets the path comparison used by this unix publisher platform runtime instance to locate the associated file-system resource.
+    /// </summary>
+    /// <value>The path comparison value exposed by <see cref="UnixPublisherPlatformRuntimeService"/>.</value>
     public StringComparison PathComparison => StringComparison.Ordinal;
+    /// <summary>
+    /// Gets a value indicating whether global hotkeys applies to the unix publisher platform runtime state.
+    /// </summary>
+    /// <value>The supports global hotkeys value exposed by <see cref="UnixPublisherPlatformRuntimeService"/>.</value>
     public bool SupportsGlobalHotkeys => false;
+    /// <summary>
+    /// Gets a value indicating whether process audio loopback applies to the unix publisher platform runtime state.
+    /// </summary>
+    /// <value>The supports process audio loopback value exposed by <see cref="UnixPublisherPlatformRuntimeService"/>.</value>
     public bool SupportsProcessAudioLoopback => false;
+    /// <summary>
+    /// Gets the default native capture backend value that forms part of the unix publisher platform runtime state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The default native capture backend value exposed by <see cref="UnixPublisherPlatformRuntimeService"/>.</value>
     public string DefaultNativeCaptureBackend => isMacOS ? "avfoundation" : isLinux ? "v4l2" : "unknown";
+    /// <summary>
+    /// Gets the preferred hardware encoder backends collection maintained or exposed by this unix publisher platform runtime instance for downstream processing.
+    /// </summary>
+    /// <value>The preferred hardware encoder backends value exposed by <see cref="UnixPublisherPlatformRuntimeService"/>.</value>
     public IReadOnlyList<string> PreferredHardwareEncoderBackends => isMacOS
         ? ["videotoolbox", "nvenc", "qsv", "amf", "software"]
         : ["nvenc", "qsv", "amf", "videotoolbox", "software"];
+    /// <summary>
+    /// Gets the FFmpeg bundled path collection used by this unix publisher platform runtime instance to locate the associated file-system resource.
+    /// </summary>
+    /// <value>The FFmpeg bundled path collection value exposed by <see cref="UnixPublisherPlatformRuntimeService"/>.</value>
     public PublisherRuntimeCollection FfmpegBundledPathCollection => PublisherRuntimeCollection.FfmpegUnixBundledPaths;
 
+    /// <summary>
+    /// Performs paths equal as part of the unix publisher platform runtime service workflow, applying the service's runtime policy, state management, and diagnostics as required.
+    /// </summary>
+    /// <param name="left">Left value supplied to the unix publisher platform runtime operation and used when producing its result.</param>
+    /// <param name="right">Right value supplied to the unix publisher platform runtime operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool PathsEqual(string left, string right)
     {
         try
@@ -276,6 +494,12 @@ public sealed class UnixPublisherPlatformRuntimeService(
         }
     }
 
+    /// <summary>
+    /// Determines whether same or descendant path as part of the unix publisher platform runtime service workflow, applying the service's runtime policy, state management, and diagnostics as required.
+    /// </summary>
+    /// <param name="root">Root value supplied to the unix publisher platform runtime operation and used when producing its result.</param>
+    /// <param name="candidate">Candidate value supplied to the unix publisher platform runtime operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool IsSameOrDescendantPath(string root, string candidate)
     {
         try
@@ -295,6 +519,11 @@ public sealed class UnixPublisherPlatformRuntimeService(
         }
     }
 
+    /// <summary>
+    /// Determines whether FFmpeg executable name for host as part of the unix publisher platform runtime service workflow, applying the service's runtime policy, state management, and diagnostics as required.
+    /// </summary>
+    /// <param name="executableName">Executable name value supplied to the unix publisher platform runtime operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool IsFfmpegExecutableNameForHost(string executableName)
     {
         try
@@ -308,6 +537,10 @@ public sealed class UnixPublisherPlatformRuntimeService(
         }
     }
 
+    /// <summary>
+    /// Retrieves command extensions as part of the unix publisher platform runtime service workflow, applying the service's runtime policy, state management, and diagnostics as required.
+    /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     public IReadOnlyList<string> GetCommandExtensions()
     {
         try
@@ -322,6 +555,11 @@ public sealed class UnixPublisherPlatformRuntimeService(
         }
     }
 
+    /// <summary>
+    /// Performs enumerate known FFmpeg install locations as part of the unix publisher platform runtime service workflow, applying the service's runtime policy, state management, and diagnostics as required.
+    /// </summary>
+    /// <param name="runtimePolicy">Publisher runtime policy data service dependency used by the unix publisher platform runtime workflow to provide the corresponding application capability.</param>
+    /// <returns>The collection produced by the operation.</returns>
     public IEnumerable<string> EnumerateKnownFfmpegInstallLocations(IPublisherRuntimePolicyDataService runtimePolicy)
     {
         try
@@ -337,6 +575,10 @@ public sealed class UnixPublisherPlatformRuntimeService(
         }
     }
 
+    /// <summary>
+    /// Performs enumerate font directories as part of the unix publisher platform runtime service workflow, applying the service's runtime policy, state management, and diagnostics as required.
+    /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     public IReadOnlyList<string> EnumerateFontDirectories()
     {
         try
@@ -368,6 +610,10 @@ public sealed class UnixPublisherPlatformRuntimeService(
         }
     }
 
+    /// <summary>
+    /// Performs enumerate platform font families as part of the unix publisher platform runtime service workflow, applying the service's runtime policy, state management, and diagnostics as required.
+    /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     public IReadOnlyList<string> EnumeratePlatformFontFamilies()
     {
         try
@@ -407,6 +653,10 @@ public sealed class UnixPublisherPlatformRuntimeService(
         }
     }
 
+    /// <summary>
+    /// Performs enumerate native video device paths as part of the unix publisher platform runtime service workflow, applying the service's runtime policy, state management, and diagnostics as required.
+    /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     public IReadOnlyList<string> EnumerateNativeVideoDevicePaths()
     {
         try
@@ -421,6 +671,11 @@ public sealed class UnixPublisherPlatformRuntimeService(
         }
     }
 
+    /// <summary>
+    /// Performs supports native capture backend as part of the unix publisher platform runtime service workflow, applying the service's runtime policy, state management, and diagnostics as required.
+    /// </summary>
+    /// <param name="backend">Backend value supplied to the unix publisher platform runtime operation and used when producing its result.</param>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
     public bool SupportsNativeCaptureBackend(string backend)
     {
         try
@@ -435,6 +690,11 @@ public sealed class UnixPublisherPlatformRuntimeService(
         }
     }
 
+    /// <summary>
+    /// Performs restrict secret file permissions as part of the unix publisher platform runtime service workflow, applying the service's runtime policy, state management, and diagnostics as required.
+    /// </summary>
+    /// <param name="path">Path value supplied to the unix publisher platform runtime operation and used when producing its result.</param>
+    /// <param name="callerLogger">Logger dependency used by the unix publisher platform runtime workflow to provide the corresponding application capability.</param>
     public void RestrictSecretFilePermissions(string path, ILogger callerLogger)
     {
         try

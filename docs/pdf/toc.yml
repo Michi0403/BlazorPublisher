@@ -1,6 +1,6 @@
 order: 200
 pdf: true
-pdfFileName: PublisherStudio-3.0.1.pdf
+pdfFileName: PublisherStudio-3.0.3.pdf
 pdfTocPage: true
 pdfCoverPage: ../pdf-cover.html
 pdfPrintBackground: true

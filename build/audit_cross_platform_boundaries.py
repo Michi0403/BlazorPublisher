@@ -97,6 +97,24 @@ for build_file in ("Build-Release.ps1", "Build-LocalDevelopment.ps1"):
     check("Assert-CrossPlatformBoundaries.ps1" in s, f"{build_file} must run the cross-platform boundary guard.")
     check("Assert-SourcePackagePrerequisites.ps1" in s, f"{build_file} must fail fast on incomplete source packages.")
 
+python_common = text(ROOT / "build" / "PythonRuntime.Common.ps1")
+for marker in ("Get-Command $commandName", "'python', 'python3'", "Get-Command py", "PrefixArguments = @('-3')"):
+    check(marker in python_common, f"Shared Python runtime resolver is missing marker: {marker}")
+prereq = text(ROOT / "build" / "Assert-SourcePackagePrerequisites.ps1")
+check("PythonRuntime.Common.ps1" in prereq and "Resolve-PublisherStudioPythonRuntime" in prereq, "Source preflight must resolve Python 3 before the ordered build.")
+for rel in (
+    "build/Assert-PanelStudioPersistence.ps1",
+    "build/Assert-XmlDocumentationCoverage.ps1",
+    "build/Invoke-ArchitectureAudit.ps1",
+    "build/Assert-IteratorExceptionPolicy.ps1",
+    "build/Assert-AsyncContinuationPolicy.ps1",
+    "build/Assert-MethodDiagnostics.ps1",
+    "build/Assert-ComponentSafety.ps1",
+):
+    script_text = text(ROOT / rel)
+    check("PythonRuntime.Common.ps1" in script_text and "Invoke-PublisherStudioPythonScript" in script_text, f"{rel} must use the shared Python runtime resolver.")
+    check(re.search(r"&\s+python(?:\s|$)", script_text, re.IGNORECASE) is None, f"{rel} must not invoke a bare python executable.")
+
 if failures:
     for failure in failures:
         print("ERROR:", failure)

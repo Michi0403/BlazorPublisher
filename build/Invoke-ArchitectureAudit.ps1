@@ -6,6 +6,7 @@ param(
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot 'PythonRuntime.Common.ps1')
 
 function Fail([string]$Message) { throw "Architecture policy validation failed: $Message" }
 function Normalize-Signature([string]$Value) { return ([regex]::Replace($Value, '\s+', ' ')).Trim() }
@@ -17,23 +18,13 @@ $sourceRoot = if ($isLocalGpt) { Join-Path $root 'LocalGPTWebviewWrapper\LocalGP
 $pythonScript = Join-Path $PSScriptRoot 'audit_application_architecture.py'
 
 function Invoke-PythonAudit {
-    $python = Get-Command python -ErrorAction SilentlyContinue
-    if ($python) {
-        $auditOutput = @(& $python.Source $pythonScript --root $root --product $product --mode $Mode 2>&1)
-        $auditExitCode = [int]$LASTEXITCODE
-        foreach ($line in $auditOutput) { Write-Host ([string]$line) }
-        return $auditExitCode
+    $result = Invoke-PublisherStudioPythonScript -ScriptPath $pythonScript -Arguments @('--root', $root, '--product', $product, '--mode', $Mode) -AllowMissing
+    if ($null -eq $result) {
+        return $null
     }
 
-    $launcher = Get-Command py -ErrorAction SilentlyContinue
-    if ($launcher) {
-        $auditOutput = @(& $launcher.Source -3 $pythonScript --root $root --product $product --mode $Mode 2>&1)
-        $auditExitCode = [int]$LASTEXITCODE
-        foreach ($line in $auditOutput) { Write-Host ([string]$line) }
-        return $auditExitCode
-    }
-
-    return $null
+    foreach ($line in $result.Output) { Write-Host ([string]$line) }
+    return [int]$result.ExitCode
 }
 
 function Remove-NonCode([string]$Text) {

@@ -30,6 +30,7 @@ public interface INativeCaptureSessionFactory
 /// <param name="taskRunner">Supervised task runner used for intentionally concurrent native capture pumps.</param>
 /// <param name="loggerFactory">Logger factory dependency used by the native capture session workflow to provide the corresponding application capability.</param>
 /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
+/// <param name="platform">Publisher platform runtime service dependency used by the native capture session workflow to provide the corresponding application capability.</param>
 public sealed class NativeCaptureSessionFactory(
     IPublisherRuntimePolicyDataService runtimePolicy,
     FfmpegLocator ffmpegLocator,
@@ -238,6 +239,7 @@ public sealed class NativeCaptureSession : IDisposable
     /// <param name="processLoopbackFactory">Windows process loopback capture factory dependency used by the native capture session workflow to provide the corresponding application capability.</param>
     /// <param name="taskRunner">Supervised task runner used to observe the capture pump.</param>
     /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
+    /// <param name="platform">Publisher platform runtime service dependency used by the native capture session workflow to provide the corresponding application capability.</param>
     public NativeCaptureSession(
         NativeCaptureRequest request,
         IPublisherRuntimePolicyDataService runtimePolicy,

@@ -1,4 +1,4 @@
-﻿param(
+param(
     [switch]$SkipPackageRestore
 )
 
@@ -64,7 +64,7 @@ function Remove-GeneratedPathWithRetry {
         }
     }
 
-    $message = if ($null -ne $lastError) { $lastError.Message } else { "unknown Windows file-system error" }
+    $message = if ($null -ne $lastError) { $lastError.Message } else { "unknown file-system error" }
     throw "Could not clear generated browser asset path '$Path'. Close PublisherStudio/browser/file-indexer handles that are locking the generated vendor folder, then retry. Last error: $message"
 }
 
@@ -72,52 +72,70 @@ function Remove-GeneratedPathWithRetry {
 function Resolve-Executable {
     param(
         [Parameter(Mandatory = $true)][string[]]$CommandNames,
-        [Parameter(Mandatory = $true)][string[]]$CandidatePaths
+        [AllowEmptyCollection()][string[]]$CandidatePaths = @()
     )
 
     foreach ($commandName in $CommandNames) {
-        $command = Get-Command $commandName -ErrorAction SilentlyContinue
-        if ($command -and $command.Source) {
-            return $command.Source
+        $command = Get-Command $commandName -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
+        if ($null -ne $command) {
+            $commandPath = if (-not [string]::IsNullOrWhiteSpace([string]$command.Source)) { [string]$command.Source } else { [string]$command.Path }
+            if (-not [string]::IsNullOrWhiteSpace($commandPath)) { return $commandPath }
         }
     }
 
-    foreach ($candidate in $CandidatePaths) {
-        if (-not [string]::IsNullOrWhiteSpace($candidate) -and (Test-Path $candidate)) {
-            return $candidate
+    foreach ($candidate in @($CandidatePaths)) {
+        if (-not [string]::IsNullOrWhiteSpace($candidate) -and (Test-Path -LiteralPath $candidate -PathType Leaf)) {
+            return [IO.Path]::GetFullPath($candidate)
         }
     }
 
     return $null
 }
 
-$programFilesX86 = [Environment]::GetEnvironmentVariable("ProgramFiles(x86)")
-$nodeCandidates = @(
-    $(if ($env:NVM_SYMLINK) { Join-Path $env:NVM_SYMLINK "node.exe" }),
-    $(if ($env:ProgramFiles) { Join-Path $env:ProgramFiles "nodejs\node.exe" }),
-    $(if ($programFilesX86) { Join-Path $programFilesX86 "nodejs\node.exe" }),
-    $(if ($env:LOCALAPPDATA) { Join-Path $env:LOCALAPPDATA "Programs\nodejs\node.exe" })
-) | Where-Object { $_ }
+$nodeRuntimeScript = Join-Path $root ([IO.Path]::Combine('build', 'NodeRuntime.Common.ps1'))
+if (-not (Test-Path -LiteralPath $nodeRuntimeScript -PathType Leaf)) {
+    throw "PublisherStudio Node.js runtime resolver is unavailable: $nodeRuntimeScript"
+}
+. $nodeRuntimeScript
 
-$npmCandidates = @(
-    $(if ($env:NVM_SYMLINK) { Join-Path $env:NVM_SYMLINK "npm.cmd" }),
-    $(if ($env:ProgramFiles) { Join-Path $env:ProgramFiles "nodejs\npm.cmd" }),
-    $(if ($programFilesX86) { Join-Path $programFilesX86 "nodejs\npm.cmd" }),
-    $(if ($env:LOCALAPPDATA) { Join-Path $env:LOCALAPPDATA "Programs\nodejs\npm.cmd" }),
-    $(if ($env:APPDATA) { Join-Path $env:APPDATA "npm\npm.cmd" })
-) | Where-Object { $_ }
+$nodeCacheRoot = Get-PublisherStudioDocumentationToolCacheRoot -FallbackRoot (Join-Path $root ([IO.Path]::Combine('artifacts', '.documentation-tools')))
+$nodeInfo = Resolve-PublisherStudioNodeRuntime `
+    -CacheRoot $nodeCacheRoot `
+    -Version '22.23.2' `
+    -MinimumMajor 20 `
+    -MaximumPreferredMajor 22 `
+    -AllowProvisioning `
+    -PreferCompatibleLts
+if ($null -eq $nodeInfo -or [string]::IsNullOrWhiteSpace([string]$nodeInfo.Path)) {
+    throw 'Node.js 20+ could not be resolved for PublisherStudio DevExpress asset preparation.'
+}
 
-$npxCandidates = @(
-    $(if ($env:NVM_SYMLINK) { Join-Path $env:NVM_SYMLINK "npx.cmd" }),
-    $(if ($env:ProgramFiles) { Join-Path $env:ProgramFiles "nodejs\npx.cmd" }),
-    $(if ($programFilesX86) { Join-Path $programFilesX86 "nodejs\npx.cmd" }),
-    $(if ($env:LOCALAPPDATA) { Join-Path $env:LOCALAPPDATA "Programs\nodejs\npx.cmd" }),
-    $(if ($env:APPDATA) { Join-Path $env:APPDATA "npm\npx.cmd" })
-) | Where-Object { $_ }
+$node = [string]$nodeInfo.Path
+$nodeDirectory = Split-Path -Parent $node
+$runningOnWindows = [bool](Get-PublisherStudioNodeHostDescriptor).RunningOnWindows
+$npmAdjacentName = if ($runningOnWindows) { 'npm.cmd' } else { 'npm' }
+$npxAdjacentName = if ($runningOnWindows) { 'npx.cmd' } else { 'npx' }
 
-$node = Resolve-Executable -CommandNames @("node", "node.exe") -CandidatePaths $nodeCandidates
-$npm = Resolve-Executable -CommandNames @("npm", "npm.cmd") -CandidatePaths $npmCandidates
-$npx = Resolve-Executable -CommandNames @("npx", "npx.cmd") -CandidatePaths $npxCandidates
+$npmCandidates = @((Join-Path $nodeDirectory $npmAdjacentName))
+$npxCandidates = @((Join-Path $nodeDirectory $npxAdjacentName))
+if ($runningOnWindows) {
+    if ($env:NVM_SYMLINK) {
+        $npmCandidates += Join-Path $env:NVM_SYMLINK 'npm.cmd'
+        $npxCandidates += Join-Path $env:NVM_SYMLINK 'npx.cmd'
+    }
+    if ($env:APPDATA) {
+        $npmCandidates += Join-Path $env:APPDATA ([IO.Path]::Combine('npm', 'npm.cmd'))
+        $npxCandidates += Join-Path $env:APPDATA ([IO.Path]::Combine('npm', 'npx.cmd'))
+    }
+}
+else {
+    $npmCandidates += @('/opt/homebrew/bin/npm', '/usr/local/bin/npm', '/usr/bin/npm')
+    $npxCandidates += @('/opt/homebrew/bin/npx', '/usr/local/bin/npx', '/usr/bin/npx')
+}
+
+$npm = Resolve-Executable -CommandNames @('npm', 'npm.cmd') -CandidatePaths $npmCandidates
+$npx = Resolve-Executable -CommandNames @('npx', 'npx.cmd') -CandidatePaths $npxCandidates
+Write-Host "PublisherStudio DevExpress Node.js preflight: using $($nodeInfo.Version) at '$node'." -ForegroundColor DarkGray
 
 if (-not $node -or -not $npm -or -not $npx) {
     throw @"
@@ -125,11 +143,9 @@ Node.js with npm and npx was not found.
 
 PublisherStudio uses Node.js only on developer/build machines to restore the local DevExpress browser files and generate the public DevExtreme runtime license used by standalone HTML exports. Installed applications remain fully offline and do not require Node.js.
 
-Install Node.js 20 LTS or newer, then close and reopen Visual Studio so its PATH is refreshed. Afterwards run:
+PublisherStudio automatically resolves or provisions a verified Node.js 22 LTS runtime. The resolved Node distribution must also expose npm and npx.
 
-    Prepare-DevExpressAssets.cmd
-
-The script also checks standard Node.js and NVM for Windows installation folders.
+Re-run the release after verifying that the per-user PublisherStudio DocumentationTools cache is writable. On developer machines with a system Node installation, node/npm/npx on PATH are also accepted.
 "@
 }
 

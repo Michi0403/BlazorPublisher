@@ -49,6 +49,7 @@ public sealed class LanStreamingServer : IAsyncDisposable
     /// <param name="session">Session value supplied to the LAN streaming server operation and used when producing its result.</param>
     /// <param name="taskRunner">Supervised task runner used by the LAN/RTSP server lifetime.</param>
     /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
+    /// <param name="platform">Publisher platform runtime service dependency used by the LAN streaming server workflow to provide the corresponding application capability.</param>
     public LanStreamingServer(MediaSession session, ISupervisedTaskRunner taskRunner, IPublisherPlatformRuntimeService platform, ILogger<LanStreamingServer> logger)
     {
         _session = session;

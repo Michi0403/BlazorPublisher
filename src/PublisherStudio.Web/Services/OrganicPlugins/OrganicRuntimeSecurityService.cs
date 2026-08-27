@@ -11,6 +11,7 @@ namespace PublisherStudio.Services.OrganicPlugins;
 /// are never compiled into the application, and can be discarded from the frontend to reset every trusted link.
 /// </summary>
 /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
+/// <param name="platform">Publisher platform runtime service dependency used by the organic runtime security workflow to provide the corresponding application capability.</param>
 public sealed class OrganicRuntimeSecurityService(
     IPublisherPlatformRuntimeService platform,
     ILogger<OrganicRuntimeSecurityService> logger) : IOrganicRuntimeSecurityService

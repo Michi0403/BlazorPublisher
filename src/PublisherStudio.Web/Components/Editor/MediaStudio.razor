@@ -1550,11 +1550,15 @@
     /// </summary>
     /// <value>The selected segment value exposed by <see cref="MediaStudio"/>.</value>
     private PublicationMediaSegment? SelectedSegment => _segments.FirstOrDefault(segment => segment.Id == _selectedSegmentId);
-    /// <summary>Gets the timeline-selected clips in canonical sequence order.</summary>
+    /// <summary>
+    /// Gets the selected timeline segments collection maintained or exposed by this media studio instance for downstream processing.
+    /// </summary>
+    /// <value>The selected timeline segments value exposed by <see cref="MediaStudio"/>.</value>
     private IReadOnlyList<PublicationMediaSegment> SelectedTimelineSegments => _segments
         .Where(segment => _selectedSegmentIds.Contains(segment.Id))
         .ToList();
     /// <summary>Gets whether one or more playable selected clips can be exported as selected ranges.</summary>
+    /// <value>The can export selected timeline ranges value exposed by <see cref="MediaStudio"/>.</value>
     private bool CanExportSelectedTimelineRanges => IsVideo
         && !_renderingVideoExport
         && !_renderingTimelineSelectionExport
@@ -2379,7 +2383,7 @@
         try
         {
             if (_disposed) throw new ObjectDisposedException(nameof(MediaStudio));
-            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=3.0.1").ConfigureAwait(true);
+            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=3.0.3").ConfigureAwait(true);
             _self ??= DotNetObjectReference.Create(this);
             if (SessionId != Guid.Empty)
             {
@@ -2594,6 +2598,8 @@
     /// <param name="id">Identifier of the resource to use for this operation.</param>
     /// <param name="seek">Value indicating whether seek should apply to this operation.</param>
     /// <param name="forceReload">Value indicating whether force reload should apply to this operation.</param>
+    /// <param name="commitCurrent">Value indicating whether commit current should apply to this operation.</param>
+    /// <param name="preserveTimelineSelection">Value indicating whether preserve timeline selection should apply to this operation.</param>
     private void SelectSegment(Guid id, bool seek = true, bool forceReload = false, bool commitCurrent = true, bool preserveTimelineSelection = false)
     {
         try
@@ -2642,6 +2648,7 @@
     }
 
     /// <summary>Replaces the timeline multi-selection with one clip and moves the Shift anchor to that clip.</summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
     private void SetSingleTimelineSelection(Guid id)
     {
         try
@@ -2658,6 +2665,9 @@
     }
 
     /// <summary>Applies plain, Ctrl/Command, and Shift timeline-selection semantics without losing the primary inspector clip.</summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="shiftKey">Value indicating whether shift key should apply to this operation.</param>
+    /// <param name="additive">Value indicating whether additive should apply to this operation.</param>
     private void ApplyTimelineSelection(Guid id, bool shiftKey, bool additive)
     {
         try
@@ -2695,6 +2705,9 @@
     }
 
     /// <summary>Handles timeline selection, including contiguous Shift selection and additive Ctrl/Command selection.</summary>
+    /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="args">Args value supplied to the media studio operation and used when producing its result.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task SelectTimelineSegment(Guid id, MouseEventArgs args)
     {
         try
@@ -7041,6 +7054,7 @@
     }
 
     /// <summary>Exports each selected timeline clip range into its own rendered file.</summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task ExportSelectedTimelineRangesSeparately()
     {
         try
@@ -7055,6 +7069,7 @@
     }
 
     /// <summary>Exports the selected timeline clip ranges in sequence order into one rendered file.</summary>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private Task ExportSelectedTimelineRangesCombined()
     {
         try
@@ -7069,6 +7084,8 @@
     }
 
     /// <summary>Builds browser-safe selected-range payloads and delegates the actual rendering to the Media Studio module.</summary>
+    /// <param name="combined">Value indicating whether combined should apply to this operation.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ExportSelectedTimelineRanges(bool combined)
     {
         if (!CanExportSelectedTimelineRanges) return;
@@ -9443,14 +9460,19 @@
     private sealed class TimelineSelectionExportResult
     {
         /// <summary>Gets or sets the number of source clips included in the export.</summary>
+        /// <value>The clip count value exposed by <see cref="MediaStudio"/>.</value>
         public int ClipCount { get; set; }
         /// <summary>Gets or sets the number of files downloaded by the browser.</summary>
+        /// <value>The file count value exposed by <see cref="MediaStudio"/>.</value>
         public int FileCount { get; set; }
         /// <summary>Gets or sets the combined byte count of the generated files.</summary>
+        /// <value>The size bytes value exposed by <see cref="MediaStudio"/>.</value>
         public long SizeBytes { get; set; }
         /// <summary>Gets or sets the combined output file name when a single file was requested.</summary>
+        /// <value>The file name value exposed by <see cref="MediaStudio"/>.</value>
         public string FileName { get; set; } = string.Empty;
         /// <summary>Gets or sets whether the browser export was cancelled before files were produced.</summary>
+        /// <value>The cancelled value exposed by <see cref="MediaStudio"/>.</value>
         public bool Cancelled { get; set; }
     }
 

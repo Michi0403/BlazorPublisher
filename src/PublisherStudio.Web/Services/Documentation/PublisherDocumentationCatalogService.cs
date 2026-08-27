@@ -10,6 +10,7 @@ namespace PublisherStudio.Services.Documentation;
 /// </summary>
 /// <param name="environment">Web host environment dependency used by the publisher documentation catalog workflow to provide the corresponding application capability.</param>
 /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
+/// <param name="platform">Publisher platform runtime service dependency used by the publisher documentation catalog workflow to provide the corresponding application capability.</param>
 public sealed class PublisherDocumentationCatalogService(
     IWebHostEnvironment environment,
     IPublisherPlatformRuntimeService platform,

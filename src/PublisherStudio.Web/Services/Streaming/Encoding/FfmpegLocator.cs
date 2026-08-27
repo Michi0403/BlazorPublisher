@@ -9,6 +9,7 @@ namespace PublisherStudio.Services.Streaming.Encoding;
 /// </summary>
 /// <param name="runtimePolicy">Publisher runtime policy data service dependency used by the FFmpeg locator workflow to provide the corresponding application capability.</param>
 /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
+/// <param name="platform">Publisher platform runtime service dependency used by the FFmpeg locator workflow to provide the corresponding application capability.</param>
 public sealed class FfmpegLocator(
     IPublisherRuntimePolicyDataService runtimePolicy,
     IPublisherPlatformRuntimeService platform,
@@ -116,6 +117,7 @@ public sealed class FfmpegLocator(
     /// <summary>
     /// Enumerates platform-owned FFmpeg installation locations without leaking host-specific path policy into the common locator.
     /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     private IEnumerable<string> KnownInstallLocations()
     {
         try

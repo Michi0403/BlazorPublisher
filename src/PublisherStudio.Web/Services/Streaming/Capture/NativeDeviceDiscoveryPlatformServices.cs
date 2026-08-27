@@ -10,17 +10,32 @@ namespace PublisherStudio.Services.Streaming.Capture;
 /// </summary>
 public interface INativeDeviceDiscoveryPlatformService
 {
+    /// <summary>
+    /// Performs discover as part of the native device discovery platform service workflow, applying the service's runtime policy, state management, and diagnostics as required.
+    /// </summary>
+    /// <param name="ffmpegPath">Ffmpeg path value supplied to the native device discovery platform operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The collection produced by the operation.</returns>
     Task<IReadOnlyList<DiscoveredNativeMediaDeviceInfo>> DiscoverAsync(
         string? ffmpegPath,
         CancellationToken cancellationToken);
 }
 
 /// <summary>Windows DirectShow and process-loopback discovery.</summary>
+/// <param name="ffmpegLocator">Ffmpeg locator value supplied to the windows native device discovery platform operation and used when producing its result.</param>
+/// <param name="runtimePatterns">Publisher runtime pattern service dependency used by the windows native device discovery platform workflow to provide the corresponding application capability.</param>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class WindowsNativeDeviceDiscoveryPlatformService(
     FfmpegLocator ffmpegLocator,
     IPublisherRuntimePatternService runtimePatterns,
     ILogger<WindowsNativeDeviceDiscoveryPlatformService> logger) : INativeDeviceDiscoveryPlatformService
 {
+    /// <summary>
+    /// Performs discover as part of the windows native device discovery platform service workflow, applying the service's runtime policy, state management, and diagnostics as required.
+    /// </summary>
+    /// <param name="ffmpegPath">Ffmpeg path value supplied to the windows native device discovery platform operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The collection produced by the operation.</returns>
     public async Task<IReadOnlyList<DiscoveredNativeMediaDeviceInfo>> DiscoverAsync(
         string? ffmpegPath,
         CancellationToken cancellationToken)
@@ -44,6 +59,12 @@ public sealed class WindowsNativeDeviceDiscoveryPlatformService(
         }
     }
 
+    /// <summary>
+    /// Discovers direct show as part of the windows native device discovery platform service workflow, applying the service's runtime policy, state management, and diagnostics as required.
+    /// </summary>
+    /// <param name="ffmpegPath">Ffmpeg path value supplied to the windows native device discovery platform operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private async Task<IReadOnlyList<DiscoveredNativeMediaDeviceInfo>> DiscoverDirectShowAsync(
         string? ffmpegPath,
         CancellationToken cancellationToken)
@@ -85,6 +106,10 @@ public sealed class WindowsNativeDeviceDiscoveryPlatformService(
         }
     }
 
+    /// <summary>
+    /// Discovers process loopback targets as part of the windows native device discovery platform service workflow, applying the service's runtime policy, state management, and diagnostics as required.
+    /// </summary>
+    /// <returns>The collection produced by the operation.</returns>
     private IReadOnlyList<DiscoveredNativeMediaDeviceInfo> DiscoverProcessLoopbackTargets()
     {
         var result = new List<DiscoveredNativeMediaDeviceInfo>();
@@ -116,6 +141,13 @@ public sealed class WindowsNativeDeviceDiscoveryPlatformService(
         return result;
     }
 
+    /// <summary>
+    /// Performs run FFmpeg as part of the windows native device discovery platform service workflow, applying the service's runtime policy, state management, and diagnostics as required.
+    /// </summary>
+    /// <param name="ffmpegPath">Ffmpeg path value supplied to the windows native device discovery platform operation and used when producing its result.</param>
+    /// <param name="arguments">String dependency used by the windows native device discovery platform workflow to provide the corresponding application capability.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The string produced by the operation.</returns>
     private async Task<string> RunFfmpegAsync(
         string? ffmpegPath,
         IReadOnlyList<string> arguments,
@@ -150,12 +182,22 @@ public sealed class WindowsNativeDeviceDiscoveryPlatformService(
 }
 
 /// <summary>macOS AVFoundation and Linux V4L2 discovery.</summary>
+/// <param name="ffmpegLocator">Ffmpeg locator value supplied to the unix native device discovery platform operation and used when producing its result.</param>
+/// <param name="runtimePatterns">Publisher runtime pattern service dependency used by the unix native device discovery platform workflow to provide the corresponding application capability.</param>
+/// <param name="platform">Publisher platform runtime service dependency used by the unix native device discovery platform workflow to provide the corresponding application capability.</param>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class UnixNativeDeviceDiscoveryPlatformService(
     FfmpegLocator ffmpegLocator,
     IPublisherRuntimePatternService runtimePatterns,
     IPublisherPlatformRuntimeService platform,
     ILogger<UnixNativeDeviceDiscoveryPlatformService> logger) : INativeDeviceDiscoveryPlatformService
 {
+    /// <summary>
+    /// Performs discover as part of the unix native device discovery platform service workflow, applying the service's runtime policy, state management, and diagnostics as required.
+    /// </summary>
+    /// <param name="ffmpegPath">Ffmpeg path value supplied to the unix native device discovery platform operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The collection produced by the operation.</returns>
     public async Task<IReadOnlyList<DiscoveredNativeMediaDeviceInfo>> DiscoverAsync(
         string? ffmpegPath,
         CancellationToken cancellationToken)
@@ -185,6 +227,12 @@ public sealed class UnixNativeDeviceDiscoveryPlatformService(
         }
     }
 
+    /// <summary>
+    /// Discovers av foundation as part of the unix native device discovery platform service workflow, applying the service's runtime policy, state management, and diagnostics as required.
+    /// </summary>
+    /// <param name="ffmpegPath">Ffmpeg path value supplied to the unix native device discovery platform operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The collection produced by the operation.</returns>
     private async Task<IReadOnlyList<DiscoveredNativeMediaDeviceInfo>> DiscoverAvFoundationAsync(
         string? ffmpegPath,
         CancellationToken cancellationToken)
@@ -228,6 +276,13 @@ public sealed class UnixNativeDeviceDiscoveryPlatformService(
         }
     }
 
+    /// <summary>
+    /// Performs run FFmpeg as part of the unix native device discovery platform service workflow, applying the service's runtime policy, state management, and diagnostics as required.
+    /// </summary>
+    /// <param name="ffmpegPath">Ffmpeg path value supplied to the unix native device discovery platform operation and used when producing its result.</param>
+    /// <param name="arguments">String dependency used by the unix native device discovery platform workflow to provide the corresponding application capability.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The string produced by the operation.</returns>
     private async Task<string> RunFfmpegAsync(
         string? ffmpegPath,
         IReadOnlyList<string> arguments,

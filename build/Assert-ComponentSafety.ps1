@@ -2,6 +2,7 @@ param([string]$RepositoryRoot = (Split-Path -Parent $PSScriptRoot))
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot 'PythonRuntime.Common.ps1')
 function Fail([string]$Message) { throw "Component safety validation failed: $Message" }
 
 $componentRoot = Join-Path $RepositoryRoot 'src\PublisherStudio.Web\Components'
@@ -38,21 +39,14 @@ foreach ($token in @('protected override Task OnErrorAsync(Exception exception)'
 
 $audit = Join-Path $PSScriptRoot 'audit_component_resilience.py'
 if (-not (Test-Path -LiteralPath $audit -PathType Leaf)) { Fail 'The strict method-granular component resilience audit is missing.' }
-$python = Get-Command python -ErrorAction SilentlyContinue
-if ($python) { & $python.Source $audit --root $RepositoryRoot; if ($LASTEXITCODE -ne 0) { Fail 'Component method resilience audit failed.' } }
-else {
-    $launcher = Get-Command py -ErrorAction SilentlyContinue
-    if ($launcher) { & $launcher.Source -3 $audit --root $RepositoryRoot; if ($LASTEXITCODE -ne 0) { Fail 'Component method resilience audit failed.' } }
-    else { Fail 'Python 3 is required for strict method-granular component resilience; the build must never silently weaken this policy.' }
-}
+$result = Invoke-PublisherStudioPythonScript -ScriptPath $audit -Arguments @('--root', $RepositoryRoot)
+$result.Output | ForEach-Object { Write-Host ([string]$_) }
+if ($result.ExitCode -ne 0) { Fail 'Component method resilience audit failed.' }
 
 $prerenderAudit = Join-Path $PSScriptRoot 'audit_prerender_interop_safety.py'
 if (-not (Test-Path -LiteralPath $prerenderAudit -PathType Leaf)) { Fail 'The prerender JavaScript interop safety audit is missing.' }
-if ($python) { & $python.Source $prerenderAudit --root $RepositoryRoot; if ($LASTEXITCODE -ne 0) { Fail 'Prerender JavaScript interop safety audit failed.' } }
-else {
-    $launcher = Get-Command py -ErrorAction SilentlyContinue
-    if ($launcher) { & $launcher.Source -3 $prerenderAudit --root $RepositoryRoot; if ($LASTEXITCODE -ne 0) { Fail 'Prerender JavaScript interop safety audit failed.' } }
-    else { Fail 'Python 3 is required for prerender JavaScript interop safety; the build must never silently weaken this policy.' }
-}
+$result = Invoke-PublisherStudioPythonScript -ScriptPath $prerenderAudit -Arguments @('--root', $RepositoryRoot)
+$result.Output | ForEach-Object { Write-Host ([string]$_) }
+if ($result.ExitCode -ne 0) { Fail 'Prerender JavaScript interop safety audit failed.' }
 
 Write-Host "Component safety validation passed: $($razorFiles.Count) Razor components own typed loggers; every component method is method-locally guarded; prerender JavaScript interop is attachment-gated; no legacy exemptions are permitted." -ForegroundColor Green

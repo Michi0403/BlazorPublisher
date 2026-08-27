@@ -22,10 +22,18 @@ public sealed record DiscoveredNativeMediaDeviceInfo(
 /// Platform-neutral facade for native media-device discovery. Host-specific DirectShow, AVFoundation,
 /// V4L2 and process-loopback details are owned by the injected platform implementation.
 /// </summary>
+/// <param name="platformDiscovery">Native device discovery platform service dependency used by the native device discovery workflow to provide the corresponding application capability.</param>
+/// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class NativeDeviceDiscovery(
     INativeDeviceDiscoveryPlatformService platformDiscovery,
     ILogger<NativeDeviceDiscovery> logger)
 {
+    /// <summary>
+    /// Performs discover for <see cref="NativeDeviceDiscovery"/>, keeping the operation consistent with the state and invariants of the surrounding native device discovery workflow.
+    /// </summary>
+    /// <param name="ffmpegPath">Ffmpeg path value supplied to the native device discovery operation and used when producing its result.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The collection produced by the operation.</returns>
     public async Task<IReadOnlyList<DiscoveredNativeMediaDeviceInfo>> DiscoverAsync(
         string? ffmpegPath,
         CancellationToken cancellationToken)

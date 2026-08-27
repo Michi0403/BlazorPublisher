@@ -6,6 +6,7 @@ namespace PublisherStudio.Services.Streaming.UseCases.Lan;
 /// Resolves LAN status, safe HLS assets and the local watch page without coupling controllers to session internals.
 /// </summary>
 /// <param name="sessions">Media session registry dependency used by the streaming LAN use cases workflow to provide the corresponding application capability.</param>
+/// <param name="platform">Publisher platform runtime service dependency used by the streaming LAN use cases workflow to provide the corresponding application capability.</param>
 public sealed class StreamingLanUseCases(
     MediaSessionRegistry sessions,
     IPublisherPlatformRuntimeService platform)

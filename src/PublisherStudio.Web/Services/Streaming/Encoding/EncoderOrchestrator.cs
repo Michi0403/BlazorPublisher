@@ -1613,6 +1613,7 @@ public sealed class FfmpegEncoderSet(
 /// </summary>
 /// <param name="ffmpegLocator">Ffmpeg locator value supplied to the FFmpeg encoder operation and used when producing its result.</param>
 /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
+/// <param name="platform">Publisher platform runtime service dependency used by the FFmpeg encoder workflow to provide the corresponding application capability.</param>
 public sealed class FfmpegEncoderResolver(
     FfmpegLocator ffmpegLocator,
     IPublisherPlatformRuntimeService platform,

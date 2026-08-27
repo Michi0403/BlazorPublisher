@@ -9,6 +9,7 @@ namespace PublisherStudio.Services;
 /// Users may still type a font family that is not in this catalog.
 /// </summary>
 /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
+/// <param name="platform">Publisher platform runtime service dependency used by the system font workflow to provide the corresponding application capability.</param>
 public sealed class SystemFontCatalog(
     IPublisherPlatformRuntimeService platform,
     ILogger<SystemFontCatalog> logger)

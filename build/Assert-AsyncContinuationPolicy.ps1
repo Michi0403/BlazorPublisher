@@ -1,5 +1,6 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot 'PythonRuntime.Common.ps1')
 
 function Fail([string]$Message) { throw "Async continuation validation failed: $Message" }
 
@@ -9,23 +10,13 @@ $pythonScript = Join-Path $PSScriptRoot 'audit_async_continuations.py'
 if (-not (Test-Path -LiteralPath $pythonScript -PathType Leaf)) { Fail "The strict async-continuation audit is missing: $pythonScript" }
 
 function Invoke-PythonAudit {
-    $python = Get-Command python -ErrorAction SilentlyContinue
-    if ($python) {
-        $output = @(& $python.Source $pythonScript --source-root $sourceRoot 2>&1)
-        $exitCode = [int]$LASTEXITCODE
-        foreach ($line in $output) { Write-Host ([string]$line) }
-        return $exitCode
+    $result = Invoke-PublisherStudioPythonScript -ScriptPath $pythonScript -Arguments @('--source-root', $sourceRoot) -AllowMissing
+    if ($null -eq $result) {
+        return $null
     }
 
-    $launcher = Get-Command py -ErrorAction SilentlyContinue
-    if ($launcher) {
-        $output = @(& $launcher.Source -3 $pythonScript --source-root $sourceRoot 2>&1)
-        $exitCode = [int]$LASTEXITCODE
-        foreach ($line in $output) { Write-Host ([string]$line) }
-        return $exitCode
-    }
-
-    return $null
+    foreach ($line in $result.Output) { Write-Host ([string]$line) }
+    return [int]$result.ExitCode
 }
 
 $pythonExit = Invoke-PythonAudit

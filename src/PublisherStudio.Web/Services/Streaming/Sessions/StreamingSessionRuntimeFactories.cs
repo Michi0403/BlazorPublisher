@@ -61,6 +61,7 @@ public interface ILanStreamingServerFactory
 /// <param name="loggerFactory">Logger factory dependency used by the LAN streaming server workflow to provide the corresponding application capability.</param>
 /// <param name="taskRunner">Supervised task runner used by the LAN and RTSP server lifetimes.</param>
 /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
+/// <param name="platform">Publisher platform runtime service dependency used by the LAN streaming server workflow to provide the corresponding application capability.</param>
 public sealed class LanStreamingServerFactory(
     ILoggerFactory loggerFactory,
     ISupervisedTaskRunner taskRunner,

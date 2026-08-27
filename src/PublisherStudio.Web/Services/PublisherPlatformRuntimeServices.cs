@@ -699,8 +699,14 @@ public sealed class UnixPublisherPlatformRuntimeService(
     {
         try
         {
-            File.SetUnixFileMode(path, UnixFileMode.UserRead | UnixFileMode.UserWrite);
-            logger.LogTrace("Restricted Unix secret-file permissions for {SecretPath}.", path);
+            if (!OperatingSystem.IsWindows())
+            {
+                File.SetUnixFileMode(path, UnixFileMode.UserRead | UnixFileMode.UserWrite);
+                logger.LogTrace("Restricted Unix secret-file permissions for {SecretPath}.", path);
+                return;
+            }
+
+            throw new PlatformNotSupportedException("Unix secret-file permissions are unavailable on Windows.");
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or PlatformNotSupportedException)
         {

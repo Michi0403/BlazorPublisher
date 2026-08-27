@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <InvariantGlobalization>true</InvariantGlobalization>
     <AssemblyName>PublisherStudio.Setup</AssemblyName>
-    <Version>3.0.3</Version>
+    <Version>3.0.4</Version>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);1591</NoWarn>
     <ApplicationIcon>..\..\assets\PublisherStudio.ico</ApplicationIcon>

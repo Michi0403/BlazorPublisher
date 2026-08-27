@@ -176,6 +176,7 @@ public sealed class PublisherDocumentationCatalogService(
         lock (synchronization)
         {
             if (commentCache is not null &&
+                commentCachePath is not null &&
                 platform.PathsEqual(commentCachePath, path) &&
                 commentCacheWriteUtc == writeUtc)
                 return commentCache;

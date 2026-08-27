@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using PublisherStudio.BusinessObjects;
 using PublisherStudio.Services.Configuration;
 using PublisherStudio.Services.Streaming.Encoding;
 

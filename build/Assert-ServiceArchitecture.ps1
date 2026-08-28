@@ -57,7 +57,7 @@ if ($registrationText.IndexOf('AddSingleton<ISupervisedTaskRunner, SupervisedTas
 
 $methodGuard = Join-Path $PSScriptRoot 'Assert-MethodDiagnostics.ps1'
 $methodGuardText = Get-Content -LiteralPath $methodGuard -Raw
-foreach ($token in @('audit_service_resilience.py', '--product publisherstudio')) {
+foreach ($token in @('audit_service_resilience.py', '--product', 'publisherstudio')) {
     if ($methodGuardText.IndexOf($token, [StringComparison]::Ordinal) -lt 0) {
         $errors.Add("Broad service-method try/catch enforcement must remain wired through Assert-MethodDiagnostics.ps1: missing '$token'.")
     }

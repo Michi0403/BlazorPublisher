@@ -1,215 +1,224 @@
 <Project>
   <PropertyGroup>
-    <WireProtocolBootstrapScript>$(MSBuildThisFileDirectory)build\Ensure-WireProtocolPackage.ps1</WireProtocolBootstrapScript>
-    <LoggingIntegrityScript>$(MSBuildThisFileDirectory)build\Assert-LoggingIntegrity.ps1</LoggingIntegrityScript>
-    <OneWireArchitectureScript>$(MSBuildThisFileDirectory)build\Assert-OneWireArchitecture.ps1</OneWireArchitectureScript>
-    <RuntimeValueOwnershipScript>$(MSBuildThisFileDirectory)build\Assert-RuntimeValueOwnership.ps1</RuntimeValueOwnershipScript>
-    <LocalizationIntegrityScript>$(MSBuildThisFileDirectory)build\Assert-LocalizationIntegrity.ps1</LocalizationIntegrityScript>
-    <OperationalDiagnosticsScript>$(MSBuildThisFileDirectory)build\Assert-OperationalDiagnostics.ps1</OperationalDiagnosticsScript>
-    <InteractiveServerRenderModeScript>$(MSBuildThisFileDirectory)build\Assert-InteractiveServerRenderModes.ps1</InteractiveServerRenderModeScript>
-    <AsyncContinuationScript>$(MSBuildThisFileDirectory)build\Assert-AsyncContinuationPolicy.ps1</AsyncContinuationScript>
-    <ComponentDiagnosticsScript>$(MSBuildThisFileDirectory)build\Assert-ComponentDiagnostics.ps1</ComponentDiagnosticsScript>
-    <ComponentSafetyScript>$(MSBuildThisFileDirectory)build\Assert-ComponentSafety.ps1</ComponentSafetyScript>
-    <MethodDiagnosticsPolicyScript>$(MSBuildThisFileDirectory)build\Assert-MethodDiagnostics.ps1</MethodDiagnosticsPolicyScript>
-    <ServiceArchitectureScript>$(MSBuildThisFileDirectory)build\Assert-ServiceArchitecture.ps1</ServiceArchitectureScript>
-    <ApplicationStaticPolicyScript>$(MSBuildThisFileDirectory)build\Assert-ApplicationStaticPolicy.ps1</ApplicationStaticPolicyScript>
-    <TextServiceOwnershipScript>$(MSBuildThisFileDirectory)build\Assert-TextServiceOwnership.ps1</TextServiceOwnershipScript>
-    <IteratorExceptionPolicyScript>$(MSBuildThisFileDirectory)build\Assert-IteratorExceptionPolicy.ps1</IteratorExceptionPolicyScript>
-    <SystemVariableInitializationScript>$(MSBuildThisFileDirectory)build\Assert-SystemVariableInitialization.ps1</SystemVariableInitializationScript>
-    <PanelStudioInteractionLifecycleScript>$(MSBuildThisFileDirectory)build\Assert-PanelStudioInteractionLifecycle.ps1</PanelStudioInteractionLifecycleScript>
-    <PanelStudioAuthoringGeometryScript>$(MSBuildThisFileDirectory)build\Assert-PanelStudioAuthoringGeometry.ps1</PanelStudioAuthoringGeometryScript>
-    <JavaScriptDiagnosticsScript>$(MSBuildThisFileDirectory)build\Assert-JavaScriptDiagnostics.ps1</JavaScriptDiagnosticsScript>
-    <PublishConfigurationScript>$(MSBuildThisFileDirectory)build\Assert-PublishConfiguration.ps1</PublishConfigurationScript>
-    <InstallerWorkflowScript>$(MSBuildThisFileDirectory)build\Assert-InstallerWorkflow.ps1</InstallerWorkflowScript>
-    <XmlDocumentationCoverageScript>$(MSBuildThisFileDirectory)build\Assert-XmlDocumentationCoverage.ps1</XmlDocumentationCoverageScript>
+    <!-- Repository policy/build scripts are required on every supported build host. -->
+    <RepositoryPowerShell Condition="'$(RepositoryPowerShell)' == '' and '$(OS)' == 'Windows_NT'">powershell</RepositoryPowerShell>
+    <RepositoryPowerShell Condition="'$(RepositoryPowerShell)' == '' and '$(OS)' != 'Windows_NT'">pwsh</RepositoryPowerShell>
+    <RepositoryPowerShellArguments Condition="'$(RepositoryPowerShellArguments)' == '' and '$(OS)' == 'Windows_NT'">-NoProfile -NonInteractive -ExecutionPolicy Bypass</RepositoryPowerShellArguments>
+    <RepositoryPowerShellArguments Condition="'$(RepositoryPowerShellArguments)' == '' and '$(OS)' != 'Windows_NT'">-NoProfile -NonInteractive</RepositoryPowerShellArguments>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <WireProtocolBootstrapScript>$(MSBuildThisFileDirectory)build/Ensure-WireProtocolPackage.ps1</WireProtocolBootstrapScript>
+    <LoggingIntegrityScript>$(MSBuildThisFileDirectory)build/Assert-LoggingIntegrity.ps1</LoggingIntegrityScript>
+    <OneWireArchitectureScript>$(MSBuildThisFileDirectory)build/Assert-OneWireArchitecture.ps1</OneWireArchitectureScript>
+    <RuntimeValueOwnershipScript>$(MSBuildThisFileDirectory)build/Assert-RuntimeValueOwnership.ps1</RuntimeValueOwnershipScript>
+    <LocalizationIntegrityScript>$(MSBuildThisFileDirectory)build/Assert-LocalizationIntegrity.ps1</LocalizationIntegrityScript>
+    <OperationalDiagnosticsScript>$(MSBuildThisFileDirectory)build/Assert-OperationalDiagnostics.ps1</OperationalDiagnosticsScript>
+    <InteractiveServerRenderModeScript>$(MSBuildThisFileDirectory)build/Assert-InteractiveServerRenderModes.ps1</InteractiveServerRenderModeScript>
+    <AsyncContinuationScript>$(MSBuildThisFileDirectory)build/Assert-AsyncContinuationPolicy.ps1</AsyncContinuationScript>
+    <ComponentDiagnosticsScript>$(MSBuildThisFileDirectory)build/Assert-ComponentDiagnostics.ps1</ComponentDiagnosticsScript>
+    <ComponentSafetyScript>$(MSBuildThisFileDirectory)build/Assert-ComponentSafety.ps1</ComponentSafetyScript>
+    <MethodDiagnosticsPolicyScript>$(MSBuildThisFileDirectory)build/Assert-MethodDiagnostics.ps1</MethodDiagnosticsPolicyScript>
+    <ServiceArchitectureScript>$(MSBuildThisFileDirectory)build/Assert-ServiceArchitecture.ps1</ServiceArchitectureScript>
+    <ApplicationStaticPolicyScript>$(MSBuildThisFileDirectory)build/Assert-ApplicationStaticPolicy.ps1</ApplicationStaticPolicyScript>
+    <TextServiceOwnershipScript>$(MSBuildThisFileDirectory)build/Assert-TextServiceOwnership.ps1</TextServiceOwnershipScript>
+    <IteratorExceptionPolicyScript>$(MSBuildThisFileDirectory)build/Assert-IteratorExceptionPolicy.ps1</IteratorExceptionPolicyScript>
+    <SystemVariableInitializationScript>$(MSBuildThisFileDirectory)build/Assert-SystemVariableInitialization.ps1</SystemVariableInitializationScript>
+    <PanelStudioInteractionLifecycleScript>$(MSBuildThisFileDirectory)build/Assert-PanelStudioInteractionLifecycle.ps1</PanelStudioInteractionLifecycleScript>
+    <PanelStudioAuthoringGeometryScript>$(MSBuildThisFileDirectory)build/Assert-PanelStudioAuthoringGeometry.ps1</PanelStudioAuthoringGeometryScript>
+    <JavaScriptDiagnosticsScript>$(MSBuildThisFileDirectory)build/Assert-JavaScriptDiagnostics.ps1</JavaScriptDiagnosticsScript>
+    <PublishConfigurationScript>$(MSBuildThisFileDirectory)build/Assert-PublishConfiguration.ps1</PublishConfigurationScript>
+    <InstallerWorkflowScript>$(MSBuildThisFileDirectory)build/Assert-InstallerWorkflow.ps1</InstallerWorkflowScript>
+    <XmlDocumentationCoverageScript>$(MSBuildThisFileDirectory)build/Assert-XmlDocumentationCoverage.ps1</XmlDocumentationCoverageScript>
   </PropertyGroup>
 
   <Target Name="EnsurePublisherWireProtocolPackage"
           BeforeTargets="Restore;_GenerateRestoreProjectSpec;_GenerateRestoreGraphProjectEntry"
-          Condition="'$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(SkipWireProtocolBootstrap)' != 'true' and '$(OS)' == 'Windows_NT'">
+          Condition="'$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(SkipWireProtocolBootstrap)' != 'true'">
     <Error Condition="!Exists('$(WireProtocolBootstrapScript)')" Text="LocalGPT protocol package bootstrap script is missing: $(WireProtocolBootstrapScript)" />
     <Exec Condition="Exists('$(WireProtocolBootstrapScript)')"
-          Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(WireProtocolBootstrapScript)&quot; -Version &quot;$(LocalGptWireProtocolVersion)&quot;"
+          Command="&quot;$(RepositoryPowerShell)&quot; $(RepositoryPowerShellArguments) -File &quot;$(WireProtocolBootstrapScript)&quot; -Version &quot;$(LocalGptWireProtocolVersion)&quot;"
           WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true"
           StandardOutputImportance="High" StandardErrorImportance="High" />
   </Target>
 
-  <!--<Target Name="AssertPublisherLoggingIntegrity"
+  <Target Name="AssertPublisherLoggingIntegrity"
           BeforeTargets="BeforeBuild"
-          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipLoggingIntegrityGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipLoggingIntegrityGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web'">
     <Error Condition="!Exists('$(LoggingIntegrityScript)')" Text="Logging integrity guard script is missing: $(LoggingIntegrityScript)" />
-    <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(LoggingIntegrityScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
-  </Target>-->
+    <Exec Command="&quot;$(RepositoryPowerShell)&quot; $(RepositoryPowerShellArguments) -File &quot;$(LoggingIntegrityScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
+  </Target>
 
   <Target Name="AssertPublisherOneWireArchitecture"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherLoggingIntegrity"
-          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipOneWireArchitectureGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipOneWireArchitectureGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web'">
     <Error Condition="!Exists('$(OneWireArchitectureScript)')" Text="1-Wire architecture guard script is missing: $(OneWireArchitectureScript)" />
-    <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(OneWireArchitectureScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
+    <Exec Command="&quot;$(RepositoryPowerShell)&quot; $(RepositoryPowerShellArguments) -File &quot;$(OneWireArchitectureScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
   </Target>
 
   <Target Name="AssertPublisherRuntimeValueOwnership"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherOneWireArchitecture"
-          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipRuntimeValueOwnershipGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipRuntimeValueOwnershipGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web'">
     <Error Condition="!Exists('$(RuntimeValueOwnershipScript)')" Text="Runtime-value ownership script is missing: $(RuntimeValueOwnershipScript)" />
-    <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(RuntimeValueOwnershipScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
+    <Exec Command="&quot;$(RepositoryPowerShell)&quot; $(RepositoryPowerShellArguments) -File &quot;$(RuntimeValueOwnershipScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
   </Target>
 
   <Target Name="AssertPublisherLocalizationIntegrity"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherRuntimeValueOwnership"
-          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipLocalizationIntegrityGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipLocalizationIntegrityGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web'">
     <Error Condition="!Exists('$(LocalizationIntegrityScript)')" Text="Localization integrity guard script is missing: $(LocalizationIntegrityScript)" />
-    <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(LocalizationIntegrityScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
+    <Exec Command="&quot;$(RepositoryPowerShell)&quot; $(RepositoryPowerShellArguments) -File &quot;$(LocalizationIntegrityScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
   </Target>
 
   <Target Name="AssertPublisherOperationalDiagnostics"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherLocalizationIntegrity"
-          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipOperationalDiagnosticsGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipOperationalDiagnosticsGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web'">
     <Error Condition="!Exists('$(OperationalDiagnosticsScript)')" Text="Operational diagnostics guard script is missing: $(OperationalDiagnosticsScript)" />
-    <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(OperationalDiagnosticsScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
+    <Exec Command="&quot;$(RepositoryPowerShell)&quot; $(RepositoryPowerShellArguments) -File &quot;$(OperationalDiagnosticsScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
   </Target>
 
   <Target Name="AssertPublisherInteractiveServerRenderModes"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherOperationalDiagnostics"
-          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipInteractiveServerRenderModeGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipInteractiveServerRenderModeGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web'">
     <Error Condition="!Exists('$(InteractiveServerRenderModeScript)')" Text="InteractiveServer render-mode guard script is missing: $(InteractiveServerRenderModeScript)" />
-    <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(InteractiveServerRenderModeScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
+    <Exec Command="&quot;$(RepositoryPowerShell)&quot; $(RepositoryPowerShellArguments) -File &quot;$(InteractiveServerRenderModeScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
   </Target>
 
   <Target Name="AssertPublisherAsyncContinuationPolicy"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherInteractiveServerRenderModes"
-          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipAsyncContinuationGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipAsyncContinuationGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web'">
     <Error Condition="!Exists('$(AsyncContinuationScript)')" Text="Async continuation guard script is missing: $(AsyncContinuationScript)" />
-    <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(AsyncContinuationScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
+    <Exec Command="&quot;$(RepositoryPowerShell)&quot; $(RepositoryPowerShellArguments) -File &quot;$(AsyncContinuationScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
   </Target>
 
   <Target Name="AssertPublisherComponentDiagnostics"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherAsyncContinuationPolicy"
-          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipComponentDiagnosticsGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipComponentDiagnosticsGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web'">
     <Error Condition="!Exists('$(ComponentDiagnosticsScript)')" Text="Component diagnostics guard script is missing: $(ComponentDiagnosticsScript)" />
-    <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(ComponentDiagnosticsScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
+    <Exec Command="&quot;$(RepositoryPowerShell)&quot; $(RepositoryPowerShellArguments) -File &quot;$(ComponentDiagnosticsScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
   </Target>
 
   <Target Name="AssertPublisherComponentSafety"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherComponentDiagnostics"
-          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipComponentSafetyGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipComponentSafetyGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web'">
     <Error Condition="!Exists('$(ComponentSafetyScript)')" Text="Component safety policy script is missing: $(ComponentSafetyScript)" />
-    <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(ComponentSafetyScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
+    <Exec Command="&quot;$(RepositoryPowerShell)&quot; $(RepositoryPowerShellArguments) -File &quot;$(ComponentSafetyScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
   </Target>
 
   <Target Name="AssertPublisherMethodDiagnosticsPolicy"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherComponentSafety"
-          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipMethodDiagnosticsPolicyGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipMethodDiagnosticsPolicyGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web'">
     <Error Condition="!Exists('$(MethodDiagnosticsPolicyScript)')" Text="Method diagnostics policy script is missing: $(MethodDiagnosticsPolicyScript)" />
-    <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(MethodDiagnosticsPolicyScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
+    <Exec Command="&quot;$(RepositoryPowerShell)&quot; $(RepositoryPowerShellArguments) -File &quot;$(MethodDiagnosticsPolicyScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
   </Target>
 
-  <!--<Target Name="AssertPublisherServiceArchitecture"
+  <Target Name="AssertPublisherServiceArchitecture"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherMethodDiagnosticsPolicy"
-          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipServiceArchitectureGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipServiceArchitectureGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web'">
     <Error Condition="!Exists('$(ServiceArchitectureScript)')" Text="Service architecture policy script is missing: $(ServiceArchitectureScript)" />
-    <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(ServiceArchitectureScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
-  </Target>-->
+    <Exec Command="&quot;$(RepositoryPowerShell)&quot; $(RepositoryPowerShellArguments) -File &quot;$(ServiceArchitectureScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
+  </Target>
 
   <Target Name="AssertPublisherApplicationStaticPolicy"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherServiceArchitecture"
-          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipApplicationStaticPolicyGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipApplicationStaticPolicyGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web'">
     <Error Condition="!Exists('$(ApplicationStaticPolicyScript)')" Text="Application static policy script is missing: $(ApplicationStaticPolicyScript)" />
-    <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(ApplicationStaticPolicyScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
+    <Exec Command="&quot;$(RepositoryPowerShell)&quot; $(RepositoryPowerShellArguments) -File &quot;$(ApplicationStaticPolicyScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
   </Target>
 
   <Target Name="AssertPublisherTextServiceOwnership"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherApplicationStaticPolicy"
-          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipTextServiceOwnershipGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipTextServiceOwnershipGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web'">
     <Error Condition="!Exists('$(TextServiceOwnershipScript)')" Text="Text-service ownership script is missing: $(TextServiceOwnershipScript)" />
-    <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(TextServiceOwnershipScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
+    <Exec Command="&quot;$(RepositoryPowerShell)&quot; $(RepositoryPowerShellArguments) -File &quot;$(TextServiceOwnershipScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
   </Target>
 
   <Target Name="AssertPublisherIteratorExceptionPolicy"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherTextServiceOwnership"
-          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipIteratorExceptionPolicyGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipIteratorExceptionPolicyGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web'">
     <Error Condition="!Exists('$(IteratorExceptionPolicyScript)')" Text="Iterator exception policy script is missing: $(IteratorExceptionPolicyScript)" />
-    <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(IteratorExceptionPolicyScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
+    <Exec Command="&quot;$(RepositoryPowerShell)&quot; $(RepositoryPowerShellArguments) -File &quot;$(IteratorExceptionPolicyScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
   </Target>
 
   <Target Name="AssertPublisherSystemVariableInitialization"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherIteratorExceptionPolicy"
-          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipSystemVariableInitializationGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipSystemVariableInitializationGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web'">
     <Error Condition="!Exists('$(SystemVariableInitializationScript)')" Text="System-variable initialization guard script is missing: $(SystemVariableInitializationScript)" />
-    <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(SystemVariableInitializationScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
+    <Exec Command="&quot;$(RepositoryPowerShell)&quot; $(RepositoryPowerShellArguments) -File &quot;$(SystemVariableInitializationScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
   </Target>
 
   <Target Name="AssertPublisherPanelStudioInteractionLifecycle"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherSystemVariableInitialization"
-          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipPanelStudioInteractionLifecycleGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipPanelStudioInteractionLifecycleGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web'">
     <Error Condition="!Exists('$(PanelStudioInteractionLifecycleScript)')" Text="Panel Studio interaction lifecycle guard script is missing: $(PanelStudioInteractionLifecycleScript)" />
-    <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(PanelStudioInteractionLifecycleScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
+    <Exec Command="&quot;$(RepositoryPowerShell)&quot; $(RepositoryPowerShellArguments) -File &quot;$(PanelStudioInteractionLifecycleScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
   </Target>
 
   <Target Name="AssertPublisherPanelStudioAuthoringGeometry"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherPanelStudioInteractionLifecycle"
-          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipPanelStudioAuthoringGeometryGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipPanelStudioAuthoringGeometryGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web'">
     <Error Condition="!Exists('$(PanelStudioAuthoringGeometryScript)')" Text="Panel Studio authoring geometry guard script is missing: $(PanelStudioAuthoringGeometryScript)" />
-    <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(PanelStudioAuthoringGeometryScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
+    <Exec Command="&quot;$(RepositoryPowerShell)&quot; $(RepositoryPowerShellArguments) -File &quot;$(PanelStudioAuthoringGeometryScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
   </Target>
 
   <Target Name="AssertPublisherJavaScriptDiagnostics"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherPanelStudioAuthoringGeometry"
-          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipJavaScriptDiagnosticsGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipJavaScriptDiagnosticsGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web'">
     <Error Condition="!Exists('$(JavaScriptDiagnosticsScript)')" Text="JavaScript diagnostics guard script is missing: $(JavaScriptDiagnosticsScript)" />
-    <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(JavaScriptDiagnosticsScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
+    <Exec Command="&quot;$(RepositoryPowerShell)&quot; $(RepositoryPowerShellArguments) -File &quot;$(JavaScriptDiagnosticsScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
   </Target>
 
   <Target Name="AssertPublisherPublishConfiguration"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherJavaScriptDiagnostics"
-          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipPublishConfigurationGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipPublishConfigurationGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web'">
     <Error Condition="!Exists('$(PublishConfigurationScript)')" Text="Publish configuration guard script is missing: $(PublishConfigurationScript)" />
-    <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(PublishConfigurationScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
+    <Exec Command="&quot;$(RepositoryPowerShell)&quot; $(RepositoryPowerShellArguments) -File &quot;$(PublishConfigurationScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
   </Target>
 
   <Target Name="AssertPublisherInstallerWorkflow"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherPublishConfiguration"
-          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipInstallerWorkflowGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipInstallerWorkflowGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web'">
     <Error Condition="!Exists('$(InstallerWorkflowScript)')" Text="Installer workflow guard script is missing: $(InstallerWorkflowScript)" />
-    <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(InstallerWorkflowScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
+    <Exec Command="&quot;$(RepositoryPowerShell)&quot; $(RepositoryPowerShellArguments) -File &quot;$(InstallerWorkflowScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
   </Target>
 
   <Target Name="AssertPublisherXmlDocumentationCoverage"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherInstallerWorkflow"
-          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipXmlDocumentationCoverageGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipXmlDocumentationCoverageGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web'">
     <Error Condition="!Exists('$(XmlDocumentationCoverageScript)')" Text="XML documentation coverage guard script is missing: $(XmlDocumentationCoverageScript)" />
-    <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(XmlDocumentationCoverageScript)&quot;"
+    <Exec Command="&quot;$(RepositoryPowerShell)&quot; $(RepositoryPowerShellArguments) -File &quot;$(XmlDocumentationCoverageScript)&quot;"
           WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
   </Target>
 
   <PropertyGroup>
-    <PublisherStudioDocumentationScript>$(MSBuildThisFileDirectory)build\Build-Documentation.ps1</PublisherStudioDocumentationScript>
-    <PublisherStudioPagesSnapshotScript>$(MSBuildThisFileDirectory)build\Update-GitHubPagesSnapshot.ps1</PublisherStudioPagesSnapshotScript>
-    <PublisherStudioPagesSnapshotArchive>$(MSBuildThisFileDirectory).github\pages\publisherstudio-kawaii-docs.zip</PublisherStudioPagesSnapshotArchive>
+    <PublisherStudioDocumentationScript>$(MSBuildThisFileDirectory)build/Build-Documentation.ps1</PublisherStudioDocumentationScript>
+    <PublisherStudioPagesSnapshotScript>$(MSBuildThisFileDirectory)build/Update-GitHubPagesSnapshot.ps1</PublisherStudioPagesSnapshotScript>
+    <PublisherStudioPagesSnapshotArchive>$(MSBuildThisFileDirectory).github/pages/publisherstudio-kawaii-docs.zip</PublisherStudioPagesSnapshotArchive>
     <SeedPublisherStudioGitHubPagesSnapshotOnBuild Condition="'$(SeedPublisherStudioGitHubPagesSnapshotOnBuild)' == ''">true</SeedPublisherStudioGitHubPagesSnapshotOnBuild>
     <!-- The dot prevents a trailing Windows backslash from escaping later PowerShell arguments. -->
     <PublisherStudioDocumentationRepositoryRoot>$(MSBuildThisFileDirectory).</PublisherStudioDocumentationRepositoryRoot>
-    <PublisherStudioDocumentationOutputRoot>$(TargetDir)wwwroot\help-docs</PublisherStudioDocumentationOutputRoot>
+    <PublisherStudioDocumentationOutputRoot>$(TargetDir)wwwroot/help-docs</PublisherStudioDocumentationOutputRoot>
     <BuildPublisherStudioDocumentation Condition="'$(BuildPublisherStudioDocumentation)' == ''">true</BuildPublisherStudioDocumentation>
-    <RequirePublisherStudioDocumentationPdf Condition="'$(RequirePublisherStudioDocumentationPdf)' == ''">true</RequirePublisherStudioDocumentationPdf>
+    <RequirePublisherStudioDocumentationPdf Condition="'$(RequirePublisherStudioDocumentationPdf)' == '' and '$(Configuration)' == 'Release'">true</RequirePublisherStudioDocumentationPdf>
+    <RequirePublisherStudioDocumentationPdf Condition="'$(RequirePublisherStudioDocumentationPdf)' == ''">false</RequirePublisherStudioDocumentationPdf>
     <PublisherStudioDocumentationPdfArgument Condition="'$(RequirePublisherStudioDocumentationPdf)' == 'true'">-RequirePdf</PublisherStudioDocumentationPdfArgument>
   </PropertyGroup>
 
   <Target Name="BuildPublisherStudioDocumentation"
           AfterTargets="Build"
-          Condition="'$(DesignTimeBuild)' != 'true' and '$(BuildPublisherStudioDocumentation)' == 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(BuildPublisherStudioDocumentation)' == 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web'">
     <Error Condition="!Exists('$(PublisherStudioDocumentationScript)')" Text="PublisherStudio documentation build script is missing: $(PublisherStudioDocumentationScript)" />
     <Error Condition="!Exists('$(TargetPath)')" Text="PublisherStudio documentation cannot be generated because the application assembly is missing: $(TargetPath)" />
     <Error Condition="!Exists('$(TargetDir)$(AssemblyName).xml')" Text="PublisherStudio documentation cannot be generated because compiler XML is missing: $(TargetDir)$(AssemblyName).xml" />
     <Message Importance="High" Text="Generating PublisherStudio $(Version) documentation into $(PublisherStudioDocumentationOutputRoot)" />
-    <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(PublisherStudioDocumentationScript)&quot; -RepositoryRoot &quot;$(PublisherStudioDocumentationRepositoryRoot)&quot; -AssemblyPath &quot;$(TargetPath)&quot; -XmlDocumentationPath &quot;$(TargetDir)$(AssemblyName).xml&quot; -Version &quot;$(Version)&quot; -OutputWebRoot &quot;$(PublisherStudioDocumentationOutputRoot)&quot; $(PublisherStudioDocumentationPdfArgument)"
+    <Exec Command="&quot;$(RepositoryPowerShell)&quot; $(RepositoryPowerShellArguments) -File &quot;$(PublisherStudioDocumentationScript)&quot; -RepositoryRoot &quot;$(PublisherStudioDocumentationRepositoryRoot)&quot; -AssemblyPath &quot;$(TargetPath)&quot; -XmlDocumentationPath &quot;$(TargetDir)$(AssemblyName).xml&quot; -Version &quot;$(Version)&quot; -OutputWebRoot &quot;$(PublisherStudioDocumentationOutputRoot)&quot; $(PublisherStudioDocumentationPdfArgument)"
           WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true"
           StandardOutputImportance="High" StandardErrorImportance="High" />
-    <Error Condition="!Exists('$(PublisherStudioDocumentationOutputRoot)\index.html')" Text="PublisherStudio documentation generation completed without index.html: $(PublisherStudioDocumentationOutputRoot)" />
-    <Error Condition="!Exists('$(PublisherStudioDocumentationOutputRoot)\api\index.html')" Text="PublisherStudio documentation generation completed without the API reference root: $(PublisherStudioDocumentationOutputRoot)\api\index.html" />
-    <Error Condition="!Exists('$(PublisherStudioDocumentationOutputRoot)\documentation-status.json')" Text="PublisherStudio documentation generation completed without documentation-status.json: $(PublisherStudioDocumentationOutputRoot)" />
-    <Error Condition="!Exists('$(PublisherStudioDocumentationOutputRoot)\PublisherStudio.Web.xml')" Text="PublisherStudio documentation generation completed without PublisherStudio.Web.xml: $(PublisherStudioDocumentationOutputRoot)" />
-    <Error Condition="'$(RequirePublisherStudioDocumentationPdf)' == 'true' and !Exists('$(PublisherStudioDocumentationOutputRoot)\PublisherStudio-$(Version).pdf')" Text="PublisherStudio documentation generation completed without the complete versioned PDF: $(PublisherStudioDocumentationOutputRoot)\PublisherStudio-$(Version).pdf" />
+    <Error Condition="!Exists('$(PublisherStudioDocumentationOutputRoot)/index.html')" Text="PublisherStudio documentation generation completed without index.html: $(PublisherStudioDocumentationOutputRoot)" />
+    <Error Condition="!Exists('$(PublisherStudioDocumentationOutputRoot)/api/index.html')" Text="PublisherStudio documentation generation completed without the API reference root: $(PublisherStudioDocumentationOutputRoot)/api/index.html" />
+    <Error Condition="!Exists('$(PublisherStudioDocumentationOutputRoot)/documentation-status.json')" Text="PublisherStudio documentation generation completed without documentation-status.json: $(PublisherStudioDocumentationOutputRoot)" />
+    <Error Condition="!Exists('$(PublisherStudioDocumentationOutputRoot)/PublisherStudio.Web.xml')" Text="PublisherStudio documentation generation completed without PublisherStudio.Web.xml: $(PublisherStudioDocumentationOutputRoot)" />
+    <Error Condition="'$(RequirePublisherStudioDocumentationPdf)' == 'true' and !Exists('$(PublisherStudioDocumentationOutputRoot)/PublisherStudio-$(Version).pdf')" Text="PublisherStudio documentation generation completed without the complete versioned PDF: $(PublisherStudioDocumentationOutputRoot)/PublisherStudio-$(Version).pdf" />
   </Target>
 
   <!--
@@ -219,10 +228,10 @@
   -->
   <Target Name="SeedPublisherStudioGitHubPagesSnapshot"
           AfterTargets="BuildPublisherStudioDocumentation"
-          Condition="'$(DesignTimeBuild)' != 'true' and '$(BuildPublisherStudioDocumentation)' == 'true' and '$(SeedPublisherStudioGitHubPagesSnapshotOnBuild)' == 'true' and ('$(Configuration)' == 'Debug' or '$(Configuration)' == 'Release') and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(BuildPublisherStudioDocumentation)' == 'true' and '$(SeedPublisherStudioGitHubPagesSnapshotOnBuild)' == 'true' and ('$(Configuration)' == 'Debug' or '$(Configuration)' == 'Release') and '$(MSBuildProjectName)' == 'PublisherStudio.Web'">
     <Error Condition="!Exists('$(PublisherStudioPagesSnapshotScript)')" Text="PublisherStudio GitHub Pages snapshot script is missing: $(PublisherStudioPagesSnapshotScript)" />
     <Message Importance="High" Text="Validating and seeding the PublisherStudio $(Version) GitHub Pages snapshot from $(PublisherStudioDocumentationOutputRoot)" />
-    <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(PublisherStudioPagesSnapshotScript)&quot; -DocumentationRoot &quot;$(PublisherStudioDocumentationOutputRoot)&quot; -OutputArchive &quot;$(PublisherStudioPagesSnapshotArchive)&quot;"
+    <Exec Command="&quot;$(RepositoryPowerShell)&quot; $(RepositoryPowerShellArguments) -File &quot;$(PublisherStudioPagesSnapshotScript)&quot; -DocumentationRoot &quot;$(PublisherStudioDocumentationOutputRoot)&quot; -OutputArchive &quot;$(PublisherStudioPagesSnapshotArchive)&quot;"
           WorkingDirectory="$(MSBuildThisFileDirectory)"
           ConsoleToMSBuild="true"
           StandardOutputImportance="High"
@@ -234,11 +243,11 @@
           AfterTargets="ComputeFilesToPublish"
           BeforeTargets="CopyFilesToPublishDirectory"
           DependsOnTargets="BuildPublisherStudioDocumentation"
-          Condition="'$(DesignTimeBuild)' != 'true' and '$(BuildPublisherStudioDocumentation)' == 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(BuildPublisherStudioDocumentation)' == 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web'">
     <ItemGroup>
-      <PublisherStudioDocumentationPublishFiles Include="$(PublisherStudioDocumentationOutputRoot)\**\*" />
+      <PublisherStudioDocumentationPublishFiles Include="$(PublisherStudioDocumentationOutputRoot)/**/*" />
       <ResolvedFileToPublish Include="@(PublisherStudioDocumentationPublishFiles)">
-        <RelativePath>wwwroot\help-docs\%(RecursiveDir)%(Filename)%(Extension)</RelativePath>
+        <RelativePath>wwwroot/help-docs/%(RecursiveDir)%(Filename)%(Extension)</RelativePath>
         <CopyToPublishDirectory>Always</CopyToPublishDirectory>
         <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       </ResolvedFileToPublish>

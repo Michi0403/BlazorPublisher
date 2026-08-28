@@ -1,7 +1,7 @@
-# PublisherStudio 3.0.8
+# PublisherStudio 3.0.9
 
-PublisherStudio 3.0.8 is the **macOS Documentation PDF Runtime Repair** release.
+PublisherStudio 3.0.9 is the **Cross-Platform Build and Documentation Runtime Repair** release.
 
-It keeps the complete DocFX, accessibility, and PDF release pipeline intact. The documentation browser resolver now recognizes the standard macOS Google Chrome, Microsoft Edge, and Chromium application bundles, allowing the existing single-browser PDF path to run on macOS instead of unnecessarily falling back to the much slower DocFX PDF plug-in. If the plug-in fallback is still required, its output is streamed live and redirected carriage-return transfer counters that become corrupt under PowerShell are not redrawn in the release console.
+This patch repairs the exact 3.0.8 build-guard and documentation-tooling failures. Repository guards remain enabled and now execute on Windows, macOS, and Linux through the appropriate PowerShell host. The delegated native-device facade again owns the reviewed cancellation and failure catch boundaries, its required logging-integrity policy document is restored, and the service-architecture guard validates the existing tokenized `--product publisherstudio` invocation correctly. Debug builds keep generated HTML help but do not force the heavyweight PDF; the release path still requires the complete versioned PDF once. Existing Node.js 20+ installations are reused instead of provisioning a second runtime, and redirected DocFX progress is compact and de-duplicated across platforms.
 
-No application, UI, InteractiveServer, service, deployment, publication-format, or persistence behavior was changed. This handoff is source-only; no .NET build and no GitHub/network source access were used while preparing it. See `CHANGELOG-v3.0.8-MACOS-DOCUMENTATION-PDF-RUNTIME-REPAIR.md` and `VALIDATION-v3.0.8-source.md`.
+Application features, UI behavior, InteractiveServer boundaries, persistence, DevExpress/Spreadsheet functionality, publication formats, LocalGPT wire protocol integration, and release packaging contracts are unchanged. This handoff is source-only; no .NET build and no GitHub access were used while preparing it. See `CHANGELOG-v3.0.9-CROSS-PLATFORM-BUILD-DOCUMENTATION-REPAIR.md` and `VALIDATION-v3.0.9-source.md`.

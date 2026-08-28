@@ -3425,7 +3425,7 @@
                 var bytes = buffer.ToArray();
                 if (bytes.Length == 0) throw new InvalidDataException("The selected media file is empty.");
 
-                module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=3.0.8").ConfigureAwait(true);
+                module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=3.0.9").ConfigureAwait(true);
                 temporaryAssetId = Guid.NewGuid();
                 var inspectionUrl = MediaAssets.RegisterBytes(temporaryAssetId, bytes, mimeType);
                 MediaSourceInfo info;

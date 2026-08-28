@@ -688,7 +688,7 @@ function Find-PublisherStudioDocumentationBrowser {
         }
     }
 
-    foreach ($commandName in @("msedge", "chrome", "chromium", "chromium-browser")) {
+    foreach ($commandName in @("msedge", "microsoft-edge", "microsoft-edge-stable", "chrome", "google-chrome", "google-chrome-stable", "chromium", "chromium-browser")) {
         $command = Get-Command $commandName -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
         if ($null -ne $command) {
             $commandPath = if (-not [string]::IsNullOrWhiteSpace([string]$command.Source)) { [string]$command.Source } else { [string]$command.Path }
@@ -2022,12 +2022,12 @@ $useManifestTool = $false
 function Invoke-PublisherStudioDocfx {
     param([Parameter(Mandatory)][string[]]$Arguments)
 
-    # Stream DocFX output as it arrives so a long PDF render cannot look frozen. DocFX uses
-    # carriage-return transfer counters for its interactive console; once redirected through
-    # PowerShell those counters can repaint into impossible totals, so keep them for diagnostics
-    # but do not reproduce the corrupted in-place counters in the release console.
+    # Keep native DocFX output available for diagnostics, but render interactive progress as
+    # bounded normal lines. Carriage-return redraws otherwise flood macOS/Linux terminals, while
+    # redirected Unicode bars can become mojibake under Windows/MSBuild.
     $previousErrorActionPreference = $ErrorActionPreference
     $capturedOutput = [System.Collections.Generic.List[string]]::new()
+    $progressState = @{}
     $writeEntry = {
         param([object]$Entry)
         $rawLine = [string]$Entry
@@ -2035,7 +2035,46 @@ function Invoke-PublisherStudioDocfx {
         foreach ($rawSegment in @($rawLine -split "`r")) {
             if ([string]::IsNullOrWhiteSpace($rawSegment)) { continue }
             $displayLine = [regex]::Replace($rawSegment, '\x1B\[[0-?]*[ -/]*[@-~]', '')
+            if ([string]::IsNullOrWhiteSpace($displayLine)) { continue }
+
+            # File-copy redraw counters are terminal-only progress. Their carriage-return records
+            # are not stable once redirected and can report impossible totals, so do not print them.
             if ($displayLine -match '^\s*(?:Removed|Copied)\s+\d+\s+of\s+\d+\s+files\b') { continue }
+
+            # Replace Spectre/Playwright download bars with compact numeric milestones. This also
+            # strips block characters before Windows code-page conversion can turn them into Ôû... text.
+            $downloadMatch = [regex]::Match($displayLine, '\|[^\r\n]*\|\s*(?<percent>\d{1,3})%\s+of\s+(?<size>.+?)\s*$')
+            if ($downloadMatch.Success) {
+                $percent = [int]$downloadMatch.Groups['percent'].Value
+                $size = $downloadMatch.Groups['size'].Value.Trim()
+                $key = 'download|' + $size
+                $last = if ($progressState.ContainsKey($key)) { [int]$progressState[$key] } else { -100 }
+                if ($last -lt 0 -or $percent -eq 100 -or ($percent -ge 95 -and $last -lt 95) -or ($percent - $last -ge 10)) {
+                    $progressState[$key] = $percent
+                    Write-Host "[DocFX] Tool download: $percent% of $size"
+                }
+                continue
+            }
+
+            # DocFX PDF progress can sit at 98% for a long final merge. Print meaningful movement
+            # once, not hundreds of identical redraw records.
+            $pdfMatch = [regex]::Match($displayLine, '(?i)(?<name>[^\r\n]*?\.pdf):\s*(?<percent>\d{1,3})%\s*$')
+            if ($pdfMatch.Success) {
+                $percent = [int]$pdfMatch.Groups['percent'].Value
+                $name = $pdfMatch.Groups['name'].Value.Trim()
+                $key = 'pdf|' + $name
+                $last = if ($progressState.ContainsKey($key)) { [int]$progressState[$key] } else { -100 }
+                if ($last -lt 0 -or $percent -eq 100 -or ($percent -ge 95 -and $last -lt 95) -or ($percent - $last -ge 10)) {
+                    $progressState[$key] = $percent
+                    Write-Host "[DocFX] $name: $percent%"
+                }
+                continue
+            }
+
+            # Suppress any remaining progress-bar-only record. Non-progress diagnostics, warnings,
+            # build stages, and final status lines continue to pass through unchanged.
+            if ($displayLine -match '^\s*\|[^\r\n]*\|\s*\d{1,3}%') { continue }
+
             $displayLine = [regex]::Replace($displayLine, '(?i)\b(?:fatalerror|error)\s*:', 'diagnostic:')
             Write-Host "[DocFX] $displayLine"
         }

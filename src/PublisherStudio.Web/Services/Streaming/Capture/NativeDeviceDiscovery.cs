@@ -44,6 +44,11 @@ public sealed class NativeDeviceDiscovery(
             logger.LogInformation("Discovered {DeviceCount} native media devices.", discovered.Count);
             return discovered;
         }
+        catch (OperationCanceledException exception)
+        {
+            logger.LogDebug(exception, "Native media-device discovery was canceled.");
+            throw;
+        }
         catch (Exception exception)
         {
             logger.LogError(exception, "Could not discover native media devices.");

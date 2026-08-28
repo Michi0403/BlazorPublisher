@@ -1,7 +1,7 @@
-# PublisherStudio 3.0.9
+# PublisherStudio 3.1.0
 
-PublisherStudio 3.0.9 is the **Cross-Platform Build and Documentation Runtime Repair** release.
+PublisherStudio 3.1.0 is the **PowerShell Documentation Progress Parser Repair** release.
 
-This patch repairs the exact 3.0.8 build-guard and documentation-tooling failures. Repository guards remain enabled and now execute on Windows, macOS, and Linux through the appropriate PowerShell host. The delegated native-device facade again owns the reviewed cancellation and failure catch boundaries, its required logging-integrity policy document is restored, and the service-architecture guard validates the existing tokenized `--product publisherstudio` invocation correctly. Debug builds keep generated HTML help but do not force the heavyweight PDF; the release path still requires the complete versioned PDF once. Existing Node.js 20+ installations are reused instead of provisioning a second runtime, and redirected DocFX progress is compact and de-duplicated across platforms.
+It preserves the 3.0.9 cross-platform build/documentation behavior and fixes the documentation progress formatter so Windows PowerShell 5.1 parses the DocFX percentage line correctly. The full release documentation/PDF pipeline, cross-platform guards, existing Node/browser reuse, DevExpress/Spreadsheet preparation, application behavior, InteractiveServer boundaries, and deployment behavior remain unchanged.
 
-Application features, UI behavior, InteractiveServer boundaries, persistence, DevExpress/Spreadsheet functionality, publication formats, LocalGPT wire protocol integration, and release packaging contracts are unchanged. This handoff is source-only; no .NET build and no GitHub access were used while preparing it. See `CHANGELOG-v3.0.9-CROSS-PLATFORM-BUILD-DOCUMENTATION-REPAIR.md` and `VALIDATION-v3.0.9-source.md`.
+This handoff is source-only. No .NET build and no GitHub access were used while preparing it. See `CHANGELOG-v3.1.0-POWERSHELL-DOCFX-PROGRESS-PARSER-REPAIR.md` and `VALIDATION-v3.1.0-source.md`.

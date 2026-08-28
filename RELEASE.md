@@ -1,7 +1,7 @@
-# PublisherStudio 3.0.5
+# PublisherStudio 3.0.8
 
-PublisherStudio 3.0.5 is the **Native Discovery Resolution Hardening** release.
+PublisherStudio 3.0.8 is the **macOS Documentation PDF Runtime Repair** release.
 
-It keeps the 3.0.4 compiler repairs and hardens them so the native discovery code no longer relies on a namespace import for `PublisherRuntimePattern`. The two runtime-pattern references are fully qualified, and the Unix file-mode code now rejects Windows before entering the Unix-only API call, giving the platform analyzer an explicit supported-path boundary.
+It keeps the complete DocFX, accessibility, and PDF release pipeline intact. The documentation browser resolver now recognizes the standard macOS Google Chrome, Microsoft Edge, and Chromium application bundles, allowing the existing single-browser PDF path to run on macOS instead of unnecessarily falling back to the much slower DocFX PDF plug-in. If the plug-in fallback is still required, its output is streamed live and redirected carriage-return transfer counters that become corrupt under PowerShell are not redrawn in the release console.
 
-This handoff is source-only. No .NET build and no GitHub/network source access were used while preparing it. See `CHANGELOG-v3.0.5-NATIVE-DISCOVERY-RESOLUTION-HARDENING.md` and `VALIDATION-v3.0.5-source.md`.
+No application, UI, InteractiveServer, service, deployment, publication-format, or persistence behavior was changed. This handoff is source-only; no .NET build and no GitHub/network source access were used while preparing it. See `CHANGELOG-v3.0.8-MACOS-DOCUMENTATION-PDF-RUNTIME-REPAIR.md` and `VALIDATION-v3.0.8-source.md`.

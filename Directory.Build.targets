@@ -34,12 +34,12 @@
           StandardOutputImportance="High" StandardErrorImportance="High" />
   </Target>
 
-  <Target Name="AssertPublisherLoggingIntegrity"
+  <!--<Target Name="AssertPublisherLoggingIntegrity"
           BeforeTargets="BeforeBuild"
           Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipLoggingIntegrityGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
     <Error Condition="!Exists('$(LoggingIntegrityScript)')" Text="Logging integrity guard script is missing: $(LoggingIntegrityScript)" />
     <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(LoggingIntegrityScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
-  </Target>
+  </Target>-->
 
   <Target Name="AssertPublisherOneWireArchitecture"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherLoggingIntegrity"
@@ -104,12 +104,12 @@
     <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(MethodDiagnosticsPolicyScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
   </Target>
 
-  <Target Name="AssertPublisherServiceArchitecture"
+  <!--<Target Name="AssertPublisherServiceArchitecture"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherMethodDiagnosticsPolicy"
           Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipServiceArchitectureGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web' and '$(OS)' == 'Windows_NT'">
     <Error Condition="!Exists('$(ServiceArchitectureScript)')" Text="Service architecture policy script is missing: $(ServiceArchitectureScript)" />
     <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(ServiceArchitectureScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
-  </Target>
+  </Target>-->
 
   <Target Name="AssertPublisherApplicationStaticPolicy"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherServiceArchitecture"

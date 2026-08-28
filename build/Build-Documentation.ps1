@@ -594,6 +594,32 @@ function Install-PublisherStudioWebsiteThemeAssets {
     return $updatedCount
 }
 
+function Repair-PublisherStudioGeneratedHtmlLanguage {
+    param([Parameter(Mandatory)][string]$SiteRoot)
+
+    $siteRootFull = [IO.Path]::GetFullPath($SiteRoot)
+    $updatedCount = 0
+    foreach ($file in @(Get-ChildItem -LiteralPath $siteRootFull -Filter "*.html" -File -Recurse -ErrorAction SilentlyContinue)) {
+        if ($file.FullName -like "*\.print-book\*") { continue }
+
+        $html = [IO.File]::ReadAllText($file.FullName)
+        $openingTagMatch = [regex]::Match($html, '(?i)<html\b[^>]*>')
+        if (-not $openingTagMatch.Success) { continue }
+
+        $openingTag = $openingTagMatch.Value
+        if ($openingTag -match '(?i)\blang\s*=') { continue }
+
+        $replacementTag = $openingTag.Insert(5, ' lang="en"')
+        $updated = $html.Substring(0, $openingTagMatch.Index) +
+            $replacementTag +
+            $html.Substring($openingTagMatch.Index + $openingTagMatch.Length)
+        [IO.File]::WriteAllText($file.FullName, $updated, [Text.UTF8Encoding]::new($false))
+        $updatedCount++
+    }
+
+    return $updatedCount
+}
+
 function Test-PublisherStudioCompletePdf {
     param(
         [Parameter(Mandatory)][string]$Path,
@@ -642,6 +668,24 @@ function Find-PublisherStudioDocumentationBrowser {
     if (-not [string]::IsNullOrWhiteSpace($localApplicationData)) {
         $candidates.Add([pscustomobject]@{ Path = (Join-Path $localApplicationData "Microsoft\Edge\Application\msedge.exe"); Name = "Microsoft Edge" })
         $candidates.Add([pscustomobject]@{ Path = (Join-Path $localApplicationData "Google\Chrome\Application\chrome.exe"); Name = "Google Chrome" })
+    }
+
+    # macOS GUI applications are not normally placed on PATH. Probe the standard application
+    # bundles so the preferred single-browser PDF path is available there just as it is on Windows.
+    if ([IO.Path]::DirectorySeparatorChar -ne '\') {
+        $unixName = ''
+        try { $unixName = [string](& uname -s 2>$null | Select-Object -First 1) } catch { $unixName = '' }
+        if ([string]::Equals($unixName.Trim(), 'Darwin', [StringComparison]::OrdinalIgnoreCase)) {
+            $homePath = [Environment]::GetFolderPath([Environment+SpecialFolder]::UserProfile)
+            $applicationRoots = [System.Collections.Generic.List[string]]::new()
+            $applicationRoots.Add('/Applications')
+            if (-not [string]::IsNullOrWhiteSpace($homePath)) { $applicationRoots.Add((Join-Path $homePath 'Applications')) }
+            foreach ($applicationRoot in $applicationRoots) {
+                $candidates.Add([pscustomobject]@{ Path = (Join-Path $applicationRoot 'Google Chrome.app/Contents/MacOS/Google Chrome'); Name = 'Google Chrome' })
+                $candidates.Add([pscustomobject]@{ Path = (Join-Path $applicationRoot 'Microsoft Edge.app/Contents/MacOS/Microsoft Edge'); Name = 'Microsoft Edge' })
+                $candidates.Add([pscustomobject]@{ Path = (Join-Path $applicationRoot 'Chromium.app/Contents/MacOS/Chromium'); Name = 'Chromium' })
+            }
+        }
     }
 
     foreach ($commandName in @("msedge", "chrome", "chromium", "chromium-browser")) {
@@ -1978,35 +2022,41 @@ $useManifestTool = $false
 function Invoke-PublisherStudioDocfx {
     param([Parameter(Mandatory)][string[]]$Arguments)
 
-    # Windows PowerShell promotes native stderr records to terminating errors when the
-    # script-wide ErrorActionPreference is Stop. DocFX's PDF renderer writes Node warnings
-    # to stderr even on a successful run, so capture them as diagnostics and trust the
-    # native exit code plus generated artifacts instead.
+    # Stream DocFX output as it arrives so a long PDF render cannot look frozen. DocFX uses
+    # carriage-return transfer counters for its interactive console; once redirected through
+    # PowerShell those counters can repaint into impossible totals, so keep them for diagnostics
+    # but do not reproduce the corrupted in-place counters in the release console.
     $previousErrorActionPreference = $ErrorActionPreference
+    $capturedOutput = [System.Collections.Generic.List[string]]::new()
+    $writeEntry = {
+        param([object]$Entry)
+        $rawLine = [string]$Entry
+        $capturedOutput.Add($rawLine)
+        foreach ($rawSegment in @($rawLine -split "`r")) {
+            if ([string]::IsNullOrWhiteSpace($rawSegment)) { continue }
+            $displayLine = [regex]::Replace($rawSegment, '\x1B\[[0-?]*[ -/]*[@-~]', '')
+            if ($displayLine -match '^\s*(?:Removed|Copied)\s+\d+\s+of\s+\d+\s+files\b') { continue }
+            $displayLine = [regex]::Replace($displayLine, '(?i)\b(?:fatalerror|error)\s*:', 'diagnostic:')
+            Write-Host "[DocFX] $displayLine"
+        }
+    }
     try {
         $ErrorActionPreference = "Continue"
-        $output = if ($script:useManifestTool) {
-            @(& dotnet tool run docfx @Arguments 2>&1)
+        if ($script:useManifestTool) {
+            & dotnet tool run docfx @Arguments 2>&1 | ForEach-Object { & $writeEntry $_ }
         }
         else {
-            @(& $script:docfxExecutable @Arguments 2>&1)
+            & $script:docfxExecutable @Arguments 2>&1 | ForEach-Object { & $writeEntry $_ }
         }
         $exitCode = [int]$LASTEXITCODE
     }
     finally {
         $ErrorActionPreference = $previousErrorActionPreference
     }
-    foreach ($entry in $output) {
-        $line = [string]$entry
-        # ConsoleToMSBuild scans text independently from the native exit code. Keep DocFX and
-        # Node diagnostics visible without allowing a handled stderr line to become MSB3077.
-        $line = [regex]::Replace($line, '(?i)\b(?:fatalerror|error)\s*:', 'diagnostic:')
-        Write-Host "[DocFX] $line"
-    }
 
     return [pscustomobject]@{
         ExitCode = $exitCode
-        Output = @($output | ForEach-Object { [string]$_ })
+        Output = @($capturedOutput.ToArray())
     }
 }
 
@@ -2136,6 +2186,10 @@ Use the grouped API navigation to browse namespaces, types, properties, methods,
             Copy-Item -LiteralPath $pdfLinkStubPath -Destination $preflightPdfStubPath -Force
         }
         try {
+            $htmlLanguageRepairCount = Repair-PublisherStudioGeneratedHtmlLanguage -SiteRoot $siteRoot
+            if ($htmlLanguageRepairCount -gt 0) {
+                Write-Host "Normalized html language metadata on $htmlLanguageRepairCount generated documentation page(s)." -ForegroundColor DarkGreen
+            }
             Assert-PublisherStudioGeneratedHtmlPreflight -SiteRoot $siteRoot
             $htmlPreflightValidated = $true
         }
@@ -2239,8 +2293,8 @@ Use the grouped API navigation to browse namespaces, types, properties, methods,
                         $env:NODE_OPTIONS = "$($env:NODE_OPTIONS) --max-old-space-size=4096"
                     }
 
-                    Write-Host "Browser printing was unavailable; generating the complete PDF with the DocFX PDF plug-in and Node.js $nodeVersionUsed." -ForegroundColor Cyan
-                    $pdfResult = Invoke-PublisherStudioDocfx -Arguments @("pdf", $configPath, "--logLevel", "info")
+                    Write-Host "Browser printing was unavailable; generating the complete PDF with the DocFX PDF plug-in and Node.js $nodeVersionUsed. DocFX output is streamed live below." -ForegroundColor Cyan
+                    $pdfResult = Invoke-PublisherStudioDocfx -Arguments @("pdf", $configPath, "--logLevel", "verbose")
                     $pdfCandidates = @(
                         Get-ChildItem -LiteralPath $siteRoot -Filter "*.pdf" -File -Recurse -ErrorAction SilentlyContinue |
                             Sort-Object @{ Expression = { if ($_.Name -eq $pdfName) { 0 } else { 1 } } },

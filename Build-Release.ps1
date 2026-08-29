@@ -6,8 +6,11 @@ param(
     [string]$WireProtocolVersion = "2.1.1",
     [string]$WireProtocolPackageUrl = "",
     [string]$LocalGptRepository = "",
+    [string]$ReleasePackagingVersion = "1.0.0",
+    [string]$ReleasePackagingPackageUrl = "",
     [switch]$UseBundledWireProtocolPackage,
-    [switch]$RefreshWireProtocolPackage
+    [switch]$RefreshWireProtocolPackage,
+    [switch]$RefreshReleasePackagingPackage
 )
 
 $ErrorActionPreference = "Stop"
@@ -42,7 +45,8 @@ $wireProtocolPackage = Join-Path $packageDirectory $wireProtocolPackageName
 $documentationCacheRoot = Join-Path $artifacts ".documentation-cache"
 $documentationPrepared = $false
 $releaseZipPaths = New-Object 'System.Collections.Generic.List[string]'
-$releasePackagingVersion = '1.0.0'
+$releasePackagingPackageName = "LocalGPT.ReleasePackaging.$ReleasePackagingVersion.nupkg"
+$releasePackagingPackage = Join-Path $packageDirectory $releasePackagingPackageName
 $releasePackagingTool = $null
 $nativeReleasePackagingScript = Join-Path $root 'build/NativeReleasePackaging.ps1'
 
@@ -470,7 +474,7 @@ function Complete-ReleaseBundle {
             $hash = (Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
             "$hash  $($file.Name)"
         }
-        $checksumLines | Set-Content -LiteralPath $checksumPath -Encoding utf8NoBOM
+        [IO.File]::WriteAllLines($checksumPath, [string[]]$checksumLines, (New-Object Text.UTF8Encoding($false)))
 
         foreach ($zipPath in $uniqueZipPaths) {
             Remove-Item -LiteralPath $zipPath -Force -ErrorAction SilentlyContinue
@@ -714,7 +718,21 @@ function Publish-Runtime {
 New-Item -ItemType Directory -Path $packageDirectory, $artifacts -Force | Out-Null
 Remove-Item -LiteralPath $documentationCacheRoot -Recurse -Force -ErrorAction SilentlyContinue
 Ensure-WireProtocolPackage
-$releasePackagingTool = & (Join-Path $root 'build/Ensure-ReleasePackagingPackage.ps1') -Configuration $Configuration -Version $releasePackagingVersion
+$releasePackagingEnsureArguments = @{
+    Version = $ReleasePackagingVersion
+    PackageDirectory = $packageDirectory
+    PackageUrl = $ReleasePackagingPackageUrl
+    LocalGptRepository = $LocalGptRepository
+}
+if ($RefreshReleasePackagingPackage) { $releasePackagingEnsureArguments.ForceDownload = $true }
+$releasePackagingToolOutput = @(& (Join-Path $root 'build/Ensure-ReleasePackagingPackage.ps1') @releasePackagingEnsureArguments)
+if ($releasePackagingToolOutput.Count -ne 1 -or [string]::IsNullOrWhiteSpace([string]$releasePackagingToolOutput[0])) { throw "Release-packaging tool preparation returned $($releasePackagingToolOutput.Count) pipeline value(s); expected exactly one executable path." }
+$releasePackagingTool = [string]$releasePackagingToolOutput[0]
+if (-not (Test-Path -LiteralPath $releasePackagingTool -PathType Leaf)) { throw "Prepared release-packaging tool is missing: $releasePackagingTool" }
+if (-not (Test-Path -LiteralPath $releasePackagingPackage -PathType Leaf)) {
+    throw "LocalGPT release-packaging package preparation did not produce $releasePackagingPackage"
+}
+Copy-Item -LiteralPath $releasePackagingPackage -Destination (Join-Path $artifacts $releasePackagingPackageName) -Force
 Copy-Item -LiteralPath $wireProtocolPackage -Destination (Join-Path $artifacts $wireProtocolPackageName) -Force
 Prepare-PublisherStudioClientAssets
 Prepare-PublisherStudioDocumentation

@@ -18,6 +18,9 @@ $requiredRelativePaths = @(
     "docs/templates/publisherstudio/public/logo.svg",
     "build/NodeRuntime.Common.ps1",
     "build/PythonRuntime.Common.ps1",
+    "build/Ensure-WireProtocolPackage.ps1",
+    "build/Ensure-ReleasePackagingPackage.ps1",
+    "build/NativeReleasePackaging.ps1",
     ".github/scripts/prepare-pages-artifact.py"
 )
 

@@ -82,6 +82,22 @@ public sealed class SystemVariableStoreService : ISystemVariableStoreService
     /// Stores the system-variable name used for user-defined Panel Studio preview viewport presets.
     /// </summary>
     private readonly string _panelStudioPreviewPresetsName = "PanelStudio.PreviewViewportPresets";
+    /// <summary>
+    /// Stores the operator-owned maximum video archive entry policy key.
+    /// </summary>
+    private readonly string _maximumVideoArchiveEntriesName = "RuntimePolicy.MaximumVideoArchiveEntries";
+    /// <summary>
+    /// Stores the operator-owned maximum notification history policy key.
+    /// </summary>
+    private readonly string _maximumNotificationMessagesName = "RuntimePolicy.MaximumNotificationMessages";
+    /// <summary>
+    /// Stores the operator-owned maximum organic payload character policy key.
+    /// </summary>
+    private readonly string _maximumOrganicPayloadCharactersName = "RuntimePolicy.MaximumOrganicPayloadCharacters";
+    /// <summary>
+    /// Stores the operator-owned organic replay tracked-message capacity policy key.
+    /// </summary>
+    private readonly string _organicReplayMaximumTrackedMessagesName = "RuntimePolicy.OrganicReplayMaximumTrackedMessages";
 
     /// <summary>
     /// Initializes a new <see cref="SystemVariableStoreService"/> instance and captures the dependencies or initial state required by its system variable store workflow.
@@ -109,6 +125,10 @@ public sealed class SystemVariableStoreService : ISystemVariableStoreService
         _values[_runtimeEndpointFileName] = "server.json";
         _values[_defaultDocumentName] = "Untitled Publication";
         _values[_panelStudioPreviewPresetsName] = "[]";
+        _values[_maximumVideoArchiveEntriesName] = int.MaxValue.ToString(CultureInfo.InvariantCulture);
+        _values[_maximumNotificationMessagesName] = int.MaxValue.ToString(CultureInfo.InvariantCulture);
+        _values[_maximumOrganicPayloadCharactersName] = int.MaxValue.ToString(CultureInfo.InvariantCulture);
+        _values[_organicReplayMaximumTrackedMessagesName] = int.MaxValue.ToString(CultureInfo.InvariantCulture);
 
         LoadConfiguration(configuration);
         LoadPersisted();

@@ -552,7 +552,7 @@
       "controller": "OrganicPlugins",
       "method": "POST",
       "route": "/api/organic/capabilities/publisher.website.content.request",
-      "parameterSchemaJson": "{\"type\":\"object\",\"properties\":{\"format\":{\"enum\":[\"html\",\"div\",\"document\"]},\"sourceUrl\":{\"type\":\"string\"},\"maximumCharacters\":{\"type\":\"integer\",\"maximum\":200000}}}",
+      "parameterSchemaJson": "{\"type\":\"object\",\"properties\":{\"format\":{\"enum\":[\"html\",\"div\",\"document\"]},\"sourceUrl\":{\"type\":\"string\"},\"maximumCharacters\":{\"type\":\"integer\",\"minimum\":1}}}",
       "organs": [
         "eyes"
       ],

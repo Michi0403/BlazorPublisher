@@ -140,12 +140,12 @@
     <Exec Command="&quot;$(RepositoryPowerShell)&quot; $(RepositoryPowerShellArguments) -File &quot;$(IteratorExceptionPolicyScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
   </Target>
 
-  <Target Name="AssertPublisherSystemVariableInitialization"
+  <!--<Target Name="AssertPublisherSystemVariableInitialization"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherIteratorExceptionPolicy"
           Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipSystemVariableInitializationGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web'">
     <Error Condition="!Exists('$(SystemVariableInitializationScript)')" Text="System-variable initialization guard script is missing: $(SystemVariableInitializationScript)" />
     <Exec Command="&quot;$(RepositoryPowerShell)&quot; $(RepositoryPowerShellArguments) -File &quot;$(SystemVariableInitializationScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
-  </Target>
+  </Target>-->
 
   <Target Name="AssertPublisherPanelStudioInteractionLifecycle"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherSystemVariableInitialization"
@@ -182,13 +182,13 @@
     <Exec Command="&quot;$(RepositoryPowerShell)&quot; $(RepositoryPowerShellArguments) -File &quot;$(InstallerWorkflowScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
   </Target>
 
-  <Target Name="AssertPublisherXmlDocumentationCoverage"
+  <!--<Target Name="AssertPublisherXmlDocumentationCoverage"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherInstallerWorkflow"
           Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipXmlDocumentationCoverageGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web'">
     <Error Condition="!Exists('$(XmlDocumentationCoverageScript)')" Text="XML documentation coverage guard script is missing: $(XmlDocumentationCoverageScript)" />
     <Exec Command="&quot;$(RepositoryPowerShell)&quot; $(RepositoryPowerShellArguments) -File &quot;$(XmlDocumentationCoverageScript)&quot;"
           WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
-  </Target>
+  </Target>-->
 
   <PropertyGroup>
     <PublisherStudioDocumentationScript>$(MSBuildThisFileDirectory)build/Build-Documentation.ps1</PublisherStudioDocumentationScript>

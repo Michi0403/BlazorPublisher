@@ -73,6 +73,11 @@ public interface IPublisherRuntimePolicyDataService
     /// <value>The maximum notification messages value exposed by <see cref="IPublisherRuntimePolicyDataService"/>.</value>
     int MaximumNotificationMessages { get; }
     /// <summary>
+    /// Gets the maximum organic payload characters value governed by the persisted operator runtime policy.
+    /// </summary>
+    /// <value>The maximum organic payload characters value exposed by <see cref="IPublisherRuntimePolicyDataService"/>.</value>
+    int MaximumOrganicPayloadCharacters { get; }
+    /// <summary>
     /// Gets the installer download attempts value that forms part of the publisher runtime policy state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The installer download attempts value exposed by <see cref="IPublisherRuntimePolicyDataService"/>.</value>

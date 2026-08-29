@@ -1,7 +1,7 @@
-# PublisherStudio 3.1.0
+# PublisherStudio 3.1.2
 
-PublisherStudio 3.1.0 is the **PowerShell Documentation Progress Parser Repair** release.
+PublisherStudio 3.1.2 is the **Operator Policy and Cross-Platform Release Packaging** release.
 
-It preserves the 3.0.9 cross-platform build/documentation behavior and fixes the documentation progress formatter so Windows PowerShell 5.1 parses the DocFX percentage line correctly. The full release documentation/PDF pipeline, cross-platform guards, existing Node/browser reuse, DevExpress/Spreadsheet preparation, application behavior, InteractiveServer boundaries, and deployment behavior remain unchanged.
+It removes the remaining replay-capacity ceiling, preserves the maintained service architecture, and aligns the source-side Windows/macOS/Linux release packaging path with LocalGPT.
 
-This handoff is source-only. No .NET build and no GitHub access were used while preparing it. See `CHANGELOG-v3.1.0-POWERSHELL-DOCFX-PROGRESS-PARSER-REPAIR.md` and `VALIDATION-v3.1.0-source.md`.
+This handoff is source-only. No .NET build and no GitHub access are used as evidence while preparing it. See `CHANGELOG-v3.1.2-OPERATOR-POLICY-RELEASE-PACKAGING.md` and `VALIDATION-v3.1.2-source.md`.

@@ -1,4 +1,5 @@
 using PublisherStudio.BusinessObjects;
+using PublisherStudio.Services.Configuration;
 
 namespace PublisherStudio.Services.UserExperience;
 
@@ -7,13 +8,12 @@ namespace PublisherStudio.Services.UserExperience;
 /// It deliberately contains no UI dependency so the same messages can be surfaced by Blazor,
 /// automation clients, diagnostics, or a future native shell.
 /// </summary>
+/// <param name="runtimePolicy">Runtime policy containing the persisted operator-owned notification-history limit.</param>
 /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
-public sealed class UserNotificationService(ILogger<UserNotificationService> logger) : IUserNotificationService
+public sealed class UserNotificationService(
+    IPublisherRuntimePolicyDataService runtimePolicy,
+    ILogger<UserNotificationService> logger) : IUserNotificationService
 {
-    /// <summary>
-    /// Defines the maximum messages constant used by <see cref="UserNotificationService"/> so callers and internal logic share the same stable value.
-    /// </summary>
-    private const int MaximumMessages = 12;
     /// <summary>
     /// Stores the in-memory messages collection maintained internally by <see cref="UserNotificationService"/> for its current workflow state.
     /// </summary>
@@ -59,8 +59,9 @@ public sealed class UserNotificationService(ILogger<UserNotificationService> log
             lock (_messagesGate)
             {
                 _messages.Insert(0, message);
-                if (_messages.Count > MaximumMessages)
-                    _messages.RemoveRange(MaximumMessages, _messages.Count - MaximumMessages);
+                var maximumMessages = Math.Max(1, runtimePolicy.MaximumNotificationMessages);
+                if (_messages.Count > maximumMessages)
+                    _messages.RemoveRange(maximumMessages, _messages.Count - maximumMessages);
             }
 
             Log(message);

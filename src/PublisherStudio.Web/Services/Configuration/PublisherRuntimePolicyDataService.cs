@@ -13,6 +13,10 @@ public sealed class PublisherRuntimePolicyDataService : IPublisherRuntimePolicyD
     /// </summary>
     private readonly PublisherRuntimePolicyOptions options;
     /// <summary>
+    /// Stores the persisted system-variable policy used for operator-owned runtime limits.
+    /// </summary>
+    private readonly ISystemVariableStoreService systemVariables;
+    /// <summary>
     /// Stores the in-memory collections collection maintained internally by <see cref="PublisherRuntimePolicyDataService"/> for its current workflow state.
     /// </summary>
     private readonly FrozenDictionary<PublisherRuntimeCollection, string[]> collections;
@@ -25,14 +29,17 @@ public sealed class PublisherRuntimePolicyDataService : IPublisherRuntimePolicyD
     /// Initializes a new <see cref="PublisherRuntimePolicyDataService"/> instance and captures the dependencies or initial state required by its publisher runtime policy workflow.
     /// </summary>
     /// <param name="options">Options containing the caller-supplied values that control this operation.</param>
+    /// <param name="systemVariables">Persisted system-variable store containing operator-owned runtime policy overrides.</param>
     /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
     public PublisherRuntimePolicyDataService(
         PublisherRuntimePolicyOptions options,
+        ISystemVariableStoreService systemVariables,
         ILogger<PublisherRuntimePolicyDataService> logger)
     {
         try
         {
             this.options = options;
+            this.systemVariables = systemVariables;
             this.logger = logger;
             collections = options.Collections.ToFrozenDictionary(
                 item => item.Key,
@@ -109,12 +116,17 @@ public sealed class PublisherRuntimePolicyDataService : IPublisherRuntimePolicyD
     /// Gets the maximum video archive entries value that forms part of the publisher runtime policy state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The maximum video archive entries value exposed by <see cref="PublisherRuntimePolicyDataService"/>.</value>
-    public int MaximumVideoArchiveEntries => options.MaximumVideoArchiveEntries;
+    public int MaximumVideoArchiveEntries => Math.Max(1, systemVariables.GetInt("RuntimePolicy.MaximumVideoArchiveEntries", int.MaxValue));
     /// <summary>
     /// Gets the maximum notification messages value that forms part of the publisher runtime policy state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The maximum notification messages value exposed by <see cref="PublisherRuntimePolicyDataService"/>.</value>
-    public int MaximumNotificationMessages => options.MaximumNotificationMessages;
+    public int MaximumNotificationMessages => Math.Max(1, systemVariables.GetInt("RuntimePolicy.MaximumNotificationMessages", int.MaxValue));
+    /// <summary>
+    /// Gets the maximum organic payload characters value governed by the persisted operator runtime policy.
+    /// </summary>
+    /// <value>The maximum organic payload characters value exposed by <see cref="PublisherRuntimePolicyDataService"/>.</value>
+    public int MaximumOrganicPayloadCharacters => Math.Max(1, systemVariables.GetInt("RuntimePolicy.MaximumOrganicPayloadCharacters", int.MaxValue));
     /// <summary>
     /// Gets the installer download attempts value that forms part of the publisher runtime policy state consumed or produced by the surrounding workflow.
     /// </summary>
@@ -225,6 +237,7 @@ public sealed class PublisherRuntimePolicyDataService : IPublisherRuntimePolicyD
                 AudioSampleRate = AudioSampleRate,
                 MaximumVideoArchiveEntries = MaximumVideoArchiveEntries,
                 MaximumNotificationMessages = MaximumNotificationMessages,
+                MaximumOrganicPayloadCharacters = MaximumOrganicPayloadCharacters,
                 InstallerDownloadAttempts = InstallerDownloadAttempts,
                 InstallerMoveAttempts = InstallerMoveAttempts,
                 OrganicProtocolVersion = OrganicProtocolVersion,
@@ -256,8 +269,9 @@ public sealed class PublisherRuntimePolicyDataService : IPublisherRuntimePolicyD
                 options.MinimumMediaSourceLength <= 0 ||
                 options.WordArtViewWidth <= 0 ||
                 options.WordArtViewHeight <= 0 ||
-                options.MaximumVideoArchiveEntries <= 0 ||
-                options.MaximumNotificationMessages <= 0 ||
+                MaximumVideoArchiveEntries <= 0 ||
+                MaximumNotificationMessages <= 0 ||
+                MaximumOrganicPayloadCharacters <= 0 ||
                 options.InstallerDownloadAttempts <= 0 ||
                 options.InstallerMoveAttempts <= 0 ||
                 string.IsNullOrWhiteSpace(options.OrganicProtocolVersion) ||

@@ -302,7 +302,7 @@ public sealed class OrganicCapabilityCatalog(
         "publisher.spreadsheet.inspect" => "{\"type\":\"object\",\"required\":[\"sessionId\"],\"properties\":{\"sessionId\":{\"type\":\"string\"}}}",
         "publisher.text.insert.propose" => "{\"type\":\"object\",\"required\":[\"text\"],\"properties\":{\"target\":{\"type\":\"string\"},\"text\":{\"type\":\"string\"},\"reason\":{\"type\":\"string\"}}}",
         "publisher.text.edit.request" => "{\"type\":\"object\",\"properties\":{\"title\":{\"type\":\"string\"},\"question\":{\"type\":\"string\"},\"initialText\":{\"type\":\"string\"}}}",
-        "publisher.website.content.request" => "{\"type\":\"object\",\"properties\":{\"format\":{\"enum\":[\"html\",\"div\",\"document\"]},\"sourceUrl\":{\"type\":\"string\"},\"maximumCharacters\":{\"type\":\"integer\",\"maximum\":200000}}}",
+        "publisher.website.content.request" => "{\"type\":\"object\",\"properties\":{\"format\":{\"enum\":[\"html\",\"div\",\"document\"]},\"sourceUrl\":{\"type\":\"string\"},\"maximumCharacters\":{\"type\":\"integer\",\"minimum\":1}}}",
         _ => "{\"type\":\"object\",\"properties\":{}}"
     };
     }
@@ -461,6 +461,7 @@ public sealed class OrganicCapabilityCatalog(
 /// <param name="mediaConversion">Media conversion service dependency used by the organic work executor workflow to provide the corresponding application capability.</param>
 /// <param name="resultStore">Organic result store dependency used by the organic work executor workflow to provide the corresponding application capability.</param>
 /// <param name="recurringScreenReader">Recurring screen reader service dependency used by the organic work executor workflow to provide the corresponding application capability.</param>
+/// <param name="runtimePolicy">Runtime policy containing persisted operator-owned payload limits.</param>
 /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class OrganicWorkExecutor(
     IOrganicPluginProtocolCodec codec,
@@ -473,6 +474,7 @@ public sealed class OrganicWorkExecutor(
     IMediaConversionService mediaConversion,
     IOrganicResultStore resultStore,
     IRecurringScreenReaderService recurringScreenReader,
+    PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService runtimePolicy,
     ILogger<OrganicWorkExecutor> logger) : IOrganicWorkExecutor
 {
     /// <summary>
@@ -631,7 +633,8 @@ public sealed class OrganicWorkExecutor(
             var text = envelope.InteractionValueJson ?? string.Empty;
             if (string.IsNullOrWhiteSpace(text))
                 throw new InvalidOperationException("The PublisherStudio user saved no text for the current request.");
-            if (text.Length > 200000) text = text[..200000];
+            var operatorMaximum = Math.Max(1, runtimePolicy.MaximumOrganicPayloadCharacters);
+            if (text.Length > operatorMaximum) text = text[..operatorMaximum];
             return new
             {
                 Text = text,
@@ -664,7 +667,9 @@ public sealed class OrganicWorkExecutor(
     try
     {
             var content = envelope.InteractionValueJson ?? string.Empty;
-            var maximum = Math.Clamp(GetInt(parameters, "maximumCharacters", 120000), 1000, 200000);
+            var operatorMaximum = Math.Max(1, runtimePolicy.MaximumOrganicPayloadCharacters);
+            var requestedMaximum = GetInt(parameters, "maximumCharacters", operatorMaximum);
+            var maximum = Math.Clamp(requestedMaximum, 1, operatorMaximum);
             var truncated = content.Length > maximum;
             if (truncated) content = content[..maximum];
             return new

@@ -1076,6 +1076,11 @@ public sealed record PublisherRuntimePolicyOptions
     /// <value>The maximum notification messages value exposed by <see cref="PublisherRuntimePolicyOptions"/>.</value>
     public int MaximumNotificationMessages { get; init; }
     /// <summary>
+    /// Gets or sets the maximum organic payload characters value that forms part of the publisher runtime policy state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The maximum organic payload characters value exposed by <see cref="PublisherRuntimePolicyOptions"/>.</value>
+    public int MaximumOrganicPayloadCharacters { get; init; }
+    /// <summary>
     /// Gets or sets the installer download attempts value that forms part of the publisher runtime policy state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The installer download attempts value exposed by <see cref="PublisherRuntimePolicyOptions"/>.</value>
@@ -1222,6 +1227,11 @@ public sealed record PublisherRuntimePolicySnapshot
     /// </summary>
     /// <value>The maximum notification messages value exposed by <see cref="PublisherRuntimePolicySnapshot"/>.</value>
     public int MaximumNotificationMessages { get; init; }
+    /// <summary>
+    /// Gets or sets the maximum organic payload characters value that forms part of the publisher runtime policy snapshot state consumed or produced by the surrounding workflow.
+    /// </summary>
+    /// <value>The maximum organic payload characters value exposed by <see cref="PublisherRuntimePolicySnapshot"/>.</value>
+    public int MaximumOrganicPayloadCharacters { get; init; }
     /// <summary>
     /// Gets or sets the installer download attempts value that forms part of the publisher runtime policy snapshot state consumed or produced by the surrounding workflow.
     /// </summary>

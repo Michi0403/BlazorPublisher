@@ -42,6 +42,9 @@ $wireProtocolPackage = Join-Path $packageDirectory $wireProtocolPackageName
 $documentationCacheRoot = Join-Path $artifacts ".documentation-cache"
 $documentationPrepared = $false
 $releaseZipPaths = New-Object 'System.Collections.Generic.List[string]'
+$releasePackagingVersion = '1.0.0'
+$releasePackagingTool = $null
+$nativeReleasePackagingScript = Join-Path $root 'build/NativeReleasePackaging.ps1'
 
 function Invoke-DotNet {
     param(
@@ -459,6 +462,14 @@ function Complete-ReleaseBundle {
             Move-Item -LiteralPath $file.FullName -Destination (Join-Path $versionDirectory $file.Name)
         }
 
+        $checksumPath = Join-Path $versionDirectory 'SHA256SUMS.txt'
+        $checksumLines = foreach ($file in Get-ChildItem -LiteralPath $versionDirectory -File | Sort-Object Name) {
+            if ($file.Name -eq 'SHA256SUMS.txt') { continue }
+            $hash = (Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+            "$hash  $($file.Name)"
+        }
+        $checksumLines | Set-Content -LiteralPath $checksumPath -Encoding utf8NoBOM
+
         foreach ($zipPath in $uniqueZipPaths) {
             Remove-Item -LiteralPath $zipPath -Force -ErrorAction SilentlyContinue
         }
@@ -576,8 +587,45 @@ function Prepare-PublisherStudioDocumentation {
     Write-Host "Cached one verified documentation payload for all RID publishes." -ForegroundColor Green
 }
 
+
+function Publish-UnixRuntime {
+    param([Parameter(Mandatory)][string]$Rid)
+    if ($Rid.StartsWith('win-')) { throw "Publish-UnixRuntime received Windows RID $Rid." }
+    if (-not $script:releasePackagingTool) { throw 'Release packaging tool was not prepared.' }
+    $wireProperties = Get-WireProperties
+    foreach ($mode in @('Full','Light')) {
+        $selfContained = if ($mode -eq 'Full') { 'true' } else { 'false' }
+        $publishFolder = Join-Path $artifacts ("staging/$Rid/$($mode.ToLowerInvariant())")
+        Remove-Item -LiteralPath $publishFolder -Recurse -Force -ErrorAction SilentlyContinue
+        New-Item -ItemType Directory -Path $publishFolder -Force | Out-Null
+        Write-Host "Publishing PublisherStudio $Rid $mode application payload (no setup console)..." -ForegroundColor Cyan
+        Invoke-DotNet -Arguments (@('restore', $webProject, '-r', $Rid, '--disable-parallel', '--force-evaluate') + $wireProperties) -FailureMessage "PublisherStudio application restore failed for $Rid $mode."
+        Invoke-DotNet -Arguments (@(
+            'publish', $webProject, '-c', $Configuration, '-r', $Rid, '--no-restore', '-o', $publishFolder,
+            '--self-contained', $selfContained, '-p:PublishSingleFile=false',
+            '-p:BuildPublisherStudioDocumentation=false', '-p:SeedPublisherStudioGitHubPagesSnapshotOnBuild=false',
+            '-p:RequirePublisherStudioDocumentationPdf=false', '-maxcpucount:1'
+        ) + $wireProperties) -FailureMessage "PublisherStudio application publish failed for $Rid $mode."
+        $appExecutable = 'PublisherStudio.Web'
+        if (-not (Test-Path -LiteralPath (Join-Path $publishFolder $appExecutable) -PathType Leaf)) { throw "Published PublisherStudio apphost is missing for $Rid $mode." }
+        $publishedDocumentationRoot = Join-Path $publishFolder 'wwwroot/help-docs'
+        Remove-Item -LiteralPath $publishedDocumentationRoot -Recurse -Force -ErrorAction SilentlyContinue
+        New-Item -ItemType Directory -Path $publishedDocumentationRoot -Force | Out-Null
+        Copy-Item -Path (Join-Path $script:documentationCacheRoot '*') -Destination $publishedDocumentationRoot -Recurse -Force
+        Assert-PublishedConfigurationFiles -SourceRoot $webDirectory -PublishRoot $publishFolder
+        Assert-PublisherStudioDocumentationPayload -DocumentationRoot $publishedDocumentationRoot -Version $appVersion
+        $protocolDirectory = Join-Path $publishFolder 'protocol'; New-Item -ItemType Directory -Path $protocolDirectory -Force | Out-Null
+        Copy-Item -LiteralPath $wireProtocolPackage -Destination (Join-Path $protocolDirectory $wireProtocolPackageName) -Force
+        $publisherIcon = Join-Path $root 'assets/PublisherStudio.ico'; if (Test-Path -LiteralPath $publisherIcon -PathType Leaf) { Copy-Item -LiteralPath $publisherIcon -Destination (Join-Path $publishFolder 'PublisherStudio.ico') -Force }
+        $nativeArtifacts = & $script:nativeReleasePackagingScript -ProductName 'PublisherStudio' -ExecutableName $appExecutable -Version $appVersion -Rid $Rid -Mode $mode -PayloadDirectory $publishFolder -OutputDirectory $artifacts -PackagingTool $script:releasePackagingTool -DependencyPolicy PublisherStudio
+        foreach ($artifact in @($nativeArtifacts)) { if (-not [string]::IsNullOrWhiteSpace([string]$artifact)) { $script:releaseZipPaths.Add([string]$artifact) } }
+    }
+}
+
 function Publish-Runtime {
     param([Parameter(Mandatory)][string]$Rid)
+
+    if (-not $Rid.StartsWith('win-')) { Publish-UnixRuntime -Rid $Rid; return }
 
     $profile = Resolve-ReleaseProfile -Rid $Rid
     $appFolder = Resolve-ProfilePublishFolder -ProjectPath $webProject -ProfileName $profile.AppProfile
@@ -664,6 +712,7 @@ function Publish-Runtime {
 New-Item -ItemType Directory -Path $packageDirectory, $artifacts -Force | Out-Null
 Remove-Item -LiteralPath $documentationCacheRoot -Recurse -Force -ErrorAction SilentlyContinue
 Ensure-WireProtocolPackage
+$releasePackagingTool = & (Join-Path $root 'build/Ensure-ReleasePackagingPackage.ps1') -Configuration $Configuration -Version $releasePackagingVersion
 Copy-Item -LiteralPath $wireProtocolPackage -Destination (Join-Path $artifacts $wireProtocolPackageName) -Force
 Prepare-PublisherStudioClientAssets
 Prepare-PublisherStudioDocumentation

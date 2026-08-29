@@ -48,4 +48,3 @@ src/PublisherStudio.Web/wwwroot/help-docs/
 
 !Update-GitHubPagesSnapshot.cmd
 installer-launchers.zip
-build/__pycache__/

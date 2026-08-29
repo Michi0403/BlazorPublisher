@@ -15,25 +15,25 @@ $root = Split-Path -Parent $MyInvocation.MyCommand.Path
 & (Join-Path $root ([IO.Path]::Combine('build', 'Assert-SourcePackagePrerequisites.ps1'))) -RepositoryRoot $root
 & (Join-Path $root ([IO.Path]::Combine('build', 'Assert-CrossPlatformBoundaries.ps1'))) -RepositoryRoot $root
 Write-Host "Refreshing reviewed PublisherStudio frontend SHA-256 inventory before the ordered CLI build..." -ForegroundColor DarkCyan
-& (Join-Path $root 'build\Update-JavaScriptDiagnosticsManifest.ps1')
-& (Join-Path $root 'build\Assert-JavaScriptDiagnostics.ps1')
-& (Join-Path $root 'build\Assert-InteractiveServerRenderModes.ps1')
-& (Join-Path $root 'build\Assert-PanelStudioAuthoringGeometry.ps1')
-& (Join-Path $root 'build\Assert-PanelStudioInteractionLifecycle.ps1')
-& (Join-Path $root 'build\Assert-PanelStudioPersistence.ps1')
-& (Join-Path $root 'build\Assert-XmlDocumentationCoverage.ps1')
+& (Join-Path $root 'build/Update-JavaScriptDiagnosticsManifest.ps1')
+& (Join-Path $root 'build/Assert-JavaScriptDiagnostics.ps1')
+& (Join-Path $root 'build/Assert-InteractiveServerRenderModes.ps1')
+& (Join-Path $root 'build/Assert-PanelStudioAuthoringGeometry.ps1')
+& (Join-Path $root 'build/Assert-PanelStudioInteractionLifecycle.ps1')
+& (Join-Path $root 'build/Assert-PanelStudioPersistence.ps1')
+& (Join-Path $root 'build/Assert-XmlDocumentationCoverage.ps1')
 Write-Host "Clearing repository-local obj restore state before the ordered CLI build..." -ForegroundColor DarkCyan
 Get-ChildItem (Join-Path $root "src") -Directory -Recurse -Force |
     Where-Object { $_.Name -eq "obj" } |
     Sort-Object FullName -Descending |
     Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
-$webProject = Join-Path $root "src\PublisherStudio.Web\PublisherStudio.Web.csproj"
-$setupProject = Join-Path $root "src\PublisherStudio.InstallerConsole\PublisherStudio.InstallerConsole.csproj"
+$webProject = Join-Path $root "src/PublisherStudio.Web/PublisherStudio.Web.csproj"
+$setupProject = Join-Path $root "src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj"
 $packageDirectory = Join-Path $root "packages"
 
 # Report narrow protocol/wiring findings without blocking local development.
-& (Join-Path $root "build\Assert-OneWireArchitecture.ps1")
-& (Join-Path $root "build\Assert-InstallerWorkflow.ps1")
+& (Join-Path $root "build/Assert-OneWireArchitecture.ps1")
+& (Join-Path $root "build/Assert-InstallerWorkflow.ps1")
 
 function Invoke-DotNet {
     param([Parameter(Mandatory)][string[]]$Arguments, [Parameter(Mandatory)][string]$FailureMessage)
@@ -59,7 +59,7 @@ $ensureArguments = @{
     LocalGptRepository = $LocalGptRepository
 }
 if ($RefreshWireProtocolPackage) { $ensureArguments.ForceDownload = $true }
-& (Join-Path $root "build\Ensure-WireProtocolPackage.ps1") @ensureArguments | Out-Null
+& (Join-Path $root "build/Ensure-WireProtocolPackage.ps1") @ensureArguments | Out-Null
 
 $wireProperties = @(
     "-p:LocalGptWireProtocolVersion=$WireProtocolVersion",

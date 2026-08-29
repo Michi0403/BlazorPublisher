@@ -15,12 +15,13 @@ public sealed class OrganicReplayPolicyDataService(
     /// <summary>
     /// Stores the internal snapshot state used by <see cref="OrganicReplayPolicyDataService"/> while executing its surrounding workflow.
     /// </summary>
+    /// <value>The snapshot value exposed by <see cref="OrganicReplayPolicyDataService"/>.</value>
     private OrganicReplayPolicySnapshot Snapshot => new()
     {
         Retention = TimeSpan.FromMinutes(15),
         AllowedFutureSkew = TimeSpan.FromMinutes(2),
         CleanupInterval = 64,
-        MaximumTrackedMessages = Math.Max(1, systemVariables.GetInt("RuntimePolicy.OrganicReplayMaximumTrackedMessages", int.MaxValue))
+        MaximumTrackedMessages = systemVariables.OrganicReplayMaximumTrackedMessages
     };
 
     /// <summary>

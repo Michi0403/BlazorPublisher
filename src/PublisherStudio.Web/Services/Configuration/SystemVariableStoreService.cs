@@ -204,6 +204,26 @@ public sealed class SystemVariableStoreService : ISystemVariableStoreService
     /// </summary>
     /// <value>The stable system-variable name used for persisted preview viewport presets.</value>
     public string PanelStudioPreviewPresetsVariableName => _panelStudioPreviewPresetsName;
+    /// <summary>
+    /// Gets the operator-configured maximum number of video archive entries accepted by PublisherStudio.
+    /// </summary>
+    /// <value>The persisted maximum video archive entry count.</value>
+    public int MaximumVideoArchiveEntries => Math.Max(1, GetInt(_maximumVideoArchiveEntriesName, int.MaxValue));
+    /// <summary>
+    /// Gets the operator-configured maximum number of notification messages retained by PublisherStudio.
+    /// </summary>
+    /// <value>The persisted maximum notification history count.</value>
+    public int MaximumNotificationMessages => Math.Max(1, GetInt(_maximumNotificationMessagesName, int.MaxValue));
+    /// <summary>
+    /// Gets the operator-configured maximum character count accepted for Organic protocol payloads.
+    /// </summary>
+    /// <value>The persisted maximum Organic payload character count.</value>
+    public int MaximumOrganicPayloadCharacters => Math.Max(1, GetInt(_maximumOrganicPayloadCharactersName, int.MaxValue));
+    /// <summary>
+    /// Gets the operator-configured maximum number of Organic replay message identifiers retained for replay detection.
+    /// </summary>
+    /// <value>The persisted Organic replay tracking capacity.</value>
+    public int OrganicReplayMaximumTrackedMessages => Math.Max(1, GetInt(_organicReplayMaximumTrackedMessagesName, int.MaxValue));
 
     /// <summary>
     /// Performs attach logger as part of the system variable store service workflow, applying the service's runtime policy, state management, and diagnostics as required.

@@ -17,26 +17,26 @@ $root = Split-Path -Parent $MyInvocation.MyCommand.Path
 & (Join-Path $root ([IO.Path]::Combine('build', 'Assert-SourcePackagePrerequisites.ps1'))) -RepositoryRoot $root
 & (Join-Path $root ([IO.Path]::Combine('build', 'Assert-CrossPlatformBoundaries.ps1'))) -RepositoryRoot $root
 Write-Host "Refreshing reviewed PublisherStudio frontend SHA-256 inventory before the ordered CLI build..." -ForegroundColor DarkCyan
-& (Join-Path $root 'build\Update-JavaScriptDiagnosticsManifest.ps1')
-& (Join-Path $root 'build\Assert-JavaScriptDiagnostics.ps1')
-& (Join-Path $root 'build\Assert-InteractiveServerRenderModes.ps1')
-& (Join-Path $root 'build\Assert-PanelStudioAuthoringGeometry.ps1')
-& (Join-Path $root 'build\Assert-PanelStudioInteractionLifecycle.ps1')
-& (Join-Path $root 'build\Assert-PanelStudioPersistence.ps1')
-& (Join-Path $root 'build\Assert-XmlDocumentationCoverage.ps1')
+& (Join-Path $root 'build/Update-JavaScriptDiagnosticsManifest.ps1')
+& (Join-Path $root 'build/Assert-JavaScriptDiagnostics.ps1')
+& (Join-Path $root 'build/Assert-InteractiveServerRenderModes.ps1')
+& (Join-Path $root 'build/Assert-PanelStudioAuthoringGeometry.ps1')
+& (Join-Path $root 'build/Assert-PanelStudioInteractionLifecycle.ps1')
+& (Join-Path $root 'build/Assert-PanelStudioPersistence.ps1')
+& (Join-Path $root 'build/Assert-XmlDocumentationCoverage.ps1')
 Write-Host "Clearing repository-local bin/obj build state for the authoritative release build..." -ForegroundColor Cyan
 Get-ChildItem (Join-Path $root "src") -Directory -Recurse -Force |
     Where-Object { $_.Name -in @("bin", "obj") } |
     Sort-Object FullName -Descending |
     Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
-$artifacts = Join-Path $root "artifacts\release"
+$artifacts = Join-Path $root "artifacts/release"
 $packageDirectory = Join-Path $root "packages"
-$webProject = Join-Path $root "src\PublisherStudio.Web\PublisherStudio.Web.csproj"
+$webProject = Join-Path $root "src/PublisherStudio.Web/PublisherStudio.Web.csproj"
 $webDirectory = Split-Path -Parent $webProject
-$setupProject = Join-Path $root "src\PublisherStudio.InstallerConsole\PublisherStudio.InstallerConsole.csproj"
-$documentationScript = Join-Path $root "build\Build-Documentation.ps1"
-$pagesSnapshotScript = Join-Path $root "build\Update-GitHubPagesSnapshot.ps1"
-$pagesSnapshotArchive = Join-Path $root ".github\pages\publisherstudio-kawaii-docs.zip"
+$setupProject = Join-Path $root "src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj"
+$documentationScript = Join-Path $root "build/Build-Documentation.ps1"
+$pagesSnapshotScript = Join-Path $root "build/Update-GitHubPagesSnapshot.ps1"
+$pagesSnapshotArchive = Join-Path $root ".github/pages/publisherstudio-kawaii-docs.zip"
 $wireProtocolPackageName = "LocalGPT.WireProtocolVersion.$WireProtocolVersion.nupkg"
 $wireProtocolPackage = Join-Path $packageDirectory $wireProtocolPackageName
 $documentationCacheRoot = Join-Path $artifacts ".documentation-cache"
@@ -76,7 +76,7 @@ function Resolve-PublishProfilePath {
     )
 
     $projectDirectory = Split-Path -Parent $ProjectPath
-    $profilePath = Join-Path $projectDirectory "Properties\PublishProfiles\$ProfileName.pubxml"
+    $profilePath = Join-Path $projectDirectory "Properties/PublishProfiles/$ProfileName.pubxml"
     if (-not (Test-Path -LiteralPath $profilePath -PathType Leaf)) {
         throw "Publish profile not found: $profilePath"
     }
@@ -171,15 +171,15 @@ function Assert-PublisherStudioDocumentationPayload {
 
     $requiredArtifacts = @(
         (Join-Path $DocumentationRoot "index.html"),
-        (Join-Path $DocumentationRoot "api\index.html"),
-        (Join-Path $DocumentationRoot "api\toc.html"),
-        (Join-Path $DocumentationRoot "public\docfx.min.css"),
-        (Join-Path $DocumentationRoot "public\docfx.min.js"),
+        (Join-Path $DocumentationRoot "api/index.html"),
+        (Join-Path $DocumentationRoot "api/toc.html"),
+        (Join-Path $DocumentationRoot "public/docfx.min.css"),
+        (Join-Path $DocumentationRoot "public/docfx.min.js"),
         (Join-Path $DocumentationRoot "documentation-status.json"),
         (Join-Path $DocumentationRoot "PublisherStudio.Web.xml"),
         (Join-Path $DocumentationRoot "PublisherStudio-$Version.pdf"),
-        (Join-Path $DocumentationRoot "styles\publisherstudio-kawaii.css"),
-        (Join-Path $DocumentationRoot "styles\publisherstudio-kawaii.js"),
+        (Join-Path $DocumentationRoot "styles/publisherstudio-kawaii.css"),
+        (Join-Path $DocumentationRoot "styles/publisherstudio-kawaii.js"),
         (Join-Path $DocumentationRoot "favicon.svg"),
         (Join-Path $DocumentationRoot "favicon.ico"),
         (Join-Path $DocumentationRoot "logo.svg")
@@ -195,8 +195,10 @@ function Assert-PublisherStudioDocumentationPayload {
         throw "Published PublisherStudio documentation version '$($status.version)' does not match application version '$Version'."
     }
     $versionedPdfs = @(Get-ChildItem -LiteralPath $DocumentationRoot -File -Filter 'PublisherStudio-*.pdf' -ErrorAction SilentlyContinue)
+    $versionedPdfNames = @($versionedPdfs | ForEach-Object { $_.Name })
+    $versionedPdfDisplay = if ($versionedPdfNames.Count -eq 0) { '<none>' } else { $versionedPdfNames -join ', ' }
     if ($versionedPdfs.Count -ne 1 -or -not [string]::Equals($versionedPdfs[0].Name, "PublisherStudio-$Version.pdf", [StringComparison]::OrdinalIgnoreCase)) {
-        throw "Published PublisherStudio documentation must contain exactly one current versioned PDF (PublisherStudio-$Version.pdf). Found: $($versionedPdfs.Name -join ', ')"
+        throw "Published PublisherStudio documentation must contain exactly one current versioned PDF (PublisherStudio-$Version.pdf). Found: $versionedPdfDisplay"
     }
     if ([string]$status.documentationMode -ne "docfx") { throw "Published PublisherStudio documentation did not use the DocFX modern site." }
     if ([string]$status.pdfMode -notin @("html-browser-print", "docfx-pdf-plugin")) { throw "Published PublisherStudio documentation does not contain the complete HTML-backed documentation PDF." }
@@ -209,7 +211,7 @@ function Assert-PublisherStudioDocumentationPayload {
     if ([int]$status.apiYamlCount -le 1 -or [int]$status.apiHtmlCount -le 1) { throw "Published PublisherStudio documentation contains an incomplete API graph." }
     $physicalApiHtmlCount = @(Get-ChildItem -LiteralPath (Join-Path $DocumentationRoot "api") -Filter "*.html" -File -Recurse -ErrorAction SilentlyContinue).Count
     if ($physicalApiHtmlCount -le 1) { throw "Published PublisherStudio documentation API directory is physically incomplete ($physicalApiHtmlCount HTML file(s))." }
-    $apiIndexText = Get-Content -LiteralPath (Join-Path $DocumentationRoot "api\index.html") -Raw
+    $apiIndexText = Get-Content -LiteralPath (Join-Path $DocumentationRoot "api/index.html") -Raw
     if ($apiIndexText.IndexOf("PublisherStudio API reference", [StringComparison]::OrdinalIgnoreCase) -lt 0) { throw "Published PublisherStudio api/index.html is not the generated API reference entry point." }
     if ([long]$status.pdfBytes -lt 1048576) { throw "Published PublisherStudio documentation contains an unexpectedly small PDF." }
     if ([int]$status.pdfCandidateCount -lt 1 -or [string]::IsNullOrWhiteSpace([string]$status.pdfGeneratedSourcePath)) { throw "Published PublisherStudio documentation did not record a real documentation PDF source." }
@@ -504,7 +506,7 @@ function Ensure-WireProtocolPackage {
         LocalGptRepository = $LocalGptRepository
     }
     if ($RefreshWireProtocolPackage) { $ensureArguments.ForceDownload = $true }
-    & (Join-Path $root "build\Ensure-WireProtocolPackage.ps1") @ensureArguments | Out-Null
+    & (Join-Path $root "build/Ensure-WireProtocolPackage.ps1") @ensureArguments | Out-Null
     if (-not (Test-Path -LiteralPath $wireProtocolPackage -PathType Leaf)) {
         throw "LocalGPT protocol package preparation did not produce $wireProtocolPackage"
     }
@@ -515,15 +517,15 @@ function Prepare-PublisherStudioClientAssets {
     & (Join-Path $root "Prepare-DevExpressAssets.ps1")
 
     $requiredAssets = @(
-        "wwwroot\vendor\devexpress-aspnetcore-spreadsheet\dist\dx-aspnetcore-spreadsheet.js",
-        "wwwroot\vendor\devexpress-aspnetcore-spreadsheet\dist\dx-aspnetcore-spreadsheet.css",
-        "wwwroot\vendor\devextreme-dist\js\dx.all.js",
-        "wwwroot\vendor\devextreme-dist\css\dx.light.css",
-        "wwwroot\vendor\jquery\jquery.min.js",
-        "wwwroot\vendor\devextreme-license.js",
-        "wwwroot\vendor\devextreme-license.meta.json",
-        "wwwroot\vendor\devextreme-license.version",
-        "wwwroot\vendor\devextreme-assets.meta.json"
+        "wwwroot/vendor/devexpress-aspnetcore-spreadsheet/dist/dx-aspnetcore-spreadsheet.js",
+        "wwwroot/vendor/devexpress-aspnetcore-spreadsheet/dist/dx-aspnetcore-spreadsheet.css",
+        "wwwroot/vendor/devextreme-dist/js/dx.all.js",
+        "wwwroot/vendor/devextreme-dist/css/dx.light.css",
+        "wwwroot/vendor/jquery/jquery.min.js",
+        "wwwroot/vendor/devextreme-license.js",
+        "wwwroot/vendor/devextreme-license.meta.json",
+        "wwwroot/vendor/devextreme-license.version",
+        "wwwroot/vendor/devextreme-assets.meta.json"
     )
     $missingAssets = @($requiredAssets | Where-Object { -not (Test-Path -LiteralPath (Join-Path $webDirectory $_) -PathType Leaf) })
     if ($missingAssets.Count -gt 0) {
@@ -546,10 +548,10 @@ function Prepare-PublisherStudioDocumentation {
         throw "Documentation build script not found: $documentationScript"
     }
 
-    $neutralOutputRoot = Join-Path $webDirectory "bin\$Configuration\net10.0"
+    $neutralOutputRoot = Join-Path $webDirectory "bin/$Configuration/net10.0"
     $documentationAssembly = Join-Path $neutralOutputRoot "PublisherStudio.Web.dll"
     $documentationXml = Join-Path $neutralOutputRoot "PublisherStudio.Web.xml"
-    $documentationOutput = Join-Path $neutralOutputRoot "wwwroot\help-docs"
+    $documentationOutput = Join-Path $neutralOutputRoot "wwwroot/help-docs"
     $wireProperties = Get-WireProperties
     $documentationProperties = @(
         "-p:RuntimeIdentifier=",
@@ -673,7 +675,7 @@ function Publish-Runtime {
     if (-not (Test-Path -LiteralPath $script:documentationCacheRoot -PathType Container)) {
         throw "The shared PublisherStudio documentation cache is missing: $script:documentationCacheRoot"
     }
-    $publishedDocumentationRoot = Join-Path $appFolder "wwwroot\help-docs"
+    $publishedDocumentationRoot = Join-Path $appFolder "wwwroot/help-docs"
     Remove-Item -LiteralPath $publishedDocumentationRoot -Recurse -Force -ErrorAction SilentlyContinue
     New-Item -ItemType Directory -Path $publishedDocumentationRoot -Force | Out-Null
     Copy-Item -Path (Join-Path $script:documentationCacheRoot "*") -Destination $publishedDocumentationRoot -Recurse -Force
@@ -688,7 +690,7 @@ function Publish-Runtime {
     Copy-Item -LiteralPath $wireProtocolPackage -Destination (Join-Path $protocolAppDirectory $wireProtocolPackageName) -Force
     Copy-Item -LiteralPath $wireProtocolPackage -Destination (Join-Path $protocolSetupDirectory $wireProtocolPackageName) -Force
 
-    $publisherIcon = Join-Path $root "assets\PublisherStudio.ico"
+    $publisherIcon = Join-Path $root "assets/PublisherStudio.ico"
     if (-not (Test-Path -LiteralPath $publisherIcon -PathType Leaf)) { throw "PublisherStudio release icon is unavailable: $publisherIcon" }
     Copy-Item -LiteralPath $publisherIcon -Destination (Join-Path $setupFolder "PublisherStudio.ico") -Force
     Copy-Item -LiteralPath $publisherIcon -Destination (Join-Path $appFolder "PublisherStudio.ico") -Force
@@ -743,7 +745,7 @@ try {
         -ReadmePath (Join-Path $root "README.md") `
         -LicensePath $licensePath `
         -WireProtocolPackagePath $wireProtocolPackage `
-        -SetupIconPath (Join-Path $root "assets\PublisherStudio.ico") `
+        -SetupIconPath (Join-Path $root "assets/PublisherStudio.ico") `
         -RequireWindowsX64Setup $requireWinX64Setup
 }
 finally {

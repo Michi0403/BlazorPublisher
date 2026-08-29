@@ -76,6 +76,26 @@ public interface ISystemVariableStoreService
     /// <value>The stable system-variable name used for persisted preview viewport presets.</value>
     string PanelStudioPreviewPresetsVariableName { get; }
     /// <summary>
+    /// Gets the operator-configured maximum number of video archive entries accepted by PublisherStudio.
+    /// </summary>
+    /// <value>The persisted maximum video archive entry count.</value>
+    int MaximumVideoArchiveEntries { get; }
+    /// <summary>
+    /// Gets the operator-configured maximum number of notification messages retained by PublisherStudio.
+    /// </summary>
+    /// <value>The persisted maximum notification history count.</value>
+    int MaximumNotificationMessages { get; }
+    /// <summary>
+    /// Gets the operator-configured maximum character count accepted for Organic protocol payloads.
+    /// </summary>
+    /// <value>The persisted maximum Organic payload character count.</value>
+    int MaximumOrganicPayloadCharacters { get; }
+    /// <summary>
+    /// Gets the operator-configured maximum number of Organic replay message identifiers retained for replay detection.
+    /// </summary>
+    /// <value>The persisted Organic replay tracking capacity.</value>
+    int OrganicReplayMaximumTrackedMessages { get; }
+    /// <summary>
     /// Retrieves string as part of the system variable store service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     /// <param name="name">Name value supplied to the system variable store operation and used when producing its result.</param>

@@ -1,13 +1,14 @@
-﻿param(
+param(
     [string]$DocumentationRoot = "",
-    [string]$OutputArchive = ""
+    [string]$OutputArchive = "",
+    [switch]$AllowMissingPdf
 )
 
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
 $repositoryRoot = Split-Path -Parent $PSScriptRoot
-$projectFile = Join-Path $repositoryRoot 'src\\PublisherStudio.Web\\PublisherStudio.Web.csproj'
+$projectFile = Join-Path $repositoryRoot 'src/PublisherStudio.Web/PublisherStudio.Web.csproj'
 if (-not (Test-Path -LiteralPath $projectFile -PathType Leaf)) {
     throw "PublisherStudio project file was not found: $projectFile"
 }
@@ -37,9 +38,9 @@ function Get-PublisherStudioDocumentationVersion {
 
 if ([string]::IsNullOrWhiteSpace($DocumentationRoot)) {
     $candidateRoots = @(
-        (Join-Path $repositoryRoot 'src\\PublisherStudio.Web\\bin\\Release\\net10.0\\wwwroot\\help-docs'),
-        (Join-Path $repositoryRoot 'src\\PublisherStudio.Web\\bin\\Debug\\net10.0\\wwwroot\\help-docs'),
-        (Join-Path $repositoryRoot 'src\\PublisherStudio.Web\\wwwroot\\help-docs')
+        (Join-Path $repositoryRoot 'src/PublisherStudio.Web/bin/Release/net10.0/wwwroot/help-docs'),
+        (Join-Path $repositoryRoot 'src/PublisherStudio.Web/bin/Debug/net10.0/wwwroot/help-docs'),
+        (Join-Path $repositoryRoot 'src/PublisherStudio.Web/wwwroot/help-docs')
     )
     $matchingRoots = @()
     $detectedRoots = [System.Collections.Generic.List[string]]::new()
@@ -66,20 +67,49 @@ if ([string]::IsNullOrWhiteSpace($DocumentationRoot)) {
     Write-Host "Selected version-matched PublisherStudio documentation output: $DocumentationRoot" -ForegroundColor Cyan
 }
 $DocumentationRoot = [IO.Path]::GetFullPath($DocumentationRoot)
-$versionedDocumentationPdfs = @(Get-ChildItem -LiteralPath $DocumentationRoot -File -Filter 'PublisherStudio-*.pdf' -ErrorAction SilentlyContinue)
-$expectedDocumentationPdf = 'PublisherStudio-' + $expectedVersion + '.pdf'
-if ($versionedDocumentationPdfs.Count -ne 1 -or -not [string]::Equals($versionedDocumentationPdfs[0].Name, $expectedDocumentationPdf, [StringComparison]::OrdinalIgnoreCase)) {
-    throw "PublisherStudio Pages source must contain exactly one current versioned PDF '$expectedDocumentationPdf'. Found: $($versionedDocumentationPdfs.Name -join ', ')"
-}
 if (-not (Test-Path -LiteralPath $DocumentationRoot -PathType Container)) {
     throw "Generated PublisherStudio documentation was not found: $DocumentationRoot"
 }
+$versionedDocumentationPdfs = @(Get-ChildItem -LiteralPath $DocumentationRoot -File -Filter 'PublisherStudio-*.pdf' -ErrorAction SilentlyContinue)
+$expectedDocumentationPdf = 'PublisherStudio-' + $expectedVersion + '.pdf'
+$foundPdfNames = @($versionedDocumentationPdfs | ForEach-Object { $_.Name })
+
+if ($versionedDocumentationPdfs.Count -eq 0 -and $AllowMissingPdf) {
+    $statusPath = Join-Path $DocumentationRoot 'documentation-status.json'
+    if (-not (Test-Path -LiteralPath $statusPath -PathType Leaf)) {
+        throw "Generated PublisherStudio documentation is missing documentation-status.json: $DocumentationRoot"
+    }
+    $status = [IO.File]::ReadAllText($statusPath) | ConvertFrom-Json
+    $pdfAvailableProperty = $status.PSObject.Properties['pdfAvailable']
+    if ($null -eq $pdfAvailableProperty -or [bool]$pdfAvailableProperty.Value) {
+        throw "PublisherStudio documentation omitted '$expectedDocumentationPdf' without declaring pdfAvailable=false."
+    }
+
+    $validator = Join-Path $repositoryRoot ".github/scripts/prepare-pages-artifact.py"
+    if (-not (Test-Path -LiteralPath $validator -PathType Leaf)) {
+        throw "Repository-root GitHub Pages validator was not found: $validator"
+    }
+    $python = Get-Command python -ErrorAction SilentlyContinue
+    if ($null -eq $python) { $python = Get-Command python3 -ErrorAction SilentlyContinue }
+    if ($null -eq $python) { throw "Python 3 is required to validate the GitHub Pages documentation." }
+    & $python.Source $validator --source $DocumentationRoot --html-only
+    if ($LASTEXITCODE -ne 0) {
+        throw "Generated PublisherStudio HTML documentation failed validation for version $expectedVersion."
+    }
+    Write-Host "Validated PublisherStudio $expectedVersion HTML documentation. A PDF was not required for this build, so the tracked Pages release snapshot was left unchanged." -ForegroundColor Green
+    return
+}
+
+if ($versionedDocumentationPdfs.Count -ne 1 -or -not [string]::Equals($versionedDocumentationPdfs[0].Name, $expectedDocumentationPdf, [StringComparison]::OrdinalIgnoreCase)) {
+    $found = if ($foundPdfNames.Count -eq 0) { '<none>' } else { $foundPdfNames -join ', ' }
+    throw "PublisherStudio Pages source must contain exactly one current versioned PDF '$expectedDocumentationPdf'. Found: $found"
+}
 
 if ([string]::IsNullOrWhiteSpace($OutputArchive)) {
-    $OutputArchive = Join-Path $repositoryRoot '.github\\pages\\publisherstudio-kawaii-docs.zip'
+    $OutputArchive = Join-Path $repositoryRoot '.github/pages/publisherstudio-kawaii-docs.zip'
 }
 $OutputArchive = [IO.Path]::GetFullPath($OutputArchive)
-$validator = Join-Path $repositoryRoot ".github\scripts\prepare-pages-artifact.py"
+$validator = Join-Path $repositoryRoot ".github/scripts/prepare-pages-artifact.py"
 if (-not (Test-Path -LiteralPath $validator -PathType Leaf)) {
     throw "Repository-root GitHub Pages validator was not found: $validator"
 }
@@ -147,8 +177,8 @@ try {
     & $python.Source $validator --archive $temporaryArchive --output $verificationRoot --expected-version $expectedVersion
     if ($LASTEXITCODE -ne 0) { throw "The new PublisherStudio Pages snapshot failed final validation for version $expectedVersion." }
 
-    $sourceApiIndex = Join-Path $DocumentationRoot 'api\index.html'
-    $verifiedApiIndex = Join-Path $verificationRoot 'api\index.html'
+    $sourceApiIndex = Join-Path $DocumentationRoot 'api/index.html'
+    $verifiedApiIndex = Join-Path $verificationRoot 'api/index.html'
     if (-not (Test-Path -LiteralPath $sourceApiIndex -PathType Leaf) -or -not (Test-Path -LiteralPath $verifiedApiIndex -PathType Leaf)) {
         throw "PublisherStudio Pages snapshot API entry point disappeared during snapshot preparation."
     }

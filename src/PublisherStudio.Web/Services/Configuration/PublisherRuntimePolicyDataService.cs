@@ -116,17 +116,17 @@ public sealed class PublisherRuntimePolicyDataService : IPublisherRuntimePolicyD
     /// Gets the maximum video archive entries value that forms part of the publisher runtime policy state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The maximum video archive entries value exposed by <see cref="PublisherRuntimePolicyDataService"/>.</value>
-    public int MaximumVideoArchiveEntries => Math.Max(1, systemVariables.GetInt("RuntimePolicy.MaximumVideoArchiveEntries", int.MaxValue));
+    public int MaximumVideoArchiveEntries => systemVariables.MaximumVideoArchiveEntries;
     /// <summary>
     /// Gets the maximum notification messages value that forms part of the publisher runtime policy state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The maximum notification messages value exposed by <see cref="PublisherRuntimePolicyDataService"/>.</value>
-    public int MaximumNotificationMessages => Math.Max(1, systemVariables.GetInt("RuntimePolicy.MaximumNotificationMessages", int.MaxValue));
+    public int MaximumNotificationMessages => systemVariables.MaximumNotificationMessages;
     /// <summary>
     /// Gets the maximum organic payload characters value governed by the persisted operator runtime policy.
     /// </summary>
     /// <value>The maximum organic payload characters value exposed by <see cref="PublisherRuntimePolicyDataService"/>.</value>
-    public int MaximumOrganicPayloadCharacters => Math.Max(1, systemVariables.GetInt("RuntimePolicy.MaximumOrganicPayloadCharacters", int.MaxValue));
+    public int MaximumOrganicPayloadCharacters => systemVariables.MaximumOrganicPayloadCharacters;
     /// <summary>
     /// Gets the installer download attempts value that forms part of the publisher runtime policy state consumed or produced by the surrounding workflow.
     /// </summary>

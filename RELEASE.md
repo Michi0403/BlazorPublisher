@@ -1,7 +1,11 @@
-# PublisherStudio 3.1.5
+# PublisherStudio 3.1.6
 
-PublisherStudio 3.1.5 is the **Shared Packaging Pipeline Contract** maintenance release.
+PublisherStudio 3.1.6 is the **LocalGPT release-packaging 1.0.1 consumption** maintenance release.
 
-It applies the same single-value PowerShell helper contract to PublisherStudio's consumption of the LocalGPT-owned release-packaging tool, preventing `dotnet tool install` progress output from becoming part of the executable-path value.
+The supplied Windows release log proves PublisherStudio builds its RID-neutral application, documentation, all three Windows application/setup RIDs, and the linux-x64 Full application payload before failing in the shared LocalGPT packaging helper. PublisherStudio itself does not own the failing TAR implementation.
 
-PublisherStudio continues to use its Windows one-click installer console while Linux and macOS use the shared native package lanes rather than a Unix setup console. Existing application behavior is otherwise preserved. See `CHANGELOG-v3.1.5-SHARED-PACKAGING-PIPELINE-CONTRACT.md` and `VALIDATION-v3.1.5-source.md`.
+This release updates PublisherStudio's shared-helper requirement from `LocalGPT.ReleasePackaging` 1.0.0 to 1.0.1. The corrected helper remains authored and packaged by LocalGPT, following the same source-ownership model as the 1-Wire NuGet package.
+
+The intended package matrix remains unchanged: Windows setup + portable ZIPs, Linux Full/Light TAR.GZ/DEB/RPM/AppImage outputs, and macOS Full/Light application/TAR.GZ plus DMG completion on macOS.
+
+See `CHANGELOG-v3.1.6-LOCALGPT-PACKAGING-101-CONSUMPTION.md` and `VALIDATION-v3.1.6-source.md`.

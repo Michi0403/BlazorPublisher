@@ -1,6 +1,6 @@
 # PublisherStudio documentation
 
-**Version 3.1.5**
+**Version 3.1.6**
 
 PublisherStudio is a local-first publishing workspace for page layout, stories, spreadsheets, pictures, audio, video, streaming, interactive content, and self-contained exports.
 
@@ -55,4 +55,4 @@ The conceptual pages are built together with compiler-generated XML documentatio
 
 The packaged PDF is built from the same reviewed Kawaii HTML tree as the website. It contains every maintained PublisherStudio chapter and every generated API namespace/type page; a tiny source-only or fallback PDF is rejected by the release and Pages gates.
 
-[🐾 Download the Kawaii handbook](~/PublisherStudio-3.1.5.pdf)
+[🐾 Download the Kawaii handbook](~/PublisherStudio-3.1.6.pdf)

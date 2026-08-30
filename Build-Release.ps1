@@ -1,5 +1,5 @@
 param(
-    [ValidateSet("all", "win-x64", "win-x86", "win-arm64", "linux-x64", "linux-arm64", "osx-x64", "osx-arm64")]
+    [ValidateSet("all", "all-rids", "win-x64", "win-x86", "win-arm64", "linux-x64", "linux-arm64", "osx-x64", "osx-arm64")]
     [string]$Runtime = "all",
     [ValidateSet("Release", "Debug")]
     [string]$Configuration = "Release",
@@ -10,11 +10,22 @@ param(
     [string]$ReleasePackagingPackageUrl = "",
     [switch]$UseBundledWireProtocolPackage,
     [switch]$RefreshWireProtocolPackage,
-    [switch]$RefreshReleasePackagingPackage
+    [switch]$RefreshReleasePackagingPackage,
+    [switch]$UseContainerPackaging
 )
 
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
+
+function Initialize-BuildConsoleEncoding {
+    if ([Runtime.InteropServices.RuntimeInformation]::IsOSPlatform([Runtime.InteropServices.OSPlatform]::Windows)) {
+        $utf8 = New-Object Text.UTF8Encoding($false)
+        [Console]::InputEncoding = $utf8
+        [Console]::OutputEncoding = $utf8
+        $global:OutputEncoding = $utf8
+    }
+}
+Initialize-BuildConsoleEncoding
 
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
 & (Join-Path $root ([IO.Path]::Combine('build', 'Assert-SourcePackagePrerequisites.ps1'))) -RepositoryRoot $root
@@ -58,6 +69,21 @@ function Invoke-DotNet {
 
     & dotnet @Arguments
     if ($LASTEXITCODE -ne 0) { throw $FailureMessage }
+}
+
+function Get-ReleaseHostFamily {
+    if ([Runtime.InteropServices.RuntimeInformation]::IsOSPlatform([Runtime.InteropServices.OSPlatform]::Windows)) { return 'Windows' }
+    if ([Runtime.InteropServices.RuntimeInformation]::IsOSPlatform([Runtime.InteropServices.OSPlatform]::Linux)) { return 'Linux' }
+    if ([Runtime.InteropServices.RuntimeInformation]::IsOSPlatform([Runtime.InteropServices.OSPlatform]::OSX)) { return 'macOS' }
+    throw 'Unsupported release host. PublisherStudio release builds support Windows, Linux, and macOS.'
+}
+
+function Get-HostDefaultRuntimes {
+    switch (Get-ReleaseHostFamily) {
+        'Windows' { return @('win-x64', 'win-x86', 'win-arm64') }
+        'Linux'   { return @('linux-x64', 'linux-arm64') }
+        'macOS'   { return @('osx-x64', 'osx-arm64') }
+    }
 }
 
 function Resolve-ProjectVersion {
@@ -623,7 +649,7 @@ function Publish-UnixRuntime {
         $protocolDirectory = Join-Path $publishFolder 'protocol'; New-Item -ItemType Directory -Path $protocolDirectory -Force | Out-Null
         Copy-Item -LiteralPath $wireProtocolPackage -Destination (Join-Path $protocolDirectory $wireProtocolPackageName) -Force
         $publisherIcon = Join-Path $root 'assets/PublisherStudio.ico'; if (Test-Path -LiteralPath $publisherIcon -PathType Leaf) { Copy-Item -LiteralPath $publisherIcon -Destination (Join-Path $publishFolder 'PublisherStudio.ico') -Force }
-        $nativeArtifacts = & $script:nativeReleasePackagingScript -ProductName 'PublisherStudio' -ExecutableName $appExecutable -Version $appVersion -Rid $Rid -Mode $mode -PayloadDirectory $publishFolder -OutputDirectory $artifacts -PackagingTool $script:releasePackagingTool -DependencyPolicy PublisherStudio
+        $nativeArtifacts = & $script:nativeReleasePackagingScript -ProductName 'PublisherStudio' -ExecutableName $appExecutable -Version $appVersion -Rid $Rid -Mode $mode -PayloadDirectory $publishFolder -OutputDirectory $artifacts -PackagingTool $script:releasePackagingTool -DependencyPolicy PublisherStudio -UseContainerFallback:$UseContainerPackaging
         foreach ($artifact in @($nativeArtifacts)) { if (-not [string]::IsNullOrWhiteSpace([string]$artifact)) { $script:releaseZipPaths.Add([string]$artifact) } }
     }
 }
@@ -715,34 +741,48 @@ function Publish-Runtime {
     Write-Host "Created portable ZIP $setupZip" -ForegroundColor Green
 }
 
+$releaseHost = Get-ReleaseHostFamily
+$runtimes = if ($Runtime -eq "all") {
+    @(Get-HostDefaultRuntimes)
+} elseif ($Runtime -eq "all-rids") {
+    @("win-x64", "win-x86", "win-arm64", "linux-x64", "linux-arm64", "osx-x64", "osx-arm64")
+} else {
+    @($Runtime)
+}
+Write-Host "Release host $releaseHost selected runtime(s): $($runtimes -join ', ')" -ForegroundColor Cyan
+if ($Runtime -eq 'all') {
+    Write-Host "Runtime 'all' is host-aware. Use -Runtime all-rids only for an explicit cross-host publish attempt." -ForegroundColor DarkCyan
+}
+$requiresReleasePackaging = @($runtimes | Where-Object { -not $_.StartsWith('win-') }).Count -gt 0
+
 New-Item -ItemType Directory -Path $packageDirectory, $artifacts -Force | Out-Null
 Remove-Item -LiteralPath $documentationCacheRoot -Recurse -Force -ErrorAction SilentlyContinue
 Ensure-WireProtocolPackage
-$releasePackagingEnsureArguments = @{
-    Version = $ReleasePackagingVersion
-    PackageDirectory = $packageDirectory
-    PackageUrl = $ReleasePackagingPackageUrl
-    LocalGptRepository = $LocalGptRepository
+
+if ($requiresReleasePackaging) {
+    $releasePackagingEnsureArguments = @{
+        Version = $ReleasePackagingVersion
+        Configuration = $Configuration
+        PackageDirectory = $packageDirectory
+        PackageUrl = $ReleasePackagingPackageUrl
+        LocalGptRepository = $LocalGptRepository
+    }
+    if ($RefreshReleasePackagingPackage) { $releasePackagingEnsureArguments.ForceDownload = $true }
+    $releasePackagingToolOutput = @(& (Join-Path $root 'build/Ensure-ReleasePackagingPackage.ps1') @releasePackagingEnsureArguments)
+    if ($releasePackagingToolOutput.Count -ne 1 -or [string]::IsNullOrWhiteSpace([string]$releasePackagingToolOutput[0])) { throw "Release-packaging tool preparation returned $($releasePackagingToolOutput.Count) pipeline value(s); expected exactly one executable path." }
+    $releasePackagingTool = [string]$releasePackagingToolOutput[0]
+    if (-not (Test-Path -LiteralPath $releasePackagingTool -PathType Leaf)) { throw "Prepared release-packaging tool is missing: $releasePackagingTool" }
+    if (-not (Test-Path -LiteralPath $releasePackagingPackage -PathType Leaf)) {
+        throw "LocalGPT release-packaging package preparation did not produce $releasePackagingPackage"
+    }
+    Copy-Item -LiteralPath $releasePackagingPackage -Destination (Join-Path $artifacts $releasePackagingPackageName) -Force
+} else {
+    Write-Host "Skipping LocalGPT.ReleasePackaging tool preparation because this host-aware release contains Windows runtimes only." -ForegroundColor DarkCyan
 }
-if ($RefreshReleasePackagingPackage) { $releasePackagingEnsureArguments.ForceDownload = $true }
-$releasePackagingToolOutput = @(& (Join-Path $root 'build/Ensure-ReleasePackagingPackage.ps1') @releasePackagingEnsureArguments)
-if ($releasePackagingToolOutput.Count -ne 1 -or [string]::IsNullOrWhiteSpace([string]$releasePackagingToolOutput[0])) { throw "Release-packaging tool preparation returned $($releasePackagingToolOutput.Count) pipeline value(s); expected exactly one executable path." }
-$releasePackagingTool = [string]$releasePackagingToolOutput[0]
-if (-not (Test-Path -LiteralPath $releasePackagingTool -PathType Leaf)) { throw "Prepared release-packaging tool is missing: $releasePackagingTool" }
-if (-not (Test-Path -LiteralPath $releasePackagingPackage -PathType Leaf)) {
-    throw "LocalGPT release-packaging package preparation did not produce $releasePackagingPackage"
-}
-Copy-Item -LiteralPath $releasePackagingPackage -Destination (Join-Path $artifacts $releasePackagingPackageName) -Force
+
 Copy-Item -LiteralPath $wireProtocolPackage -Destination (Join-Path $artifacts $wireProtocolPackageName) -Force
 Prepare-PublisherStudioClientAssets
 Prepare-PublisherStudioDocumentation
-
-$runtimes = if ($Runtime -eq "all") {
-    @("win-x64", "win-x86", "win-arm64", "linux-x64", "linux-arm64", "osx-x64", "osx-arm64")
-}
-else {
-    @($Runtime)
-}
 
 try {
     foreach ($rid in $runtimes) { Publish-Runtime -Rid $rid }

@@ -23,13 +23,13 @@ The preparation command restores the pinned browser packages and generates the p
 .\Build-Release.ps1 -Runtime win-x64
 ```
 
-All supported runtimes can be built sequentially with:
+All maintained runtimes for the current host OS can be built sequentially with:
 
 ```
 .\Build-AllRuntimes.ps1
 ```
 
-The release lane restores the authoritative LocalGPT wire protocol package, publishes the application and standalone setup, validates configuration and documentation, then creates manifest-backed archives.
+The release lane is host-aware: Windows produces Windows application/setup outputs only, Linux produces Linux application packages, and macOS produces macOS application packages. `Build-Release.ps1 -Runtime all-rids` is available for an explicit cross-host publish attempt. Linux RPM/AppImage finishing is optional; Docker/Podman is used only when `-UseContainerPackaging` is explicitly requested. The lane restores the authoritative LocalGPT wire protocol package, resolves the LocalGPT-owned release-packaging helper only when Unix/macOS packaging needs it, validates configuration and documentation, then creates the supported archives.
 
 ## Quality gates
 

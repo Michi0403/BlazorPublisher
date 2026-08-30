@@ -1,8 +1,8 @@
-﻿# PublisherStudio
+# PublisherStudio
 
 PublisherStudio is a local-first publishing studio for documents, stories, pictures, spreadsheets, presentations, websites, video, streaming, and reusable interactive panels.
 
-Version **2.3.7** keeps the proven 2.2.10 application/documentation and console-release baseline plus the 2.3.0 documentation-viewer Close repair, and refreshes the reviewed JavaScript diagnostics manifest for that browser change. The full-width DocFX viewer, API reference, service resilience, Pages seeding, and user-confirmed documentation URL compiler fix remain intact.
+Version **3.1.7** keeps the current application, editor, documentation, recording/export, and installer behavior while making the release lane host-aware. Windows release builds produce the Windows application/setup matrix only; Linux and macOS use their own native package lanes, with optional Linux RPM/AppImage finishing and local-first consumption of the LocalGPT-owned release-packaging helper.
 
 ## Build
 

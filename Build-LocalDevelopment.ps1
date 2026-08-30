@@ -11,6 +11,16 @@ param(
 
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
+
+function Initialize-BuildConsoleEncoding {
+    if ([Runtime.InteropServices.RuntimeInformation]::IsOSPlatform([Runtime.InteropServices.OSPlatform]::Windows)) {
+        $utf8 = New-Object Text.UTF8Encoding($false)
+        [Console]::InputEncoding = $utf8
+        [Console]::OutputEncoding = $utf8
+        $global:OutputEncoding = $utf8
+    }
+}
+Initialize-BuildConsoleEncoding
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
 & (Join-Path $root ([IO.Path]::Combine('build', 'Assert-SourcePackagePrerequisites.ps1'))) -RepositoryRoot $root
 & (Join-Path $root ([IO.Path]::Combine('build', 'Assert-CrossPlatformBoundaries.ps1'))) -RepositoryRoot $root

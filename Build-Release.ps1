@@ -11,7 +11,9 @@ param(
     [switch]$UseBundledWireProtocolPackage,
     [switch]$RefreshWireProtocolPackage,
     [switch]$RefreshReleasePackagingPackage,
-    [switch]$UseContainerPackaging
+    [switch]$UseContainerPackaging,
+    [switch]$ProvisionNativePackagingTools,
+    [switch]$RequireOptionalNativePackages
 )
 
 $ErrorActionPreference = "Stop"
@@ -82,7 +84,7 @@ function Get-HostDefaultRuntimes {
     switch (Get-ReleaseHostFamily) {
         'Windows' { return @('win-x64', 'win-x86', 'win-arm64') }
         'Linux'   { return @('linux-x64', 'linux-arm64') }
-        'macOS'   { return @('osx-x64', 'osx-arm64') }
+        'macOS'   { return @('osx-x64', 'osx-arm64', 'linux-x64', 'linux-arm64') }
     }
 }
 
@@ -649,7 +651,7 @@ function Publish-UnixRuntime {
         $protocolDirectory = Join-Path $publishFolder 'protocol'; New-Item -ItemType Directory -Path $protocolDirectory -Force | Out-Null
         Copy-Item -LiteralPath $wireProtocolPackage -Destination (Join-Path $protocolDirectory $wireProtocolPackageName) -Force
         $publisherIcon = Join-Path $root 'assets/PublisherStudio.ico'; if (Test-Path -LiteralPath $publisherIcon -PathType Leaf) { Copy-Item -LiteralPath $publisherIcon -Destination (Join-Path $publishFolder 'PublisherStudio.ico') -Force }
-        $nativeArtifacts = & $script:nativeReleasePackagingScript -ProductName 'PublisherStudio' -ExecutableName $appExecutable -Version $appVersion -Rid $Rid -Mode $mode -PayloadDirectory $publishFolder -OutputDirectory $artifacts -PackagingTool $script:releasePackagingTool -DependencyPolicy PublisherStudio -UseContainerFallback:$UseContainerPackaging
+        $nativeArtifacts = & $script:nativeReleasePackagingScript -ProductName 'PublisherStudio' -ExecutableName $appExecutable -Version $appVersion -Rid $Rid -Mode $mode -PayloadDirectory $publishFolder -OutputDirectory $artifacts -PackagingTool $script:releasePackagingTool -DependencyPolicy PublisherStudio -UseContainerFallback:$UseContainerPackaging -ProvisionHomebrewTools:$ProvisionNativePackagingTools -RequireOptionalPackages:$RequireOptionalNativePackages
         foreach ($artifact in @($nativeArtifacts)) { if (-not [string]::IsNullOrWhiteSpace([string]$artifact)) { $script:releaseZipPaths.Add([string]$artifact) } }
     }
 }
@@ -752,6 +754,9 @@ $runtimes = if ($Runtime -eq "all") {
 Write-Host "Release host $releaseHost selected runtime(s): $($runtimes -join ', ')" -ForegroundColor Cyan
 if ($Runtime -eq 'all') {
     Write-Host "Runtime 'all' is host-aware. Use -Runtime all-rids only for an explicit cross-host publish attempt." -ForegroundColor DarkCyan
+    if ($releaseHost -eq 'macOS') {
+        Write-Host "macOS host release also includes Linux x64/ARM64 payloads. TAR.GZ/DEB are managed; RPM uses rpmbuild (Homebrew rpm is supported); AppImage remains Linux/container-only." -ForegroundColor DarkCyan
+    }
 }
 $requiresReleasePackaging = @($runtimes | Where-Object { -not $_.StartsWith('win-') }).Count -gt 0
 

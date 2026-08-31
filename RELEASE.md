@@ -1,11 +1,11 @@
-# PublisherStudio 3.1.7
+# PublisherStudio 3.1.9
 
-PublisherStudio 3.1.7 is the **host-aware local-first release** maintenance release.
+PublisherStudio 3.1.9 is the **macOS Linux cross-release and Homebrew RPM** maintenance release.
 
-The supplied Windows 3.1.6 release log proves PublisherStudio successfully builds its application, documentation, all Windows x64/x86/ARM64 application/setup outputs, and Linux TAR.GZ/DEB artifacts before the old pipeline fails at mandatory RPM packaging. Windows release builds now stop at Windows outputs by default and therefore do not require the LocalGPT Unix packaging tool.
+The default workstation release matrix now uses Windows for the Windows x64/x86/ARM64 application/setup outputs and macOS for macOS x64/ARM64 plus Linux x64/ARM64 application packages. Linux remains a first-class build host for developers and Linux-native release finishing.
 
-`Build-Release -Runtime all` now means all maintained runtimes for the current host OS. `-Runtime all-rids` is available for deliberate cross-host publishing. Linux RPM/AppImage finishing is optional, and container fallback is opt-in.
+On macOS, Linux TAR.GZ and DEB packages are created with the LocalGPT-owned managed packaging helper. RPM can be created with Homebrew's `rpm`/`rpmbuild` (`brew install rpm`) and explicit Linux targets. `-ProvisionNativePackagingTools` is an opt-in helper for installing that formula when Homebrew already exists. AppImage stays Linux-native and is skipped on macOS unless an optional container fallback is explicitly requested.
 
-For non-Windows packaging, `LocalGPT.ReleasePackaging` remains LocalGPT-owned and is resolved local-first. PublisherStudio can consume the local package/cache or invoke the authoritative LocalGPT package publisher from an available LocalGPT checkout. Network download is used only when an explicit package URL is supplied.
+RPM/AppImage remain optional by default. `-RequireOptionalNativePackages` makes them strict when a release operator explicitly requires them.
 
-See `CHANGELOG-v3.1.7-HOST-AWARE-LOCAL-FIRST-RELEASE.md` and `VALIDATION-v3.1.7-source.md`.
+See `CHANGELOG-v3.1.9-MACOS-LINUX-HOMEBREW-RELEASE.md` and `VALIDATION-v3.1.9-source.md`.

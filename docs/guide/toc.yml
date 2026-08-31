@@ -24,6 +24,8 @@
   href: ../articles/architecture.md
 - name: Developer build
   href: ../articles/developer-build.md
+- name: Windows + WSL Linux releases
+  href: ../articles/wsl-linux-release.md
 - name: Troubleshooting
   href: ../articles/troubleshooting.md
 - name: Documentation system

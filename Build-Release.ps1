@@ -13,7 +13,18 @@ param(
     [switch]$RefreshReleasePackagingPackage,
     [switch]$UseContainerPackaging,
     [switch]$ProvisionNativePackagingTools,
-    [switch]$RequireOptionalNativePackages
+    [switch]$RequireOptionalNativePackages,
+    [ValidateSet("Auto", "Off", "Require")]
+    [string]$WslLinux = "Auto",
+    [string]$WslDistribution = "",
+    [ValidateSet("IfStarted", "Always", "Never")]
+    [string]$WslShutdown = "IfStarted",
+    [switch]$ProvisionWslBuildTools,
+    [switch]$KeepWslBuildTree,
+    [switch]$WslChildBuild,
+    [switch]$SkipReleaseBundle,
+    [string]$PreparedDocumentationRoot = "",
+    [switch]$UsePreparedClientAssets
 )
 
 $ErrorActionPreference = "Stop"
@@ -30,7 +41,10 @@ function Initialize-BuildConsoleEncoding {
 Initialize-BuildConsoleEncoding
 
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
-& (Join-Path $root ([IO.Path]::Combine('build', 'Assert-SourcePackagePrerequisites.ps1'))) -RepositoryRoot $root
+$wslCommonScript = Join-Path $root 'build/WslRelease.Common.ps1'
+if (-not (Test-Path -LiteralPath $wslCommonScript -PathType Leaf)) { throw "WSL release helper is missing: $wslCommonScript" }
+. $wslCommonScript
+& (Join-Path $root ([IO.Path]::Combine('build', 'Assert-SourcePackagePrerequisites.ps1'))) -RepositoryRoot $root -SkipNodeRuntime:($WslChildBuild -and $UsePreparedClientAssets -and -not [string]::IsNullOrWhiteSpace($PreparedDocumentationRoot))
 & (Join-Path $root ([IO.Path]::Combine('build', 'Assert-CrossPlatformBoundaries.ps1'))) -RepositoryRoot $root
 Write-Host "Refreshing reviewed PublisherStudio frontend SHA-256 inventory before the ordered CLI build..." -ForegroundColor DarkCyan
 & (Join-Path $root 'build/Update-JavaScriptDiagnosticsManifest.ps1')
@@ -233,12 +247,12 @@ function Assert-PublisherStudioDocumentationPayload {
         throw "Published PublisherStudio documentation must contain exactly one current versioned PDF (PublisherStudio-$Version.pdf). Found: $versionedPdfDisplay"
     }
     if ([string]$status.documentationMode -ne "docfx") { throw "Published PublisherStudio documentation did not use the DocFX modern site." }
-    if ([string]$status.pdfMode -notin @("html-browser-print", "docfx-pdf-plugin")) { throw "Published PublisherStudio documentation does not contain the complete HTML-backed documentation PDF." }
+    if ([string]$status.pdfMode -notin @("html-browser-print", "html-browser-print-compatibility", "docfx-pdf-plugin")) { throw "Published PublisherStudio documentation does not contain the complete HTML-backed documentation PDF." }
     if (-not ([bool]$status.htmlPreflightValidated)) { throw "Published PublisherStudio documentation did not pass the generated HTML accessibility/link preflight before PDF rendering." }
-    $expectedPdfAccessibilityMode = if ([string]$status.pdfMode -eq "docfx-pdf-plugin") { "html-accessibility-fallback" } else { "tagged-pdf-required" }
+    $expectedPdfAccessibilityMode = if ([string]$status.pdfMode -eq "html-browser-print") { "tagged-pdf-required" } else { "html-accessibility-fallback" }
     if (-not [string]::Equals([string]$status.pdfAccessibilityMode, $expectedPdfAccessibilityMode, [StringComparison]::Ordinal)) { throw "Published PublisherStudio documentation has an unexpected PDF accessibility mode '$($status.pdfAccessibilityMode)' for PDF mode '$($status.pdfMode)'." }
-    if ([string]$status.pdfMode -eq "html-browser-print" -and [int]$status.pdfSourcePageCount -lt 10) { throw "The PublisherStudio documentation PDF did not include the expected HTML page set." }
-    if ([string]$status.pdfMode -eq "html-browser-print" -and [int]$status.apiHtmlCount -gt 0 -and [int]$status.pdfSourcePageCount -lt [int]$status.apiHtmlCount) { throw "The PublisherStudio documentation PDF omitted generated API pages." }
+    if ([string]$status.pdfMode -like "html-browser-print*" -and [int]$status.pdfSourcePageCount -lt 10) { throw "The PublisherStudio documentation PDF did not include the expected HTML page set." }
+    if ([string]$status.pdfMode -like "html-browser-print*" -and [int]$status.apiHtmlCount -gt 0 -and [int]$status.pdfSourcePageCount -lt [int]$status.apiHtmlCount) { throw "The PublisherStudio documentation PDF omitted generated API pages." }
     if (-not ([bool]$status.completeApiReference)) { throw "Published PublisherStudio documentation is missing the complete XML-generated API reference." }
     if ([int]$status.apiYamlCount -le 1 -or [int]$status.apiHtmlCount -le 1) { throw "Published PublisherStudio documentation contains an incomplete API graph." }
     $physicalApiHtmlCount = @(Get-ChildItem -LiteralPath (Join-Path $DocumentationRoot "api") -Filter "*.html" -File -Recurse -ErrorAction SilentlyContinue).Count
@@ -545,8 +559,13 @@ function Ensure-WireProtocolPackage {
 }
 
 function Prepare-PublisherStudioClientAssets {
-    Write-Host "Preparing local DevExpress client assets and runtime license..." -ForegroundColor Cyan
-    & (Join-Path $root "Prepare-DevExpressAssets.ps1")
+    if ($UsePreparedClientAssets) {
+        Write-Host "Reusing parent-prepared PublisherStudio DevExpress browser assets in this delegated Linux release child." -ForegroundColor DarkCyan
+    }
+    else {
+        Write-Host "Preparing local DevExpress client assets and runtime license..." -ForegroundColor Cyan
+        & (Join-Path $root "Prepare-DevExpressAssets.ps1")
+    }
 
     $requiredAssets = @(
         "wwwroot/vendor/devexpress-aspnetcore-spreadsheet/dist/dx-aspnetcore-spreadsheet.js",
@@ -576,6 +595,17 @@ function Get-WireProperties {
 
 function Prepare-PublisherStudioDocumentation {
     if ($script:documentationPrepared) { return }
+    if (-not [string]::IsNullOrWhiteSpace($PreparedDocumentationRoot)) {
+        $preparedRoot = [IO.Path]::GetFullPath($PreparedDocumentationRoot)
+        if (-not (Test-Path -LiteralPath $preparedRoot -PathType Container)) { throw "Prepared PublisherStudio documentation root is missing: $preparedRoot" }
+        Assert-PublisherStudioDocumentationPayload -DocumentationRoot $preparedRoot -Version $appVersion
+        Remove-Item -LiteralPath $script:documentationCacheRoot -Recurse -Force -ErrorAction SilentlyContinue
+        New-Item -ItemType Directory -Path $script:documentationCacheRoot -Force | Out-Null
+        Copy-Item -Path (Join-Path $preparedRoot '*') -Destination $script:documentationCacheRoot -Recurse -Force
+        $script:documentationPrepared = $true
+        Write-Host "Reused parent-prepared PublisherStudio documentation for this Linux release child." -ForegroundColor Green
+        return
+    }
     if (-not (Test-Path -LiteralPath $documentationScript -PathType Leaf)) {
         throw "Documentation build script not found: $documentationScript"
     }
@@ -751,9 +781,65 @@ $runtimes = if ($Runtime -eq "all") {
 } else {
     @($Runtime)
 }
-Write-Host "Release host $releaseHost selected runtime(s): $($runtimes -join ', ')" -ForegroundColor Cyan
+
+$wslLinuxRuntimes = @()
+$wslResolvedDistribution = ''
+$wslWasRunningBeforeProbe = $false
+$wslEffectiveShutdown = $WslShutdown
+$wslExecutable = $null
+if ($releaseHost -eq 'Windows' -and -not $WslChildBuild -and $WslLinux -ne 'Off') {
+    $wslCandidates = if ($Runtime -eq 'all') {
+        @('linux-x64','linux-arm64')
+    } else {
+        @($runtimes | Where-Object { $_ -in @('linux-x64','linux-arm64') })
+    }
+
+    if ($wslCandidates.Count -gt 0) {
+        $wslExecutable = Get-WslReleaseExecutable
+        if (-not [string]::IsNullOrWhiteSpace($wslExecutable)) {
+            $wslResolvedDistribution = Resolve-WslReleaseDistribution -WslExecutable $wslExecutable -RequestedDistribution $WslDistribution
+        }
+
+        if (-not [string]::IsNullOrWhiteSpace($wslResolvedDistribution)) {
+            $runningBeforeProbe = @(Get-WslReleaseRunningDistributions -WslExecutable $wslExecutable)
+            $wslWasRunningBeforeProbe = @($runningBeforeProbe | Where-Object { [string]::Equals($_, $wslResolvedDistribution, [StringComparison]::OrdinalIgnoreCase) }).Count -gt 0
+            $wslStatus = Get-WslReleaseBuildStatus -WslExecutable $wslExecutable -Distribution $wslResolvedDistribution
+            if ((-not $wslStatus.CoreReady) -and $ProvisionWslBuildTools) {
+                Write-Host "Provisioning the existing WSL distribution '$wslResolvedDistribution' because -ProvisionWslBuildTools was requested..." -ForegroundColor Cyan
+                & (Join-Path $root 'Setup-WslLinuxBuild.ps1') -Distribution $wslResolvedDistribution -Provision -Shutdown Never
+                $wslStatus = Get-WslReleaseBuildStatus -WslExecutable $wslExecutable -Distribution $wslResolvedDistribution
+            }
+            $wslLicenseReady = $wslStatus.CoreReady -and (Test-WslReleaseDevExpressLicenseAvailable -WslExecutable $wslExecutable -Distribution $wslResolvedDistribution -Status $wslStatus)
+            if ($wslStatus.CoreReady -and $wslLicenseReady) {
+                $wslLinuxRuntimes = @($wslCandidates)
+                $runtimes = @($runtimes | Where-Object { $_ -notin $wslLinuxRuntimes })
+                if ($WslShutdown -eq 'IfStarted') { $wslEffectiveShutdown = if ($wslWasRunningBeforeProbe) { 'Never' } else { 'Always' } }
+                Write-Host "Ready WSL Linux backend '$wslResolvedDistribution' will build: $($wslLinuxRuntimes -join ', ')." -ForegroundColor Cyan
+            }
+            else {
+                $reason = if (-not $wslStatus.CoreReady) { Get-WslReleaseReadinessMessage $wslStatus } else { 'DevExpress build license is not available through the WSL profile or Windows license bridge.' }
+                if (-not $wslWasRunningBeforeProbe) { & $wslExecutable --terminate $wslResolvedDistribution 2>$null | Out-Null }
+                if ($WslLinux -eq 'Require') { throw "WSL Linux release was required, but '$wslResolvedDistribution' is not ready: $reason" }
+                Write-Host "WSL Linux release backend not used: $reason" -ForegroundColor DarkCyan
+                if ($Runtime -eq 'all') { Write-Host 'Continuing with the normal Windows release only. Run .\\Setup-WslLinuxBuild.ps1 -Provision to enable automatic Linux packaging.' -ForegroundColor DarkCyan }
+                else { Write-Host 'Explicit Linux RIDs remain in the local runtime list, so the existing cross-publish path is preserved.' -ForegroundColor DarkCyan }
+            }
+        }
+        else {
+            if ($WslLinux -eq 'Require') { throw 'WSL Linux release was required, but no usable WSL distribution is installed and initialized.' }
+            if ($Runtime -eq 'all') { Write-Host 'No ready WSL distribution was found; continuing with the normal Windows release only.' -ForegroundColor DarkCyan }
+            else { Write-Host 'No ready WSL distribution was found; explicit Linux RIDs will use the existing Windows cross-publish path.' -ForegroundColor DarkCyan }
+        }
+    }
+}
+
+$displayRuntimes = @($runtimes) + @($wslLinuxRuntimes | ForEach-Object { "$_ (WSL)" })
+Write-Host "Release host $releaseHost selected runtime(s): $($displayRuntimes -join ', ')" -ForegroundColor Cyan
 if ($Runtime -eq 'all') {
     Write-Host "Runtime 'all' is host-aware. Use -Runtime all-rids only for an explicit cross-host publish attempt." -ForegroundColor DarkCyan
+    if ($releaseHost -eq 'Windows' -and $wslLinuxRuntimes.Count -gt 0) {
+        Write-Host 'Windows is the release coordinator: Windows packages are native; Linux Full/Light packages are delegated headlessly to WSL and imported into the same release bundle.' -ForegroundColor DarkCyan
+    }
     if ($releaseHost -eq 'macOS') {
         Write-Host "macOS host release also includes Linux x64/ARM64 payloads. TAR.GZ/DEB are managed; RPM uses rpmbuild (Homebrew rpm is supported); AppImage remains Linux/container-only." -ForegroundColor DarkCyan
     }
@@ -763,6 +849,34 @@ $requiresReleasePackaging = @($runtimes | Where-Object { -not $_.StartsWith('win
 New-Item -ItemType Directory -Path $packageDirectory, $artifacts -Force | Out-Null
 Remove-Item -LiteralPath $documentationCacheRoot -Recurse -Force -ErrorAction SilentlyContinue
 Ensure-WireProtocolPackage
+
+if ($wslLinuxRuntimes.Count -gt 0) {
+    try {
+        $wslPackageArguments = @{
+            Version = $ReleasePackagingVersion
+            Configuration = $Configuration
+            PackageDirectory = $packageDirectory
+            PackageUrl = $ReleasePackagingPackageUrl
+            LocalGptRepository = $LocalGptRepository
+            PackageOnly = $true
+        }
+        if ($RefreshReleasePackagingPackage) { $wslPackageArguments.ForceDownload = $true }
+        $wslPackageOutput = @(& (Join-Path $root 'build/Ensure-ReleasePackagingPackage.ps1') @wslPackageArguments)
+        if ($wslPackageOutput.Count -ne 1 -or [string]::IsNullOrWhiteSpace([string]$wslPackageOutput[0])) { throw "WSL release-packaging package preparation returned $($wslPackageOutput.Count) pipeline value(s); expected exactly one package path." }
+        $releasePackagingPackage = [string]$wslPackageOutput[0]
+        if (-not (Test-Path -LiteralPath $releasePackagingPackage -PathType Leaf)) { throw "WSL release-packaging package is missing: $releasePackagingPackage" }
+        Write-Host "Prepared LocalGPT.ReleasePackaging $ReleasePackagingVersion for the WSL Linux child without installing the tool on Windows." -ForegroundColor DarkCyan
+    }
+    catch {
+        if ($WslLinux -eq 'Require') { throw }
+        Write-Warning "The ready WSL backend could not be supplied with LocalGPT.ReleasePackaging: $($_.Exception.Message)"
+        if ($Runtime -ne 'all') { $runtimes = @($runtimes + $wslLinuxRuntimes | Select-Object -Unique) }
+        $wslLinuxRuntimes = @()
+        if (-not $wslWasRunningBeforeProbe -and -not [string]::IsNullOrWhiteSpace($wslResolvedDistribution)) { & $wslExecutable --terminate $wslResolvedDistribution 2>$null | Out-Null }
+        Write-Host "Continuing without WSL. Explicit Linux requests retain the existing Windows cross-publish path; host-aware 'all' continues with Windows only." -ForegroundColor DarkCyan
+    }
+}
+$requiresReleasePackaging = @($runtimes | Where-Object { -not $_.StartsWith('win-') }).Count -gt 0
 
 if ($requiresReleasePackaging) {
     $releasePackagingEnsureArguments = @{
@@ -792,6 +906,24 @@ Prepare-PublisherStudioDocumentation
 try {
     foreach ($rid in $runtimes) { Publish-Runtime -Rid $rid }
 
+    if ($wslLinuxRuntimes.Count -gt 0) {
+        $wslArtifacts = @(& (Join-Path $root 'build/Invoke-WslLinuxRelease.ps1') `
+            -ProductName PublisherStudio `
+            -RepositoryRoot $root `
+            -OutputDirectory $artifacts `
+            -PreparedDocumentationRoot $documentationCacheRoot `
+            -Version $appVersion `
+            -Runtimes $wslLinuxRuntimes `
+            -Configuration $Configuration `
+            -Distribution $wslResolvedDistribution `
+            -ReleasePackagingPackagePath $releasePackagingPackage `
+            -UseContainerPackaging:$UseContainerPackaging `
+            -RequireOptionalNativePackages:$RequireOptionalNativePackages `
+            -KeepBuildTree:$KeepWslBuildTree `
+            -Shutdown $wslEffectiveShutdown)
+        foreach ($artifact in $wslArtifacts) { if (-not [string]::IsNullOrWhiteSpace([string]$artifact)) { $script:releaseZipPaths.Add([string]$artifact) } }
+    }
+
     $documentationPdf = Join-Path $documentationCacheRoot "PublisherStudio-$appVersion.pdf"
     $winX64Profile = Resolve-ReleaseProfile -Rid "win-x64"
     $winX64SetupFolder = Resolve-ProfilePublishFolder -ProjectPath $setupProject -ProfileName $winX64Profile.SetupProfile
@@ -800,21 +932,26 @@ try {
     $licensePath = Join-Path $root "LICENSE.MD"
     if (-not (Test-Path -LiteralPath $licensePath -PathType Leaf)) { $licensePath = Join-Path $root "LICENSE" }
 
-    Complete-ReleaseBundle `
-        -Version $appVersion `
-        -ReleaseZipPaths @($releaseZipPaths) `
-        -DocumentationPdfPath $documentationPdf `
-        -WindowsX64SetupExecutablePath $winX64SetupExecutable `
-        -ReadmePath (Join-Path $root "README.md") `
-        -LicensePath $licensePath `
-        -WireProtocolPackagePath $wireProtocolPackage `
-        -SetupIconPath (Join-Path $root "assets/PublisherStudio.ico") `
-        -RequireWindowsX64Setup $requireWinX64Setup
+    if (-not $SkipReleaseBundle) {
+        Complete-ReleaseBundle `
+            -Version $appVersion `
+            -ReleaseZipPaths @($releaseZipPaths) `
+            -DocumentationPdfPath $documentationPdf `
+            -WindowsX64SetupExecutablePath $winX64SetupExecutable `
+            -ReadmePath (Join-Path $root "README.md") `
+            -LicensePath $licensePath `
+            -WireProtocolPackagePath $wireProtocolPackage `
+            -SetupIconPath (Join-Path $root "assets/PublisherStudio.ico") `
+            -RequireWindowsX64Setup $requireWinX64Setup
+    }
+    else {
+        Write-Host 'Skipping the upload-ready version bundle because this is a delegated Linux release child.' -ForegroundColor DarkCyan
+    }
 }
 finally {
     Remove-Item -LiteralPath $documentationCacheRoot -Recurse -Force -ErrorAction SilentlyContinue
 }
 
-$releaseBundle = Join-Path $artifacts $appVersion
+$releaseBundle = if ($SkipReleaseBundle) { $artifacts } else { Join-Path $artifacts $appVersion }
 Write-Host "Release output: $releaseBundle" -ForegroundColor Green
 Write-Host "Protocol package cache: $(Join-Path $artifacts $wireProtocolPackageName)" -ForegroundColor Green

@@ -5,7 +5,8 @@ param(
     [string]$PackageDirectory = "",
     [string]$PackageUrl = "",
     [string]$LocalGptRepository = "",
-    [switch]$ForceDownload
+    [switch]$ForceDownload,
+    [switch]$PackageOnly
 )
 
 $ErrorActionPreference = "Stop"
@@ -175,6 +176,12 @@ Underlying error: $($_.Exception.Message)
 finally {
     if ($hasLock) { try { $mutex.ReleaseMutex() } catch { } }
     $mutex.Dispose()
+}
+
+if ($PackageOnly) {
+    Write-Host "Prepared LocalGPT.ReleasePackaging package without installing the .NET tool because -PackageOnly was requested." -ForegroundColor DarkCyan
+    Write-Output ([string][IO.Path]::GetFullPath($packagePath))
+    return
 }
 
 # Install only from the prepared local package using an isolated NuGet configuration.

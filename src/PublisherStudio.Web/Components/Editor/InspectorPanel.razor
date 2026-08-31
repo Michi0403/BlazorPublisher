@@ -5596,7 +5596,7 @@
             var poster = string.Empty;
             try
             {
-                _mediaModule ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=3.1.9").ConfigureAwait(true);
+                _mediaModule ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=3.2.1").ConfigureAwait(true);
                 var localUrl = MediaAssets.RegisterBytes(inspectionId, bytes, mimeType);
                 try
                 {

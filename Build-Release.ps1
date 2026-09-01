@@ -28,6 +28,9 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+# File-provider progress is deliberately suppressed. Recursive Remove-Item progress races with
+# DocFX/Spectre rendering and can report impossible file/byte totals in the shared terminal.
+$ProgressPreference = "SilentlyContinue"
 Set-StrictMode -Version Latest
 
 function Initialize-BuildConsoleEncoding {
@@ -55,10 +58,17 @@ Write-Host "Refreshing reviewed PublisherStudio frontend SHA-256 inventory befor
 & (Join-Path $root 'build/Assert-PanelStudioPersistence.ps1')
 & (Join-Path $root 'build/Assert-XmlDocumentationCoverage.ps1')
 Write-Host "Clearing repository-local bin/obj build state for the authoritative release build..." -ForegroundColor Cyan
-Get-ChildItem (Join-Path $root "src") -Directory -Recurse -Force |
-    Where-Object { $_.Name -in @("bin", "obj") } |
-    Sort-Object FullName -Descending |
-    Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+$buildStateDirectories = @(
+    Get-ChildItem (Join-Path $root "src") -Directory -Recurse -Force |
+        Where-Object { $_.Name -in @("bin", "obj") } |
+        Sort-Object FullName -Descending
+)
+foreach ($buildStateDirectory in $buildStateDirectories) {
+    if (Test-Path -LiteralPath $buildStateDirectory.FullName) {
+        Remove-Item -LiteralPath $buildStateDirectory.FullName -Recurse -Force -ErrorAction Stop
+    }
+}
+Write-Host "Cleared $($buildStateDirectories.Count) repository-local bin/obj director$(if ($buildStateDirectories.Count -eq 1) { 'y' } else { 'ies' }). Durable documentation caches outside bin/obj were preserved." -ForegroundColor DarkCyan
 $artifacts = Join-Path $root "artifacts/release"
 $packageDirectory = Join-Path $root "packages"
 $webProject = Join-Path $root "src/PublisherStudio.Web/PublisherStudio.Web.csproj"
@@ -98,7 +108,7 @@ function Get-HostDefaultRuntimes {
     switch (Get-ReleaseHostFamily) {
         'Windows' { return @('win-x64', 'win-x86', 'win-arm64') }
         'Linux'   { return @('linux-x64', 'linux-arm64') }
-        'macOS'   { return @('osx-x64', 'osx-arm64', 'linux-x64', 'linux-arm64') }
+        'macOS'   { return @('osx-x64', 'osx-arm64', 'linux-x64', 'linux-arm64', 'win-x64', 'win-x86', 'win-arm64') }
     }
 }
 
@@ -681,7 +691,7 @@ function Publish-UnixRuntime {
         $protocolDirectory = Join-Path $publishFolder 'protocol'; New-Item -ItemType Directory -Path $protocolDirectory -Force | Out-Null
         Copy-Item -LiteralPath $wireProtocolPackage -Destination (Join-Path $protocolDirectory $wireProtocolPackageName) -Force
         $publisherIcon = Join-Path $root 'assets/PublisherStudio.ico'; if (Test-Path -LiteralPath $publisherIcon -PathType Leaf) { Copy-Item -LiteralPath $publisherIcon -Destination (Join-Path $publishFolder 'PublisherStudio.ico') -Force }
-        $nativeArtifacts = & $script:nativeReleasePackagingScript -ProductName 'PublisherStudio' -ExecutableName $appExecutable -Version $appVersion -Rid $Rid -Mode $mode -PayloadDirectory $publishFolder -OutputDirectory $artifacts -PackagingTool $script:releasePackagingTool -DependencyPolicy PublisherStudio -UseContainerFallback:$UseContainerPackaging -ProvisionHomebrewTools:$ProvisionNativePackagingTools -RequireOptionalPackages:$RequireOptionalNativePackages
+        $nativeArtifacts = & $script:nativeReleasePackagingScript -ProductName 'PublisherStudio' -ExecutableName $appExecutable -Version $appVersion -Rid $Rid -Mode $mode -PayloadDirectory $publishFolder -OutputDirectory $artifacts -PackagingTool $script:releasePackagingTool -DependencyPolicy PublisherStudio -UseContainerFallback:$UseContainerPackaging -ProvisionHomebrewTools:$ProvisionNativePackagingTools -RequireOptionalPackages:$RequireOptionalNativePackages -MacIconSource (Join-Path $root 'assets/PublisherStudio.png') -DmgBackgroundPath (Join-Path $root 'build/assets/PublisherStudio-dmg-background.png')
         foreach ($artifact in @($nativeArtifacts)) { if (-not [string]::IsNullOrWhiteSpace([string]$artifact)) { $script:releaseZipPaths.Add([string]$artifact) } }
     }
 }
@@ -841,7 +851,8 @@ if ($Runtime -eq 'all') {
         Write-Host 'Windows is the release coordinator: Windows packages are native; Linux Full/Light packages are delegated headlessly to WSL and imported into the same release bundle.' -ForegroundColor DarkCyan
     }
     if ($releaseHost -eq 'macOS') {
-        Write-Host "macOS host release also includes Linux x64/ARM64 payloads. TAR.GZ/DEB are managed; RPM uses rpmbuild (Homebrew rpm is supported); AppImage remains Linux/container-only." -ForegroundColor DarkCyan
+        Write-Host "macOS is the full release coordinator: macOS x64/ARM64, Linux x64/ARM64, and Windows x64/x86/ARM64 application/setup payloads are built in one run." -ForegroundColor DarkCyan
+        Write-Host "macOS produces native DMG/PKG/TAR.GZ packages; Linux TAR.GZ/DEB are managed and RPM uses Homebrew rpmbuild when available. AppImage remains a Linux/WSL/container finishing step." -ForegroundColor DarkCyan
     }
 }
 $requiresReleasePackaging = @($runtimes | Where-Object { -not $_.StartsWith('win-') }).Count -gt 0

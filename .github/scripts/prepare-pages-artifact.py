@@ -137,15 +137,21 @@ def validate_pdf(source: Path, status: dict[str, object]) -> tuple[str, int, boo
     declared_size = status.get("pdfBytes") or status.get("PdfBytes")
     if declared_size is not None and int(declared_size) != size:
         fail(f"documentation-status.json declares {declared_size} PDF bytes but {name} contains {size}")
-    data = pdf.read_bytes()
-    if not data.startswith(b"%PDF-"): fail(f"{name} does not have a PDF header")
-    if b"ReportLab" in data or b"Deterministic fallback documentation index" in data:
+    with pdf.open("rb") as stream:
+        probe = stream.read(min(size, 4 * 1024 * 1024))
+    if not probe.startswith(b"%PDF-"): fail(f"{name} does not have a PDF header")
+    if b"ReportLab" in probe or b"Deterministic fallback documentation index" in probe:
         fail(f"{name} is an obsolete source/fallback PDF rather than the maintained HTML-backed handbook")
-    tagged = pdf_contains_token(data, b"/StructTreeRoot")
     accessibility_mode = str(status.get("pdfAccessibilityMode") or status.get("PdfAccessibilityMode") or "tagged-pdf-required").strip()
     html_preflight = bool(status.get("htmlPreflightValidated") or status.get("HtmlPreflightValidated"))
-    if not tagged:
-        if accessibility_mode != "html-accessibility-fallback" or not html_preflight:
+    if accessibility_mode == "html-accessibility-fallback" and html_preflight:
+        # DocFX plug-in PDFs can exceed a gigabyte. Do not load the whole handbook into memory
+        # merely to prove a tag that this renderer does not promise; HTML accessibility remains strict.
+        tagged = b"/StructTreeRoot" in probe
+    else:
+        data = pdf.read_bytes()
+        tagged = pdf_contains_token(data, b"/StructTreeRoot")
+        if not tagged:
             fail(f"{name} is not a tagged accessible PDF (/StructTreeRoot missing)")
     return name, size, tagged, accessibility_mode
 
@@ -181,12 +187,25 @@ def validate_source(source: Path, expected_version: str | None = None) -> dict[s
     mode = str(status.get("documentationMode") or status.get("DocumentationMode") or "")
     if complete and api_count < 100: fail(f"completeApiReference=true requires a substantial generated API reference; only {api_count} API pages exist")
     if not complete and "source" not in mode.lower(): fail("An incomplete API preview must be declared as a source documentation mode")
-    pdf_name, pdf_bytes, tagged, pdf_accessibility_mode = validate_pdf(source, status)
+    pdf_available = bool(status.get("pdfAvailable", True))
+    if pdf_available:
+        pdf_name, pdf_bytes, tagged, pdf_accessibility_mode = validate_pdf(source, status)
+        pages_pdf_published = True
+    else:
+        pdf_name = str(status.get("releasePdfFileName") or status.get("pdfFileName") or "").strip()
+        pdf_bytes = int(status.get("releasePdfBytes") or status.get("pdfBytes") or 0)
+        tagged = bool(status.get("releasePdfTagged") or False)
+        pdf_accessibility_mode = str(status.get("pdfAccessibilityMode") or "html-accessibility-fallback")
+        pages_pdf_published = False
+        if not pdf_name or pdf_bytes < MIN_PDF_BYTES:
+            fail("HTML-only Pages snapshot must preserve releasePdfFileName/releasePdfBytes metadata")
+        if (source / pdf_name).exists():
+            fail("HTML-only Pages snapshot unexpectedly contains the release PDF")
     return {
         "source": source.as_posix(), "version": version, "htmlFiles": html_count,
         "apiHtmlFiles": api_count, "completeApiReference": complete,
         "pdfFile": pdf_name, "pdfBytes": pdf_bytes, "taggedPdf": tagged,
-        "pdfAccessibilityMode": pdf_accessibility_mode,
+        "pdfAccessibilityMode": pdf_accessibility_mode, "pagesPdfPublished": pages_pdf_published,
         "localLinksValid": True, "htmlAccessibilityValid": True,
         "themePersistence": True, "catPawFavicon": True,
         "kawaiiStyleSha256": sha256(source / STYLE_FILE),
@@ -222,6 +241,31 @@ def copy_tree(source: Path, output: Path) -> None:
     shutil.copytree(source, output, symlinks=False)
     (output / ".nojekyll").write_text("", encoding="utf-8")
 
+def copy_pages_tree(source: Path, output: Path, metadata: dict[str, object]) -> None:
+    """Create the tracked Pages payload without duplicating the potentially multi-GB release PDF."""
+    pdf_name = str(metadata.get("pdfFile") or "").strip()
+    if output.exists(): shutil.rmtree(output)
+    def ignore(directory: str, names: list[str]) -> set[str]:
+        return {pdf_name} if pdf_name in names else set()
+    shutil.copytree(source, output, symlinks=False, ignore=ignore)
+    (output / ".nojekyll").write_text("", encoding="utf-8")
+    status_path = output / "documentation-status.json"
+    status = json.loads(read_text(status_path))
+    status["releasePdfFileName"] = pdf_name
+    status["releasePdfBytes"] = int(metadata.get("pdfBytes") or 0)
+    status["releasePdfTagged"] = bool(metadata.get("taggedPdf"))
+    status["pdfAvailable"] = False
+    status["pagesPdfPublished"] = False
+    status["pagesPdfExcludedReason"] = "The complete handbook is distributed with the release bundle; GitHub Pages publishes the validated HTML reference only."
+    status_path.write_text(json.dumps(status, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    release_url = "https://github.com/Michi0403/BlazorPublisher/releases/latest"
+    for html in output.rglob("*.html"):
+        text = read_text(html)
+        if pdf_name in text:
+            pattern = re.compile(r'href=(?P<q>["\'])(?:\.\./|\./)?' + re.escape(pdf_name) + r'(?P=q)', re.IGNORECASE)
+            text = pattern.sub('href="' + release_url + '"', text)
+            html.write_text(text, encoding="utf-8")
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     group = parser.add_mutually_exclusive_group(required=True)
@@ -229,7 +273,7 @@ def main() -> int:
     group.add_argument("--source", type=Path)
     parser.add_argument("--output", type=Path)
     parser.add_argument("--expected-version")
-    parser.add_argument("--html-only", action="store_true", help="Validate generated HTML accessibility and local links without requiring a PDF or deployment output.")
+    parser.add_argument("--html-only", action="store_true", help="Validate generated HTML accessibility and local links without requiring status/PDF artifacts.")
     args = parser.parse_args()
     try:
         if args.html_only:
@@ -258,8 +302,9 @@ def main() -> int:
         else:
             source = args.source.resolve(strict=True)
             metadata = validate_source(source, args.expected_version)
-            copy_tree(source, output)
-            metadata["deploymentSource"] = "explicit documentation directory"
+            copy_pages_tree(source, output, metadata)
+            metadata["pagesPdfPublished"] = False
+            metadata["deploymentSource"] = "explicit documentation directory (HTML-only Pages snapshot; release PDF kept out of tracked archive)"
         metadata["artifact"] = output.as_posix()
         (output / "github-pages-deployment.json").write_text(json.dumps(metadata, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
         print(json.dumps(metadata, indent=2, ensure_ascii=False))

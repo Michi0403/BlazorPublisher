@@ -693,6 +693,11 @@ function Publish-UnixRuntime {
         $publisherIcon = Join-Path $root 'assets/PublisherStudio.ico'; if (Test-Path -LiteralPath $publisherIcon -PathType Leaf) { Copy-Item -LiteralPath $publisherIcon -Destination (Join-Path $publishFolder 'PublisherStudio.ico') -Force }
         $nativeArtifacts = & $script:nativeReleasePackagingScript -ProductName 'PublisherStudio' -ExecutableName $appExecutable -Version $appVersion -Rid $Rid -Mode $mode -PayloadDirectory $publishFolder -OutputDirectory $artifacts -PackagingTool $script:releasePackagingTool -DependencyPolicy PublisherStudio -UseContainerFallback:$UseContainerPackaging -ProvisionHomebrewTools:$ProvisionNativePackagingTools -RequireOptionalPackages:$RequireOptionalNativePackages -MacIconSource (Join-Path $root 'assets/PublisherStudio.png') -DmgBackgroundPath (Join-Path $root 'build/assets/PublisherStudio-dmg-background.png')
         foreach ($artifact in @($nativeArtifacts)) { if (-not [string]::IsNullOrWhiteSpace([string]$artifact)) { $script:releaseZipPaths.Add([string]$artifact) } }
+        # Native artifacts are now complete; do not keep another multi-gigabyte documentation-bearing RID tree alive.
+        Remove-Item -LiteralPath $publishFolder -Recurse -Force -ErrorAction SilentlyContinue
+        $transientMacApp = Join-Path $artifacts 'PublisherStudio.app'
+        if ($Rid.StartsWith('osx-')) { Remove-Item -LiteralPath $transientMacApp -Recurse -Force -ErrorAction SilentlyContinue }
+        Write-Host "Released transient $Rid $mode staging workspace after native package validation." -ForegroundColor DarkCyan
     }
 }
 

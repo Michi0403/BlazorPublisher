@@ -170,6 +170,7 @@ HERE=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 APP=$(CDPATH= cd -- "$HERE/../Resources/app" && pwd)
 BIN="$APP/__EXECUTABLE__"
 PRODUCT="__PRODUCT__"
+FALLBACK_URL="http://127.0.0.1:58071"
 LOG_DIR="$HOME/Library/Logs/$PRODUCT"
 LOG_FILE="$LOG_DIR/launcher.log"
 mkdir -p "$LOG_DIR"
@@ -180,8 +181,8 @@ read_endpoint() {
     "$HOME/.local/share/$PRODUCT/runtime/server.json"
   do
     [ -f "$f" ] || continue
-    pid=$(sed -nE 's/.*"[Pp]rocess[Ii]d"[[:space:]]*:[[:space:]]*([0-9]+).*/\1/p' "$f" | head -n 1)
-    if [ -n "${pid:-}" ] && ! kill -0 "$pid" 2>/dev/null; then
+    owner_pid=$(sed -nE 's/.*"[Pp]rocess[Ii]d"[[:space:]]*:[[:space:]]*([0-9]+).*/\1/p' "$f" | head -n 1)
+    if [ -n "${owner_pid:-}" ] && ! kill -0 "$owner_pid" 2>/dev/null; then
       rm -f "$f" 2>/dev/null || true
       continue
     fi
@@ -191,6 +192,25 @@ read_endpoint() {
     esac
   done
   return 1
+}
+endpoint_responds() {
+  candidate="$1"
+  if [ -x /usr/bin/curl ]; then
+    /usr/bin/curl --silent --show-error --fail --location --connect-timeout 1 --max-time 2 --output /dev/null "$candidate" >/dev/null 2>&1
+    return $?
+  fi
+  return 1
+}
+open_startup_terminal() {
+  helper="$LOG_DIR/startup-watch.command"
+  cat >"$helper" <<EOF
+#!/bin/sh
+clear
+printf '%s\\n' '$PRODUCT is starting.' 'This window follows the launcher log while the local web server comes online.' 'Close this Terminal window after the browser opens, or press Control-C to stop following the log.' ''
+exec /usr/bin/tail -n 80 -f '$LOG_FILE'
+EOF
+  chmod +x "$helper" 2>/dev/null || true
+  /usr/bin/open -a Terminal "$helper" >/dev/null 2>&1 || true
 }
 show_failure() {
   reason="$1"
@@ -209,7 +229,13 @@ APPLESCRIPT
 }
 
 if url=$(read_endpoint 2>/dev/null); then
-  /usr/bin/open "$url" >/dev/null 2>&1 || true
+  if endpoint_responds "$url"; then
+    /usr/bin/open "$url" >/dev/null 2>&1 || true
+    exit 0
+  fi
+fi
+if endpoint_responds "$FALLBACK_URL"; then
+  /usr/bin/open "$FALLBACK_URL" >/dev/null 2>&1 || true
   exit 0
 fi
 
@@ -224,10 +250,18 @@ printf '%s\n' "$(date '+%Y-%m-%d %H:%M:%S') Starting $PRODUCT from $BIN" >>"$LOG
 pid=$!
 
 i=0
-while [ $i -lt 120 ]; do
+terminal_opened=0
+while [ $i -lt 600 ]; do
   if url=$(read_endpoint 2>/dev/null); then
-    printf '%s\n' "$(date '+%Y-%m-%d %H:%M:%S') $PRODUCT ready at $url (pid $pid)" >>"$LOG_FILE"
-    /usr/bin/open "$url" >/dev/null 2>&1 || true
+    if endpoint_responds "$url"; then
+      printf '%s\n' "$(date '+%Y-%m-%d %H:%M:%S') $PRODUCT ready at $url (pid $pid)" >>"$LOG_FILE"
+      /usr/bin/open "$url" >/dev/null 2>&1 || true
+      exit 0
+    fi
+  fi
+  if endpoint_responds "$FALLBACK_URL"; then
+    printf '%s\n' "$(date '+%Y-%m-%d %H:%M:%S') $PRODUCT HTTP endpoint responded at $FALLBACK_URL before the runtime endpoint file was available (pid $pid)" >>"$LOG_FILE"
+    /usr/bin/open "$FALLBACK_URL" >/dev/null 2>&1 || true
     exit 0
   fi
   if ! kill -0 "$pid" 2>/dev/null; then
@@ -237,11 +271,16 @@ while [ $i -lt 120 ]; do
     if [ "$code" -eq 0 ]; then exit 1; fi
     exit "$code"
   fi
+  if [ $i -eq 40 ] && [ $terminal_opened -eq 0 ]; then
+    printf '%s\n' "$(date '+%Y-%m-%d %H:%M:%S') Startup is taking longer than 20 seconds; opening a Terminal log helper while $PRODUCT continues starting." >>"$LOG_FILE"
+    open_startup_terminal
+    terminal_opened=1
+  fi
   i=$((i+1))
-  sleep 0.25
+  sleep 0.5
 done
 
-show_failure "$PRODUCT is still running but did not publish its local web address within 30 seconds."
+show_failure "$PRODUCT is still running but no local HTTP endpoint responded within 5 minutes. The process was left running for diagnosis."
 exit 1
 '@
     Write-Utf8NoBom $Destination ($template.Replace('__PRODUCT__', $ProductName).Replace('__EXECUTABLE__', $BinaryRelativePath))

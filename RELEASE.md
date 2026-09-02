@@ -1,11 +1,9 @@
-# PublisherStudio 3.2.3
+# PublisherStudio 3.2.4
 
-PublisherStudio 3.2.3 keeps the existing macOS full-release coordinator, Windows/Linux release lanes, Pages snapshot behavior, application launcher, editor behavior, and optional WSL2 delegation intact. The patch is focused on documentation resilience, deterministic release-console output, and macOS package correctness.
+PublisherStudio 3.2.4 applies the same installed macOS launcher repair as LocalGPT: the `.app` launcher now checks the runtime endpoint file and the authoritative `http://127.0.0.1:58071` endpoint, allows slow startup for up to five minutes, opens the browser when HTTP is actually ready, and opens a Terminal log-follow helper after 20 seconds rather than declaring failure after 30 seconds.
 
-Release documentation now has a durable validated payload cache under the existing external PublisherStudio documentation-tool cache rather than under repository `bin`/`obj`. The cache key includes the version, compiled documentation assembly/XML, documentation sources, and documentation build/repair scripts. A successful DocFX HTML build is committed before the long PDF stage, so an interrupted or failed PDF render can reuse the complete API/HTML tree on the next run. A successfully validated PDF is cached alongside it. Normal release cleanup still removes every repository-local `bin`/`obj` directory. PublisherStudio and LocalGPT share a machine-level PDF-render lock so two large DocFX/Chromium jobs do not compete at the same time, and the default DocFX navigation timeout is 30 minutes instead of the macOS-specific five-minute limit that failed on slower systems.
+The release pipeline also addresses the 3.2.3 `No space left on device` failure. After each Unix Full/Light native package set is successfully created and validated, its documentation-bearing staging tree and transient macOS `.app` working bundle are removed immediately. The durable DocFX cache and final release artifacts are retained; only redundant temporary working copies are released.
 
-PowerShell file-provider progress is suppressed in the documentation, release-cleanup, and native-packaging paths. Cleanup still happens, but it is line-oriented and deterministic rather than asynchronously overwriting DocFX/Spectre progress with impossible removed-file/byte totals.
+The headless DMG and explicit `/Applications/PublisherStudio.app` PKG layout introduced in 3.2.3 remain unchanged.
 
-macOS DMGs are now created and verified headlessly with `hdiutil`; release builds no longer mount the image or drive Finder through AppleEvents. The application bundle, Applications alias, and branded background asset are retained without the unreliable Finder layout step. PKGs now use an explicit root payload containing `/Applications/PublisherStudio.app`, then validate the emitted payload with `pkgutil --payload-files` before accepting the package. The tracked Pages snapshot remains HTML-only while the complete release PDF remains mandatory in the release documentation payload.
-
-See `CHANGELOG-v3.2.3-MACOS-COORDINATOR-PAGES-PACKAGING.md`, `VALIDATION-v3.2.3-source.md`, and `docs/articles/developer-build.md`.
+See `CHANGELOG-v3.2.4-MACOS-LAUNCHER-WORKSPACE-REPAIR.md` and `VALIDATION-v3.2.4-source.md`.

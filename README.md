@@ -2,7 +2,7 @@
 
 PublisherStudio is a local-first publishing studio for documents, stories, pictures, spreadsheets, presentations, websites, video, streaming, and reusable interactive panels.
 
-Version **3.2.3** keeps the current application, editor, documentation, recording/export, and installer behavior while expanding the host-aware release lane. Windows builds the Windows application/setup matrix only; macOS builds macOS x64/ARM64 plus Linux x64/ARM64 packages in one run; Linux remains available for native Linux release work. Linux TAR.GZ/DEB packaging is managed, RPM can use Homebrew `rpm` on macOS, and AppImage remains an optional Linux/container finisher.
+Version **3.2.4** keeps the current application, editor, documentation, recording/export, and installer behavior while expanding the host-aware release lane. Windows builds the Windows application/setup matrix only; macOS builds macOS x64/ARM64 plus Linux x64/ARM64 packages in one run; Linux remains available for native Linux release work. Linux TAR.GZ/DEB packaging is managed, RPM can use Homebrew `rpm` on macOS, and AppImage remains an optional Linux/container finisher.
 
 ## Build
 

@@ -38,11 +38,24 @@ public sealed class ApplicationPathService(IOptions<PublisherStudioPathOptions> 
         {
             logger.LogTrace($"Entering ApplicationPathService.Resolve.");
                     var configured = options.Value;
-                    var documents = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-                    var pictures = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
-                    var videos = Environment.GetFolderPath(Environment.SpecialFolder.MyVideos);
-                    var music = Environment.GetFolderPath(Environment.SpecialFolder.MyMusic);
-                    var studioRoot = Path.Combine(documents, "PublisherStudio");
+                    var localApplicationData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                    if (string.IsNullOrWhiteSpace(localApplicationData))
+                    {
+                        var userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+                        localApplicationData = string.IsNullOrWhiteSpace(userProfile)
+                            ? Path.GetTempPath()
+                            : Path.Combine(userProfile, ".local", "share");
+                    }
+
+                    var userDataRoot = Path.Combine(localApplicationData, "PublisherStudio");
+                    var documents = KnownFolderOrFallback(Environment.SpecialFolder.MyDocuments, Path.Combine(userDataRoot, "Documents"));
+                    var pictures = KnownFolderOrFallback(Environment.SpecialFolder.MyPictures, Path.Combine(userDataRoot, "Images"));
+                    var videos = KnownFolderOrFallback(Environment.SpecialFolder.MyVideos, Path.Combine(userDataRoot, "Video"));
+                    var music = KnownFolderOrFallback(Environment.SpecialFolder.MyMusic, Path.Combine(userDataRoot, "Audio"));
+                    var nativeDocuments = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                    var studioRoot = string.IsNullOrWhiteSpace(nativeDocuments)
+                        ? userDataRoot
+                        : Path.Combine(documents, "PublisherStudio");
                     return new PublisherStudioPathOptions
                     {
                         Images = Choose(projectOverrides?.Images, configured.Images, pictures, Path.Combine(studioRoot, "Images")),
@@ -115,6 +128,27 @@ public sealed class ApplicationPathService(IOptions<PublisherStudioPathOptions> 
     }
 
     /// <summary>
+    /// Resolves a platform-known user folder and falls back to an application-owned per-user path when the host does not expose that folder.
+    /// </summary>
+    /// <param name="folder">Known folder requested from the operating system.</param>
+    /// <param name="fallback">Per-user fallback used when the known folder is unavailable.</param>
+    /// <returns>An absolute writable-user-scope candidate path.</returns>
+    private string KnownFolderOrFallback(Environment.SpecialFolder folder, string fallback)
+    {
+        try
+        {
+            logger.LogTrace($"Entering ApplicationPathService.KnownFolderOrFallback for {folder}.");
+            var value = Environment.GetFolderPath(folder);
+            return string.IsNullOrWhiteSpace(value) ? fallback : value;
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"ApplicationPathService.KnownFolderOrFallback failed for {folder}: {exception.Message}");
+            throw;
+        }
+    }
+
+    /// <summary>
     /// Performs choose as part of the application path service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     /// <param name="candidates">Candidates value supplied to the application path operation and used when producing its result.</param>
@@ -124,7 +158,14 @@ public sealed class ApplicationPathService(IOptions<PublisherStudioPathOptions> 
         try
         {
             logger.LogTrace($"Entering ApplicationPathService.Choose.");
-                    var selected = candidates.FirstOrDefault(candidate => !string.IsNullOrWhiteSpace(candidate)) ?? AppContext.BaseDirectory;
+                    var selected = candidates.FirstOrDefault(candidate => !string.IsNullOrWhiteSpace(candidate));
+                    if (string.IsNullOrWhiteSpace(selected))
+                    {
+                        var localApplicationData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                        if (string.IsNullOrWhiteSpace(localApplicationData))
+                            localApplicationData = Path.GetTempPath();
+                        selected = Path.Combine(localApplicationData, "PublisherStudio");
+                    }
                     return Environment.ExpandEnvironmentVariables(Path.GetFullPath(selected));
     
         }

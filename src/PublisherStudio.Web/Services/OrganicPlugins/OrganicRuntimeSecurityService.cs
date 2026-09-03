@@ -521,12 +521,29 @@ public sealed class OrganicRuntimeSecurityService(
     try
     {
             if (!string.IsNullOrWhiteSpace(resolvedPath)) return resolvedPath;
-            var preferred = Path.Combine(AppContext.BaseDirectory, "security", "onewire-secret.json");
+            var portable = Path.Combine(AppContext.BaseDirectory, "security", "onewire-secret.json");
+            if (File.Exists(portable) && CanWriteDirectory(Path.GetDirectoryName(portable)!))
+            {
+                logger.LogInformation("Preserving the existing portable PublisherStudio 1-Wire secret at {SecretPath}.", portable);
+                return resolvedPath = portable;
+            }
+
+            var preferred = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "PublisherStudio",
+                "OrganicPlugins",
+                "Security",
+                "onewire-secret.json");
             if (CanWriteDirectory(Path.GetDirectoryName(preferred)!))
                 return resolvedPath = preferred;
-            var fallback = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "PublisherStudio", "OrganicPlugins", "Security", "onewire-secret.json");
-            logger.LogWarning("The PublisherStudio program directory is not writable; the runtime 1-Wire secret will use {SecretPath}.", fallback);
-            return resolvedPath = fallback;
+
+            if (CanWriteDirectory(Path.GetDirectoryName(portable)!))
+            {
+                logger.LogWarning("The PublisherStudio per-user data directory is not writable; falling back to the portable program directory for the runtime 1-Wire secret: {SecretPath}.", portable);
+                return resolvedPath = portable;
+            }
+
+            throw new UnauthorizedAccessException("PublisherStudio cannot create a writable runtime 1-Wire secret directory in either per-user application data or the portable program directory.");
     
     }
     catch (Exception __serviceMethodException)

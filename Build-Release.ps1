@@ -6,7 +6,7 @@ param(
     [string]$WireProtocolVersion = "2.1.1",
     [string]$WireProtocolPackageUrl = "",
     [string]$LocalGptRepository = "",
-    [string]$ReleasePackagingVersion = "1.0.1",
+    [string]$ReleasePackagingVersion = "1.0.2",
     [string]$ReleasePackagingPackageUrl = "",
     [switch]$UseBundledWireProtocolPackage,
     [switch]$RefreshWireProtocolPackage,
@@ -14,6 +14,11 @@ param(
     [switch]$UseContainerPackaging,
     [switch]$ProvisionNativePackagingTools,
     [switch]$RequireOptionalNativePackages,
+    [switch]$AllowUnsignedMacPackages,
+    [string]$DocumentationCacheRoot = "",
+    [switch]$DisableDocumentationToolProvisioning,
+    [string]$ReleaseOutputRoot = "",
+    [switch]$ForceRebuildArtifacts,
     [ValidateSet("Auto", "Off", "Require")]
     [string]$WslLinux = "Auto",
     [string]$WslDistribution = "",
@@ -44,9 +49,16 @@ function Initialize-BuildConsoleEncoding {
 Initialize-BuildConsoleEncoding
 
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
+if (-not [string]::IsNullOrWhiteSpace($DocumentationCacheRoot)) {
+    $env:FUTURE2_DOCUMENTATION_CACHE_ROOT = [IO.Path]::GetFullPath($DocumentationCacheRoot)
+}
+$nodeRuntimeCommonScript = Join-Path $root 'build/NodeRuntime.Common.ps1'
+if (-not (Test-Path -LiteralPath $nodeRuntimeCommonScript -PathType Leaf)) { throw "Documentation runtime helper is missing: $nodeRuntimeCommonScript" }
+. $nodeRuntimeCommonScript
 $wslCommonScript = Join-Path $root 'build/WslRelease.Common.ps1'
 if (-not (Test-Path -LiteralPath $wslCommonScript -PathType Leaf)) { throw "WSL release helper is missing: $wslCommonScript" }
 . $wslCommonScript
+& (Join-Path $root 'build/Assert-PowerShellCompatibility.ps1')
 & (Join-Path $root ([IO.Path]::Combine('build', 'Assert-SourcePackagePrerequisites.ps1'))) -RepositoryRoot $root -SkipNodeRuntime:($WslChildBuild -and $UsePreparedClientAssets -and -not [string]::IsNullOrWhiteSpace($PreparedDocumentationRoot))
 & (Join-Path $root ([IO.Path]::Combine('build', 'Assert-CrossPlatformBoundaries.ps1'))) -RepositoryRoot $root
 Write-Host "Refreshing reviewed PublisherStudio frontend SHA-256 inventory before the ordered CLI build..." -ForegroundColor DarkCyan
@@ -57,19 +69,26 @@ Write-Host "Refreshing reviewed PublisherStudio frontend SHA-256 inventory befor
 & (Join-Path $root 'build/Assert-PanelStudioInteractionLifecycle.ps1')
 & (Join-Path $root 'build/Assert-PanelStudioPersistence.ps1')
 & (Join-Path $root 'build/Assert-XmlDocumentationCoverage.ps1')
-Write-Host "Clearing repository-local bin/obj build state for the authoritative release build..." -ForegroundColor Cyan
-$buildStateDirectories = @(
-    Get-ChildItem (Join-Path $root "src") -Directory -Recurse -Force |
-        Where-Object { $_.Name -in @("bin", "obj") } |
-        Sort-Object FullName -Descending
-)
-foreach ($buildStateDirectory in $buildStateDirectories) {
-    if (Test-Path -LiteralPath $buildStateDirectory.FullName) {
-        Remove-Item -LiteralPath $buildStateDirectory.FullName -Recurse -Force -ErrorAction Stop
+function Clear-RepositoryReleaseBuildState {
+    param([switch]$BestEffort)
+    $directories = @(
+        Get-ChildItem (Join-Path $root "src") -Directory -Recurse -Force -ErrorAction SilentlyContinue |
+            Where-Object { $_.Name -in @("bin", "obj") } |
+            Sort-Object FullName -Descending
+    )
+    foreach ($directory in $directories) {
+        if (-not (Test-Path -LiteralPath $directory.FullName)) { continue }
+        if ($BestEffort) { Remove-Item -LiteralPath $directory.FullName -Recurse -Force -ErrorAction SilentlyContinue }
+        else { Remove-Item -LiteralPath $directory.FullName -Recurse -Force -ErrorAction Stop }
     }
+    return $directories.Count
 }
-Write-Host "Cleared $($buildStateDirectories.Count) repository-local bin/obj director$(if ($buildStateDirectories.Count -eq 1) { 'y' } else { 'ies' }). Durable documentation caches outside bin/obj were preserved." -ForegroundColor DarkCyan
-$artifacts = Join-Path $root "artifacts/release"
+
+Write-Host "Clearing repository-local bin/obj build state for the authoritative release build..." -ForegroundColor Cyan
+$clearedBuildStateCount = Clear-RepositoryReleaseBuildState
+Write-Host "Cleared $clearedBuildStateCount repository-local bin/obj director$(if ($clearedBuildStateCount -eq 1) { 'y' } else { 'ies' }). Durable documentation caches outside bin/obj were preserved." -ForegroundColor DarkCyan
+$configuredReleaseOutputRoot = if (-not [string]::IsNullOrWhiteSpace($ReleaseOutputRoot)) { $ReleaseOutputRoot } else { [string]$env:FUTURE2_RELEASE_OUTPUT_ROOT }
+$artifacts = if (-not [string]::IsNullOrWhiteSpace($configuredReleaseOutputRoot)) { [IO.Path]::GetFullPath($configuredReleaseOutputRoot) } else { Join-Path $root "artifacts/release" }
 $packageDirectory = Join-Path $root "packages"
 $webProject = Join-Path $root "src/PublisherStudio.Web/PublisherStudio.Web.csproj"
 $webDirectory = Split-Path -Parent $webProject
@@ -79,7 +98,8 @@ $pagesSnapshotScript = Join-Path $root "build/Update-GitHubPagesSnapshot.ps1"
 $pagesSnapshotArchive = Join-Path $root ".github/pages/publisherstudio-kawaii-docs.zip"
 $wireProtocolPackageName = "LocalGPT.WireProtocolVersion.$WireProtocolVersion.nupkg"
 $wireProtocolPackage = Join-Path $packageDirectory $wireProtocolPackageName
-$documentationCacheRoot = Join-Path $artifacts ".documentation-cache"
+$documentationToolCacheBase = Get-PublisherStudioDocumentationToolCacheRoot -FallbackRoot (Join-Path $root 'artifacts/.documentation-tools')
+$documentationCacheRoot = Join-Path $documentationToolCacheBase 'release-payload/PublisherStudio' 
 $documentationPrepared = $false
 $releaseZipPaths = New-Object 'System.Collections.Generic.List[string]'
 $releasePackagingPackageName = "LocalGPT.ReleasePackaging.$ReleasePackagingVersion.nupkg"
@@ -222,7 +242,8 @@ function Assert-PublishedConfigurationFiles {
 function Assert-PublisherStudioDocumentationPayload {
     param(
         [Parameter(Mandatory)][string]$DocumentationRoot,
-        [Parameter(Mandatory)][string]$Version
+        [Parameter(Mandatory)][string]$Version,
+        [switch]$RequirePhysicalPdf
     )
 
     $requiredArtifacts = @(
@@ -233,12 +254,12 @@ function Assert-PublisherStudioDocumentationPayload {
         (Join-Path $DocumentationRoot "public/docfx.min.js"),
         (Join-Path $DocumentationRoot "documentation-status.json"),
         (Join-Path $DocumentationRoot "PublisherStudio.Web.xml"),
-        (Join-Path $DocumentationRoot "PublisherStudio-$Version.pdf"),
         (Join-Path $DocumentationRoot "styles/publisherstudio-kawaii.css"),
         (Join-Path $DocumentationRoot "styles/publisherstudio-kawaii.js"),
         (Join-Path $DocumentationRoot "favicon.svg"),
         (Join-Path $DocumentationRoot "favicon.ico"),
-        (Join-Path $DocumentationRoot "logo.svg")
+        (Join-Path $DocumentationRoot "logo.svg"),
+        (Join-Path $DocumentationRoot "PublisherStudio-$Version.pdf")
     )
     foreach ($requiredArtifact in $requiredArtifacts) {
         if (-not (Test-Path -LiteralPath $requiredArtifact -PathType Leaf)) {
@@ -254,15 +275,25 @@ function Assert-PublisherStudioDocumentationPayload {
     $versionedPdfNames = @($versionedPdfs | ForEach-Object { $_.Name })
     $versionedPdfDisplay = if ($versionedPdfNames.Count -eq 0) { '<none>' } else { $versionedPdfNames -join ', ' }
     if ($versionedPdfs.Count -ne 1 -or -not [string]::Equals($versionedPdfs[0].Name, "PublisherStudio-$Version.pdf", [StringComparison]::OrdinalIgnoreCase)) {
-        throw "Published PublisherStudio documentation must contain exactly one current versioned PDF (PublisherStudio-$Version.pdf). Found: $versionedPdfDisplay"
+        throw "Published PublisherStudio documentation must contain exactly one current embedded PDF (PublisherStudio-$Version.pdf). Found: $versionedPdfDisplay"
     }
     if ([string]$status.documentationMode -ne "docfx") { throw "Published PublisherStudio documentation did not use the DocFX modern site." }
-    if ([string]$status.pdfMode -notin @("html-browser-print", "html-browser-print-compatibility", "docfx-pdf-plugin")) { throw "Published PublisherStudio documentation does not contain the complete HTML-backed documentation PDF." }
+    $browserBackedPdfModes = @("html-browser-print", "html-browser-print-compatibility", "html-browser-chunked")
+    if ([string]$status.pdfMode -notin @($browserBackedPdfModes + "docfx-pdf-plugin")) { throw "Published PublisherStudio documentation does not contain the complete HTML-backed documentation PDF." }
     if (-not ([bool]$status.htmlPreflightValidated)) { throw "Published PublisherStudio documentation did not pass the generated HTML accessibility/link preflight before PDF rendering." }
-    $expectedPdfAccessibilityMode = if ([string]$status.pdfMode -eq "html-browser-print") { "tagged-pdf-required" } else { "html-accessibility-fallback" }
-    if (-not [string]::Equals([string]$status.pdfAccessibilityMode, $expectedPdfAccessibilityMode, [StringComparison]::Ordinal)) { throw "Published PublisherStudio documentation has an unexpected PDF accessibility mode '$($status.pdfAccessibilityMode)' for PDF mode '$($status.pdfMode)'." }
-    if ([string]$status.pdfMode -like "html-browser-print*" -and [int]$status.pdfSourcePageCount -lt 10) { throw "The PublisherStudio documentation PDF did not include the expected HTML page set." }
-    if ([string]$status.pdfMode -like "html-browser-print*" -and [int]$status.apiHtmlCount -gt 0 -and [int]$status.pdfSourcePageCount -lt [int]$status.apiHtmlCount) { throw "The PublisherStudio documentation PDF omitted generated API pages." }
+    $acceptedPdfAccessibilityModes = if ([string]$status.pdfMode -eq "html-browser-print" -and [string]$status.pdfCompressionMode -eq "browser-native") {
+        @("tagged-pdf-required")
+    } elseif ([string]$status.pdfMode -eq "html-browser-print" -and [string]$status.pdfCompressionMode -eq "cached-validated-pdf") {
+        # The durable cache preserves the validated PDF/accessibility result but intentionally records cache reuse
+        # rather than the original compression mode. A cached browser-native tagged PDF and a cached post-processed
+        # HTML-fallback PDF are therefore both valid, while unknown/unavailable accessibility states remain rejected.
+        @("tagged-pdf-required", "html-accessibility-fallback")
+    } else {
+        @("html-accessibility-fallback")
+    }
+    if ([string]$status.pdfAccessibilityMode -notin $acceptedPdfAccessibilityModes) { throw "Published PublisherStudio documentation has an unexpected PDF accessibility mode '$($status.pdfAccessibilityMode)' for PDF mode '$($status.pdfMode)' and compression mode '$($status.pdfCompressionMode)'." }
+    if ([string]$status.pdfMode -in $browserBackedPdfModes -and [int]$status.pdfSourcePageCount -lt 10) { throw "The PublisherStudio documentation PDF did not include the expected HTML page set." }
+    if ([string]$status.pdfMode -in $browserBackedPdfModes -and [int]$status.apiHtmlCount -gt 0 -and [int]$status.pdfSourcePageCount -lt [int]$status.apiHtmlCount) { throw "The PublisherStudio documentation PDF omitted generated API pages." }
     if (-not ([bool]$status.completeApiReference)) { throw "Published PublisherStudio documentation is missing the complete XML-generated API reference." }
     if ([int]$status.apiYamlCount -le 1 -or [int]$status.apiHtmlCount -le 1) { throw "Published PublisherStudio documentation contains an incomplete API graph." }
     $physicalApiHtmlCount = @(Get-ChildItem -LiteralPath (Join-Path $DocumentationRoot "api") -Filter "*.html" -File -Recurse -ErrorAction SilentlyContinue).Count
@@ -271,6 +302,13 @@ function Assert-PublisherStudioDocumentationPayload {
     if ($apiIndexText.IndexOf("PublisherStudio API reference", [StringComparison]::OrdinalIgnoreCase) -lt 0) { throw "Published PublisherStudio api/index.html is not the generated API reference entry point." }
     if ([long]$status.pdfBytes -lt 1048576) { throw "Published PublisherStudio documentation contains an unexpectedly small PDF." }
     if ([int]$status.pdfCandidateCount -lt 1 -or [string]::IsNullOrWhiteSpace([string]$status.pdfGeneratedSourcePath)) { throw "Published PublisherStudio documentation did not record a real documentation PDF source." }
+    if (-not ([bool]$status.pdfAvailable)) { throw "Runtime documentation status must declare pdfAvailable=true because the compressed handbook is embedded." }
+    if (-not ([bool]$status.runtimePdfPublished)) { throw "Runtime documentation status must declare runtimePdfPublished=true because the compressed handbook is embedded." }
+    if (-not [string]::Equals([string]$status.releasePdfFileName, "PublisherStudio-$Version.pdf", [StringComparison]::OrdinalIgnoreCase)) { throw "Runtime documentation did not preserve the embedded PDF identity." }
+    if ([long]$status.releasePdfBytes -lt 1048576) { throw "Runtime documentation did not preserve the embedded PDF size metadata." }
+    $physicalPdf = Get-Item -LiteralPath (Join-Path $DocumentationRoot "PublisherStudio-$Version.pdf")
+    if ([long]$physicalPdf.Length -ne [long]$status.pdfBytes) { throw "Embedded PublisherStudio PDF byte size does not match documentation-status.json." }
+    if ($null -ne $status.maximumSanePdfBytes -and [long]$physicalPdf.Length -gt [long]$status.maximumSanePdfBytes) { throw "Embedded PublisherStudio PDF exceeds the configured sane-size ceiling." }
 
     $index = Get-Content -LiteralPath (Join-Path $DocumentationRoot "index.html") -Raw
     foreach ($marker in @(
@@ -285,7 +323,7 @@ function Assert-PublisherStudioDocumentationPayload {
         }
     }
 
-    Write-Host "Verified complete PublisherStudio $Version DocFX modern HTML and HTML-backed PDF documentation in $DocumentationRoot" -ForegroundColor Green
+    Write-Host "Verified complete PublisherStudio $Version DocFX modern HTML and compressed embedded PDF documentation in $DocumentationRoot" -ForegroundColor Green
 }
 
 function Assert-ReleaseArchiveLayout {
@@ -331,11 +369,15 @@ function Assert-ReleaseArchiveLayout {
                 }
             }
             if ([string]::IsNullOrWhiteSpace($Version)) { throw "Version is required when validating release documentation." }
+            $expectedPdf = "$RootFolderName/wwwroot/help-docs/PublisherStudio-$Version.pdf"
             $pdfPrefix = "$RootFolderName/wwwroot/help-docs/PublisherStudio-"
             $versionedPdfs = @($names | Where-Object { $_.StartsWith($pdfPrefix, [StringComparison]::OrdinalIgnoreCase) -and $_.EndsWith('.pdf', [StringComparison]::OrdinalIgnoreCase) })
-            $expectedPdf = "$RootFolderName/wwwroot/help-docs/PublisherStudio-$Version.pdf"
-            if ($versionedPdfs.Count -ne 1 -or -not ($versionedPdfs -contains $expectedPdf)) {
-                throw "Release archive must contain exactly the current PublisherStudio documentation PDF '$expectedPdf'. Found: $($versionedPdfs -join ', ')"
+            if ($versionedPdfs.Count -ne 1 -or -not [string]::Equals($versionedPdfs[0], $expectedPdf, [StringComparison]::OrdinalIgnoreCase)) {
+                throw "Runtime release archive must contain exactly the current compressed embedded PublisherStudio PDF '$expectedPdf'. Found: $($versionedPdfs -join ', ')"
+            }
+            $pdfEntry = $archive.Entries | Where-Object { $_.FullName.TrimStart('/') -ieq $expectedPdf } | Select-Object -First 1
+            if ($null -eq $pdfEntry -or $pdfEntry.Length -lt 1048576L) {
+                throw "Runtime release archive contains a missing or unexpectedly small embedded PublisherStudio PDF: $ArchivePath"
             }
         }
         foreach ($name in $names) {
@@ -470,6 +512,62 @@ function Test-VersionDirectoryName {
     return $Name -match '^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$'
 }
 
+function Test-ExistingReleaseBundleComplete {
+    param([Parameter(Mandatory)][string]$Version)
+    $versionDirectory = Join-Path $artifacts $Version
+    $checksumPath = Join-Path $versionDirectory 'SHA256SUMS.txt'
+    if (-not (Test-Path -LiteralPath $checksumPath -PathType Leaf)) { return $false }
+    $lines = @(Get-Content -LiteralPath $checksumPath -Encoding UTF8 | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+    if ($lines.Count -eq 0) { return $false }
+    $manifestNames = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+    foreach ($line in $lines) {
+        if ([string]$line -notmatch '^([0-9A-Fa-f]{64})\s+(.+)$') { return $false }
+        $expectedHash = $Matches[1].ToLowerInvariant()
+        $name = $Matches[2].Trim()
+        if ([string]::IsNullOrWhiteSpace($name) -or $name.IndexOfAny([char[]]"/\\") -ge 0) { return $false }
+        $path = Join-Path $versionDirectory $name
+        if (-not (Test-Path -LiteralPath $path -PathType Leaf)) { return $false }
+        $actualHash = (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLowerInvariant()
+        if (-not [string]::Equals($expectedHash, $actualHash, [StringComparison]::Ordinal)) { return $false }
+        [void]$manifestNames.Add($name)
+    }
+    $payloadFiles = @(Get-ChildItem -LiteralPath $versionDirectory -File | Where-Object { $_.Name -ne 'SHA256SUMS.txt' })
+    return $manifestNames.Count -eq $payloadFiles.Count
+}
+
+function Move-OrReuseReleaseFile {
+    param(
+        [Parameter(Mandatory)][string]$SourcePath,
+        [Parameter(Mandatory)][string]$DestinationDirectory,
+        [switch]$Move
+    )
+    $destination = Join-Path $DestinationDirectory ([IO.Path]::GetFileName($SourcePath))
+    $sourceFull = [IO.Path]::GetFullPath($SourcePath)
+    $destinationFull = [IO.Path]::GetFullPath($destination)
+    if ([string]::Equals($sourceFull, $destinationFull, [StringComparison]::OrdinalIgnoreCase)) {
+        if (-not (Test-Path -LiteralPath $destinationFull -PathType Leaf)) { throw "Release file is missing: $destinationFull" }
+        return $destinationFull
+    }
+
+    if (Test-Path -LiteralPath $destinationFull -PathType Leaf) {
+        if (Test-Path -LiteralPath $sourceFull -PathType Leaf) {
+            $sourceInfo = Get-Item -LiteralPath $sourceFull
+            $destinationInfo = Get-Item -LiteralPath $destinationFull
+            if ($sourceInfo.Length -ne $destinationInfo.Length) { throw "Release resume conflict: $sourceFull and $destinationFull have different sizes." }
+            $sourceHash = (Get-FileHash -LiteralPath $sourceFull -Algorithm SHA256).Hash
+            $destinationHash = (Get-FileHash -LiteralPath $destinationFull -Algorithm SHA256).Hash
+            if (-not [string]::Equals($sourceHash, $destinationHash, [StringComparison]::OrdinalIgnoreCase)) { throw "Release resume conflict: $sourceFull and $destinationFull contain different bytes." }
+            if ($Move) { Remove-Item -LiteralPath $sourceFull -Force }
+        }
+        return $destinationFull
+    }
+
+    if (-not (Test-Path -LiteralPath $sourceFull -PathType Leaf)) { throw "Required release file is missing: $sourceFull" }
+    if ($Move) { Move-Item -LiteralPath $sourceFull -Destination $destinationFull }
+    else { Copy-Item -LiteralPath $sourceFull -Destination $destinationFull -Force }
+    return $destinationFull
+}
+
 function Complete-ReleaseBundle {
     param(
         [Parameter(Mandatory)][string]$Version,
@@ -484,65 +582,51 @@ function Complete-ReleaseBundle {
     )
 
     $versionDirectory = Join-Path $artifacts $Version
-    if (Test-Path -LiteralPath $versionDirectory) {
-        throw "Release bundle '$versionDirectory' already exists. Existing version directories are never overwritten."
+    if ($ForceRebuildArtifacts -and (Test-Path -LiteralPath $versionDirectory -PathType Container)) {
+        Remove-Item -LiteralPath $versionDirectory -Recurse -Force
     }
+    if ((Test-ExistingReleaseBundleComplete -Version $Version) -and -not $ForceRebuildArtifacts) {
+        Write-Host "Upload-ready release bundle already exists and all SHA-256 entries validate: $versionDirectory" -ForegroundColor Green
+        return
+    }
+    New-Item -ItemType Directory -Path $versionDirectory -Force | Out-Null
 
     $uniqueZipPaths = @($ReleaseZipPaths | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -Unique)
-    if ($uniqueZipPaths.Count -eq 0) { throw "No release ZIPs were produced for release $Version." }
+    if ($uniqueZipPaths.Count -eq 0) { throw "No release artifacts were produced for release $Version." }
+
+    # Move large generated artifacts directly into the final version directory. If a previous run
+    # died halfway through this step, byte-identical files already present there are reused instead
+    # of copied again. This keeps peak disk usage low and makes final-bundle assembly crash-resumable.
     foreach ($zipPath in $uniqueZipPaths) {
-        if (-not (Test-Path -LiteralPath $zipPath -PathType Leaf)) { throw "Expected release ZIP is missing: $zipPath" }
+        Move-OrReuseReleaseFile -SourcePath $zipPath -DestinationDirectory $versionDirectory -Move | Out-Null
     }
-    foreach ($requiredFile in @($DocumentationPdfPath, $ReadmePath, $LicensePath, $WireProtocolPackagePath, $SetupIconPath)) {
-        if (-not (Test-Path -LiteralPath $requiredFile -PathType Leaf)) { throw "Required upload-ready release file is missing: $requiredFile" }
+    Move-OrReuseReleaseFile -SourcePath $DocumentationPdfPath -DestinationDirectory $versionDirectory -Move | Out-Null
+    foreach ($supportFile in @($ReadmePath, $LicensePath, $WireProtocolPackagePath, $SetupIconPath)) {
+        if (-not (Test-Path -LiteralPath $supportFile -PathType Leaf)) { throw "Required upload-ready release file is missing: $supportFile" }
+        Move-OrReuseReleaseFile -SourcePath $supportFile -DestinationDirectory $versionDirectory | Out-Null
     }
-    if ($RequireWindowsX64Setup -and -not (Test-Path -LiteralPath $WindowsX64SetupExecutablePath -PathType Leaf)) {
-        throw "Windows x64 setup executable is required for the full release bundle but is missing: $WindowsX64SetupExecutablePath"
+    if ($RequireWindowsX64Setup) {
+        if (-not (Test-Path -LiteralPath $WindowsX64SetupExecutablePath -PathType Leaf)) { throw "Windows x64 setup executable is required for the full release bundle but is missing: $WindowsX64SetupExecutablePath" }
+        Move-OrReuseReleaseFile -SourcePath $WindowsX64SetupExecutablePath -DestinationDirectory $versionDirectory | Out-Null
+    }
+    elseif (Test-Path -LiteralPath $WindowsX64SetupExecutablePath -PathType Leaf) {
+        Move-OrReuseReleaseFile -SourcePath $WindowsX64SetupExecutablePath -DestinationDirectory $versionDirectory | Out-Null
     }
 
-    $stagingDirectory = Join-Path $artifacts (".release-bundle-" + [Guid]::NewGuid().ToString("N"))
-    New-Item -ItemType Directory -Path $stagingDirectory -Force | Out-Null
-    try {
-        foreach ($zipPath in $uniqueZipPaths) {
-            Copy-Item -LiteralPath $zipPath -Destination (Join-Path $stagingDirectory ([IO.Path]::GetFileName($zipPath))) -Force
-        }
-        Copy-Item -LiteralPath $DocumentationPdfPath -Destination (Join-Path $stagingDirectory ([IO.Path]::GetFileName($DocumentationPdfPath))) -Force
-        Copy-Item -LiteralPath $ReadmePath -Destination (Join-Path $stagingDirectory ([IO.Path]::GetFileName($ReadmePath))) -Force
-        Copy-Item -LiteralPath $LicensePath -Destination (Join-Path $stagingDirectory ([IO.Path]::GetFileName($LicensePath))) -Force
-        Copy-Item -LiteralPath $WireProtocolPackagePath -Destination (Join-Path $stagingDirectory ([IO.Path]::GetFileName($WireProtocolPackagePath))) -Force
-        Copy-Item -LiteralPath $SetupIconPath -Destination (Join-Path $stagingDirectory ([IO.Path]::GetFileName($SetupIconPath))) -Force
-        if (Test-Path -LiteralPath $WindowsX64SetupExecutablePath -PathType Leaf) {
-            Copy-Item -LiteralPath $WindowsX64SetupExecutablePath -Destination (Join-Path $stagingDirectory ([IO.Path]::GetFileName($WindowsX64SetupExecutablePath))) -Force
-        }
-
-        New-Item -ItemType Directory -Path $versionDirectory -Force | Out-Null
-        foreach ($file in Get-ChildItem -LiteralPath $stagingDirectory -File) {
-            Move-Item -LiteralPath $file.FullName -Destination (Join-Path $versionDirectory $file.Name)
-        }
-
-        $checksumPath = Join-Path $versionDirectory 'SHA256SUMS.txt'
-        $checksumLines = foreach ($file in Get-ChildItem -LiteralPath $versionDirectory -File | Sort-Object Name) {
-            if ($file.Name -eq 'SHA256SUMS.txt') { continue }
-            $hash = (Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
-            "$hash  $($file.Name)"
-        }
-        [IO.File]::WriteAllLines($checksumPath, [string[]]$checksumLines, (New-Object Text.UTF8Encoding($false)))
-
-        foreach ($zipPath in $uniqueZipPaths) {
-            Remove-Item -LiteralPath $zipPath -Force -ErrorAction SilentlyContinue
-        }
-
-        foreach ($directory in Get-ChildItem -LiteralPath $artifacts -Directory -Force) {
-            if ($directory.FullName -eq $versionDirectory) { continue }
-            if (Test-VersionDirectoryName -Name $directory.Name) { continue }
-            Remove-Item -LiteralPath $directory.FullName -Recurse -Force -ErrorAction Stop
-        }
-
-        Write-Host "Upload-ready release bundle: $versionDirectory" -ForegroundColor Green
+    $checksumPath = Join-Path $versionDirectory 'SHA256SUMS.txt'
+    $checksumLines = foreach ($file in Get-ChildItem -LiteralPath $versionDirectory -File | Sort-Object Name) {
+        if ($file.Name -eq 'SHA256SUMS.txt') { continue }
+        $hash = (Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+        "$hash  $($file.Name)"
     }
-    finally {
-        Remove-Item -LiteralPath $stagingDirectory -Recurse -Force -ErrorAction SilentlyContinue
-    }
+    [IO.File]::WriteAllLines($checksumPath, [string[]]$checksumLines, (New-Object Text.UTF8Encoding($false)))
+    if (-not (Test-ExistingReleaseBundleComplete -Version $Version)) { throw "Release bundle checksum verification failed after assembly: $versionDirectory" }
+    Write-Host "Upload-ready release bundle: $versionDirectory" -ForegroundColor Green
+}
+
+if (-not $ForceRebuildArtifacts -and -not $SkipReleaseBundle -and $Runtime -eq 'all' -and (Test-ExistingReleaseBundleComplete -Version $appVersion)) {
+    Write-Host "Release $appVersion is already complete and SHA-256 verified at $(Join-Path $artifacts $appVersion). Nothing will be rebuilt or resubmitted. Use -ForceRebuildArtifacts to intentionally rebuild it." -ForegroundColor Green
+    return
 }
 
 function Ensure-WireProtocolPackage {
@@ -608,7 +692,7 @@ function Prepare-PublisherStudioDocumentation {
     if (-not [string]::IsNullOrWhiteSpace($PreparedDocumentationRoot)) {
         $preparedRoot = [IO.Path]::GetFullPath($PreparedDocumentationRoot)
         if (-not (Test-Path -LiteralPath $preparedRoot -PathType Container)) { throw "Prepared PublisherStudio documentation root is missing: $preparedRoot" }
-        Assert-PublisherStudioDocumentationPayload -DocumentationRoot $preparedRoot -Version $appVersion
+        Assert-PublisherStudioDocumentationPayload -DocumentationRoot $preparedRoot -Version $appVersion -RequirePhysicalPdf
         Remove-Item -LiteralPath $script:documentationCacheRoot -Recurse -Force -ErrorAction SilentlyContinue
         New-Item -ItemType Directory -Path $script:documentationCacheRoot -Force | Out-Null
         Copy-Item -Path (Join-Path $preparedRoot '*') -Destination $script:documentationCacheRoot -Recurse -Force
@@ -647,9 +731,12 @@ function Prepare-PublisherStudioDocumentation {
         -XmlDocumentationPath $documentationXml `
         -Version $appVersion `
         -OutputWebRoot $documentationOutput `
-        -RequirePdf
+        -DocumentationCacheRoot $documentationToolCacheBase `
+        -PackagingTool $releasePackagingTool `
+        -RequirePdf `
+        -DisablePdfToolProvisioning:$DisableDocumentationToolProvisioning
 
-    Assert-PublisherStudioDocumentationPayload -DocumentationRoot $documentationOutput -Version $appVersion
+    Assert-PublisherStudioDocumentationPayload -DocumentationRoot $documentationOutput -Version $appVersion -RequirePhysicalPdf
     if (-not (Test-Path -LiteralPath $pagesSnapshotScript -PathType Leaf)) { throw "GitHub Pages snapshot script not found: $pagesSnapshotScript" }
     Write-Host "Validating and seeding the PublisherStudio $appVersion GitHub Pages snapshot from the release documentation payload..." -ForegroundColor Cyan
     & $pagesSnapshotScript -DocumentationRoot $documentationOutput -OutputArchive $pagesSnapshotArchive
@@ -662,14 +749,52 @@ function Prepare-PublisherStudioDocumentation {
 }
 
 
+function Copy-PublisherStudioRuntimeDocumentation {
+    param(
+        [Parameter(Mandatory)][string]$SourceRoot,
+        [Parameter(Mandatory)][string]$DestinationRoot,
+        [Parameter(Mandatory)][string]$Version
+    )
+
+    $pdfName = "PublisherStudio-$Version.pdf"
+    Remove-Item -LiteralPath $DestinationRoot -Recurse -Force -ErrorAction SilentlyContinue
+    New-Item -ItemType Directory -Path $DestinationRoot -Force | Out-Null
+    foreach ($entry in Get-ChildItem -LiteralPath $SourceRoot -Force) {
+        Copy-Item -LiteralPath $entry.FullName -Destination (Join-Path $DestinationRoot $entry.Name) -Recurse -Force
+    }
+
+    $pdfPath = Join-Path $DestinationRoot $pdfName
+    if (-not (Test-Path -LiteralPath $pdfPath -PathType Leaf)) {
+        throw "Embedded PublisherStudio documentation PDF is missing after runtime documentation copy: $pdfPath"
+    }
+    $statusPath = Join-Path $DestinationRoot 'documentation-status.json'
+    $status = Get-Content -LiteralPath $statusPath -Raw | ConvertFrom-Json
+    $releasePdfBytes = [long](Get-Item -LiteralPath $pdfPath).Length
+    $status | Add-Member -NotePropertyName releasePdfFileName -NotePropertyValue $pdfName -Force
+    $status | Add-Member -NotePropertyName releasePdfBytes -NotePropertyValue $releasePdfBytes -Force
+    $status | Add-Member -NotePropertyName runtimePdfPublished -NotePropertyValue $true -Force
+    $status | Add-Member -NotePropertyName pdfAvailable -NotePropertyValue $true -Force
+    $status | Add-Member -NotePropertyName pdfBytes -NotePropertyValue $releasePdfBytes -Force
+    $status | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $statusPath -Encoding utf8
+}
+
 function Publish-UnixRuntime {
     param([Parameter(Mandatory)][string]$Rid)
     if ($Rid.StartsWith('win-')) { throw "Publish-UnixRuntime received Windows RID $Rid." }
     if (-not $script:releasePackagingTool) { throw 'Release packaging tool was not prepared.' }
     $wireProperties = Get-WireProperties
-    foreach ($mode in @('Full','Light')) {
-        $selfContained = if ($mode -eq 'Full') { 'true' } else { 'false' }
-        $publishFolder = Join-Path $artifacts ("staging/$Rid/$($mode.ToLowerInvariant())")
+    $mode = 'Full'
+    $selfContained = 'true'
+    $publishFolder = Join-Path $artifacts ("staging/$Rid/$($mode.ToLowerInvariant())")
+    if ($Rid.StartsWith('osx-') -and -not $ForceRebuildArtifacts) {
+        $existingNativeArtifacts = @(
+            & $script:nativeReleasePackagingScript -ProductName 'PublisherStudio' -ExecutableName 'PublisherStudio.Web' -Version $appVersion -Rid $Rid -Mode $mode -PayloadDirectory $publishFolder -OutputDirectory $artifacts -PackagingTool $script:releasePackagingTool -DependencyPolicy PublisherStudio -ProbeExistingArtifactsOnly -MacIconSource (Join-Path $root 'assets/PublisherStudio.png') -DmgBackgroundPath (Join-Path $root 'build/assets/PublisherStudio-dmg-background.png')
+        )
+        if ($existingNativeArtifacts.Count -eq 3) {
+            foreach ($artifact in $existingNativeArtifacts) { $script:releaseZipPaths.Add([string]$artifact) }
+            return
+        }
+    }
         Remove-Item -LiteralPath $publishFolder -Recurse -Force -ErrorAction SilentlyContinue
         New-Item -ItemType Directory -Path $publishFolder -Force | Out-Null
         Write-Host "Publishing PublisherStudio $Rid $mode application payload (no setup console)..." -ForegroundColor Cyan
@@ -683,22 +808,19 @@ function Publish-UnixRuntime {
         $appExecutable = 'PublisherStudio.Web'
         if (-not (Test-Path -LiteralPath (Join-Path $publishFolder $appExecutable) -PathType Leaf)) { throw "Published PublisherStudio apphost is missing for $Rid $mode." }
         $publishedDocumentationRoot = Join-Path $publishFolder 'wwwroot/help-docs'
-        Remove-Item -LiteralPath $publishedDocumentationRoot -Recurse -Force -ErrorAction SilentlyContinue
-        New-Item -ItemType Directory -Path $publishedDocumentationRoot -Force | Out-Null
-        Copy-Item -Path (Join-Path $script:documentationCacheRoot '*') -Destination $publishedDocumentationRoot -Recurse -Force
+        Copy-PublisherStudioRuntimeDocumentation -SourceRoot $script:documentationCacheRoot -DestinationRoot $publishedDocumentationRoot -Version $appVersion
         Assert-PublishedConfigurationFiles -SourceRoot $webDirectory -PublishRoot $publishFolder
         Assert-PublisherStudioDocumentationPayload -DocumentationRoot $publishedDocumentationRoot -Version $appVersion
         $protocolDirectory = Join-Path $publishFolder 'protocol'; New-Item -ItemType Directory -Path $protocolDirectory -Force | Out-Null
         Copy-Item -LiteralPath $wireProtocolPackage -Destination (Join-Path $protocolDirectory $wireProtocolPackageName) -Force
         $publisherIcon = Join-Path $root 'assets/PublisherStudio.ico'; if (Test-Path -LiteralPath $publisherIcon -PathType Leaf) { Copy-Item -LiteralPath $publisherIcon -Destination (Join-Path $publishFolder 'PublisherStudio.ico') -Force }
-        $nativeArtifacts = & $script:nativeReleasePackagingScript -ProductName 'PublisherStudio' -ExecutableName $appExecutable -Version $appVersion -Rid $Rid -Mode $mode -PayloadDirectory $publishFolder -OutputDirectory $artifacts -PackagingTool $script:releasePackagingTool -DependencyPolicy PublisherStudio -UseContainerFallback:$UseContainerPackaging -ProvisionHomebrewTools:$ProvisionNativePackagingTools -RequireOptionalPackages:$RequireOptionalNativePackages -MacIconSource (Join-Path $root 'assets/PublisherStudio.png') -DmgBackgroundPath (Join-Path $root 'build/assets/PublisherStudio-dmg-background.png')
+        $nativeArtifacts = & $script:nativeReleasePackagingScript -ProductName 'PublisherStudio' -ExecutableName $appExecutable -Version $appVersion -Rid $Rid -Mode $mode -PayloadDirectory $publishFolder -OutputDirectory $artifacts -PackagingTool $script:releasePackagingTool -DependencyPolicy PublisherStudio -UseContainerFallback:$UseContainerPackaging -ProvisionHomebrewTools:$ProvisionNativePackagingTools -RequireOptionalPackages:$RequireOptionalNativePackages -ForceRebuildArtifacts:$ForceRebuildArtifacts -MacIconSource (Join-Path $root 'assets/PublisherStudio.png') -DmgBackgroundPath (Join-Path $root 'build/assets/PublisherStudio-dmg-background.png')
         foreach ($artifact in @($nativeArtifacts)) { if (-not [string]::IsNullOrWhiteSpace([string]$artifact)) { $script:releaseZipPaths.Add([string]$artifact) } }
         # Native artifacts are now complete; do not keep another multi-gigabyte documentation-bearing RID tree alive.
         Remove-Item -LiteralPath $publishFolder -Recurse -Force -ErrorAction SilentlyContinue
         $transientMacApp = Join-Path $artifacts 'PublisherStudio.app'
         if ($Rid.StartsWith('osx-')) { Remove-Item -LiteralPath $transientMacApp -Recurse -Force -ErrorAction SilentlyContinue }
         Write-Host "Released transient $Rid $mode staging workspace after native package validation." -ForegroundColor DarkCyan
-    }
 }
 
 function Publish-Runtime {
@@ -753,10 +875,8 @@ function Publish-Runtime {
         throw "The shared PublisherStudio documentation cache is missing: $script:documentationCacheRoot"
     }
     $publishedDocumentationRoot = Join-Path $appFolder "wwwroot/help-docs"
-    Remove-Item -LiteralPath $publishedDocumentationRoot -Recurse -Force -ErrorAction SilentlyContinue
-    New-Item -ItemType Directory -Path $publishedDocumentationRoot -Force | Out-Null
-    Copy-Item -Path (Join-Path $script:documentationCacheRoot "*") -Destination $publishedDocumentationRoot -Recurse -Force
-    Write-Host "Reused the verified complete documentation payload for $Rid." -ForegroundColor Cyan
+    Copy-PublisherStudioRuntimeDocumentation -SourceRoot $script:documentationCacheRoot -DestinationRoot $publishedDocumentationRoot -Version $appVersion
+    Write-Host "Reused the verified HTML documentation and compressed embedded PDF payload for $Rid." -ForegroundColor Cyan
 
     Assert-PublishedConfigurationFiles -SourceRoot $webDirectory -PublishRoot $appFolder
     Assert-PublisherStudioDocumentationPayload -DocumentationRoot $publishedDocumentationRoot -Version $appVersion
@@ -853,13 +973,14 @@ Write-Host "Release host $releaseHost selected runtime(s): $($displayRuntimes -j
 if ($Runtime -eq 'all') {
     Write-Host "Runtime 'all' is host-aware. Use -Runtime all-rids only for an explicit cross-host publish attempt." -ForegroundColor DarkCyan
     if ($releaseHost -eq 'Windows' -and $wslLinuxRuntimes.Count -gt 0) {
-        Write-Host 'Windows is the release coordinator: Windows packages are native; Linux Full/Light packages are delegated headlessly to WSL and imported into the same release bundle.' -ForegroundColor DarkCyan
+        Write-Host 'Windows is the release coordinator: Windows packages are native; Linux self-contained Full packages are delegated headlessly to WSL and imported into the same release bundle.' -ForegroundColor DarkCyan
     }
     if ($releaseHost -eq 'macOS') {
         Write-Host "macOS is the full release coordinator: macOS x64/ARM64, Linux x64/ARM64, and Windows x64/x86/ARM64 application/setup payloads are built in one run." -ForegroundColor DarkCyan
-        Write-Host "macOS produces native DMG/PKG/TAR.GZ packages; Linux TAR.GZ/DEB are managed and RPM uses Homebrew rpmbuild when available. AppImage remains a Linux/WSL/container finishing step." -ForegroundColor DarkCyan
+        Write-Host "macOS produces native self-contained Full DMG/PKG/TAR.GZ packages; Linux self-contained Full TAR.GZ/DEB are managed and RPM uses Homebrew rpmbuild when available. AppImage remains a Linux/WSL/container finishing step." -ForegroundColor DarkCyan
     }
 }
+& (Join-Path $root 'build/Initialize-MacReleaseTrust.ps1') -ProductName 'PublisherStudio' -SelectedRuntimes @($runtimes) -AllowUnsignedMacPackages:$AllowUnsignedMacPackages
 $requiresReleasePackaging = @($runtimes | Where-Object { -not $_.StartsWith('win-') }).Count -gt 0
 
 New-Item -ItemType Directory -Path $packageDirectory, $artifacts -Force | Out-Null
@@ -894,26 +1015,21 @@ if ($wslLinuxRuntimes.Count -gt 0) {
 }
 $requiresReleasePackaging = @($runtimes | Where-Object { -not $_.StartsWith('win-') }).Count -gt 0
 
-if ($requiresReleasePackaging) {
-    $releasePackagingEnsureArguments = @{
-        Version = $ReleasePackagingVersion
-        Configuration = $Configuration
-        PackageDirectory = $packageDirectory
-        PackageUrl = $ReleasePackagingPackageUrl
-        LocalGptRepository = $LocalGptRepository
-    }
-    if ($RefreshReleasePackagingPackage) { $releasePackagingEnsureArguments.ForceDownload = $true }
-    $releasePackagingToolOutput = @(& (Join-Path $root 'build/Ensure-ReleasePackagingPackage.ps1') @releasePackagingEnsureArguments)
-    if ($releasePackagingToolOutput.Count -ne 1 -or [string]::IsNullOrWhiteSpace([string]$releasePackagingToolOutput[0])) { throw "Release-packaging tool preparation returned $($releasePackagingToolOutput.Count) pipeline value(s); expected exactly one executable path." }
-    $releasePackagingTool = [string]$releasePackagingToolOutput[0]
-    if (-not (Test-Path -LiteralPath $releasePackagingTool -PathType Leaf)) { throw "Prepared release-packaging tool is missing: $releasePackagingTool" }
-    if (-not (Test-Path -LiteralPath $releasePackagingPackage -PathType Leaf)) {
-        throw "LocalGPT release-packaging package preparation did not produce $releasePackagingPackage"
-    }
-    Copy-Item -LiteralPath $releasePackagingPackage -Destination (Join-Path $artifacts $releasePackagingPackageName) -Force
-} else {
-    Write-Host "Skipping LocalGPT.ReleasePackaging tool preparation because this host-aware release contains Windows runtimes only." -ForegroundColor DarkCyan
+# Documentation PDF assembly uses LocalGPT.ReleasePackaging on every host, not only Unix packaging lanes.
+$releasePackagingEnsureArguments = @{
+    Version = $ReleasePackagingVersion
+    Configuration = $Configuration
+    PackageDirectory = $packageDirectory
+    PackageUrl = $ReleasePackagingPackageUrl
+    LocalGptRepository = $LocalGptRepository
 }
+if ($RefreshReleasePackagingPackage) { $releasePackagingEnsureArguments.ForceDownload = $true }
+$releasePackagingToolOutput = @(& (Join-Path $root 'build/Ensure-ReleasePackagingPackage.ps1') @releasePackagingEnsureArguments)
+if ($releasePackagingToolOutput.Count -ne 1 -or [string]::IsNullOrWhiteSpace([string]$releasePackagingToolOutput[0])) { throw "Release-packaging tool preparation returned $($releasePackagingToolOutput.Count) pipeline value(s); expected exactly one executable path." }
+$releasePackagingTool = [string]$releasePackagingToolOutput[0]
+if (-not (Test-Path -LiteralPath $releasePackagingTool -PathType Leaf)) { throw "Prepared release-packaging tool is missing: $releasePackagingTool" }
+if (-not (Test-Path -LiteralPath $releasePackagingPackage -PathType Leaf)) { throw "LocalGPT release-packaging package preparation did not produce $releasePackagingPackage" }
+Copy-Item -LiteralPath $releasePackagingPackage -Destination (Join-Path $artifacts $releasePackagingPackageName) -Force
 
 Copy-Item -LiteralPath $wireProtocolPackage -Destination (Join-Path $artifacts $wireProtocolPackageName) -Force
 Prepare-PublisherStudioClientAssets
@@ -966,6 +1082,12 @@ try {
 }
 finally {
     Remove-Item -LiteralPath $documentationCacheRoot -Recurse -Force -ErrorAction SilentlyContinue
+    Remove-Item -LiteralPath (Join-Path $artifacts 'staging') -Recurse -Force -ErrorAction SilentlyContinue
+    Remove-Item -LiteralPath (Join-Path $artifacts 'PublisherStudio.app') -Recurse -Force -ErrorAction SilentlyContinue
+    $postReleaseBuildStateCount = Clear-RepositoryReleaseBuildState -BestEffort
+    if ($postReleaseBuildStateCount -gt 0) {
+        Write-Host "Released $postReleaseBuildStateCount repository-local bin/obj build-state director$(if ($postReleaseBuildStateCount -eq 1) { 'y' } else { 'ies' }) after the release attempt." -ForegroundColor DarkCyan
+    }
 }
 
 $releaseBundle = if ($SkipReleaseBundle) { $artifacts } else { Join-Path $artifacts $appVersion }

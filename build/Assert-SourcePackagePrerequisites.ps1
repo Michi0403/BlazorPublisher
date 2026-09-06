@@ -22,6 +22,7 @@ $requiredRelativePaths = @(
     "build/Ensure-WireProtocolPackage.ps1",
     "build/Ensure-ReleasePackagingPackage.ps1",
     "build/NativeReleasePackaging.ps1",
+    "build/Initialize-MacReleaseTrust.ps1",
     ".github/scripts/prepare-pages-artifact.py"
 )
 

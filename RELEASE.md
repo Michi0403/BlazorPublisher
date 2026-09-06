@@ -1,11 +1,17 @@
-# PublisherStudio 3.2.8
+# PublisherStudio 3.4.5
 
-PublisherStudio 3.2.8 repairs the durable-HTML documentation PDF fallback exposed by the 3.2.7 macOS release build.
+PublisherStudio 3.4.5 mirrors LocalGPT 3.8.2's artifact-local Apple notarization state machine. Every macOS DMG and PKG owns an independent SHA-256-bound transaction. `notarytool submit` is non-idempotent and therefore never participates in the generic retry loop.
 
-A validated DocFX HTML payload can be restored from PublisherStudio's durable cache without restoring the repository-local DocFX command. If the subsequent Microsoft Edge monolithic print failed, the fallback then attempted to invoke an unresolved command target and PowerShell stopped with `The expression after '&' ... was not valid`. The PDF path now resolves/restores DocFX lazily before invoking the plug-in, with the existing pinned 2.78.5 isolated tool path retained as the secondary fallback.
+Before each new artifact upload, the release persists `submit-pending` state and captures a read-only Apple history baseline. The artifact is submitted once. If the local result is ambiguous, Apple history is reconciled and a matching new submission ID is adopted rather than blindly uploading again. `history`, `info`, and `log` remain retryable because they do not create new submissions.
 
-The browser-print source-page limit is now 600. The current 732-page PublisherStudio documentation therefore goes directly to the DocFX PDF plug-in instead of spending time on a macOS Edge print that has already failed at that size. Smaller documentation sets can still use the compact browser-print path.
+See `CHANGELOG-v3.4.5-ARTIFACT-LOCAL-NOTARY-TRANSACTIONS.md` and `VALIDATION-v3.4.5-source.md`.
 
-All 3.2.7 method-diagnostics repair, 3.2.6 macOS architecture diagnostics, working installed-app launcher behavior, Future2 positioning, DevExpress licensing clarification, durable documentation cache, staging cleanup, headless DMG/PKG packaging, and reviewed InteractiveServer boundaries remain intact.
+## Release behavior
 
-See `CHANGELOG-v3.2.8-DOCFX-PDF-FALLBACK-REPAIR.md` and `VALIDATION-v3.2.8-source.md`.
+- DMG and PKG notarization is independent and hash-bound per artifact.
+- `submit` runs once per new transaction; history/info/log queries may retry.
+- Pending/submitted/accepted/completed state survives reruns for unchanged bytes.
+- Ambiguous submits are reconciled before any further upload can occur.
+- Already stapled and locally validated artifacts are reused rather than resubmitted.
+- Apple tooling is invoked through `xcrun notarytool`.
+- Existing documentation, application architecture, and InteractiveServer behavior are unchanged.

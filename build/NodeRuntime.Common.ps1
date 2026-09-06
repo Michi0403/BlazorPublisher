@@ -63,6 +63,11 @@ function Get-PublisherStudioDocumentationToolCacheRoot {
         [AllowEmptyString()][string]$FallbackRoot = ''
     )
 
+    $sharedCacheRoot = [string]$env:FUTURE2_DOCUMENTATION_CACHE_ROOT
+    if (-not [string]::IsNullOrWhiteSpace($sharedCacheRoot)) {
+        return Join-Path ([IO.Path]::GetFullPath($sharedCacheRoot)) 'PublisherStudio/DocumentationTools'
+    }
+
     $localApplicationData = [Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)
     if (-not [string]::IsNullOrWhiteSpace($localApplicationData)) {
         return Join-Path $localApplicationData 'PublisherStudio/DocumentationTools'

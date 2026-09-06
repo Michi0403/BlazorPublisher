@@ -22,3 +22,9 @@ The license or notice files for directly vendored open-source scripts are stored
 ## Optional external FFmpeg executable
 
 PublisherStudio can invoke a separately installed FFmpeg executable for local media conversion. FFmpeg is **not bundled or redistributed** with PublisherStudio. FFmpeg is normally licensed under LGPL 2.1-or-later, while optional GPL components can make a particular build GPL; codec and patent obligations also depend on the selected build and distribution. The user or distributor is responsible for installing and licensing an appropriate FFmpeg build. See the official FFmpeg legal and download pages.
+
+## Release-documentation PDF tooling
+
+- **PDFsharp 6.2.4** — MIT license. Used by the synchronized `LocalGPT.ReleasePackaging` .NET build tool to merge bounded browser-rendered documentation PDF chunks cross-platform.
+- **qpdf** — Apache-2.0 license. Optional external build-time PDF optimizer when installed; not bundled with PublisherStudio.
+- **Ghostscript** — AGPL-3.0-or-later. Optional external build-time PDF optimizer when installed; not bundled with PublisherStudio. The normal browser-chunk/PDFsharp merge path does not require it.

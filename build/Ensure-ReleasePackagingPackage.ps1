@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [string]$Version = "1.0.1",
+    [string]$Version = "1.0.2",
     [ValidateSet("Release", "Debug")][string]$Configuration = "Release",
     [string]$PackageDirectory = "",
     [string]$PackageUrl = "",
@@ -41,17 +41,23 @@ function Test-ReleasePackagingPackage {
 function Add-RepositoryCandidates {
     param(
         [string]$Repository,
-        [System.Collections.Generic.List[string]]$Candidates,
-        [System.Collections.Generic.List[string]]$Repositories
+        [System.Collections.Generic.List[string]]$Candidates
     )
     if ([string]::IsNullOrWhiteSpace($Repository)) { return }
     $cleanRepository = $Repository.Trim().Trim('"')
     if ([string]::IsNullOrWhiteSpace($cleanRepository)) { return }
     try { $cleanRepository = [System.IO.Path]::GetFullPath($cleanRepository) } catch { return }
-    if ($null -ne $Repositories) { $Repositories.Add($cleanRepository) }
-    $Candidates.Add((Join-Path $cleanRepository ([IO.Path]::Combine('artifacts', 'release', $packageName))))
-    $Candidates.Add((Join-Path $cleanRepository ([IO.Path]::Combine('artifacts', 'release', 'packaging', $packageName))))
-    $Candidates.Add((Join-Path $cleanRepository (Join-Path 'packages' $packageName)))
+
+    $Candidates.Add((Join-Path $cleanRepository ([IO.Path]::Combine('packages', $packageName))))
+    $releaseRoot = Join-Path $cleanRepository ([IO.Path]::Combine('artifacts', 'release'))
+    $Candidates.Add((Join-Path $releaseRoot $packageName))
+    $Candidates.Add((Join-Path $releaseRoot ([IO.Path]::Combine('packaging', $packageName))))
+
+    if (Test-Path -LiteralPath $releaseRoot -PathType Container) {
+        foreach ($versionDirectory in @(Get-ChildItem -LiteralPath $releaseRoot -Directory -ErrorAction SilentlyContinue | Sort-Object LastWriteTimeUtc -Descending)) {
+            $Candidates.Add((Join-Path $versionDirectory.FullName $packageName))
+        }
+    }
 }
 
 function Get-LockName {
@@ -70,21 +76,24 @@ try {
     catch [System.Threading.AbandonedMutexException] { $hasLock = $true }
     if (-not $hasLock) { throw "Timed out waiting for another restore to prepare $packageName." }
 
+    # Recheck under the lock because another build may have populated the cache while this process waited.
     if (-not $ForceDownload -and (Test-ReleasePackagingPackage $packagePath)) {
         Write-Host "Using cached authoritative LocalGPT release-packaging package: $packagePath" -ForegroundColor DarkGreen
     }
     else {
         Remove-Item -LiteralPath $packagePath -Force -ErrorAction SilentlyContinue
         $candidates = [System.Collections.Generic.List[string]]::new()
-        $repositories = [System.Collections.Generic.List[string]]::new()
         if (-not $ForceDownload) {
-            Add-RepositoryCandidates -Repository $LocalGptRepository -Candidates $candidates -Repositories $repositories
-            Add-RepositoryCandidates -Repository $env:LOCALGPT_REPOSITORY -Candidates $candidates -Repositories $repositories
+            Add-RepositoryCandidates -Repository $LocalGptRepository -Candidates $candidates
+            Add-RepositoryCandidates -Repository $env:LOCALGPT_REPOSITORY -Candidates $candidates
+
+            # LocalGPT and BlazorPublisher are commonly checked out as sibling repositories.
+            $siblingLocalGpt = Join-Path (Split-Path -Parent $repositoryRoot) 'LocalGPT'
+            Add-RepositoryCandidates -Repository $siblingLocalGpt -Candidates $candidates
 
             $localApplicationData = [Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)
             if (-not [string]::IsNullOrWhiteSpace($localApplicationData)) {
                 $candidates.Add((Join-Path $localApplicationData ([IO.Path]::Combine('LocalGPT', 'NuGet', $packageName))))
-                Add-RepositoryCandidates -Repository (Join-Path $localApplicationData ([IO.Path]::Combine('LocalGPT', 'src'))) -Candidates $candidates -Repositories $repositories
             }
 
             foreach ($candidate in $candidates | Select-Object -Unique) {
@@ -97,59 +106,14 @@ try {
                     break
                 }
             }
-
-            if (-not (Test-ReleasePackagingPackage $packagePath)) {
-                foreach ($repository in $repositories | Select-Object -Unique) {
-                    $publisherScript = Join-Path $repository ([IO.Path]::Combine('build', 'Publish-ReleasePackagingPackage.ps1'))
-                    if (-not (Test-Path -LiteralPath $publisherScript -PathType Leaf)) { continue }
-                    Write-Host "Preparing LocalGPT.ReleasePackaging $Version from LocalGPT source at $repository..." -ForegroundColor Cyan
-                    try {
-                        $packageOutput = @(& $publisherScript -Configuration $Configuration -Version $Version)
-                        if ($packageOutput.Count -ne 1 -or [string]::IsNullOrWhiteSpace([string]$packageOutput[0])) {
-                            throw "LocalGPT package publisher returned $($packageOutput.Count) pipeline value(s); expected one package path."
-                        }
-                        $builtPackage = [string]$packageOutput[0]
-                        if (-not (Test-ReleasePackagingPackage $builtPackage)) {
-                            throw "LocalGPT package publisher did not produce a valid $packageName package: $builtPackage"
-                        }
-                        $temporaryCopy = "$packagePath.copying"
-                        Remove-Item -LiteralPath $temporaryCopy -Force -ErrorAction SilentlyContinue
-                        Copy-Item -LiteralPath $builtPackage -Destination $temporaryCopy -Force
-                        Move-Item -LiteralPath $temporaryCopy -Destination $packagePath -Force
-
-                        if (-not [string]::IsNullOrWhiteSpace($localApplicationData)) {
-                            $sharedPackageDirectory = Join-Path $localApplicationData ([IO.Path]::Combine('LocalGPT', 'NuGet'))
-                            New-Item -ItemType Directory -Path $sharedPackageDirectory -Force | Out-Null
-                            Copy-Item -LiteralPath $packagePath -Destination (Join-Path $sharedPackageDirectory $packageName) -Force
-                        }
-                        Write-Host "Prepared authoritative LocalGPT release-packaging package from local LocalGPT source." -ForegroundColor Green
-                        break
-                    }
-                    catch {
-                        Write-Warning "Local LocalGPT release-packaging preparation failed at $repository`: $($_.Exception.Message)"
-                    }
-                }
-            }
         }
 
         if (-not (Test-ReleasePackagingPackage $packagePath)) {
             if ([string]::IsNullOrWhiteSpace($PackageUrl)) {
-                $modeHint = if ($ForceDownload) { 'The refresh/download switch was used, but no -PackageUrl was supplied.' } else { 'No network download was attempted because no -PackageUrl was supplied.' }
-                throw @"
-The authoritative LocalGPT release-packaging package could not be prepared locally.
-Expected package: $packageName
-
-Searched the PublisherStudio package cache, LOCALGPT_REPOSITORY / -LocalGptRepository,
-the shared LocalGPT NuGet cache, and the standard installed LocalGPT source location.
-$modeHint
-
-Build LocalGPT once, point LOCALGPT_REPOSITORY at a LocalGPT checkout, pass
--LocalGptRepository, or explicitly pass -ReleasePackagingPackageUrl when an online
-fallback is desired.
-"@
+                $PackageUrl = "https://github.com/Michi0403/LocalGPT/releases/latest/download/$packageName"
             }
 
-            Write-Host "Downloading authoritative LocalGPT release-packaging package $Version from the explicitly configured URL..." -ForegroundColor Cyan
+            Write-Host "Downloading authoritative LocalGPT release-packaging package $Version..." -ForegroundColor Cyan
             [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
             $temporaryPath = "$packagePath.download"
             Remove-Item -LiteralPath $temporaryPath -Force -ErrorAction SilentlyContinue
@@ -163,9 +127,14 @@ fallback is desired.
             catch {
                 Remove-Item -LiteralPath $temporaryPath -Force -ErrorAction SilentlyContinue
                 throw @"
-The explicitly requested LocalGPT release-packaging download failed.
+The authoritative LocalGPT release-packaging package could not be prepared.
 Expected package: $packageName
-Package URL: $PackageUrl
+Release URL: $PackageUrl
+
+PublisherStudio intentionally does not carry or compile LocalGPT.ReleasePackaging source.
+Build LocalGPT once so it places the authoritative package in the shared LocalGPT NuGet cache,
+set LOCALGPT_REPOSITORY / pass -LocalGptRepository to a LocalGPT release checkout, or upload
+$packageName as an asset of the current LocalGPT release.
 Underlying error: $($_.Exception.Message)
 "@
             }
@@ -184,8 +153,8 @@ if ($PackageOnly) {
     return
 }
 
-# Install only from the prepared local package using an isolated NuGet configuration.
-# This intentionally avoids --add-source, which conflicts with package-source mapping.
+# Install from the authoritative package only. NuGet.org remains enabled solely so the .NET tool
+# can resolve its MIT-licensed PDFsharp dependency; PublisherStudio never compiles helper source.
 $toolRoot = Join-Path $repositoryRoot ([IO.Path]::Combine('artifacts', 'release-tools'))
 Remove-Item -LiteralPath $toolRoot -Recurse -Force -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Path $toolRoot -Force | Out-Null
@@ -197,6 +166,7 @@ $nugetConfigText = @"
   <packageSources>
     <clear />
     <add key="LocalReleasePackages" value="$escapedPackages" />
+    <add key="NuGetOrg" value="https://api.nuget.org/v3/index.json" protocolVersion="3" />
   </packageSources>
 </configuration>
 "@

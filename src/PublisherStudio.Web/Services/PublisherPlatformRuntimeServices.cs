@@ -564,9 +564,23 @@ public sealed class UnixPublisherPlatformRuntimeService(
     {
         try
         {
-            var locations = runtimePolicy.GetCollection(PublisherRuntimeCollection.FfmpegUnixInstallPaths);
-            logger.LogTrace("Resolved {CandidateCount} Unix FFmpeg installation candidate(s).", locations.Count);
-            return locations;
+            var locations = new List<string>(runtimePolicy.GetCollection(PublisherRuntimeCollection.FfmpegUnixInstallPaths));
+            var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            if (!string.IsNullOrWhiteSpace(home))
+            {
+                locations.Add(Path.Combine(home, ".local", "bin", "ffmpeg"));
+                locations.Add(Path.Combine(home, "bin", "ffmpeg"));
+                locations.Add(Path.Combine(home, ".nix-profile", "bin", "ffmpeg"));
+            }
+            if (isLinux)
+                locations.Add("/home/linuxbrew/.linuxbrew/bin/ffmpeg");
+
+            var distinct = locations
+                .Where(path => !string.IsNullOrWhiteSpace(path))
+                .Distinct(PathComparer)
+                .ToArray();
+            logger.LogTrace("Resolved {CandidateCount} Unix FFmpeg installation candidate(s), including user-scoped and system-scoped locations.", distinct.Length);
+            return distinct;
         }
         catch (Exception exception)
         {
@@ -711,3 +725,5 @@ public sealed class UnixPublisherPlatformRuntimeService(
         }
     }
 }
+
+

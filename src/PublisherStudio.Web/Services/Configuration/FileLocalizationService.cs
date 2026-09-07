@@ -31,7 +31,7 @@ public sealed class FileLocalizationService(IWebHostEnvironment environment, ILo
     /// Gets the override path used by this file localization instance to locate the associated file-system resource.
     /// </summary>
     /// <value>The override path value exposed by <see cref="FileLocalizationService"/>.</value>
-    private string OverridePath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "PublisherStudio", "LocalizationOverrides");
+    private string OverridePath => PublisherApplicationDataPaths.ResolveUserPath("LocalizationOverrides");
 
     /// <summary>
     /// Retrieves available cultures as part of the file localization service workflow, applying the service's runtime policy, state management, and diagnostics as required.

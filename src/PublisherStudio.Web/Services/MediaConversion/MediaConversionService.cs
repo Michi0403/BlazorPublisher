@@ -185,7 +185,7 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         _runtimePatterns = runtimePatterns;
         _publisherConfiguration = publisherConfiguration;
         _taskRunner = taskRunner;
-        var publisherRoot = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "PublisherStudio");
+        var publisherRoot = PublisherApplicationDataPaths.ResolveUserRoot();
         _root = Path.Combine(publisherRoot, "MediaConversions");
         _profilesPath = Path.Combine(publisherRoot, "MediaConversionProfiles.json");
         Directory.CreateDirectory(_root);
@@ -220,7 +220,7 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
                                 [],
                                 _runtimePolicy.MediaConversionPresets.Select(preset => preset with { Available = false, UnavailableReason = "FFmpeg was not found." }).ToArray(),
                                 "PublisherStudio does not bundle FFmpeg. The executable you install remains a separate program under its own LGPL/GPL build terms.",
-                                "Install FFmpeg and place it on PATH, in PublisherStudio/tools/ffmpeg, or configure PublisherStudio:FFmpegPath / PUBLISHERSTUDIO_FFMPEG.");
+                                "Install FFmpeg with your operating-system package manager or vendor package, then refresh. PublisherStudio checks an explicit PublisherStudio:FFmpegPath / PUBLISHERSTUDIO_FFMPEG override first, bundled portable tools/ffmpeg paths next, platform-owned user/system locations (including ~/.local/bin and Homebrew/Linuxbrew/Nix locations on Unix), and finally PATH.");
                             return _capabilities;
                         }
 

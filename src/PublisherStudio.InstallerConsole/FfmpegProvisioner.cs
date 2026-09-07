@@ -64,11 +64,20 @@ internal static class FfmpegProvisioner
             yield break;
         }
 
+        var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        if (!string.IsNullOrWhiteSpace(home))
+        {
+            yield return Path.Combine(home, ".local", "bin", "ffmpeg");
+            yield return Path.Combine(home, "bin", "ffmpeg");
+            yield return Path.Combine(home, ".nix-profile", "bin", "ffmpeg");
+        }
         yield return "/usr/local/bin/ffmpeg";
         yield return "/usr/bin/ffmpeg";
         yield return "/opt/homebrew/bin/ffmpeg";
         yield return "/opt/local/bin/ffmpeg";
         yield return "/snap/bin/ffmpeg";
+        if (OperatingSystem.IsLinux())
+            yield return "/home/linuxbrew/.linuxbrew/bin/ffmpeg";
     }
 
     /// <summary>

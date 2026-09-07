@@ -51,10 +51,7 @@ public sealed class PublicationRecoveryService
     /// </summary>
     public PublicationRecoveryService()
     {
-        _root = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "PublisherStudio",
-            "recovery");
+        _root = PublisherApplicationDataPaths.ResolveUserPath("recovery");
         _manifestPath = Path.Combine(_root, "latest.json");
     }
 

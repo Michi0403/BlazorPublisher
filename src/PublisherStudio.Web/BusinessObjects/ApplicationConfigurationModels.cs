@@ -115,3 +115,47 @@ public sealed class RenderExportCapability
     /// <value>The note value exposed by <see cref="RenderExportCapability"/>.</value>
     public string Note { get; set; } = string.Empty;
 }
+
+/// <summary>Describes the effective PublisherStudio folder contract detected for the current host and user.</summary>
+public sealed class PublisherStudioApplicationPathLayout
+{
+    /// <summary>Gets the detected host platform associated with the effective path-layout snapshot used by support and first-boot guidance.</summary>
+    /// <value>The detected platform name.</value>
+    public string Platform { get; init; } = string.Empty;
+    /// <summary>Gets the canonical per-user writable PublisherStudio data root used by mutable application state.</summary>
+    /// <value>The absolute per-user application-data root.</value>
+    public string UserDataRoot { get; init; } = string.Empty;
+    /// <summary>Gets the per-user configuration overlay file used by PublisherStudio startup configuration.</summary>
+    /// <value>The absolute path to appsettings.user.json.</value>
+    public string UserConfigurationFile { get; init; } = string.Empty;
+    /// <summary>Gets the persisted per-user system-variable file used by PublisherStudio configuration services.</summary>
+    /// <value>The absolute path to the system-variable store.</value>
+    public string SystemVariablesFile { get; init; } = string.Empty;
+    /// <summary>Gets the per-user runtime directory used by endpoint and transient runtime state.</summary>
+    /// <value>The absolute runtime directory path.</value>
+    public string RuntimeDirectory { get; init; } = string.Empty;
+    /// <summary>Gets the per-user data-protection directory used by ASP.NET cryptographic key persistence.</summary>
+    /// <value>The absolute data-protection directory path.</value>
+    public string DataProtectionDirectory { get; init; } = string.Empty;
+    /// <summary>Gets the per-user spreadsheet hibernation directory used by recoverable spreadsheet state.</summary>
+    /// <value>The absolute spreadsheet hibernation directory path.</value>
+    public string SpreadsheetHibernationDirectory { get; init; } = string.Empty;
+    /// <summary>Gets the resolved default content-path collection used by PublisherStudio when no project override is supplied.</summary>
+    /// <value>The default content path options for the current user.</value>
+    public PublisherStudioPathOptions DefaultContentPaths { get; init; } = new();
+    /// <summary>Gets the application base directory used by explicit portable content and tool discovery.</summary>
+    /// <value>The absolute application base directory.</value>
+    public string PortableApplicationRoot { get; init; } = string.Empty;
+    /// <summary>Gets the system-wide discovery-root collection used to locate shared installations without making them writable defaults.</summary>
+    /// <value>The ordered system-wide discovery roots for the current host.</value>
+    public IReadOnlyList<string> SystemWideDiscoveryRoots { get; init; } = Array.Empty<string>();
+    /// <summary>Gets the persisted path-layout report file used by first-boot and support diagnostics.</summary>
+    /// <value>The absolute path to path-layout.json.</value>
+    public string LayoutReportFile { get; init; } = string.Empty;
+    /// <summary>Gets a value indicating whether this layout snapshot was produced before an existing path-layout report was found.</summary>
+    /// <value><see langword="true"/> when first boot was detected for the report; otherwise <see langword="false"/>.</value>
+    public bool FirstBootDetected { get; init; }
+    /// <summary>Gets the UTC timestamp associated with creation of the current path-layout snapshot.</summary>
+    /// <value>The layout generation timestamp in UTC.</value>
+    public DateTime GeneratedAtUtc { get; init; }
+}

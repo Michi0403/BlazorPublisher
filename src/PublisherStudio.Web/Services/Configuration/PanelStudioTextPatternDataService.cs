@@ -40,9 +40,7 @@ public sealed class PanelStudioTextPatternDataService : IPanelStudioTextPatternD
             var seedPath = Path.GetFullPath(Path.Combine(environment.ContentRootPath, settings.SeedPath));
             var definitions = ReadStore(seedPath);
 
-            var overridePath = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "PublisherStudio",
+            var overridePath = PublisherApplicationDataPaths.ResolveUserPath(
                 settings.OverrideDirectoryName,
                 settings.OverrideFileName);
             if (File.Exists(overridePath))

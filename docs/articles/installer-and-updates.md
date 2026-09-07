@@ -59,3 +59,11 @@ The Install, Update, and Start entries call the checked-in command files from th
 ## Compatibility
 
 Former `--*-blazorpublisher` command-line names remain accepted so an older launcher can invoke the repaired setup. New launchers use the PublisherStudio names.
+
+## Per-user storage and detected path layout
+
+PublisherStudio keeps writable application state in the current user's application-data directory by default. The Windows compatibility root remains `%LOCALAPPDATA%\PublisherStudio`; installer and application state use the same product root. macOS uses the current user's Application Support location, and Linux uses the host user data location (`XDG_DATA_HOME` when configured, otherwise the normal `~/.local/share` fallback).
+
+On first boot and subsequent starts PublisherStudio creates the required user-owned directories and writes `Configuration/path-layout.json`. The Help page exposes the detected user root, user configuration file, and path report so support flows can work from the actual machine layout.
+
+Portable application directories and common system-wide roots remain valid discovery/install locations but are not silently selected for mutable user configuration. FFmpeg and other tool discovery remains independent: explicit paths, portable tool folders, per-user package locations, Homebrew/Linuxbrew, normal Unix system paths, and Windows package-manager/system locations can all be discovered without moving PublisherStudio's own state out of the user's application-data root.

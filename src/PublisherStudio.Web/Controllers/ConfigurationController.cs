@@ -25,6 +25,11 @@ public sealed class ConfigurationController(
     [HttpGet("paths")]
     public ActionResult<PublisherStudioPathOptions> Paths() => Ok(paths.GetDefaults());
 
+    /// <summary>Returns the detected per-user, portable, and system-wide path layout used for support and first-boot guidance.</summary>
+    /// <returns>The detected path-layout snapshot for the current host and user.</returns>
+    [HttpGet("path-layout")]
+    public ActionResult<PublisherStudioApplicationPathLayout> PathLayout() => Ok(paths.GetLayout());
+
     /// <summary>
     /// Resolves paths for the configuration API operation, delegating application logic to the controller's services and returning the resulting HTTP-facing value.
     /// </summary>

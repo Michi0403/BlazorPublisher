@@ -59,17 +59,11 @@ public sealed class PublisherTemplateLibraryService(
 
     /// <summary>Gets the LocalApplicationData PublisherTemplates folder used for editable complete-publication templates.</summary>
     /// <value>The canonical per-user publication-template directory.</value>
-    public string PublisherTemplateDirectory => Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "PublisherStudio",
-        PublisherDirectoryName);
+    public string PublisherTemplateDirectory => PublisherApplicationDataPaths.ResolveUserPath(PublisherDirectoryName);
 
     /// <summary>Gets the LocalApplicationData DivTemplates folder used for editable reusable Panel/Div templates.</summary>
     /// <value>The canonical per-user Div-template directory.</value>
-    public string DivTemplateDirectory => Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "PublisherStudio",
-        DivDirectoryName);
+    public string DivTemplateDirectory => PublisherApplicationDataPaths.ResolveUserPath(DivDirectoryName);
 
     /// <summary>Creates both per-user template folders and copies only starter seed files that do not already exist.</summary>
     public void EnsureTemplateDirectories()

@@ -47,9 +47,7 @@ public sealed class PublicationStreamingSettingsStore
     public PublicationStreamingSettingsStore(IDataProtectionProvider protectionProvider)
     {
         _protector = protectionProvider.CreateProtector("PublisherStudio.PublicationStreamingSettings.v1");
-        var directory = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "PublisherStudio");
+        var directory = PublisherApplicationDataPaths.ResolveUserRoot();
         Directory.CreateDirectory(directory);
         _filePath = Path.Combine(directory, "publication-streaming-settings.dat");
     }

@@ -315,9 +315,7 @@ public sealed class OrganicPermissionStore : IOrganicPermissionStore
     {
         this.logger = logger;
         this.codec = codec;
-        filePath = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "PublisherStudio", "OrganicPlugins", "permissions.json");
+        filePath = PublisherApplicationDataPaths.ResolveUserPath("OrganicPlugins", "permissions.json");
     }
 
     /// <summary>

@@ -223,10 +223,7 @@ public sealed class RuntimeEndpointWriter : IRuntimeEndpointWriter
     {
         this.logger = logger;
         _runtimeEndpointState = runtimeEndpointState;
-        _runtimeDirectory = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            systemVariables.DataProtectionApplicationName,
-            systemVariables.RuntimeDirectoryName);
+        _runtimeDirectory = PublisherApplicationDataPaths.ResolveUserPath(systemVariables.RuntimeDirectoryName);
         _runtimeFilePath = Path.Combine(_runtimeDirectory, systemVariables.RuntimeEndpointFileName);
     }
 

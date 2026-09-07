@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Net;
+using System.Runtime.InteropServices;
 using DevExpress.AspNetCore;
 using DevExpress.Blazor;
 using DevExpress.Blazor.RichEdit;
@@ -82,6 +83,12 @@ public static class Program
         });
         StaticWebAssetsLoader.UseStaticWebAssets(builder.Environment, builder.Configuration);
 
+        var userSettingsFile = PublisherApplicationDataPaths.ResolveUserPath("Configuration", "appsettings.user.json");
+        Directory.CreateDirectory(Path.GetDirectoryName(userSettingsFile)!);
+        builder.Configuration
+            .AddJsonFile(userSettingsFile, optional: true, reloadOnChange: true)
+            .AddEnvironmentVariables();
+
         var systemVariables = new SystemVariableStoreService(builder.Configuration);
         builder.Services.AddSingleton<ISystemVariableStoreService>(systemVariables);
         builder.Services.AddSingleton(systemVariables);
@@ -113,9 +120,7 @@ public static class Program
         builder.Services.AddHttpClient();
         builder.Services.AddHttpClient(nameof(TwitchOAuthService), client => client.Timeout = systemVariables.TwitchHttpTimeout);
 
-        var dataProtectionPath = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "PublisherStudio", systemVariables.DataProtectionDirectoryName);
+        var dataProtectionPath = PublisherApplicationDataPaths.ResolveUserPath(systemVariables.DataProtectionDirectoryName);
         Directory.CreateDirectory(dataProtectionPath);
         var dataProtection = builder.Services.AddDataProtection()
             .PersistKeysToFileSystem(new DirectoryInfo(dataProtectionPath))
@@ -126,9 +131,7 @@ public static class Program
             policy.AllowAnyOrigin().WithMethods("GET").AllowAnyHeader()));
         builder.Services.AddDevExpressBlazor(options => options.SizeMode = SizeMode.Small).AddSpellCheck();
 
-        var spreadsheetHibernationPath = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "PublisherStudio", systemVariables.SpreadsheetHibernationDirectoryName);
+        var spreadsheetHibernationPath = PublisherApplicationDataPaths.ResolveUserPath(systemVariables.SpreadsheetHibernationDirectoryName);
         Directory.CreateDirectory(spreadsheetHibernationPath);
         builder.Services.AddDevExpressControls(options =>
         {
@@ -180,7 +183,7 @@ public static class Program
                 new CookieRequestCultureProvider()
             ]
         });
-        app.Services.GetRequiredService<IApplicationPathService>().EnsureDirectories();
+        app.Services.GetRequiredService<IApplicationPathService>().EnsureAndDocumentLayout();
         app.Services.GetRequiredService<IPublisherTemplateLibraryService>().EnsureTemplateDirectories();
 
         app.UseDevExpressControls();
@@ -193,5 +196,138 @@ public static class Program
         app.MapHealthChecks("/health");
         app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
         return app;
+    }
+}
+
+/// <summary>
+/// Resolves PublisherStudio application-data roots while keeping writable state per-user by default.
+/// Portable and system-wide roots are discovery/install candidates only unless the user explicitly configures them.
+/// </summary>
+internal static class PublisherApplicationDataPaths
+{
+    /// <summary>Defines the stable product directory name used beneath per-user and system discovery roots.</summary>
+    public const string ProductName = "PublisherStudio";
+
+    /// <summary>Resolves the platform-native per-user application-data base without selecting a system-wide writable location.</summary>
+    /// <returns>The absolute per-user application-data base for the current host.</returns>
+    public static string ResolveUserDataBase()
+    {
+        var userProfile = Environment.GetFolderPath(
+            Environment.SpecialFolder.UserProfile,
+            Environment.SpecialFolderOption.DoNotVerify);
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            var localAppData = Environment.GetEnvironmentVariable("LOCALAPPDATA");
+            if (!string.IsNullOrWhiteSpace(localAppData))
+                return Path.GetFullPath(localAppData);
+
+            var windowsLocal = Environment.GetFolderPath(
+                Environment.SpecialFolder.LocalApplicationData,
+                Environment.SpecialFolderOption.DoNotVerify);
+            if (!string.IsNullOrWhiteSpace(windowsLocal))
+                return Path.GetFullPath(windowsLocal);
+            if (!string.IsNullOrWhiteSpace(userProfile))
+                return Path.GetFullPath(Path.Combine(userProfile, "AppData", "Local"));
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            var macLocal = Environment.GetFolderPath(
+                Environment.SpecialFolder.LocalApplicationData,
+                Environment.SpecialFolderOption.DoNotVerify);
+            if (!string.IsNullOrWhiteSpace(macLocal))
+                return Path.GetFullPath(macLocal);
+            if (!string.IsNullOrWhiteSpace(userProfile))
+                return Path.GetFullPath(Path.Combine(userProfile, "Library", "Application Support"));
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            var xdgDataHome = Environment.GetEnvironmentVariable("XDG_DATA_HOME");
+            if (!string.IsNullOrWhiteSpace(xdgDataHome))
+                return Path.GetFullPath(xdgDataHome);
+
+            var linuxLocal = Environment.GetFolderPath(
+                Environment.SpecialFolder.LocalApplicationData,
+                Environment.SpecialFolderOption.DoNotVerify);
+            if (!string.IsNullOrWhiteSpace(linuxLocal))
+                return Path.GetFullPath(linuxLocal);
+            if (!string.IsNullOrWhiteSpace(userProfile))
+                return Path.GetFullPath(Path.Combine(userProfile, ".local", "share"));
+        }
+
+        var configured = Environment.GetFolderPath(
+            Environment.SpecialFolder.LocalApplicationData,
+            Environment.SpecialFolderOption.DoNotVerify);
+        if (!string.IsNullOrWhiteSpace(configured))
+            return Path.GetFullPath(configured);
+
+        var applicationData = Environment.GetFolderPath(
+            Environment.SpecialFolder.ApplicationData,
+            Environment.SpecialFolderOption.DoNotVerify);
+        if (!string.IsNullOrWhiteSpace(applicationData))
+            return Path.GetFullPath(applicationData);
+        if (!string.IsNullOrWhiteSpace(userProfile))
+            return Path.GetFullPath(Path.Combine(userProfile, ".local", "share"));
+
+        throw new InvalidOperationException("PublisherStudio could not resolve a durable per-user application-data directory.");
+    }
+
+    /// <summary>Resolves the canonical per-user PublisherStudio writable root used by all application-owned mutable state.</summary>
+    /// <returns>The absolute per-user PublisherStudio data root.</returns>
+    public static string ResolveUserRoot() => Path.Combine(ResolveUserDataBase(), ProductName);
+
+    /// <summary>Combines path segments beneath the canonical per-user PublisherStudio writable root.</summary>
+    /// <param name="segments">Relative path segments to append beneath the per-user root.</param>
+    /// <returns>The absolute per-user path containing the requested segments.</returns>
+    public static string ResolveUserPath(params string[] segments)
+    {
+        var parts = new string[segments.Length + 1];
+        parts[0] = ResolveUserRoot();
+        Array.Copy(segments, 0, parts, 1, segments.Length);
+        return Path.Combine(parts);
+    }
+
+    /// <summary>Resolves the application base directory used for explicit portable tool/content discovery.</summary>
+    /// <returns>The absolute portable application root.</returns>
+    public static string ResolvePortableRoot() => Path.GetFullPath(AppContext.BaseDirectory);
+
+    /// <summary>Enumerates platform-appropriate system-wide PublisherStudio discovery roots without making them writable defaults.</summary>
+    /// <returns>The ordered, de-duplicated system-wide discovery roots for the current host.</returns>
+    public static IReadOnlyList<string> EnumerateSystemWideRoots()
+    {
+        var candidates = new List<string>();
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            AddFolderCandidate(candidates, Environment.SpecialFolder.CommonApplicationData);
+            AddFolderCandidate(candidates, Environment.SpecialFolder.ProgramFiles);
+            AddFolderCandidate(candidates, Environment.SpecialFolder.ProgramFilesX86);
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            candidates.Add("/Library/Application Support/PublisherStudio");
+            candidates.Add("/Applications/PublisherStudio.app/Contents/Resources");
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            candidates.Add("/var/lib/PublisherStudio");
+            candidates.Add("/usr/local/share/PublisherStudio");
+            candidates.Add("/usr/share/PublisherStudio");
+            candidates.Add("/opt/PublisherStudio");
+        }
+
+        return candidates
+            .Select(Path.GetFullPath)
+            .Distinct(RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal)
+            .ToArray();
+    }
+
+    /// <summary>Adds a platform special-folder PublisherStudio candidate when the folder resolves to a usable path.</summary>
+    /// <param name="candidates">Collection receiving the resolved PublisherStudio discovery path.</param>
+    /// <param name="folder">Platform special folder to resolve without verifying its existence.</param>
+    private static void AddFolderCandidate(ICollection<string> candidates, Environment.SpecialFolder folder)
+    {
+        var value = Environment.GetFolderPath(folder, Environment.SpecialFolderOption.DoNotVerify);
+        if (!string.IsNullOrWhiteSpace(value))
+            candidates.Add(Path.Combine(value, ProductName));
     }
 }

@@ -105,10 +105,7 @@ public sealed class SystemVariableStoreService : ISystemVariableStoreService
     /// <param name="configuration">Configuration containing the caller-supplied values that control this operation.</param>
     public SystemVariableStoreService(IConfiguration configuration)
     {
-        var root = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "PublisherStudio",
-            "Configuration");
+        var root = PublisherApplicationDataPaths.ResolveUserPath("Configuration");
         _storagePath = Path.Combine(root, "system-variables.json");
 
         _values[_defaultPortName] = "58071";

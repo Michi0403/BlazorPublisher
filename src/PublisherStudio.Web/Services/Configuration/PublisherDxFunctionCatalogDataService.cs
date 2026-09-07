@@ -399,9 +399,7 @@ public sealed class PublisherDxFunctionCatalogDataService(
     {
         try
         {
-            var path = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "PublisherStudio",
+            var path = PublisherApplicationDataPaths.ResolveUserPath(
                 "Configuration",
                 "publisher-dx-functions.json");
             logger.LogTrace($"Resolved the user-local PublisherStudio DX function catalog path; path content omitted from logs.");

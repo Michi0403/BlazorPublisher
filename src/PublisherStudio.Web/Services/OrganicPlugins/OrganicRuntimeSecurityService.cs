@@ -528,9 +528,7 @@ public sealed class OrganicRuntimeSecurityService(
                 return resolvedPath = portable;
             }
 
-            var preferred = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "PublisherStudio",
+            var preferred = PublisherApplicationDataPaths.ResolveUserPath(
                 "OrganicPlugins",
                 "Security",
                 "onewire-secret.json");

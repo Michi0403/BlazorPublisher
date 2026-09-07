@@ -34,9 +34,7 @@ public sealed class StreamingProfileStore
     {
         // Keep the original purpose string so existing v1 streaming secrets remain readable.
         _protector = protectionProvider.CreateProtector("PublisherStudio.StreamingProfiles.v1");
-        var directory = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "PublisherStudio", "Streaming");
+        var directory = PublisherApplicationDataPaths.ResolveUserPath("Streaming");
         Directory.CreateDirectory(directory);
         _filePath = Path.Combine(directory, "profiles.json");
     }

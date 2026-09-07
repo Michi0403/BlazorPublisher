@@ -30,6 +30,12 @@ public interface IApplicationPathService
     /// </summary>
     /// <param name="projectOverrides">Project overrides value supplied to the application path operation and used when producing its result.</param>
     void EnsureDirectories(PublisherStudioPathOptions? projectOverrides = null);
+    /// <summary>Gets the detected per-user/system/portable path contract for this host.</summary>
+    /// <returns>The detected path-layout snapshot for the current host and user.</returns>
+    PublisherStudioApplicationPathLayout GetLayout();
+    /// <summary>Creates the per-user structure and persists a first-boot/current path report.</summary>
+    /// <returns>The path-layout snapshot that was persisted.</returns>
+    PublisherStudioApplicationPathLayout EnsureAndDocumentLayout();
 }
 
 /// <summary>

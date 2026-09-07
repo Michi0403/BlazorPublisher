@@ -492,9 +492,7 @@ public sealed class EncoderSessionService : IDisposable
         {
             logger.LogTrace($"Entering EncoderSessionService.StartLanHls.");
                     if (!_session.HasIngest(null)) return;
-                    var directory = Path.Combine(
-                        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                        "PublisherStudio", "Streaming", "Hls", _session.Id.ToString("N"));
+                    var directory = PublisherApplicationDataPaths.ResolveUserPath("Streaming", "Hls", _session.Id.ToString("N"));
                     Directory.CreateDirectory(directory);
                     _session.HlsDirectory = directory;
                     var playlist = Path.Combine(directory, "index.m3u8");

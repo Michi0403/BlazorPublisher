@@ -5,6 +5,7 @@
 @inject ILogger<Help> Logger
 @inject NavigationManager Navigation
 @inject IPublisherDocumentationViewerService Viewer
+@inject PublisherStudio.Services.Configuration.IApplicationPathService ApplicationPaths
 
 <PageTitle>PublisherStudio Documentation</PageTitle>
 <UserNotificationHost />
@@ -60,6 +61,21 @@
         </button>
     </section>
 
+    @if (PathLayout is not null)
+    {
+        <section class="publisher-help-grid" aria-label="Runtime storage paths">
+            <article class="publisher-help-card">
+                <span aria-hidden="true">📁</span><strong>Per-user application data</strong><small>@PathLayout.UserDataRoot</small>
+            </article>
+            <article class="publisher-help-card">
+                <span aria-hidden="true">⚙️</span><strong>User configuration</strong><small>@PathLayout.UserConfigurationFile</small>
+            </article>
+            <article class="publisher-help-card">
+                <span aria-hidden="true">🧭</span><strong>Detected path report</strong><small>@PathLayout.LayoutReportFile</small>
+            </article>
+        </section>
+    }
+
     <footer class="publisher-help-footer">
         <button type="button" @onclick="BackToStudio">Back to PublisherStudio</button>
         <p>The documentation opens in an in-app viewer, so closing it returns to the unchanged studio state.</p>
@@ -75,6 +91,9 @@
     /// </summary>
     /// <value>The status value exposed by <see cref="Help"/>.</value>
     private PublisherDocumentationStatus Status { get; set; } = new();
+    /// <summary>Gets the detected current-user/system/portable path layout for support and troubleshooting.</summary>
+    /// <value>The current host/user path-layout snapshot shown by the Help page.</value>
+    private PublisherStudio.BusinessObjects.PublisherStudioApplicationPathLayout? PathLayout { get; set; }
 
     /// <summary>
     /// Handles the initialized lifecycle or event notification for <see cref="Help"/>, updating the state required by the surrounding workflow.
@@ -85,6 +104,7 @@
         {
             try
             {
+                PathLayout = ApplicationPaths.GetLayout();
                 Status = Documentation.GetStatus();
                 Logger.LogInformation("Loaded PublisherStudio documentation status for version {Version}.", Status.Version);
             }

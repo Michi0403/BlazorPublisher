@@ -1,7 +1,9 @@
-# PublisherStudio 3.4.8
+# PublisherStudio 3.5.0
 
-PublisherStudio 3.4.8 keeps the 3.4.6 FFmpeg/path-discovery repair and adds one application-owned storage contract. Mutable configuration, runtime state and default Publisher content remain per-user by default; portable and system-wide locations remain discovery/install or explicit-override candidates.
+PublisherStudio 3.5.0 repairs the Windows PowerShell 5.1 documentation-cache failure reproduced after a successful DocFX HTML build and accessibility/local-link preflight. It ports the already proven LocalGPT nested `Join-Path` cache fix and adds an early compatibility guard so the same regression is rejected before the long documentation pipeline.
 
-Windows keeps the established `%LOCALAPPDATA%\PublisherStudio` default. macOS and Linux use their normal per-user application-data roots, with Linux honoring `XDG_DATA_HOME`. First boot records the effective layout for in-app troubleshooting.
+Because this was the same failure sequence previously seen in LocalGPT, 3.5.0 also ports the proven follow-up Debug documentation contract repair: Debug remains HTML/API/XML-only unless a complete PDF was actually generated, while Release continues to require and validate the versioned PDF.
 
-See `CHANGELOG-v3.4.8-PATH-LAYOUT-XML-DOCUMENTATION-REPAIR.md` and `VALIDATION-v3.4.8-source.md`.
+Runtime application behavior, Panel Studio, FFmpeg/media behavior, organic/1-Wire protocols, persistence, deployment layout, and existing InteractiveServer ownership remain unchanged.
+
+See `CHANGELOG-v3.5.0-POWERSHELL51-DOCUMENTATION-CACHE-REPAIR.md` and `VALIDATION-v3.5.0-source.md`.

@@ -3377,5 +3377,6 @@
   "Text.Exported␠selected␠ranges␠separately": "Вибрані діапазони експортовано окремо",
   "Text.Selected␠range␠export␠failed": "Не вдалося експортувати вибрані діапазони",
   "Text.files": "файлів",
-  "Text.Selected␠range␠export␠cancelled.": "Експорт вибраних діапазонів скасовано."
+  "Text.Selected␠range␠export␠cancelled.": "Експорт вибраних діапазонів скасовано.",
+  "Text.PublisherStudio␠organic␠capabilities": "Органічні можливості PublisherStudio"
 }

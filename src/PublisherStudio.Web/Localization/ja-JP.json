@@ -3377,5 +3377,6 @@
   "Text.Exported␠selected␠ranges␠separately": "選択範囲を個別にエクスポートしました",
   "Text.Selected␠range␠export␠failed": "選択範囲のエクスポートに失敗しました",
   "Text.files": "ファイル",
-  "Text.Selected␠range␠export␠cancelled.": "選択範囲のエクスポートをキャンセルしました。"
+  "Text.Selected␠range␠export␠cancelled.": "選択範囲のエクスポートをキャンセルしました。",
+  "Text.PublisherStudio␠organic␠capabilities": "PublisherStudio のオーガニック機能"
 }

@@ -3377,5 +3377,6 @@
   "Text.Exported␠selected␠ranges␠separately": "Plages sélectionnées exportées séparément",
   "Text.Selected␠range␠export␠failed": "Échec de l’export des plages sélectionnées",
   "Text.files": "fichiers",
-  "Text.Selected␠range␠export␠cancelled.": "Export des plages sélectionnées annulé."
+  "Text.Selected␠range␠export␠cancelled.": "Export des plages sélectionnées annulé.",
+  "Text.PublisherStudio␠organic␠capabilities": "Capacités organiques de PublisherStudio"
 }

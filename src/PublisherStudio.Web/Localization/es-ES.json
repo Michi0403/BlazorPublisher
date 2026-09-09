@@ -3377,5 +3377,6 @@
   "Text.Exported␠selected␠ranges␠separately": "Intervalos seleccionados exportados por separado",
   "Text.Selected␠range␠export␠failed": "Error al exportar los intervalos seleccionados",
   "Text.files": "archivos",
-  "Text.Selected␠range␠export␠cancelled.": "Exportación de los intervalos seleccionados cancelada."
+  "Text.Selected␠range␠export␠cancelled.": "Exportación de los intervalos seleccionados cancelada.",
+  "Text.PublisherStudio␠organic␠capabilities": "Capacidades orgánicas de PublisherStudio"
 }

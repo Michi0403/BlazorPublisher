@@ -3377,5 +3377,6 @@
   "Text.Exported␠selected␠ranges␠separately": "Ausgewählte Bereiche einzeln exportiert",
   "Text.Selected␠range␠export␠failed": "Export der ausgewählten Bereiche fehlgeschlagen",
   "Text.files": "Dateien",
-  "Text.Selected␠range␠export␠cancelled.": "Export der ausgewählten Bereiche abgebrochen."
+  "Text.Selected␠range␠export␠cancelled.": "Export der ausgewählten Bereiche abgebrochen.",
+  "Text.PublisherStudio␠organic␠capabilities": "Organische PublisherStudio-Fähigkeiten"
 }

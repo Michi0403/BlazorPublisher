@@ -3377,5 +3377,6 @@
   "Text.Exported␠selected␠ranges␠separately": "Exported selected ranges separately",
   "Text.Selected␠range␠export␠failed": "Selected range export failed",
   "Text.files": "files",
-  "Text.Selected␠range␠export␠cancelled.": "Selected range export cancelled."
+  "Text.Selected␠range␠export␠cancelled.": "Selected range export cancelled.",
+  "Text.PublisherStudio␠organic␠capabilities": "PublisherStudio organic capabilities"
 }

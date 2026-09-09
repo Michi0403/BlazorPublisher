@@ -53,8 +53,9 @@ function Read-RepositoryScriptText {
 # Parse every maintained repository PowerShell script before release preparation gets expensive.
 # PublisherStudio still contains reviewed legacy Join-Path calls with backslash child paths that
 # are known to run under pwsh on its supported hosts, so this validator intentionally does not
-# impose LocalGPT's stricter style-only Join-Path rule. It does enforce parser correctness and
-# compatibility hazards that can otherwise fail late in a release.
+# impose LocalGPT's stricter style-only separator rule. It does enforce runtime compatibility
+# hazards, including the PowerShell 6+ AdditionalChildPath overload that Windows PowerShell 5.1
+# does not expose.
 $scriptFiles = Get-ChildItem -LiteralPath $root -Recurse -File | Where-Object {
     $isPowerShellScript =
         [string]::Equals($_.Extension, '.ps1', [System.StringComparison]::OrdinalIgnoreCase) -or
@@ -74,7 +75,7 @@ foreach ($file in $scriptFiles) {
 
     $tokens = $null
     $parseErrors = $null
-    [void][System.Management.Automation.Language.Parser]::ParseInput(
+    $scriptAst = [System.Management.Automation.Language.Parser]::ParseInput(
         $content,
         [ref]$tokens,
         [ref]$parseErrors)
@@ -83,6 +84,27 @@ foreach ($file in $scriptFiles) {
         $line = $parseError.Extent.StartLineNumber
         $message = $parseError.Message
         $failures.Add("${relative}:$line has a PowerShell parser error: $message")
+    }
+
+    # Windows PowerShell 5.1 exposes Join-Path with only Path + ChildPath positional
+    # arguments. PowerShell 6+ added AdditionalChildPath, so a bare three-argument
+    # Join-Path expression can pass modern pwsh validation yet fail late in the long
+    # DocFX/PDF pipeline. Reject that command shape during the early compatibility guard.
+    $joinPathCommands = @($scriptAst.FindAll({
+        param($node)
+        if (-not ($node -is [System.Management.Automation.Language.CommandAst])) { return $false }
+        $commandName = $node.GetCommandName()
+        return -not [string]::IsNullOrWhiteSpace($commandName) -and
+            [string]::Equals($commandName, 'Join-Path', [System.StringComparison]::OrdinalIgnoreCase)
+    }, $true))
+    foreach ($commandAst in $joinPathCommands) {
+        $arguments = @($commandAst.CommandElements | Select-Object -Skip 1)
+        $namedParameterCount = @($arguments | Where-Object { $_ -is [System.Management.Automation.Language.CommandParameterAst] }).Count
+        if ($namedParameterCount -eq 0 -and $arguments.Count -gt 2) {
+            $relative = Get-RepositoryRelativePath -Path $file.FullName
+            $line = $commandAst.Extent.StartLineNumber
+            $failures.Add("${relative}:$line passes more than Path + ChildPath positionally to Join-Path. Windows PowerShell 5.1 has no AdditionalChildPath parameter; nest Join-Path calls instead.")
+        }
     }
 
     foreach ($match in [regex]::Matches($content, $unsupportedContainsPattern)) {

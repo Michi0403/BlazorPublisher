@@ -70,9 +70,18 @@ public static class Program
     /// <returns>The web application produced by the operation.</returns>
     public static WebApplication BuildWebApp(string[]? args = null)
     {
+        var repairedCurrentDirectory = PublisherApplicationDataPaths.RepairInvalidCurrentDirectory();
         var effectiveArgs = args ?? [];
         using var startupLoggerFactory = LoggerFactory.Create(logging => logging.AddConsole());
         var startupLogger = startupLoggerFactory.CreateLogger("PublisherStudio.Startup");
+        if (repairedCurrentDirectory)
+            startupLogger.LogWarning("The inherited process working directory no longer existed; PublisherStudio repaired it to the per-user runtime directory before startup continued.");
+        startupLogger.LogInformation(
+            "PublisherStudio runtime identity: assembly={AssemblyVersion}; executable={ExecutablePath}; base={BaseDirectory}; workingDirectory={WorkingDirectory}.",
+            typeof(Program).Assembly.GetName().Version?.ToString() ?? "unknown",
+            Environment.ProcessPath ?? "unknown",
+            AppContext.BaseDirectory,
+            PublisherApplicationDataPaths.ResolveSafeCurrentDirectory());
 
         var builder = WebApplication.CreateBuilder(new WebApplicationOptions
         {
@@ -285,6 +294,57 @@ internal static class PublisherApplicationDataPaths
         parts[0] = ResolveUserRoot();
         Array.Copy(segments, 0, parts, 1, segments.Length);
         return Path.Combine(parts);
+    }
+
+    /// <summary>Returns an existing durable working directory for child processes and packaged launches.</summary>
+    /// <returns>The canonical per-user PublisherStudio runtime directory, or a per-user temporary fallback when it cannot be created.</returns>
+    public static string ResolveProcessWorkingDirectory()
+    {
+        try
+        {
+            var runtimeDirectory = ResolveUserPath("runtime");
+            Directory.CreateDirectory(runtimeDirectory);
+            return runtimeDirectory;
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            var fallback = Path.Combine(Path.GetTempPath(), ProductName, "runtime");
+            Directory.CreateDirectory(fallback);
+            return fallback;
+        }
+    }
+
+    /// <summary>Returns the current directory when valid, otherwise a durable per-user runtime directory.</summary>
+    /// <returns>A directory that exists and can safely be used by runtime services.</returns>
+    public static string ResolveSafeCurrentDirectory()
+    {
+        try
+        {
+            var current = Directory.GetCurrentDirectory();
+            if (!string.IsNullOrWhiteSpace(current) && Directory.Exists(current))
+                return current;
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            // Fall through to the durable runtime directory.
+        }
+        return ResolveProcessWorkingDirectory();
+    }
+
+    /// <summary>Repairs an invalid inherited current directory without changing normal development launches.</summary>
+    /// <returns><see langword="true"/> when the current directory had to be repaired; otherwise <see langword="false"/>.</returns>
+    public static bool RepairInvalidCurrentDirectory()
+    {
+        try
+        {
+            _ = Directory.GetCurrentDirectory();
+            return false;
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            Directory.SetCurrentDirectory(ResolveProcessWorkingDirectory());
+            return true;
+        }
     }
 
     /// <summary>Resolves the application base directory used for explicit portable tool/content discovery.</summary>

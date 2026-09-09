@@ -507,6 +507,53 @@ $setupVersion = Resolve-ProjectVersion -ProjectPath $setupProject
 if ($appVersion -ne $setupVersion) { throw "PublisherStudio application version $appVersion does not match setup version $setupVersion." }
 
 
+function Get-ReleaseSourceFingerprint {
+    $rootFull = [IO.Path]::GetFullPath($root).TrimEnd([char[]]@('\', '/'))
+    $rootPrefix = $rootFull + [IO.Path]::DirectorySeparatorChar
+    $excludedSegments = @('.git', 'artifacts', 'bin', 'obj', '__pycache__', '.pytest_cache', 'packages')
+    $fingerprintLines = New-Object 'System.Collections.Generic.List[string]'
+    $files = @(Get-ChildItem -LiteralPath $rootFull -File -Recurse -Force -ErrorAction SilentlyContinue | Sort-Object FullName)
+    foreach ($file in $files) {
+        if (-not $file.FullName.StartsWith($rootPrefix, [StringComparison]::OrdinalIgnoreCase)) { continue }
+        $relative = $file.FullName.Substring($rootPrefix.Length).Replace('\', '/')
+        $segments = @($relative -split '/')
+        if (@($segments | Where-Object { $_ -in $excludedSegments }).Count -gt 0) { continue }
+        if ($relative.StartsWith('src/PublisherStudio.Web/wwwroot/help-docs/', [StringComparison]::OrdinalIgnoreCase)) { continue }
+        if ($relative.StartsWith('.github/pages/', [StringComparison]::OrdinalIgnoreCase)) { continue }
+        if ($file.Extension -in @('.pyc', '.pyo')) { continue }
+        $hash = (Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+        [void]$fingerprintLines.Add("$relative`t$hash")
+    }
+    if ($fingerprintLines.Count -eq 0) { throw 'Release source fingerprint cannot be computed from an empty source set.' }
+    $payload = [Text.Encoding]::UTF8.GetBytes(($fingerprintLines -join "`n"))
+    $sha = [Security.Cryptography.SHA256]::Create()
+    try { return ([BitConverter]::ToString($sha.ComputeHash($payload))).Replace('-', '').ToLowerInvariant() }
+    finally { $sha.Dispose() }
+}
+
+function Initialize-ReleaseArtifactSourceIdentity {
+    param([Parameter(Mandatory)][string]$Version)
+    New-Item -ItemType Directory -Path $artifacts -Force | Out-Null
+    $markerPath = Join-Path $artifacts "PublisherStudio-$Version-SOURCE-SHA256.txt"
+    $existingFingerprint = if (Test-Path -LiteralPath $markerPath -PathType Leaf) { ([string](Get-Content -LiteralPath $markerPath -Raw -Encoding UTF8)).Trim().ToLowerInvariant() } else { '' }
+    $sourceChanged = -not [string]::Equals($existingFingerprint, $script:releaseSourceFingerprint, [StringComparison]::Ordinal)
+    if ($ForceRebuildArtifacts -or $sourceChanged) {
+        $reason = if ($ForceRebuildArtifacts) { 'forced rebuild' } elseif ([string]::IsNullOrWhiteSpace($existingFingerprint)) { 'missing source fingerprint' } else { 'source fingerprint changed' }
+        Write-Host "Clearing same-version PublisherStudio release artifacts for $Version because $reason; stale native payloads must not be reused." -ForegroundColor Yellow
+        Remove-Item -LiteralPath (Join-Path $artifacts $Version) -Recurse -Force -ErrorAction SilentlyContinue
+        Get-ChildItem -LiteralPath $artifacts -File -Force -ErrorAction SilentlyContinue |
+            Where-Object { $_.Name -ne [IO.Path]::GetFileName($markerPath) -and ($_.Name -like "*-$Version-*" -or $_.Name -like "*-$Version.*" -or $_.Name -like "PublisherStudio-$Version*") } |
+            Remove-Item -Force -ErrorAction SilentlyContinue
+        Remove-Item -LiteralPath (Join-Path $artifacts 'PublisherStudio.app') -Recurse -Force -ErrorAction SilentlyContinue
+        Remove-Item -LiteralPath (Join-Path $artifacts 'staging') -Recurse -Force -ErrorAction SilentlyContinue
+    }
+    [IO.File]::WriteAllText($markerPath, "$($script:releaseSourceFingerprint)`n", (New-Object Text.UTF8Encoding($false)))
+}
+
+$script:releaseSourceFingerprint = Get-ReleaseSourceFingerprint
+Initialize-ReleaseArtifactSourceIdentity -Version $appVersion
+
+
 function Test-VersionDirectoryName {
     param([Parameter(Mandatory)][string]$Name)
     return $Name -match '^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$'
@@ -807,6 +854,15 @@ function Publish-UnixRuntime {
         ) + $wireProperties) -FailureMessage "PublisherStudio application publish failed for $Rid $mode."
         $appExecutable = 'PublisherStudio.Web'
         if (-not (Test-Path -LiteralPath (Join-Path $publishFolder $appExecutable) -PathType Leaf)) { throw "Published PublisherStudio apphost is missing for $Rid $mode." }
+        $publishedAssemblyPath = Join-Path $publishFolder 'PublisherStudio.Web.dll'
+        if (-not (Test-Path -LiteralPath $publishedAssemblyPath -PathType Leaf)) { throw "Published PublisherStudio managed assembly is missing for $Rid $mode." }
+        $publishedAssemblyVersion = [Reflection.AssemblyName]::GetAssemblyName($publishedAssemblyPath).Version
+        $publishedSemanticVersion = "$($publishedAssemblyVersion.Major).$($publishedAssemblyVersion.Minor).$($publishedAssemblyVersion.Build)"
+        if (-not [string]::Equals($publishedSemanticVersion, $appVersion, [StringComparison]::Ordinal)) { throw "Published PublisherStudio assembly identity mismatch for $Rid ${mode}: expected $appVersion, found $publishedSemanticVersion. Refusing to package a stale runtime." }
+        $utf8NoBom = New-Object Text.UTF8Encoding($false)
+        [IO.File]::WriteAllText((Join-Path $publishFolder 'RELEASE-VERSION.txt'), "$appVersion`n", $utf8NoBom)
+        [IO.File]::WriteAllText((Join-Path $publishFolder 'SOURCE-SHA256.txt'), "$($script:releaseSourceFingerprint)`n", $utf8NoBom)
+        Write-Host "Stamped $Rid PublisherStudio runtime payload with version $appVersion and source fingerprint $($script:releaseSourceFingerprint)." -ForegroundColor DarkCyan
         $publishedDocumentationRoot = Join-Path $publishFolder 'wwwroot/help-docs'
         Copy-PublisherStudioRuntimeDocumentation -SourceRoot $script:documentationCacheRoot -DestinationRoot $publishedDocumentationRoot -Version $appVersion
         Assert-PublishedConfigurationFiles -SourceRoot $webDirectory -PublishRoot $publishFolder

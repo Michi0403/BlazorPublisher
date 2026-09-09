@@ -241,11 +241,17 @@ public sealed class RuntimeEndpointWriter : IRuntimeEndpointWriter
             _runtimeEndpointState.SetBaseUrl(baseUrl);
             var uri = new Uri(baseUrl);
             Directory.CreateDirectory(_runtimeDirectory);
+            var assemblyVersion = typeof(Program).Assembly.GetName().Version;
+            var semanticVersion = assemblyVersion is null
+                ? "unknown"
+                : $"{assemblyVersion.Major}.{assemblyVersion.Minor}.{assemblyVersion.Build}";
             File.WriteAllText(_runtimeFilePath, System.Text.Json.JsonSerializer.Serialize(new
             {
                 ProcessId = Environment.ProcessId,
                 BaseUrl = baseUrl,
                 Port = uri.Port,
+                Version = semanticVersion,
+                ExecutablePath = Environment.ProcessPath ?? string.Empty,
                 StartedAtUtc = DateTimeOffset.UtcNow
             }, _jsonOptions));
             logger.LogInformation("PublisherStudio runtime endpoint {BaseUrl} was written to {RuntimeFilePath}.", baseUrl, _runtimeFilePath);

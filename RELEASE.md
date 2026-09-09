@@ -1,9 +1,9 @@
-# PublisherStudio 3.5.0
+# PublisherStudio 3.5.2
 
-PublisherStudio 3.5.0 repairs the Windows PowerShell 5.1 documentation-cache failure reproduced after a successful DocFX HTML build and accessibility/local-link preflight. It ports the already proven LocalGPT nested `Join-Path` cache fix and adds an early compatibility guard so the same regression is rejected before the long documentation pipeline.
+PublisherStudio 3.5.2 fixes the macOS `Build-Release.ps1` parser error in the 3.5.1 published-assembly identity diagnostic by delimiting the release-mode variable before the literal colon (`${mode}:`). The source release audit now guards the same interpolation mistake.
 
-Because this was the same failure sequence previously seen in LocalGPT, 3.5.0 also ports the proven follow-up Debug documentation contract repair: Debug remains HTML/API/XML-only unless a complete PDF was actually generated, while Release continues to require and validate the versioned PDF.
+The release also preserves the established `server.json` rendezvous behavior: updater ownership checks remain strict for the installed `/Applications/PublisherStudio.app`, while legitimate alternate/debug hosts are not terminated or erased merely because their executable/version differs from the packaged app. Installer endpoint cleanup is now ownership-aware.
 
-Runtime application behavior, Panel Studio, FFmpeg/media behavior, organic/1-Wire protocols, persistence, deployment layout, and existing InteractiveServer ownership remain unchanged.
+The 3.5.1 macOS runtime/source identity and updater handoff remain intact, as do the 3.5.0 PowerShell 5.1 documentation-cache and Debug-PDF fixes.
 
-See `CHANGELOG-v3.5.0-POWERSHELL51-DOCUMENTATION-CACHE-REPAIR.md` and `VALIDATION-v3.5.0-source.md`.
+See `CHANGELOG-v3.5.2-RELEASE-PARSER-RENDEZVOUS-REPAIR.md` and `VALIDATION-v3.5.2-source.md`.

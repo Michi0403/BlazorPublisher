@@ -18,9 +18,15 @@ function installStableNativeRangeLifecycle() { try {
     let active = null;
     let pending = null;
     let pendingFrame = 0;
-    const rangeFor = target => target instanceof HTMLInputElement && target.type === 'range' ? target : null;
+    const rangeFor = target => { try {
+        if (!(target instanceof HTMLInputElement) || target.type !== 'range') return null;
+        // DevExpress/DevExtreme own their internal range/input lifecycles. Intercepting those
+        // browser events breaks vendor scroll/caret/layout state and can create reflow races.
+        if (target.closest('.dxreRoot, .dx-widget, [class*="dxbl-"], [data-dxbl-loaded]')) return null;
+        return target;
+    } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:range-lifecycle:rangeFor', __javascriptError); return null; }};
     const dispatchCoalescedInput = element => { try {
-        if (!(element instanceof HTMLInputElement) || element.type !== 'range' || !element.isConnected) return;
+        if (!rangeFor(element) || !element.isConnected) return;
         const event = new Event('input', { bubbles: true, composed: true });
         Object.defineProperty(event, '__publisherRangeCoalesced', { value: true });
         element.dispatchEvent(event);
@@ -6910,19 +6916,21 @@ function initializeStoryEditorLayout(shellId, hostId, dotNetReference = null) { 
             return;
         }
         const shellWidth = Math.max(1, shell.clientWidth);
-        const layoutChanged = shellWidth !== lastShellWidth;
+        const layoutChanged = lastShellWidth < 0 || Math.abs(shellWidth - lastShellWidth) >= 2;
         lastShellWidth = shellWidth;
-        currentHost.style.maxWidth = `${shellWidth}px`;
+        const expectedMaxWidth = `${shellWidth}px`;
+        if (currentHost.style.maxWidth !== expectedMaxWidth) currentHost.style.maxWidth = expectedMaxWidth;
         const richRoot = currentHost.firstElementChild;
         if (richRoot instanceof HTMLElement) {
             richRoot.style.width = '100%';
             richRoot.style.maxWidth = '100%';
             richRoot.style.minWidth = '0';
         }
-        // DevExpress RichEdit reacts to a global resize by recalculating its viewport and caret.
-        // Dispatch only for a real shell-size change. Repeated resize events after an export
-        // otherwise create a ResizeObserver/RichEdit feedback loop that makes the caret jump.
-        if (layoutChanged) window.dispatchEvent(new Event('resize'));
+        // Do not synthesize a global resize here. DevExpress RichEdit owns its own viewport/caret
+        // lifecycle, and feeding a shell ResizeObserver back into window.resize can form a reflow
+        // oscillator where the page, caret and toolbar repeatedly move. Real browser/window resizes
+        // still arrive normally; this bridge only constrains the host width.
+        void layoutChanged;
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:refresh@6560', __javascriptError); throw __javascriptError; }};
     const schedule = () => { try {
         if (timer) clearTimeout(timer);

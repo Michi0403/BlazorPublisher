@@ -224,7 +224,7 @@
 
 <InputFile id="publication-file-input" class="hidden-file-input" accept=".json,.pubstudio.json,application/json" OnChange="OpenPublication" />
 <InputFile id="opendocument-file-input" class="hidden-file-input" accept=".odg,.odp,.fodg,.fodp,application/vnd.oasis.opendocument.graphics,application/vnd.oasis.opendocument.presentation,application/xml,text/xml" OnChange="ImportOpenDocument" />
-<InputFile id="picture-file-input" class="hidden-file-input" accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml" OnChange="InsertPicture" />
+<InputFile id="picture-file-input" class="hidden-file-input" accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml" multiple OnChange="InsertPicture" />
 <InputFile id="spreadsheet-file-input" class="hidden-file-input" accept=".xlsx,.xlsm,.xls,.csv,.txt,.tsv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv,text/plain" OnChange="InsertSpreadsheet" />
 <InputFile id="video-file-input" class="hidden-file-input" accept=".mp4,.m4v,.webm,.ogv,.ogg,.mov,video/mp4,video/x-m4v,video/webm,video/ogg,video/quicktime" OnChange="InsertVideo" />
 <InputFile id="audio-file-input" class="hidden-file-input" accept="audio/mpeg,audio/mp4,audio/wav,audio/x-wav,audio/ogg,audio/webm,audio/flac" OnChange="InsertAudio" />
@@ -325,7 +325,7 @@
                 {
                     <label>
                         <span>Picture quality: @Math.Round(_singleWebsiteOptions.ImageQuality * 100)%</span>
-                        <input type="range" min="0.35" max="1" step="0.01" @bind="_singleWebsiteOptions.ImageQuality" @bind:event="oninput" />
+                        <input type="range" min="0.35" max="1" step="0.01" @bind="_singleWebsiteOptions.ImageQuality" @bind:event="oninput" @bind:culture="CultureInfo.InvariantCulture" />
                     </label>
                 }
                 <label>
@@ -340,7 +340,7 @@
                 {
                     <label>
                         <span>Video quality: @Math.Round(_singleWebsiteOptions.VideoQuality * 100)%</span>
-                        <input type="range" min="0.35" max="1" step="0.01" @bind="_singleWebsiteOptions.VideoQuality" @bind:event="oninput" />
+                        <input type="range" min="0.35" max="1" step="0.01" @bind="_singleWebsiteOptions.VideoQuality" @bind:event="oninput" @bind:culture="CultureInfo.InvariantCulture" />
                     </label>
                     <label class="publisher-check-row">
                         <input type="checkbox" @bind="_singleWebsiteOptions.KeepVideoFallback" />
@@ -396,7 +396,7 @@
                 {
                     <label>
                         <span>Picture quality: @Math.Round(_structuredWebsiteOptions.ImageQuality * 100)%</span>
-                        <input type="range" min="0.35" max="1" step="0.01" @bind="_structuredWebsiteOptions.ImageQuality" @bind:event="oninput" />
+                        <input type="range" min="0.35" max="1" step="0.01" @bind="_structuredWebsiteOptions.ImageQuality" @bind:event="oninput" @bind:culture="CultureInfo.InvariantCulture" />
                         <small>The exporter keeps the original whenever conversion is unsupported or does not reduce the file.</small>
                     </label>
                 }
@@ -414,7 +414,7 @@
                 {
                     <label>
                         <span>Video quality: @Math.Round(_structuredWebsiteOptions.VideoQuality * 100)%</span>
-                        <input type="range" min="0.35" max="1" step="0.01" @bind="_structuredWebsiteOptions.VideoQuality" @bind:event="oninput" />
+                        <input type="range" min="0.35" max="1" step="0.01" @bind="_structuredWebsiteOptions.VideoQuality" @bind:event="oninput" @bind:culture="CultureInfo.InvariantCulture" />
                     </label>
                     <label class="publisher-check-row">
                         <input type="checkbox" @bind="_structuredWebsiteOptions.KeepVideoFallback" />
@@ -1942,7 +1942,7 @@
             }
             catch (JSException)
             {
-                var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js").ConfigureAwait(true);
+                var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js?v=3.5.3").ConfigureAwait(true);
                 await using var configuredModuleAsyncDisposal = module.ConfigureAwait(true);
                 await module.InvokeVoidAsync("clickElementById", id).ConfigureAwait(true);
             }
@@ -3025,16 +3025,9 @@
         {
             try
             {
-                var file = args.File;
+                var files = args.GetMultipleFiles(64);
+                if (files.Count == 0) return;
                 var allowed = new[] { "image/png", "image/jpeg", "image/gif", "image/webp", "image/svg+xml" };
-                if (!allowed.Contains(file.ContentType, StringComparer.OrdinalIgnoreCase))
-                    throw new InvalidDataException("Unsupported picture format.");
-
-                var stream = file.OpenReadStream(long.MaxValue);
-                await using var configuredStreamAsyncDisposal = stream.ConfigureAwait(true);
-                using var buffer = new MemoryStream();
-                await stream.CopyToAsync(buffer).ConfigureAwait(true);
-                var dataUrl = $"data:{file.ContentType};base64,{Convert.ToBase64String(buffer.ToArray())}";
                 double[]? dropPlacement = null;
                 try
                 {
@@ -3042,38 +3035,57 @@
                 }
                 catch (JSException)
                 {
-                    // A cached pre-v1.0.11 script must not block normal picture insertion.
+                    // A cached older script must not block normal picture insertion.
                 }
-                if (dropPlacement is { Length: >= 2 })
+
+                for (var index = 0; index < files.Count; index++)
                 {
-                    State.AddImage(dataUrl, file.Name, centerX: dropPlacement[0], centerY: dropPlacement[1]);
-                    _pendingCanvasInsert = null;
-                }
-                else if (_pendingCanvasInsert is { Kind: "picture" } placement)
-                {
-                    State.AddImage(dataUrl, file.Name, centerX: placement.X, centerY: placement.Y);
-                    _pendingCanvasInsert = null;
-                }
-                else if (_replacePictureTargetId is Guid replaceId &&
-                         State.CurrentPage.Elements.OfType<ImageFrameElement>().FirstOrDefault(item => item.Id == replaceId) is { } image)
-                {
-                    State.SelectElement(image.Id);
-                    State.UpdateSelected(_ =>
+                    var file = files[index];
+                    if (!allowed.Contains(file.ContentType, StringComparer.OrdinalIgnoreCase))
+                        throw new InvalidDataException($"Unsupported picture format: {file.Name}");
+
+                    var stream = file.OpenReadStream(long.MaxValue);
+                    await using var configuredStreamAsyncDisposal = stream.ConfigureAwait(true);
+                    using var buffer = new MemoryStream();
+                    await stream.CopyToAsync(buffer).ConfigureAwait(true);
+                    var dataUrl = $"data:{file.ContentType};base64,{Convert.ToBase64String(buffer.ToArray())}";
+
+                    // Replacement is intentionally single-target. Additional selected files are inserted
+                    // as new publication pictures so Gallery/TileView live-media datasets can expose all of them.
+                    if (index == 0 && _replacePictureTargetId is Guid replaceId &&
+                        State.CurrentPage.Elements.OfType<ImageFrameElement>().FirstOrDefault(item => item.Id == replaceId) is { } image)
                     {
-                        image.DataUrl = dataUrl;
-                        image.OriginalDataUrl = dataUrl;
-                        image.AltText = file.Name;
-                        image.Name = file.Name;
-                        image.CropX = 0;
-                        image.CropY = 0;
-                        image.CropScale = 1;
-                        image.PictureSource = null;
-                    });
+                        State.SelectElement(image.Id);
+                        State.UpdateSelected(_ =>
+                        {
+                            image.DataUrl = dataUrl;
+                            image.OriginalDataUrl = dataUrl;
+                            image.AltText = file.Name;
+                            image.Name = file.Name;
+                            image.CropX = 0;
+                            image.CropY = 0;
+                            image.CropScale = 1;
+                            image.PictureSource = null;
+                        });
+                        continue;
+                    }
+
+                    var cascade = index * 6d;
+                    if (dropPlacement is { Length: >= 2 })
+                    {
+                        State.AddImage(dataUrl, file.Name, centerX: dropPlacement[0] + cascade, centerY: dropPlacement[1] + cascade);
+                    }
+                    else if (_pendingCanvasInsert is { Kind: "picture" } placement)
+                    {
+                        State.AddImage(dataUrl, file.Name, centerX: placement.X + cascade, centerY: placement.Y + cascade);
+                    }
+                    else
+                    {
+                        State.AddImage(dataUrl, file.Name);
+                    }
                 }
-                else
-                {
-                    State.AddImage(dataUrl, file.Name);
-                }
+
+                _pendingCanvasInsert = null;
                 _replacePictureTargetId = null;
             }
             catch (Exception ex)
@@ -3082,7 +3094,6 @@
                 _replacePictureTargetId = null;
                 ShowError(ex);
             }
-    
         }
         catch (Exception __componentMethodException)
         {
@@ -3425,7 +3436,7 @@
                 var bytes = buffer.ToArray();
                 if (bytes.Length == 0) throw new InvalidDataException("The selected media file is empty.");
 
-                module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=3.3.5").ConfigureAwait(true);
+                module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=3.5.3").ConfigureAwait(true);
                 temporaryAssetId = Guid.NewGuid();
                 var inspectionUrl = MediaAssets.RegisterBytes(temporaryAssetId, bytes, mimeType);
                 MediaSourceInfo info;

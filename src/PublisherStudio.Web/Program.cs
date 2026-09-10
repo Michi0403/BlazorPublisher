@@ -92,7 +92,9 @@ public static class Program
             var entry = $"{DateTimeOffset.UtcNow:O} [Bootstrap] {message}";
             if (exception is not null)
                 entry += Environment.NewLine + exception;
-            File.AppendAllText(logPath, entry + Environment.NewLine);
+            using var stream = new FileStream(logPath, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
+            using var writer = new StreamWriter(stream);
+            writer.WriteLine(entry);
         }
         catch (Exception diagnosticException) when (diagnosticException is IOException or UnauthorizedAccessException)
         {

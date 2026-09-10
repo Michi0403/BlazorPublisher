@@ -2383,7 +2383,7 @@
         try
         {
             if (_disposed) throw new ObjectDisposedException(nameof(MediaStudio));
-            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=3.5.6").ConfigureAwait(true);
+            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=3.5.9").ConfigureAwait(true);
             _self ??= DotNetObjectReference.Create(this);
             if (SessionId != Guid.Empty)
             {
@@ -2608,7 +2608,7 @@
             if (reloadingCurrent && !forceReload)
             {
                 if (!preserveTimelineSelection) SetSingleTimelineSelection(id);
-                if (seek) TaskRunner.Run(nameof(MediaStudio), nameof(SelectSegment), async _ => await InvokeAsync(SeekSelectedAtPlayheadAsync).ConfigureAwait(false));
+                if (seek) TaskRunner.Run(nameof(MediaStudio), nameof(SelectSegment), async _ => await InvokeAsync(SeekSelectedAtPlayheadAsync).ConfigureAwait(true));
                 return;
             }
             if (_pendingInsertSegment is not null) ClearPendingInsert();
@@ -2637,7 +2637,7 @@
             _selectedCutSectionId = null;
             SelectInitialVideoLayer(segment);
             RefreshPreviewSource();
-            if (seek) TaskRunner.Run(nameof(MediaStudio), nameof(SelectSegment), async _ => await InvokeAsync(SeekSelectedAtPlayheadAsync).ConfigureAwait(false));
+            if (seek) TaskRunner.Run(nameof(MediaStudio), nameof(SelectSegment), async _ => await InvokeAsync(SeekSelectedAtPlayheadAsync).ConfigureAwait(true));
 
         }
         catch (Exception __componentMethodException)
@@ -4248,7 +4248,7 @@
             _videoSelectionUserCommitted = true;
             CommitSelectedSegment(refreshVideoEffects: true);
             _playhead = SourcePositionToTimeline(VideoSelectionStart);
-            TaskRunner.Run(nameof(MediaStudio), nameof(UseSelectedCutSection), async _ => await InvokeAsync(SeekVideoSelectionStartAsync).ConfigureAwait(false));
+            TaskRunner.Run(nameof(MediaStudio), nameof(UseSelectedCutSection), async _ => await InvokeAsync(SeekVideoSelectionStartAsync).ConfigureAwait(true));
             _warning = $"Loaded {section.Name} into the current selection.";
     
         }
@@ -6488,7 +6488,7 @@
             _error = string.IsNullOrWhiteSpace(message)
                 ? $"Drop a supported {(IsVideo ? "video" : "audio")} file into this Studio."
                 : message;
-            TaskRunner.Run(nameof(MediaStudio), nameof(MediaStudioFileDropRejected), async _ => await InvokeAsync(StateHasChanged).ConfigureAwait(false));
+            TaskRunner.Run(nameof(MediaStudio), nameof(MediaStudioFileDropRejected), async _ => await InvokeAsync(StateHasChanged).ConfigureAwait(true));
     
         }
         catch (Exception __componentMethodException)
@@ -7797,7 +7797,7 @@
             _embeddingProgress = 0;
             _error = null;
             _warning = "Embedding the completed recording into the publication…";
-            TaskRunner.Run(nameof(MediaStudio), nameof(BeginMediaRecordingTransfer), async _ => await InvokeAsync(StateHasChanged).ConfigureAwait(false));
+            TaskRunner.Run(nameof(MediaStudio), nameof(BeginMediaRecordingTransfer), async _ => await InvokeAsync(StateHasChanged).ConfigureAwait(true));
             return true;
     
         }
@@ -8295,7 +8295,7 @@
                     {
                         Logger.LogDebug(ex, "Video effect refresh ended because the browser/circuit was no longer available.");
                     }
-                }).ConfigureAwait(false));
+                }).ConfigureAwait(true));
     
         }
         catch (Exception __componentMethodException)

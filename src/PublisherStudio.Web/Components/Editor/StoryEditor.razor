@@ -371,6 +371,8 @@
     /// Stores the internal AI story panel visible state used by <see cref="StoryEditor"/> while executing its surrounding workflow.
     /// </summary>
     private bool _aiStoryPanelVisible;
+    /// <summary>Tracks whether the browser-side RichEdit layout bridge has been attached for the current visible editor surface.</summary>
+    private bool _storyLayoutAttached;
     /// <summary>
     /// Stores the internal AI story prompt state used by <see cref="StoryEditor"/> while executing its surrounding workflow.
     /// </summary>
@@ -538,6 +540,7 @@
 
             if (!Visible)
             {
+                _storyLayoutAttached = false;
                 _documentLoadGeneration++;
                 _mailMergeSettingsContent = null;
                 _loadedId = null;
@@ -565,7 +568,7 @@
     {
         try
         {
-            if (!Visible) return;
+            if (!Visible || _storyLayoutAttached) return;
             try
             {
                 _selfReference ??= DotNetObjectReference.Create(this);
@@ -574,6 +577,7 @@
                     "story-editor-shell",
                     "story-editor-host",
                     _selfReference).ConfigureAwait(true);
+                _storyLayoutAttached = true;
             }
             catch (JSDisconnectedException) { }
             catch (TaskCanceledException) { }
@@ -857,7 +861,7 @@
                 {
                         RefreshAiProposals();
                         StateHasChanged();
-                }).ConfigureAwait(false));
+                }).ConfigureAwait(true));
         }
         catch (Exception __componentMethodException)
         {
@@ -2278,6 +2282,7 @@
             LocalGptConnection.Changed -= OnOrganicStateChanged;
             OrganicResults.Changed -= OnOrganicStateChanged;
             _documentLoadGeneration++;
+            _storyLayoutAttached = false;
             _mailMergeSettingsContent = null;
             ResetStoryPreviewTransfer();
             _selfReference?.Dispose();

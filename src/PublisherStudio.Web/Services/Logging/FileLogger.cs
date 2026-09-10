@@ -6,68 +6,223 @@ using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services.Logging;
 
-/// <summary>
-/// Writes PublisherStudio application log entries to a background file queue.
-/// Blank destinations resolve to the durable per-user PublisherStudio root rather than the executable or current working directory.
-/// </summary>
-public sealed class FileLogger : ILogger, IDisposable
+/// <summary>Provides a lightweight category facade over the provider-owned PublisherStudio file sink.</summary>
+public sealed class FileLogger : ILogger
 {
-    /// <summary>Stores the resolved log path used by this logger instance.</summary>
-    private readonly string realPath;
+    /// <summary>Category attached to each persisted event.</summary>
+    private readonly string categoryName;
 
-    /// <summary>Captures the provider severity and destination policy used for every event written by this logger instance.</summary>
-    private readonly FileLoggerCoreOptions options;
+    /// <summary>Shared provider-owned file sink.</summary>
+    private readonly FileLoggerSharedSink sink;
 
-    /// <summary>Stores pending formatted log messages until the writer thread persists them.</summary>
-    private readonly BlockingCollection<string> logQueue = new();
-
-    /// <summary>Owns the dedicated background writer that drains queued messages without blocking application callers.</summary>
-    private readonly Thread loggingThread;
-
-    /// <summary>Tracks shutdown state so producers stop enqueueing after the logging pipeline begins disposal.</summary>
-    private bool disposed;
-
-    /// <summary>Reuses one inert scope object for callers that request ILogger scopes even though file output is scope-agnostic.</summary>
+    /// <summary>Reuses one inert scope object for callers that request ILogger scopes.</summary>
     private readonly LoggerNullScope nullScope = new();
 
-    /// <summary>Initializes a file logger for one logging category.</summary>
-    /// <param name="categoryName">Logging category represented by this logger. The value is accepted for ILogger compatibility.</param>
-    /// <param name="optionsMonitor">Options monitor providing the current file logger settings.</param>
-    public FileLogger(string categoryName, IOptionsMonitor<FileLoggerCoreOptions> optionsMonitor)
+    /// <summary>Initializes a category logger over the shared file sink.</summary>
+    /// <param name="categoryName">Logging category represented by this logger for ILogger compatibility.</param>
+    /// <param name="sink">Provider-owned sink shared by every category.</param>
+    internal FileLogger(string categoryName, FileLoggerSharedSink sink)
+    {
+        this.categoryName = categoryName;
+        this.sink = sink;
+    }
+
+    /// <summary>Begins an inert logging scope because file output is scope-agnostic.</summary>
+    /// <typeparam name="TState">Type of caller-provided scope state.</typeparam>
+    /// <param name="state">Caller-provided scope state.</param>
+    /// <returns>An inert disposable scope.</returns>
+    public IDisposable BeginScope<TState>(TState state) where TState : notnull => nullScope;
+
+    /// <summary>Reports whether the shared sink currently accepts the supplied severity.</summary>
+    /// <param name="logLevel">Severity being evaluated.</param>
+    /// <returns><see langword="true"/> when the event should be written.</returns>
+    public bool IsEnabled(LogLevel logLevel)
     {
         try
         {
-            ArgumentNullException.ThrowIfNull(optionsMonitor);
-            options = optionsMonitor.CurrentValue;
-            realPath = ResolveLogPath(options);
-            try
-            {
-                var directory = Path.GetDirectoryName(realPath);
-                if (!string.IsNullOrWhiteSpace(directory) && !Directory.Exists(directory)) Directory.CreateDirectory(directory);
-                using (File.Open(realPath, FileMode.Append, FileAccess.Write, FileShare.ReadWrite)) { }
-            }
-            catch (Exception fileInitializationError) when (fileInitializationError is IOException or UnauthorizedAccessException)
-            {
-                System.Diagnostics.Trace.TraceWarning($"PublisherStudio could not pre-create log file '{realPath}': {fileInitializationError.Message}");
-            }
-
-            loggingThread = new Thread(ProcessLogQueue)
-            {
-                IsBackground = true,
-                Name = "PublisherStudioFileLogger"
-            };
-            loggingThread.Start();
+            return sink.IsEnabled(logLevel);
         }
         catch (Exception exception)
         {
-            System.Diagnostics.Trace.TraceError($"PublisherStudio file logger initialization failed for category '{categoryName}': {exception}");
-            throw;
+            System.Diagnostics.Trace.TraceError($"PublisherStudio file logger level evaluation failed: {exception}");
+            return false;
         }
     }
 
-    /// <summary>Resolves the log target to durable per-user storage while still honoring explicit absolute overrides outside the application payload.</summary>
+    /// <summary>Formats and queues one application log event for shared asynchronous persistence.</summary>
+    /// <typeparam name="TState">Type of caller-provided log state.</typeparam>
+    /// <param name="logLevel">Severity of the event.</param>
+    /// <param name="eventId">Event identifier supplied by the logging caller.</param>
+    /// <param name="state">Caller-provided logging state.</param>
+    /// <param name="exception">Optional exception associated with the event.</param>
+    /// <param name="formatter">Formatter used to produce the final event message.</param>
+    public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
+    {
+        ArgumentNullException.ThrowIfNull(formatter);
+        if (!sink.IsEnabled(logLevel))
+            return;
+
+        try
+        {
+            sink.Enqueue(logLevel, categoryName, formatter(state, exception), exception);
+        }
+        catch (Exception loggingException)
+        {
+            System.Diagnostics.Trace.TraceError($"PublisherStudio file logger failed to queue an event: {loggingException}");
+        }
+    }
+}
+
+/// <summary>
+/// Owns one bounded queue and one file-writer thread for the complete PublisherStudio logging provider.
+/// This prevents per-category writer threads, competing file opens, exception storms and the resulting allocation/GC pressure.
+/// </summary>
+internal sealed class FileLoggerSharedSink : IDisposable
+{
+    /// <summary>Pending formatted log entries shared by every category logger.</summary>
+    private readonly BlockingCollection<string> logQueue = new(new ConcurrentQueue<string>(), 8192);
+
+    /// <summary>Monitors runtime file logger options without creating per-category subscriptions.</summary>
+    private readonly IOptionsMonitor<FileLoggerCoreOptions> optionsMonitor;
+
+    /// <summary>Owns the only background file writer for this provider.</summary>
+    private readonly Thread loggingThread;
+
+    /// <summary>Absolute durable log path used by the writer.</summary>
+    private readonly string realPath;
+
+    /// <summary>Tracks sink shutdown.</summary>
+    private bool disposed;
+
+    /// <summary>Initializes the shared sink and starts its single background writer.</summary>
+    /// <param name="optionsMonitor">Options monitor providing file logger policy.</param>
+    internal FileLoggerSharedSink(IOptionsMonitor<FileLoggerCoreOptions> optionsMonitor)
+    {
+        this.optionsMonitor = optionsMonitor;
+        realPath = ResolveLogPath(optionsMonitor.CurrentValue);
+        EnsureLogFile();
+        loggingThread = new Thread(ProcessLogQueue)
+        {
+            IsBackground = true,
+            Name = "PublisherStudioFileLogger"
+        };
+        loggingThread.Start();
+    }
+
+    /// <summary>Reports whether the sink accepts an event at the supplied severity.</summary>
+    /// <param name="logLevel">Severity being evaluated.</param>
+    /// <returns><see langword="true"/> when persistence is enabled for the event.</returns>
+    internal bool IsEnabled(LogLevel logLevel)
+    {
+        try
+        {
+            if (disposed)
+                return false;
+
+            var options = optionsMonitor.CurrentValue;
+            return options.CoreLogLevel != BusinessObjects.Enums.CoreLogLevel.None
+                && (int)logLevel >= (int)options.CoreLogLevel;
+        }
+        catch (Exception exception)
+        {
+            System.Diagnostics.Trace.TraceError($"PublisherStudio shared file logger level evaluation failed: {exception}");
+            return false;
+        }
+    }
+
+    /// <summary>Formats and enqueues one log entry without blocking on file I/O.</summary>
+    /// <param name="logLevel">Event severity.</param>
+    /// <param name="categoryName">Logging category.</param>
+    /// <param name="message">Formatted message.</param>
+    /// <param name="exception">Optional associated exception.</param>
+    internal void Enqueue(LogLevel logLevel, string categoryName, string message, Exception? exception)
+    {
+        try
+        {
+            if (disposed || logQueue.IsAddingCompleted)
+                return;
+
+            var builder = new StringBuilder(256)
+                .Append(DateTime.UtcNow.ToString("O"))
+                .Append(" [Machine: ").Append(Environment.MachineName).Append(']')
+                .Append(" [Level: ").Append(logLevel).Append(']')
+                .Append(" [Category: ").Append(categoryName).Append("] ")
+                .Append(message);
+
+            if (exception is not null)
+                builder.AppendLine().Append("Exception: ").Append(exception);
+
+            // Never let logging back-pressure stall the renderer. Under an extreme burst, drop the
+            // newest file-only entry; console/debug providers still receive the original event.
+            logQueue.TryAdd(builder.ToString());
+        }
+        catch (InvalidOperationException)
+        {
+            // Shutdown can complete the queue between the state check and TryAdd.
+        }
+        catch (Exception enqueueException)
+        {
+            System.Diagnostics.Trace.TraceError($"PublisherStudio shared file logger enqueue failed: {enqueueException}");
+        }
+    }
+
+    /// <summary>Creates the durable log directory and file before the writer thread starts.</summary>
+    private void EnsureLogFile()
+    {
+        try
+        {
+            var directory = Path.GetDirectoryName(realPath);
+            if (!string.IsNullOrWhiteSpace(directory))
+                Directory.CreateDirectory(directory);
+            using (File.Open(realPath, FileMode.Append, FileAccess.Write, FileShare.ReadWrite)) { }
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            System.Diagnostics.Trace.TraceWarning($"PublisherStudio could not pre-create log file '{realPath}': {exception.Message}");
+        }
+    }
+
+    /// <summary>Consumes the shared queue and persists entries serially.</summary>
+    private void ProcessLogQueue()
+    {
+        try
+        {
+            var directory = Path.GetDirectoryName(realPath);
+            if (!string.IsNullOrWhiteSpace(directory))
+                Directory.CreateDirectory(directory);
+
+            using var stream = new FileStream(
+                realPath,
+                FileMode.Append,
+                FileAccess.Write,
+                FileShare.ReadWrite | FileShare.Delete,
+                bufferSize: 16 * 1024,
+                FileOptions.SequentialScan);
+            using var writer = new StreamWriter(stream, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false), 16 * 1024)
+            {
+                AutoFlush = true
+            };
+
+            foreach (var message in logQueue.GetConsumingEnumerable())
+                writer.WriteLine(message);
+        }
+        catch (IOException exception)
+        {
+            System.Diagnostics.Trace.TraceError($"PublisherStudio could not keep its shared log writer open for '{realPath}': {exception}");
+        }
+        catch (UnauthorizedAccessException exception)
+        {
+            System.Diagnostics.Trace.TraceError($"PublisherStudio cannot write '{realPath}': {exception}");
+        }
+        catch (Exception exception)
+        {
+            System.Diagnostics.Trace.TraceError($"PublisherStudio shared file logger background writer failed: {exception}");
+        }
+    }
+
+    /// <summary>Resolves the log target to durable per-user storage while honoring safe absolute overrides.</summary>
     /// <param name="currentOptions">Current file logger options.</param>
-    /// <returns>An absolute log path that does not depend on the process current directory.</returns>
+    /// <returns>An absolute log path independent of the process working directory.</returns>
     private string ResolveLogPath(FileLoggerCoreOptions currentOptions)
     {
         try
@@ -96,131 +251,25 @@ public sealed class FileLogger : ILogger, IDisposable
         }
     }
 
-    /// <summary>Begins an inert logging scope because the file provider does not persist scope objects separately.</summary>
-    /// <typeparam name="TState">Type of caller-provided scope state.</typeparam>
-    /// <param name="state">Caller-provided scope state.</param>
-    /// <returns>An inert disposable scope.</returns>
-    public IDisposable BeginScope<TState>(TState state) where TState : notnull
-    {
-        try
-        {
-            return nullScope;
-        }
-        catch (Exception exception)
-        {
-            System.Diagnostics.Trace.TraceError($"PublisherStudio file logger scope creation failed: {exception}");
-            throw;
-        }
-    }
-
-    /// <summary>Compares an event severity with the configured file threshold while also honoring provider shutdown.</summary>
-    /// <param name="logLevel">Severity being evaluated.</param>
-    /// <returns><see langword="true"/> when the event should be written; otherwise <see langword="false"/>.</returns>
-    public bool IsEnabled(LogLevel logLevel)
-    {
-        try
-        {
-            return !disposed &&
-                options.CoreLogLevel != BusinessObjects.Enums.CoreLogLevel.None &&
-                (int)logLevel >= (int)options.CoreLogLevel;
-        }
-        catch (Exception exception)
-        {
-            System.Diagnostics.Trace.TraceError($"PublisherStudio file logger level evaluation failed: {exception}");
-            return false;
-        }
-    }
-
-    /// <summary>Formats and queues one application log event for asynchronous file persistence.</summary>
-    /// <typeparam name="TState">Type of caller-provided log state.</typeparam>
-    /// <param name="logLevel">Severity of the event.</param>
-    /// <param name="eventId">Event identifier supplied by the logging caller.</param>
-    /// <param name="state">Caller-provided logging state.</param>
-    /// <param name="exception">Optional exception associated with the event.</param>
-    /// <param name="formatter">Formatter used to produce the final event message.</param>
-    public void Log<TState>(
-        LogLevel logLevel,
-        EventId eventId,
-        TState state,
-        Exception? exception,
-        Func<TState, Exception?, string> formatter)
-    {
-        try
-        {
-            ArgumentNullException.ThrowIfNull(formatter);
-            if (!IsEnabled(logLevel)) return;
-
-            var builder = new StringBuilder()
-                .Append(DateTime.UtcNow.ToString("O"))
-                .Append(" [Machine: ").Append(Environment.MachineName).Append(']')
-                .Append(" [Level: ").Append(logLevel).Append("] ")
-                .Append(formatter(state, exception));
-
-            if (exception is not null)
-                builder.AppendLine().Append("Exception: ").Append(exception);
-
-            if (!logQueue.IsAddingCompleted)
-                logQueue.Add(builder.ToString());
-        }
-        catch (InvalidOperationException)
-        {
-            // The queue may complete concurrently during application shutdown.
-        }
-        catch (Exception loggingException)
-        {
-            System.Diagnostics.Trace.TraceError($"PublisherStudio file logger failed to queue an event: {loggingException}");
-        }
-    }
-
-    /// <summary>Consumes queued log messages and appends them to the configured file.</summary>
-    private void ProcessLogQueue()
-    {
-        try
-        {
-            foreach (var message in logQueue.GetConsumingEnumerable())
-            {
-                try
-                {
-                    var directory = Path.GetDirectoryName(realPath);
-                    if (!string.IsNullOrWhiteSpace(directory) && !Directory.Exists(directory))
-                        Directory.CreateDirectory(directory);
-
-                    File.AppendAllText(realPath, message + Environment.NewLine, Encoding.UTF8);
-                }
-                catch (IOException exception)
-                {
-                    System.Diagnostics.Trace.TraceError($"PublisherStudio could not append to '{realPath}': {exception}");
-                }
-                catch (UnauthorizedAccessException exception)
-                {
-                    System.Diagnostics.Trace.TraceError($"PublisherStudio cannot write '{realPath}': {exception}");
-                }
-                catch (Exception exception)
-                {
-                    System.Diagnostics.Trace.TraceError($"PublisherStudio file logger write failed: {exception}");
-                }
-            }
-        }
-        catch (Exception exception)
-        {
-            System.Diagnostics.Trace.TraceError($"PublisherStudio file logger background writer failed: {exception}");
-        }
-    }
-
-    /// <summary>Stops the background writer and releases the queue owned by this logger.</summary>
+    /// <summary>
+    /// Completes the shared log queue, gives the provider-owned writer thread an opportunity to drain pending entries, and then releases queue resources.
+    /// </summary>
     public void Dispose()
     {
         try
         {
-            if (disposed) return;
+            if (disposed)
+                return;
+
             disposed = true;
             logQueue.CompleteAdding();
-            loggingThread.Join();
+            if (!loggingThread.Join(TimeSpan.FromSeconds(5)))
+                System.Diagnostics.Trace.TraceWarning("PublisherStudio file logger writer did not stop within five seconds.");
             logQueue.Dispose();
         }
         catch (Exception exception)
         {
-            System.Diagnostics.Trace.TraceError($"PublisherStudio file logger shutdown failed: {exception}");
+            System.Diagnostics.Trace.TraceError($"PublisherStudio shared file logger shutdown failed: {exception}");
         }
     }
 }

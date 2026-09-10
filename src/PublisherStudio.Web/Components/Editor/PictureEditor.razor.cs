@@ -488,7 +488,7 @@ public partial class PictureEditor
     private void LocalGptConnectionChanged() {
         try
         {
-            TaskRunner.Run(nameof(PictureEditor), nameof(LocalGptConnectionChanged), async _ => await InvokeAsync(StateHasChanged).ConfigureAwait(false));
+            TaskRunner.Run(nameof(PictureEditor), nameof(LocalGptConnectionChanged), async _ => await InvokeAsync(StateHasChanged).ConfigureAwait(true));
         }
         catch (Exception __componentMethodException)
         {
@@ -615,7 +615,7 @@ public partial class PictureEditor
         try
         {
             _renderRequested = true;
-            TaskRunner.Run(nameof(PictureEditor), nameof(StateChanged), async _ => await InvokeAsync(StateHasChanged).ConfigureAwait(false));
+            TaskRunner.Run(nameof(PictureEditor), nameof(StateChanged), async _ => await InvokeAsync(StateHasChanged).ConfigureAwait(true));
     
         }
         catch (Exception __componentMethodException)
@@ -867,7 +867,7 @@ public partial class PictureEditor
             if (!string.IsNullOrWhiteSpace(color)) _drawColor = color;
             _drawTool = PictureDrawTool.Brush;
             _renderRequested = true;
-            TaskRunner.Run(nameof(PictureEditor), nameof(PictureColorPicked), async _ => await InvokeAsync(StateHasChanged).ConfigureAwait(false));
+            TaskRunner.Run(nameof(PictureEditor), nameof(PictureColorPicked), async _ => await InvokeAsync(StateHasChanged).ConfigureAwait(true));
     
         }
         catch (Exception __componentMethodException)
@@ -923,7 +923,7 @@ public partial class PictureEditor
         {
             _renderErrorActive = true;
             _error = string.IsNullOrWhiteSpace(message) ? "A picture layer could not be rendered." : message;
-            TaskRunner.Run(nameof(PictureEditor), nameof(PictureRenderFailed), async _ => await InvokeAsync(StateHasChanged).ConfigureAwait(false));
+            TaskRunner.Run(nameof(PictureEditor), nameof(PictureRenderFailed), async _ => await InvokeAsync(StateHasChanged).ConfigureAwait(true));
     
         }
         catch (Exception __componentMethodException)
@@ -944,7 +944,7 @@ public partial class PictureEditor
             if (!_renderErrorActive) return;
             _renderErrorActive = false;
             _error = null;
-            TaskRunner.Run(nameof(PictureEditor), nameof(PictureRenderRecovered), async _ => await InvokeAsync(StateHasChanged).ConfigureAwait(false));
+            TaskRunner.Run(nameof(PictureEditor), nameof(PictureRenderRecovered), async _ => await InvokeAsync(StateHasChanged).ConfigureAwait(true));
     
         }
         catch (Exception __componentMethodException)
@@ -1327,7 +1327,7 @@ public partial class PictureEditor
             _error = string.IsNullOrWhiteSpace(message)
                 ? "Drop a PNG, JPEG, GIF, WebP, SVG, SVGZ, or OpenRaster picture into Picture Studio."
                 : message;
-            TaskRunner.Run(nameof(PictureEditor), nameof(PictureStudioFileDropRejected), async _ => await InvokeAsync(StateHasChanged).ConfigureAwait(false));
+            TaskRunner.Run(nameof(PictureEditor), nameof(PictureStudioFileDropRejected), async _ => await InvokeAsync(StateHasChanged).ConfigureAwait(true));
     
         }
         catch (Exception __componentMethodException)
@@ -1913,7 +1913,7 @@ public partial class PictureEditor
             if (!IsCurrentPictureExport(exportId)) return;
             ResetPictureExport();
             _error = string.IsNullOrWhiteSpace(message) ? "The browser could not render the picture." : message;
-            TaskRunner.Run(nameof(PictureEditor), nameof(FailPictureExport), async _ => await InvokeAsync(StateHasChanged).ConfigureAwait(false));
+            TaskRunner.Run(nameof(PictureEditor), nameof(FailPictureExport), async _ => await InvokeAsync(StateHasChanged).ConfigureAwait(true));
     
         }
         catch (Exception __componentMethodException)
@@ -2883,7 +2883,7 @@ public partial class PictureEditor
     {
         try
         {
-            TaskRunner.Run(nameof(PictureEditor), nameof(SetDrawTool), async _ => await InvokeAsync(CancelPictureInteractionAsync).ConfigureAwait(false));
+            TaskRunner.Run(nameof(PictureEditor), nameof(SetDrawTool), async _ => await InvokeAsync(CancelPictureInteractionAsync).ConfigureAwait(true));
             _drawTool = tool;
             _renderRequested = true;
             StateHasChanged();

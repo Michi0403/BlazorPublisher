@@ -6901,9 +6901,13 @@ function initializeStoryEditorLayout(shellId, hostId, dotNetReference = null) { 
     if (!shell || !host) return;
     let state = storyEditorLayouts.get(shell);
     if (state) {
+        const hostChanged = state.host !== host;
         state.host = host;
         if (dotNetReference) state.dotNet = dotNetReference;
-        state.schedule();
+        // Rebinding an unchanged RichEdit host from every Blazor render used to enqueue another
+        // layout timer. Selection/caret notifications can render rapidly, so that feedback created
+        // continuous timer allocation and let layout work race the editor's own viewport lifecycle.
+        if (hostChanged) state.schedule();
         return;
     }
     let timer = 0;

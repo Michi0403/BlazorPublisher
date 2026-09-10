@@ -684,7 +684,7 @@
     private void OnLocalGptChanged() {
         try
         {
-            TaskRunner.Run(nameof(PublicationRibbon), nameof(OnLocalGptChanged), async _ => await InvokeAsync(StateHasChanged).ConfigureAwait(false));
+            TaskRunner.Run(nameof(PublicationRibbon), nameof(OnLocalGptChanged), async _ => await InvokeAsync(StateHasChanged).ConfigureAwait(true));
         }
         catch (Exception __componentMethodException)
         {

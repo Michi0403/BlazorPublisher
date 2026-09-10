@@ -1110,6 +1110,14 @@ if (-not (Test-Path -LiteralPath $releasePackagingPackage -PathType Leaf)) { thr
 Copy-Item -LiteralPath $releasePackagingPackage -Destination (Join-Path $artifacts $releasePackagingPackageName) -Force
 
 Copy-Item -LiteralPath $wireProtocolPackage -Destination (Join-Path $artifacts $wireProtocolPackageName) -Force
+
+# Compile the dependency-light setup before entering the multi-hour documentation/notarization lane.
+# Setup-only compiler regressions must fail while the release is still cheap to restart.
+Write-Host "Preflighting the PublisherStudio installer compile before expensive documentation and native packaging..." -ForegroundColor Cyan
+Invoke-DotNet -Arguments @("restore", $setupProject, "--disable-parallel", "--force-evaluate") -FailureMessage "PublisherStudio installer preflight restore failed."
+Invoke-DotNet -Arguments @("build", $setupProject, "-c", $Configuration, "--no-restore", "-maxcpucount:1") -FailureMessage "PublisherStudio installer preflight compile failed."
+Write-Host "PublisherStudio installer compile preflight passed." -ForegroundColor Green
+
 Prepare-PublisherStudioClientAssets
 Prepare-PublisherStudioDocumentation
 

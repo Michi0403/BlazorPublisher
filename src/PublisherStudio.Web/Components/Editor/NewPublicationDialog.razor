@@ -133,7 +133,7 @@
         try
         {
             Logger.LogTrace("Forwarding selected publication template {TemplateId}.", templateId);
-            await Selected.InvokeAsync(templateId).ConfigureAwait(false);
+            await Selected.InvokeAsync(templateId).ConfigureAwait(true);
         }
         catch (Exception exception)
         {
@@ -149,7 +149,7 @@
         try
         {
             Logger.LogTrace("Closing the New-from-template chooser.");
-            await Cancelled.InvokeAsync().ConfigureAwait(false);
+            await Cancelled.InvokeAsync().ConfigureAwait(true);
         }
         catch (Exception exception)
         {

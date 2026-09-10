@@ -4,11 +4,11 @@ using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services.Logging;
 
-/// <summary>Provides PublisherStudio file logger instances to the Microsoft logging pipeline.</summary>
+/// <summary>Provides lightweight category loggers that share one PublisherStudio file writer.</summary>
 public sealed class FileLoggerProvider : ILoggerProvider
 {
-    /// <summary>Stores the options monitor supplied to newly created file loggers.</summary>
-    private readonly IOptionsMonitor<FileLoggerCoreOptions> options;
+    /// <summary>Owns the single queue and background writer used by every category logger.</summary>
+    private readonly FileLoggerSharedSink sink;
 
     /// <summary>Tracks provider shutdown so no new category logger can be created after disposal begins.</summary>
     private bool disposed;
@@ -17,10 +17,10 @@ public sealed class FileLoggerProvider : ILoggerProvider
     /// <param name="options">Options monitor providing current file logger configuration.</param>
     public FileLoggerProvider(IOptionsMonitor<FileLoggerCoreOptions> options)
     {
+        ArgumentNullException.ThrowIfNull(options);
         try
         {
-            ArgumentNullException.ThrowIfNull(options);
-            this.options = options;
+            sink = new FileLoggerSharedSink(options);
         }
         catch (Exception exception)
         {
@@ -29,15 +29,15 @@ public sealed class FileLoggerProvider : ILoggerProvider
         }
     }
 
-    /// <summary>Creates a file logger for the supplied logging category.</summary>
-    /// <param name="categoryName">Logging category that will own the returned logger.</param>
-    /// <returns>A PublisherStudio file logger.</returns>
+    /// <summary>Creates a category facade over the provider-owned shared file sink.</summary>
+    /// <param name="categoryName">Logging category represented by the returned logger.</param>
+    /// <returns>A lightweight PublisherStudio logger.</returns>
     public ILogger CreateLogger(string categoryName)
     {
         try
         {
             ObjectDisposedException.ThrowIf(disposed, this);
-            return new FileLogger(categoryName, options);
+            return new FileLogger(categoryName, sink);
         }
         catch (Exception exception)
         {
@@ -46,13 +46,18 @@ public sealed class FileLoggerProvider : ILoggerProvider
         }
     }
 
-    /// <summary>Releases resources owned by the provider.</summary>
+    /// <summary>
+    /// Disposes the provider-owned shared file sink so queued entries finish through the single writer before its logging resources are released.
+    /// </summary>
     public void Dispose()
     {
         try
         {
+            if (disposed)
+                return;
+
             disposed = true;
-            GC.SuppressFinalize(this);
+            sink.Dispose();
         }
         catch (Exception exception)
         {

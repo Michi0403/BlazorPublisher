@@ -79,7 +79,7 @@
         {
             try
             {
-                await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+                await InvokeAsync(StateHasChanged).ConfigureAwait(true);
             }
             catch (Exception exception)
             {

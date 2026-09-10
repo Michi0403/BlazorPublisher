@@ -545,24 +545,36 @@ def audit(source_root: Path) -> tuple[list[Finding], dict[str, int]]:
 
                 uses_true = configuration.group(1) == "true"
                 totals["configure_true" if uses_true else "configure_false"] += 1
-                if not uses_true:
-                    continue
-
                 in_lifecycle = any(start <= token.start <= end for start, end in lifecycle_ranges)
                 in_renderer_loading_helper = any(
                     start <= token.start <= end for start, end in renderer_loading_ranges
                 )
+                if not uses_true:
+                    if is_component and (in_lifecycle or in_renderer_loading_helper):
+                        findings.append(Finding(
+                            relative,
+                            current_line,
+                            "Renderer/circuit-affine component continuations must use ConfigureAwait(true).",
+                        ))
+                    elif is_component and re.search(r"(?<!\.)\bInvokeAsync\s*\(", expression):
+                        findings.append(Finding(
+                            relative,
+                            current_line,
+                            "Renderer dispatch continuations in components must retain the Blazor circuit with ConfigureAwait(true).",
+                        ))
+                    continue
+
                 if not is_component:
                     findings.append(Finding(
                         relative,
                         current_line,
                         "ConfigureAwait(true) is forbidden outside Components; use ConfigureAwait(false).",
                     ))
-                elif not in_lifecycle and not in_renderer_loading_helper:
+                elif not in_lifecycle and not in_renderer_loading_helper and "InvokeAsync" not in expression:
                     findings.append(Finding(
                         relative,
                         current_line,
-                        "ConfigureAwait(true) is allowed only in a Blazor lifecycle method or an exact renderer-affine loading helper listed in async-continuation-policy.json.",
+                        "ConfigureAwait(true) is allowed only in a Blazor lifecycle method, an explicit renderer dispatch/interop await, or an exact renderer-affine helper listed in async-continuation-policy.json.",
                     ))
 
         if path.suffix.lower() == ".razor":

@@ -1,7 +1,9 @@
-# PublisherStudio 3.5.6
+# PublisherStudio 3.5.9
 
-PublisherStudio 3.5.6 is a release-path recovery build. It keeps `%LOCALAPPDATA%\PublisherStudio` as the canonical Windows root, restores durable setup/application logging, stages and transactionally replaces Windows runtime/setup wrappers, validates matching incoming release identities without blocking upgrades from an older setup, and falls back from an unavailable Windows loopback port while retaining 58071 as the preferred default.
+PublisherStudio 3.5.9 is a narrow maintenance release over 3.5.8 that fixes documentation contract drift exposed by the real Visual Studio rebuild.
 
-It also preserves the 3.5.3 frontend race, export-slider, Gallery multi-picture and cache-identity repairs; the 3.5.3/3.5.4 macOS distribution-PKG validation/readback; the server-rendezvous model; PowerShell 5.1 documentation compatibility; and existing render/architecture boundaries.
+The installer update helper now documents the three parameters it actually accepts, removing the stale parameter tags that produced CS1572/CS1573 warnings. The two shared-file-logging `Dispose` methods now describe queue draining, provider ownership, and single-writer shutdown semantics in enough detail to satisfy the existing XML documentation quality policy without weakening that policy.
 
-See `CHANGELOG-v3.5.6-INSTALLER-LOGGING-PORT-RECOVERY.md` and `VALIDATION-v3.5.6-source.md`.
+No runtime behavior was intentionally changed. The 3.5.8 installer compile repair, maintained logging baseline, single shared writer, renderer-affinity work, Story Editor attachment guard, and LocalGPT-aligned overlay installer are retained.
+
+See `CHANGELOG-v3.5.9-XML-DOCUMENTATION-CONTRACT-REPAIR.md` and `VALIDATION-v3.5.9-source.md`.

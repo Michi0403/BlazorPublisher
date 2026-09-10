@@ -678,7 +678,7 @@
                         SynchronizeDiscoveryActivation();
                         Refresh();
                         StateHasChanged();
-                }).ConfigureAwait(false));
+                }).ConfigureAwait(true));
         }
         catch (Exception __componentMethodException)
         {

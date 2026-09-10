@@ -142,7 +142,7 @@ else if (!_visible && _pending.Count > 0)
                 {
                         Refresh();
                         StateHasChanged();
-                }).ConfigureAwait(false));
+                }).ConfigureAwait(true));
         }
         catch (Exception __componentMethodException)
         {

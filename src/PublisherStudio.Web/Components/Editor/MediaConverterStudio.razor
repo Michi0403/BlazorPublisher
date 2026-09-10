@@ -949,7 +949,7 @@
                 {
                     RefreshJobs();
                     StateHasChanged();
-                }).ConfigureAwait(false);
+                }).ConfigureAwait(true);
                 if (_jobs.All(job => job.Status is not (MediaConversionJobStatus.Queued or MediaConversionJobStatus.Running))) break;
             }
     

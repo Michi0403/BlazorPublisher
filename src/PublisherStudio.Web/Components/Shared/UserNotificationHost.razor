@@ -66,7 +66,7 @@
         try
         {
             SynchronizeExpirationTimers();
-            TaskRunner.Run(nameof(UserNotificationHost), nameof(OnChanged), async _ => await InvokeAsync(StateHasChanged).ConfigureAwait(false));
+            TaskRunner.Run(nameof(UserNotificationHost), nameof(OnChanged), async _ => await InvokeAsync(StateHasChanged).ConfigureAwait(true));
     
         }
         catch (Exception __componentMethodException)

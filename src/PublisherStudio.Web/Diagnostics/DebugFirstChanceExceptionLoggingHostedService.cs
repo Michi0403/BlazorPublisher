@@ -91,25 +91,41 @@ public sealed class DebugFirstChanceExceptionLoggingHostedService(
         try
         {
             var exception = eventArgs.Exception;
-            var stackTrace = exception.StackTrace ?? string.Empty;
-            var applicationOwned = stackTrace.Contains("PublisherStudio.", StringComparison.Ordinal);
+            var targetSite = exception.TargetSite;
+            var declaringType = targetSite?.DeclaringType;
+            if (declaringType == typeof(PublisherStudio.Services.Logging.FileLogger)
+                || declaringType == typeof(PublisherStudio.Services.Logging.FileLoggerSharedSink))
+                return;
+
+            var applicationOwned = declaringType?.Assembly == typeof(DebugFirstChanceExceptionLoggingHostedService).Assembly;
             var level = ResolveLogLevel(exception, applicationOwned);
             if (level is null)
                 return;
 
-            var callSite = ResolveCallSite(stackTrace);
+            // Use TargetSite for the steady-state fingerprint. Materializing Exception.StackTrace for
+            // every repeated lifecycle exception allocates a stack string and then another array when
+            // it is split, which is precisely the kind of avoidable churn that shows up as constant GC.
+            var callSite = declaringType is null || targetSite is null
+                ? "target site unavailable"
+                : $"{declaringType.FullName}.{targetSite.Name}";
             var fingerprint = $"{exception.GetType().FullName}|{callSite}";
             var occurrence = occurrences.GetOrAdd(fingerprint, _ => new ExceptionOccurrence(exception.GetType().FullName ?? exception.GetType().Name, callSite));
             var count = Interlocked.Increment(ref occurrence.Count);
 
             if (count <= options.DetailedOccurrencesPerCallSite)
             {
+                // Only the bounded detailed samples pay for a full stack trace.
+                var stackTrace = exception.StackTrace ?? string.Empty;
+                var detailedCallSite = ResolveCallSite(stackTrace);
+                if (!applicationOwned && stackTrace.Contains("PublisherStudio.", StringComparison.Ordinal))
+                    applicationOwned = true;
+
                 logger.Log(
                     level.Value,
                     exception,
                     "First-chance exception observed in development. Classification: {Classification}; call site: {CallSite}; occurrence: {Occurrence}.",
                     applicationOwned ? "PublisherStudio" : "Framework lifecycle",
-                    callSite,
+                    detailedCallSite,
                     count);
                 return;
             }

@@ -1712,7 +1712,7 @@
         try
         {
             action();
-            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+            await InvokeAsync(StateHasChanged).ConfigureAwait(true);
             Logger.LogDebug("Panel Studio browser operation {Operation} completed.", operation);
         }
         catch (OperationCanceledException exception)
@@ -2713,7 +2713,7 @@
         {
             await CancelPanelPointerAsync().ConfigureAwait(false);
             SelectElement(id);
-            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+            await InvokeAsync(StateHasChanged).ConfigureAwait(true);
             await _elementContextMenu.ShowAsync(args).ConfigureAwait(false);
     
         }
@@ -2795,11 +2795,11 @@
                 _pictureEditorTargetId = id;
                 _pictureEditorSessionId = Guid.NewGuid();
                 _pictureEditorVisible = true;
-                await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+                await InvokeAsync(StateHasChanged).ConfigureAwait(true);
                 return;
             }
             EnableInteractionPreview();
-            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+            await InvokeAsync(StateHasChanged).ConfigureAwait(true);
     
         }
         catch (Exception __componentMethodException)
@@ -2855,7 +2855,7 @@
                 SelectElement(image.Id);
             }
             ClosePanelPictureEditor();
-            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+            await InvokeAsync(StateHasChanged).ConfigureAwait(true);
     
         }
         catch (Exception __componentMethodException)
@@ -3858,13 +3858,13 @@
             // not mutate the object that was just committed to the Mainframe.
             var committed = (PanelElement)Files.CloneElement(_draft);
             Panels.Normalize(Document, committed);
-            await InvokeAsync(() => Saved.InvokeAsync(committed)).ConfigureAwait(false);
-            await InvokeAsync(() => Notifications.Success("The panel was saved and remains reusable in Mainframe and exports.", "Panel saved", nameof(PanelStudio))).ConfigureAwait(false);
+            await InvokeAsync(() => Saved.InvokeAsync(committed)).ConfigureAwait(true);
+            await InvokeAsync(() => Notifications.Success("The panel was saved and remains reusable in Mainframe and exports.", "Panel saved", nameof(PanelStudio))).ConfigureAwait(true);
         }
         catch (OperationCanceledException exception)
         {
             Logger.LogDebug(exception, $"Panel Studio save was cancelled before the Mainframe accepted the project. Binding:{_interactionBindingId} Panel:{_draft?.Id} View:{_selectedViewId} Mode:{(_interactionPreview ? "Interact" : "Arrange")} TokenCancellationRequested:{exception.CancellationToken.IsCancellationRequested}.");
-            await InvokeAsync(() => _error = "The panel was not saved because the operation was cancelled.").ConfigureAwait(false);
+            await InvokeAsync(() => _error = "The panel was not saved because the operation was cancelled.").ConfigureAwait(true);
         }
         catch (Exception exception)
         {
@@ -3873,7 +3873,7 @@
             {
                 _error = exception.Message;
                 Notifications.Error(_error, "Panel save failed", nameof(PanelStudio), persistent: true);
-            }).ConfigureAwait(false);
+            }).ConfigureAwait(true);
         }
     }
 

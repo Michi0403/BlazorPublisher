@@ -1469,7 +1469,7 @@
                 _activeFeatureId = kind == PublicationVectorFeatureKind.Marker ? null : feature.Id;
             }
             feature.Points.Add(new PublicationMapPoint { Longitude = Math.Clamp(longitude, -180, 180), Latitude = Math.Clamp(latitude, -90, 90) });
-            TaskRunner.Run(nameof(DevExtremeComponentEditor), nameof(AddVectorDesignerPoint), async _ => await InvokeAsync(StateHasChanged).ConfigureAwait(false));
+            TaskRunner.Run(nameof(DevExtremeComponentEditor), nameof(AddVectorDesignerPoint), async _ => await InvokeAsync(StateHasChanged).ConfigureAwait(true));
     
         }
         catch (Exception __componentMethodException)

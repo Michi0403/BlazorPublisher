@@ -329,13 +329,13 @@ internal static class Program
                 expectedApplicationAsset,
                 expectedSetupAsset);
 
-            InstallReleaseArchivesTransactionally(
-                applicationZipPath: zipPath,
-                setupZipPath: setupZipPath,
-                targetPath: targetPath,
-                runtimeFolderName: GetRuntimeFolderName(),
-                runtimeIdentifier: runtimeIdentifier,
-                logger: logger);
+            StopInstalledPublisherStudioForUpdate(targetPath, GetRuntimeFolderName(), logger);
+
+            logger.LogInformation($"Extracting PublisherStudio app '{zipPath}' to '{targetPath}'");
+            ExtractZipWithFallback(zipPath, targetPath, logger);
+
+            logger.LogInformation($"Extracting PublisherStudio setup/bootstrap '{setupZipPath}' to '{targetPath}'");
+            ExtractZipWithFallback(setupZipPath, targetPath, logger);
 
             var installedDocumentationRoot = Path.Combine(targetPath, GetRuntimeFolderName(), "wwwroot", "help-docs");
             var installedDocumentationFiles = new[]
@@ -390,217 +390,12 @@ internal static class Program
     }
 
     /// <summary>
-    /// Stages and validates both Windows release archives before replacing the installed runtime and setup wrappers as one rollback-capable transaction.
+    /// Stops only the owned packaged runtime before overlay-extracting the validated application and setup release archives into the canonical PublisherStudio product root.
     /// User data beside those wrappers is never deleted by a normal install or update.
     /// </summary>
-    /// <param name="applicationZipPath">Validated application release archive.</param>
-    /// <param name="setupZipPath">Validated setup release archive.</param>
-    /// <param name="targetPath">Durable PublisherStudio per-user installation root.</param>
-    /// <param name="runtimeFolderName">Architecture-specific application wrapper directory.</param>
-    /// <param name="runtimeIdentifier">Runtime identifier being installed.</param>
-    /// <param name="logger">Logger used for durable setup diagnostics.</param>
-    private static void InstallReleaseArchivesTransactionally(
-        string applicationZipPath,
-        string setupZipPath,
-        string targetPath,
-        string runtimeFolderName,
-        string runtimeIdentifier,
-        ILogger logger)
-    {
-        var transactionId = Guid.NewGuid().ToString("N");
-        var stagingRoot = Path.Combine(targetPath, $".install-staging-{transactionId}");
-        var backupRoot = Path.Combine(targetPath, $".install-backup-{transactionId}");
-        var setupFolderName = "setup" + runtimeFolderName;
-        var replacements = new[] { runtimeFolderName, setupFolderName };
-        var replaced = new List<string>();
-        var backedUp = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-        try
-        {
-            Directory.CreateDirectory(stagingRoot);
-            logger.LogInformation("Staging PublisherStudio application archive before installation: {ArchivePath}", applicationZipPath);
-            ExtractZipWithFallback(applicationZipPath, stagingRoot, logger);
-            logger.LogInformation("Staging PublisherStudio setup archive before installation: {ArchivePath}", setupZipPath);
-            ExtractZipWithFallback(setupZipPath, stagingRoot, logger);
-
-            var stagedApplicationExecutable = Path.Combine(
-                stagingRoot, runtimeFolderName, GetExpectedPublishedExecutable(runtimeIdentifier, setupAsset: false));
-            var stagedSetupExecutable = Path.Combine(
-                stagingRoot, setupFolderName, GetExpectedPublishedExecutable(runtimeIdentifier, setupAsset: true));
-            if (!File.Exists(stagedApplicationExecutable))
-                throw new InvalidDataException($"Staged PublisherStudio application executable is missing: {stagedApplicationExecutable}");
-            if (!File.Exists(stagedSetupExecutable))
-                throw new InvalidDataException($"Staged PublisherStudio setup executable is missing: {stagedSetupExecutable}");
-
-            var stagedApplicationWrapper = Path.Combine(stagingRoot, runtimeFolderName);
-            var stagedSetupWrapper = Path.Combine(stagingRoot, setupFolderName);
-            var applicationIdentity = ReadStagedReleaseIdentity(stagedApplicationWrapper, "application", logger);
-            var setupIdentity = ReadStagedReleaseIdentity(stagedSetupWrapper, "setup", logger);
-            if (!string.Equals(applicationIdentity.Version, setupIdentity.Version, StringComparison.Ordinal)
-                || !string.Equals(applicationIdentity.SourceSha256, setupIdentity.SourceSha256, StringComparison.OrdinalIgnoreCase))
-            {
-                throw new InvalidDataException(
-                    $"Staged PublisherStudio application/setup release identities do not match. app={applicationIdentity.Version}/{applicationIdentity.SourceSha256}; setup={setupIdentity.Version}/{setupIdentity.SourceSha256}.");
-            }
-
-            var stagedApplicationAssembly = Path.Combine(stagedApplicationWrapper, "PublisherStudio.Web.dll");
-            var stagedSetupAssembly = Path.Combine(stagedSetupWrapper, "PublisherStudio.Setup.dll");
-            ValidateStagedAssemblyVersion(stagedApplicationAssembly, applicationIdentity.Version, "application", logger);
-            ValidateStagedAssemblyVersion(stagedSetupAssembly, setupIdentity.Version, "setup", logger);
-
-            StopInstalledPublisherStudioForUpdate(targetPath, runtimeFolderName, logger);
-            Directory.CreateDirectory(backupRoot);
-
-            foreach (var wrapperName in replacements)
-            {
-                var stagedWrapper = Path.Combine(stagingRoot, wrapperName);
-                var installedWrapper = Path.Combine(targetPath, wrapperName);
-                var backupWrapper = Path.Combine(backupRoot, wrapperName);
-
-                if (!Directory.Exists(stagedWrapper))
-                    throw new InvalidDataException($"Staged PublisherStudio wrapper is missing: {stagedWrapper}");
-
-                if (Directory.Exists(installedWrapper))
-                {
-                    Directory.Move(installedWrapper, backupWrapper);
-                    backedUp.Add(wrapperName);
-                }
-
-                try
-                {
-                    Directory.Move(stagedWrapper, installedWrapper);
-                    replaced.Add(wrapperName);
-                    logger.LogInformation("Installed fresh PublisherStudio wrapper {WrapperName}.", wrapperName);
-                }
-                catch
-                {
-                    if (Directory.Exists(installedWrapper))
-                        Directory.Delete(installedWrapper, recursive: true);
-                    if (Directory.Exists(backupWrapper))
-                    {
-                        Directory.Move(backupWrapper, installedWrapper);
-                        backedUp.Remove(wrapperName);
-                    }
-                    throw;
-                }
-            }
-
-            if (Directory.Exists(backupRoot))
-                Directory.Delete(backupRoot, recursive: true);
-            logger.LogInformation("PublisherStudio runtime and setup wrappers were replaced transactionally without touching user data in {TargetPath}.", targetPath);
-        }
-        catch (Exception exception)
-        {
-            logger.LogError(exception, "PublisherStudio transactional installation failed; restoring the previous wrappers where possible.");
-            foreach (var wrapperName in replaced.AsEnumerable().Reverse())
-            {
-                var installedWrapper = Path.Combine(targetPath, wrapperName);
-                var backupWrapper = Path.Combine(backupRoot, wrapperName);
-                try
-                {
-                    if (Directory.Exists(installedWrapper))
-                        Directory.Delete(installedWrapper, recursive: true);
-                    if (Directory.Exists(backupWrapper))
-                    {
-                        Directory.Move(backupWrapper, installedWrapper);
-                        backedUp.Remove(wrapperName);
-                    }
-                }
-                catch (Exception rollbackException)
-                {
-                    logger.LogError(rollbackException, "Could not restore PublisherStudio wrapper {WrapperName} during rollback.", wrapperName);
-                }
-            }
-
-            foreach (var wrapperName in backedUp.ToArray())
-            {
-                var installedWrapper = Path.Combine(targetPath, wrapperName);
-                var backupWrapper = Path.Combine(backupRoot, wrapperName);
-                try
-                {
-                    if (!Directory.Exists(installedWrapper) && Directory.Exists(backupWrapper))
-                    {
-                        Directory.Move(backupWrapper, installedWrapper);
-                        backedUp.Remove(wrapperName);
-                    }
-                }
-                catch (Exception rollbackException)
-                {
-                    logger.LogError(rollbackException, "Could not restore untouched PublisherStudio wrapper {WrapperName} during rollback.", wrapperName);
-                }
-            }
-            throw;
-        }
-        finally
-        {
-            try
-            {
-                if (Directory.Exists(stagingRoot))
-                    Directory.Delete(stagingRoot, recursive: true);
-                if (Directory.Exists(backupRoot) && backedUp.Count == 0)
-                    Directory.Delete(backupRoot, recursive: true);
-            }
-            catch (Exception cleanupException)
-            {
-                logger.LogWarning(cleanupException, "PublisherStudio could not fully clean transactional setup staging directories.");
-            }
-        }
-    }
-
-    /// <summary>Validates that a staged managed assembly belongs to the exact PublisherStudio release being installed.</summary>
-    /// <param name="assemblyPath">Managed assembly path.</param>
-    /// <param name="expectedVersion">Expected semantic major.minor.build version.</param>
-    /// <param name="role">Human-readable payload role.</param>
-    /// <param name="logger">Logger used for setup diagnostics.</param>
-    private static void ValidateStagedAssemblyVersion(string assemblyPath, string expectedVersion, string role, ILogger logger)
-    {
-        if (!File.Exists(assemblyPath))
-            throw new InvalidDataException($"Staged PublisherStudio {role} assembly is missing: {assemblyPath}");
-
-        var version = AssemblyName.GetAssemblyName(assemblyPath).Version;
-        var semanticVersion = version is null ? "unknown" : $"{version.Major}.{version.Minor}.{version.Build}";
-        if (!string.Equals(semanticVersion, expectedVersion, StringComparison.Ordinal))
-            throw new InvalidDataException($"Staged PublisherStudio {role} version '{semanticVersion}' does not match setup version '{expectedVersion}'.");
-
-        logger.LogInformation("Validated staged PublisherStudio {Role} assembly version {Version}.", role, semanticVersion);
-    }
-
-    /// <summary>Reads and validates the release identity shipped beside a staged PublisherStudio payload.</summary>
-    /// <param name="wrapperPath">Staged wrapper directory.</param>
-    /// <param name="role">Human-readable payload role.</param>
-    /// <param name="logger">Logger used for setup diagnostics.</param>
-    /// <returns>The staged semantic release version and source-tree SHA-256 fingerprint.</returns>
-    private static (string Version, string SourceSha256) ReadStagedReleaseIdentity(string wrapperPath, string role, ILogger logger)
-    {
-        var versionPath = Path.Combine(wrapperPath, "RELEASE-VERSION.txt");
-        var sourcePath = Path.Combine(wrapperPath, "SOURCE-SHA256.txt");
-        if (!File.Exists(versionPath))
-            throw new InvalidDataException($"Staged PublisherStudio {role} release stamp is missing: {versionPath}");
-        if (!File.Exists(sourcePath))
-            throw new InvalidDataException($"Staged PublisherStudio {role} source stamp is missing: {sourcePath}");
-
-        var stampedVersion = File.ReadAllText(versionPath).Trim();
-        var stampedSource = File.ReadAllText(sourcePath).Trim();
-        if (!System.Text.RegularExpressions.Regex.IsMatch(stampedVersion, @"^\d+\.\d\.\d$", System.Text.RegularExpressions.RegexOptions.CultureInvariant))
-            throw new InvalidDataException($"Staged PublisherStudio {role} release version is malformed: '{stampedVersion}'.");
-        if (stampedSource.Length != 64 || !stampedSource.All(Uri.IsHexDigit))
-            throw new InvalidDataException($"Staged PublisherStudio {role} source SHA-256 is malformed.");
-
-        logger.LogInformation(
-            "Validated staged PublisherStudio {Role} release identity {Version}/{SourceSha256}.",
-            role,
-            stampedVersion,
-            stampedSource);
-        return (stampedVersion, stampedSource);
-    }
-
-    /// <summary>
-    /// Stops only the installed Windows PublisherStudio runtime before replacing its files during an update.
-    /// Alternate/debug hosts are deliberately left alone unless their executable path is the installed apphost.
-    /// </summary>
-    /// <param name="installRoot">PublisherStudio per-user installation root that owns the packaged runtime.</param>
-    /// <param name="runtimeFolderName">Runtime wrapper directory name for the current Windows architecture.</param>
-    /// <param name="logger">Logger used to record ownership and termination diagnostics.</param>
+    /// <param name="installRoot">Canonical per-user PublisherStudio installation root containing the packaged runtime and runtime endpoint.</param>
+    /// <param name="runtimeFolderName">Architecture-specific application wrapper directory used to identify the runtime owned by this installation.</param>
+    /// <param name="logger">Logger used to record runtime discovery and update-shutdown diagnostics.</param>
     private static void StopInstalledPublisherStudioForUpdate(string installRoot, string runtimeFolderName, ILogger logger)
     {
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))

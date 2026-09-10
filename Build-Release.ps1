@@ -348,6 +348,21 @@ function Assert-ReleaseArchiveLayout {
         if (-not ($names -contains $expectedExecutable)) {
             throw "Release archive does not contain ${expectedExecutable}: $ArchivePath"
         }
+        if (-not [string]::IsNullOrWhiteSpace($Version)) {
+            $versionStampName = "$RootFolderName/RELEASE-VERSION.txt"
+            $sourceStampName = "$RootFolderName/SOURCE-SHA256.txt"
+            if (-not ($names -contains $versionStampName) -or -not ($names -contains $sourceStampName)) {
+                throw "Release archive is missing version/source identity stamps: $ArchivePath"
+            }
+            $versionStampEntry = $archive.Entries | Where-Object { $_.FullName.TrimStart('/') -ieq $versionStampName } | Select-Object -First 1
+            $versionReader = [IO.StreamReader]::new($versionStampEntry.Open())
+            try { $stampedVersion = $versionReader.ReadToEnd().Trim() } finally { $versionReader.Dispose() }
+            if (-not [string]::Equals($stampedVersion, $Version, [StringComparison]::Ordinal)) {
+                throw "Release archive version stamp '$stampedVersion' does not match '$Version': $ArchivePath"
+            }
+            $sourceStampEntry = $archive.Entries | Where-Object { $_.FullName.TrimStart('/') -ieq $sourceStampName } | Select-Object -First 1
+            if ($null -eq $sourceStampEntry -or $sourceStampEntry.Length -lt 64) { throw "Release archive source identity stamp is missing or malformed: $ArchivePath" }
+        }
         if ($RequireDocumentation) {
             $requiredDocumentation = @(
                 "$RootFolderName/wwwroot/help-docs/index.html",
@@ -948,7 +963,14 @@ function Publish-Runtime {
     Copy-Item -LiteralPath $publisherIcon -Destination (Join-Path $setupFolder "PublisherStudio.ico") -Force
     Copy-Item -LiteralPath $publisherIcon -Destination (Join-Path $appFolder "PublisherStudio.ico") -Force
 
-    $requiredSetupFiles = @("Install.cmd", "Update.cmd", "Start.cmd", "PublisherStudio.ico")
+    $utf8NoBom = New-Object Text.UTF8Encoding($false)
+    foreach ($releasePayloadFolder in @($appFolder, $setupFolder)) {
+        [IO.File]::WriteAllText((Join-Path $releasePayloadFolder 'RELEASE-VERSION.txt'), "$appVersion`n", $utf8NoBom)
+        [IO.File]::WriteAllText((Join-Path $releasePayloadFolder 'SOURCE-SHA256.txt'), "$($script:releaseSourceFingerprint)`n", $utf8NoBom)
+    }
+    Write-Host "Stamped Windows PublisherStudio runtime and setup payloads with version $appVersion and source fingerprint $($script:releaseSourceFingerprint)." -ForegroundColor DarkCyan
+
+    $requiredSetupFiles = @("Install.cmd", "Update.cmd", "Start.cmd", "PublisherStudio.ico", "RELEASE-VERSION.txt", "SOURCE-SHA256.txt")
     $missingSetupFiles = @($requiredSetupFiles | Where-Object { -not (Test-Path -LiteralPath (Join-Path $setupFolder $_) -PathType Leaf) })
     if ($missingSetupFiles.Count -gt 0) { throw "Published setup is incomplete. Missing: $($missingSetupFiles -join ', ')" }
 
@@ -957,7 +979,7 @@ function Publish-Runtime {
     New-PublisherStudioReleaseArchive -SourceDirectory $appFolder -DestinationPath $appZip -RootFolderName $profile.AppFolder -WriteUnixPermissions:(!$Rid.StartsWith("win-")) -UnixExecutableRelativePaths @($appExecutable)
     New-PublisherStudioReleaseArchive -SourceDirectory $setupFolder -DestinationPath $setupZip -RootFolderName $profile.SetupFolder -WriteUnixPermissions:(!$Rid.StartsWith("win-")) -UnixExecutableRelativePaths @($setupExecutable)
     Assert-ReleaseArchiveLayout -ArchivePath $appZip -RootFolderName $profile.AppFolder -Executable $appExecutable -Version $appVersion -RequireDocumentation
-    Assert-ReleaseArchiveLayout -ArchivePath $setupZip -RootFolderName $profile.SetupFolder -Executable $setupExecutable
+    Assert-ReleaseArchiveLayout -ArchivePath $setupZip -RootFolderName $profile.SetupFolder -Executable $setupExecutable -Version $appVersion
     $script:releaseZipPaths.Add($appZip)
     $script:releaseZipPaths.Add($setupZip)
     Write-Host "Created portable ZIP $appZip" -ForegroundColor Green

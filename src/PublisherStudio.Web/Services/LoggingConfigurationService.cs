@@ -64,7 +64,7 @@ public sealed class LoggingConfigurationService(
 
             services.AddSingleton<ILoggerProvider>(provider =>
                 new FileLoggerProvider(provider.GetRequiredService<IOptionsMonitor<FileLoggerCoreOptions>>()));
-            logger.LogInformation("Registered the optional file logger provider. Blank FilePath writes PublisherStudio.log beside the running application.");
+            logger.LogInformation("Registered the optional file logger provider. Blank FilePath writes PublisherStudio.log in the durable per-user PublisherStudio directory.");
         }
         catch (Exception exception)
         {

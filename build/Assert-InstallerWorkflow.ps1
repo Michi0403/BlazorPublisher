@@ -13,8 +13,15 @@ function Fail([string]$Message) {
 $program = Get-Content -LiteralPath (Join-Path $installerRoot 'Program.cs') -Raw
 foreach ($required in @(
     'Path.Combine(localAppData, "PublisherStudio")',
-    'ExtractZipWithFallback(zipPath, targetPath, logger)',
-    'ExtractZipWithFallback(setupZipPath, targetPath, logger)',
+    'InstallReleaseArchivesTransactionally(',
+    'ExtractZipWithFallback(applicationZipPath, stagingRoot, logger)',
+    'ExtractZipWithFallback(setupZipPath, stagingRoot, logger)',
+    'ReadStagedReleaseIdentity(stagedApplicationWrapper, "application", logger)',
+    'ReadStagedReleaseIdentity(stagedSetupWrapper, "setup", logger)',
+    'ValidateStagedAssemblyVersion(stagedApplicationAssembly, applicationIdentity.Version, "application", logger)',
+    'ValidateStagedAssemblyVersion(stagedSetupAssembly, setupIdentity.Version, "setup", logger)',
+    'StopInstalledPublisherStudioForUpdate(targetPath, runtimeFolderName, logger)',
+    'PublisherStudio runtime and setup wrappers were replaced transactionally without touching user data',
     'PublisherStudio app and setup/bootstrap files now reside',
     'Running the default install, update, shortcut, and start routine.',
     'TryStartDetachedSetup(args)',
@@ -59,9 +66,9 @@ foreach ($runtimeAsset in $runtimeAssets) {
 }
 
 $installStart = $program.IndexOf('private static async Task InstallPublisherStudioAsync', [StringComparison]::Ordinal)
-$uninstallStart = $program.IndexOf('private static void UninstallPublisherStudioWindows', [StringComparison]::Ordinal)
-if ($installStart -lt 0 -or $uninstallStart -le $installStart) { Fail 'InstallPublisherStudioAsync could not be isolated for preservation validation.' }
-$installText = $program.Substring($installStart, $uninstallStart - $installStart)
+$installEnd = $program.IndexOf('private static void InstallReleaseArchivesTransactionally', $installStart, [StringComparison]::Ordinal)
+if ($installStart -lt 0 -or $installEnd -le $installStart) { Fail 'InstallPublisherStudioAsync could not be isolated for preservation validation.' }
+$installText = $program.Substring($installStart, $installEnd - $installStart)
 $deleteCalls = [Regex]::Matches($installText, 'DeleteIfExists\(targetPath, logger\)').Count
 if ($deleteCalls -ne 1) { Fail "Normal installation contains $deleteCalls product-root delete calls; exactly one force-delete-gated call is required." }
 if (-not [Regex]::IsMatch($installText, 'if\s*\(options\.ForceDelete\)\s*DeleteIfExists\(targetPath, logger\)', [Text.RegularExpressions.RegexOptions]::CultureInvariant)) {
@@ -144,4 +151,4 @@ foreach ($forbidden in @('Write-ReleaseManifest', 'Write-BootstrapRepairManifest
     if ($release.Contains($forbidden)) { Fail "Build-Release.ps1 still enforces the superseded repair-manifest flow: $forbidden" }
 }
 
-Write-Host 'PublisherStudio installer workflow validation passed. Double-click installs or updates under LOCALAPPDATA\PublisherStudio, creates the mandatory shortcuts, and starts the application.'
+Write-Host 'PublisherStudio installer workflow validation passed. Double-click installs or updates transactionally under LOCALAPPDATA\PublisherStudio, preserves user data, creates the mandatory shortcuts, and starts the application.'

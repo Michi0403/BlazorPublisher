@@ -36,6 +36,43 @@ internal static class Program
     /// </summary>
     private const string DetachedSetupEnvironmentVariable = "PUBLISHERSTUDIO_SETUP_DETACHED";
 
+    /// <summary>Returns the installer assembly semantic version used by diagnostics and HTTP identification.</summary>
+    /// <value>The current setup assembly version normalized to major.minor.build.</value>
+    private static string SetupSemanticVersion
+    {
+        get
+        {
+            var version = typeof(Program).Assembly.GetName().Version;
+            return version is null ? "0.0.0" : $"{version.Major}.{version.Minor}.{version.Build}";
+        }
+    }
+
+    /// <summary>Resolves the durable setup transcript path beneath the current PublisherStudio per-user directory, with a temporary fallback only when that root cannot be created.</summary>
+    /// <returns>An absolute writable path for PublisherStudio setup diagnostics.</returns>
+    private static string ResolveSetupLogPath()
+    {
+        try
+        {
+            var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            if (!string.IsNullOrWhiteSpace(localAppData))
+            {
+                var root = Path.Combine(localAppData, "PublisherStudio");
+                Directory.CreateDirectory(root);
+                var candidate = Path.Combine(root, "PublisherStudio.Setup.log");
+                using (File.Open(candidate, FileMode.Append, FileAccess.Write, FileShare.ReadWrite)) { }
+                return candidate;
+            }
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            Console.Error.WriteLine($"PublisherStudio setup could not prepare its normal log directory: {exception.Message}");
+        }
+
+        var fallbackRoot = Path.Combine(Path.GetTempPath(), "PublisherStudio");
+        Directory.CreateDirectory(fallbackRoot);
+        return Path.Combine(fallbackRoot, "PublisherStudio.Setup.log");
+    }
+
     /// <summary>
     /// Attempts to start detached setup for <see cref="Program"/>, keeping the operation consistent with the state and invariants of the surrounding program workflow.
     /// </summary>
@@ -96,7 +133,7 @@ internal static class Program
 
         var launchedByDoubleClick = args.Length == 0 && Environment.UserInteractive;
 
-        Console.WriteLine("PublisherStudio Setup 2.2.5");
+        Console.WriteLine($"PublisherStudio Setup {SetupSemanticVersion}");
         var options = CliOptions.Parse(args);
         if (args.Length == 0)
             Console.WriteLine("No command-line action was supplied. Running the default install, update, shortcut, and start routine.");
@@ -136,16 +173,18 @@ internal static class Program
 
             ColorConsoleLoggerConfiguration colorLoggerProviderOptions = new ColorConsoleLoggerConfiguration() { EventId = 0 };
             ColorConsoleLoggerProvider colorLoggerProvider = new ColorConsoleLoggerProvider(colorLoggerProviderOptions);
-
+            var setupLogPath = ResolveSetupLogPath();
+            SetupFileLoggerProvider setupFileLoggerProvider = new SetupFileLoggerProvider(setupLogPath);
 
             using var loggerFactory = LoggerFactory.Create(configure =>
             {
                 configure.ClearProviders();
                 configure.AddProvider(colorLoggerProvider);
-                //configure.AddProvider()
+                configure.AddProvider(setupFileLoggerProvider);
             });
             var logger = loggerFactory.CreateLogger("Startup");
             logger.LogInformation("Configured app configuration.");
+            logger.LogInformation("Persistent setup transcript: {SetupLogPath}", setupLogPath);
 
             if (options.ShowHelp)
             {
@@ -205,8 +244,8 @@ internal static class Program
                 catch (Exception ex)
                 {
                     logger.LogError(ex, "Error in StartPublisherStudio.");
+                    return 1;
                 }
-
 
                 logger.LogDebug("Done.");
                 return 0;
@@ -290,11 +329,13 @@ internal static class Program
                 expectedApplicationAsset,
                 expectedSetupAsset);
 
-            logger.LogInformation($"Extracting PublisherStudio app '{zipPath}' to '{targetPath}'");
-            ExtractZipWithFallback(zipPath, targetPath, logger);
-
-            logger.LogInformation($"Extracting PublisherStudio setup/bootstrap '{setupZipPath}' to '{targetPath}'");
-            ExtractZipWithFallback(setupZipPath, targetPath, logger);
+            InstallReleaseArchivesTransactionally(
+                applicationZipPath: zipPath,
+                setupZipPath: setupZipPath,
+                targetPath: targetPath,
+                runtimeFolderName: GetRuntimeFolderName(),
+                runtimeIdentifier: runtimeIdentifier,
+                logger: logger);
 
             var installedDocumentationRoot = Path.Combine(targetPath, GetRuntimeFolderName(), "wwwroot", "help-docs");
             var installedDocumentationFiles = new[]
@@ -345,6 +386,328 @@ internal static class Program
         {
             logger.LogError(ex, $"Error in InstallPublisherStudioAsync. options {options}");
             throw;
+        }
+    }
+
+    /// <summary>
+    /// Stages and validates both Windows release archives before replacing the installed runtime and setup wrappers as one rollback-capable transaction.
+    /// User data beside those wrappers is never deleted by a normal install or update.
+    /// </summary>
+    /// <param name="applicationZipPath">Validated application release archive.</param>
+    /// <param name="setupZipPath">Validated setup release archive.</param>
+    /// <param name="targetPath">Durable PublisherStudio per-user installation root.</param>
+    /// <param name="runtimeFolderName">Architecture-specific application wrapper directory.</param>
+    /// <param name="runtimeIdentifier">Runtime identifier being installed.</param>
+    /// <param name="logger">Logger used for durable setup diagnostics.</param>
+    private static void InstallReleaseArchivesTransactionally(
+        string applicationZipPath,
+        string setupZipPath,
+        string targetPath,
+        string runtimeFolderName,
+        string runtimeIdentifier,
+        ILogger logger)
+    {
+        var transactionId = Guid.NewGuid().ToString("N");
+        var stagingRoot = Path.Combine(targetPath, $".install-staging-{transactionId}");
+        var backupRoot = Path.Combine(targetPath, $".install-backup-{transactionId}");
+        var setupFolderName = "setup" + runtimeFolderName;
+        var replacements = new[] { runtimeFolderName, setupFolderName };
+        var replaced = new List<string>();
+        var backedUp = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        try
+        {
+            Directory.CreateDirectory(stagingRoot);
+            logger.LogInformation("Staging PublisherStudio application archive before installation: {ArchivePath}", applicationZipPath);
+            ExtractZipWithFallback(applicationZipPath, stagingRoot, logger);
+            logger.LogInformation("Staging PublisherStudio setup archive before installation: {ArchivePath}", setupZipPath);
+            ExtractZipWithFallback(setupZipPath, stagingRoot, logger);
+
+            var stagedApplicationExecutable = Path.Combine(
+                stagingRoot, runtimeFolderName, GetExpectedPublishedExecutable(runtimeIdentifier, setupAsset: false));
+            var stagedSetupExecutable = Path.Combine(
+                stagingRoot, setupFolderName, GetExpectedPublishedExecutable(runtimeIdentifier, setupAsset: true));
+            if (!File.Exists(stagedApplicationExecutable))
+                throw new InvalidDataException($"Staged PublisherStudio application executable is missing: {stagedApplicationExecutable}");
+            if (!File.Exists(stagedSetupExecutable))
+                throw new InvalidDataException($"Staged PublisherStudio setup executable is missing: {stagedSetupExecutable}");
+
+            var stagedApplicationWrapper = Path.Combine(stagingRoot, runtimeFolderName);
+            var stagedSetupWrapper = Path.Combine(stagingRoot, setupFolderName);
+            var applicationIdentity = ReadStagedReleaseIdentity(stagedApplicationWrapper, "application", logger);
+            var setupIdentity = ReadStagedReleaseIdentity(stagedSetupWrapper, "setup", logger);
+            if (!string.Equals(applicationIdentity.Version, setupIdentity.Version, StringComparison.Ordinal)
+                || !string.Equals(applicationIdentity.SourceSha256, setupIdentity.SourceSha256, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidDataException(
+                    $"Staged PublisherStudio application/setup release identities do not match. app={applicationIdentity.Version}/{applicationIdentity.SourceSha256}; setup={setupIdentity.Version}/{setupIdentity.SourceSha256}.");
+            }
+
+            var stagedApplicationAssembly = Path.Combine(stagedApplicationWrapper, "PublisherStudio.Web.dll");
+            var stagedSetupAssembly = Path.Combine(stagedSetupWrapper, "PublisherStudio.Setup.dll");
+            ValidateStagedAssemblyVersion(stagedApplicationAssembly, applicationIdentity.Version, "application", logger);
+            ValidateStagedAssemblyVersion(stagedSetupAssembly, setupIdentity.Version, "setup", logger);
+
+            StopInstalledPublisherStudioForUpdate(targetPath, runtimeFolderName, logger);
+            Directory.CreateDirectory(backupRoot);
+
+            foreach (var wrapperName in replacements)
+            {
+                var stagedWrapper = Path.Combine(stagingRoot, wrapperName);
+                var installedWrapper = Path.Combine(targetPath, wrapperName);
+                var backupWrapper = Path.Combine(backupRoot, wrapperName);
+
+                if (!Directory.Exists(stagedWrapper))
+                    throw new InvalidDataException($"Staged PublisherStudio wrapper is missing: {stagedWrapper}");
+
+                if (Directory.Exists(installedWrapper))
+                {
+                    Directory.Move(installedWrapper, backupWrapper);
+                    backedUp.Add(wrapperName);
+                }
+
+                try
+                {
+                    Directory.Move(stagedWrapper, installedWrapper);
+                    replaced.Add(wrapperName);
+                    logger.LogInformation("Installed fresh PublisherStudio wrapper {WrapperName}.", wrapperName);
+                }
+                catch
+                {
+                    if (Directory.Exists(installedWrapper))
+                        Directory.Delete(installedWrapper, recursive: true);
+                    if (Directory.Exists(backupWrapper))
+                    {
+                        Directory.Move(backupWrapper, installedWrapper);
+                        backedUp.Remove(wrapperName);
+                    }
+                    throw;
+                }
+            }
+
+            if (Directory.Exists(backupRoot))
+                Directory.Delete(backupRoot, recursive: true);
+            logger.LogInformation("PublisherStudio runtime and setup wrappers were replaced transactionally without touching user data in {TargetPath}.", targetPath);
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "PublisherStudio transactional installation failed; restoring the previous wrappers where possible.");
+            foreach (var wrapperName in replaced.AsEnumerable().Reverse())
+            {
+                var installedWrapper = Path.Combine(targetPath, wrapperName);
+                var backupWrapper = Path.Combine(backupRoot, wrapperName);
+                try
+                {
+                    if (Directory.Exists(installedWrapper))
+                        Directory.Delete(installedWrapper, recursive: true);
+                    if (Directory.Exists(backupWrapper))
+                    {
+                        Directory.Move(backupWrapper, installedWrapper);
+                        backedUp.Remove(wrapperName);
+                    }
+                }
+                catch (Exception rollbackException)
+                {
+                    logger.LogError(rollbackException, "Could not restore PublisherStudio wrapper {WrapperName} during rollback.", wrapperName);
+                }
+            }
+
+            foreach (var wrapperName in backedUp.ToArray())
+            {
+                var installedWrapper = Path.Combine(targetPath, wrapperName);
+                var backupWrapper = Path.Combine(backupRoot, wrapperName);
+                try
+                {
+                    if (!Directory.Exists(installedWrapper) && Directory.Exists(backupWrapper))
+                    {
+                        Directory.Move(backupWrapper, installedWrapper);
+                        backedUp.Remove(wrapperName);
+                    }
+                }
+                catch (Exception rollbackException)
+                {
+                    logger.LogError(rollbackException, "Could not restore untouched PublisherStudio wrapper {WrapperName} during rollback.", wrapperName);
+                }
+            }
+            throw;
+        }
+        finally
+        {
+            try
+            {
+                if (Directory.Exists(stagingRoot))
+                    Directory.Delete(stagingRoot, recursive: true);
+                if (Directory.Exists(backupRoot) && backedUp.Count == 0)
+                    Directory.Delete(backupRoot, recursive: true);
+            }
+            catch (Exception cleanupException)
+            {
+                logger.LogWarning(cleanupException, "PublisherStudio could not fully clean transactional setup staging directories.");
+            }
+        }
+    }
+
+    /// <summary>Validates that a staged managed assembly belongs to the exact PublisherStudio release being installed.</summary>
+    /// <param name="assemblyPath">Managed assembly path.</param>
+    /// <param name="expectedVersion">Expected semantic major.minor.build version.</param>
+    /// <param name="role">Human-readable payload role.</param>
+    /// <param name="logger">Logger used for setup diagnostics.</param>
+    private static void ValidateStagedAssemblyVersion(string assemblyPath, string expectedVersion, string role, ILogger logger)
+    {
+        if (!File.Exists(assemblyPath))
+            throw new InvalidDataException($"Staged PublisherStudio {role} assembly is missing: {assemblyPath}");
+
+        var version = AssemblyName.GetAssemblyName(assemblyPath).Version;
+        var semanticVersion = version is null ? "unknown" : $"{version.Major}.{version.Minor}.{version.Build}";
+        if (!string.Equals(semanticVersion, expectedVersion, StringComparison.Ordinal))
+            throw new InvalidDataException($"Staged PublisherStudio {role} version '{semanticVersion}' does not match setup version '{expectedVersion}'.");
+
+        logger.LogInformation("Validated staged PublisherStudio {Role} assembly version {Version}.", role, semanticVersion);
+    }
+
+    /// <summary>Reads and validates the release identity shipped beside a staged PublisherStudio payload.</summary>
+    /// <param name="wrapperPath">Staged wrapper directory.</param>
+    /// <param name="role">Human-readable payload role.</param>
+    /// <param name="logger">Logger used for setup diagnostics.</param>
+    /// <returns>The staged semantic release version and source-tree SHA-256 fingerprint.</returns>
+    private static (string Version, string SourceSha256) ReadStagedReleaseIdentity(string wrapperPath, string role, ILogger logger)
+    {
+        var versionPath = Path.Combine(wrapperPath, "RELEASE-VERSION.txt");
+        var sourcePath = Path.Combine(wrapperPath, "SOURCE-SHA256.txt");
+        if (!File.Exists(versionPath))
+            throw new InvalidDataException($"Staged PublisherStudio {role} release stamp is missing: {versionPath}");
+        if (!File.Exists(sourcePath))
+            throw new InvalidDataException($"Staged PublisherStudio {role} source stamp is missing: {sourcePath}");
+
+        var stampedVersion = File.ReadAllText(versionPath).Trim();
+        var stampedSource = File.ReadAllText(sourcePath).Trim();
+        if (!System.Text.RegularExpressions.Regex.IsMatch(stampedVersion, @"^\d+\.\d\.\d$", System.Text.RegularExpressions.RegexOptions.CultureInvariant))
+            throw new InvalidDataException($"Staged PublisherStudio {role} release version is malformed: '{stampedVersion}'.");
+        if (stampedSource.Length != 64 || !stampedSource.All(Uri.IsHexDigit))
+            throw new InvalidDataException($"Staged PublisherStudio {role} source SHA-256 is malformed.");
+
+        logger.LogInformation(
+            "Validated staged PublisherStudio {Role} release identity {Version}/{SourceSha256}.",
+            role,
+            stampedVersion,
+            stampedSource);
+        return (stampedVersion, stampedSource);
+    }
+
+    /// <summary>
+    /// Stops only the installed Windows PublisherStudio runtime before replacing its files during an update.
+    /// Alternate/debug hosts are deliberately left alone unless their executable path is the installed apphost.
+    /// </summary>
+    /// <param name="installRoot">PublisherStudio per-user installation root that owns the packaged runtime.</param>
+    /// <param name="runtimeFolderName">Runtime wrapper directory name for the current Windows architecture.</param>
+    /// <param name="logger">Logger used to record ownership and termination diagnostics.</param>
+    private static void StopInstalledPublisherStudioForUpdate(string installRoot, string runtimeFolderName, ILogger logger)
+    {
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            return;
+
+        var expectedExecutablePath = Path.GetFullPath(
+            Path.Combine(installRoot, runtimeFolderName, "PublisherStudio.Web.exe"));
+        var endpointPath = Path.Combine(installRoot, "runtime", "server.json");
+        var ownedProcessIds = new HashSet<int>();
+        var endpointOwnedByInstalledRuntime = false;
+
+        if (File.Exists(endpointPath))
+        {
+            try
+            {
+                using var endpoint = JsonDocument.Parse(File.ReadAllText(endpointPath));
+                var root = endpoint.RootElement;
+                var endpointExecutable = root.TryGetProperty("ExecutablePath", out var executableElement)
+                    ? executableElement.GetString()
+                    : null;
+                endpointOwnedByInstalledRuntime = PathsEqual(endpointExecutable, expectedExecutablePath);
+                if (endpointOwnedByInstalledRuntime
+                    && root.TryGetProperty("ProcessId", out var processIdElement)
+                    && processIdElement.TryGetInt32(out var processId)
+                    && processId > 0)
+                {
+                    ownedProcessIds.Add(processId);
+                }
+            }
+            catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or JsonException)
+            {
+                logger.LogDebug(exception, "Could not inspect the PublisherStudio runtime endpoint before update.");
+            }
+        }
+
+        foreach (var process in Process.GetProcessesByName("PublisherStudio.Web"))
+        {
+            using (process)
+            {
+                try
+                {
+                    if (PathsEqual(process.MainModule?.FileName, expectedExecutablePath))
+                        ownedProcessIds.Add(process.Id);
+                }
+                catch (Exception exception) when (exception is InvalidOperationException or System.ComponentModel.Win32Exception or NotSupportedException)
+                {
+                    logger.LogDebug(exception, "Could not inspect PublisherStudio process {ProcessId} while preparing the update.", process.Id);
+                }
+            }
+        }
+
+        foreach (var processId in ownedProcessIds)
+        {
+            try
+            {
+                using var process = Process.GetProcessById(processId);
+                if (process.HasExited)
+                    continue;
+
+                logger.LogInformation(
+                    "Stopping installed PublisherStudio process {ProcessId} before replacing runtime files.",
+                    processId);
+                process.Kill(entireProcessTree: true);
+                if (!process.WaitForExit(15000))
+                    throw new IOException($"PublisherStudio process {processId} did not exit before the update timeout.");
+            }
+            catch (ArgumentException)
+            {
+                // Process already exited between discovery and termination.
+            }
+        }
+
+        if (endpointOwnedByInstalledRuntime && File.Exists(endpointPath))
+        {
+            try
+            {
+                File.Delete(endpointPath);
+                logger.LogInformation("Removed the installed PublisherStudio runtime endpoint before update extraction.");
+            }
+            catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+            {
+                throw new IOException($"Could not remove stale PublisherStudio runtime endpoint '{endpointPath}'.", exception);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Compares two filesystem paths using the Windows path semantics used by the setup application.
+    /// </summary>
+    /// <param name="left">Candidate path obtained from endpoint or process identity.</param>
+    /// <param name="right">Expected installed PublisherStudio executable path.</param>
+    /// <returns><see langword="true"/> when the normalized paths identify the same Windows file.</returns>
+    private static bool PathsEqual(string? left, string right)
+    {
+        if (string.IsNullOrWhiteSpace(left))
+            return false;
+
+        try
+        {
+            return string.Equals(
+                Path.GetFullPath(left).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar),
+                Path.GetFullPath(right).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar),
+                StringComparison.OrdinalIgnoreCase);
+        }
+        catch (Exception exception) when (exception is ArgumentException or NotSupportedException or PathTooLongException)
+        {
+            return false;
         }
     }
 
@@ -1614,7 +1977,7 @@ internal static class Program
 
                 using var totalTimeout = new CancellationTokenSource(TimeSpan.FromMinutes(45));
                 using var request = new HttpRequestMessage(HttpMethod.Get, url);
-                request.Headers.UserAgent.ParseAdd("PublisherStudioSetupTool/2.2.5");
+                request.Headers.UserAgent.ParseAdd($"PublisherStudioSetupTool/{SetupSemanticVersion}");
                 request.Headers.Accept.ParseAdd("*/*");
                 if (resumeAt > 0)
                     request.Headers.Range = new RangeHeaderValue(resumeAt, null);
@@ -2053,7 +2416,7 @@ internal static class Program
         try
         {
             var client = new HttpClient();
-            client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("PublisherStudioSetupTool", "2.2.5"));
+            client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("PublisherStudioSetupTool", SetupSemanticVersion));
             client.Timeout = Timeout.InfiniteTimeSpan;
             return client;
         }

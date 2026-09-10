@@ -30,7 +30,19 @@ public static class Program
     /// <returns>A task that completes when the operation has finished.</returns>
     public static async Task Main(string[] args)
     {
-        var app = BuildWebApp(args);
+        WebApplication app;
+        try
+        {
+            TryAppendBootstrapDiagnostic($"PublisherStudio process starting. assembly={typeof(Program).Assembly.GetName().Version}; executable={Environment.ProcessPath ?? "unknown"}; base={AppContext.BaseDirectory}");
+            app = BuildWebApp(args);
+        }
+        catch (Exception exception)
+        {
+            TryAppendBootstrapDiagnostic("PublisherStudio failed before the configured application logger became available.", exception);
+            Console.Error.WriteLine(exception);
+            throw;
+        }
+
         await using var configuredAppAsyncDisposal = app.ConfigureAwait(false);
         var endpointWriter = app.Services.GetRequiredService<IRuntimeEndpointWriter>();
         var hostLogger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("PublisherStudio.Host");
@@ -48,6 +60,8 @@ public static class Program
         catch (Exception exception)
         {
             hostLogger.LogCritical(exception, "PublisherStudio host terminated unexpectedly.");
+            TryAppendBootstrapDiagnostic("PublisherStudio host terminated unexpectedly.", exception);
+            Console.Error.WriteLine(exception);
             throw;
         }
         finally
@@ -60,6 +74,29 @@ public static class Program
             {
                 hostLogger.LogError(exception, "PublisherStudio could not remove its owned runtime endpoint during shutdown.");
             }
+        }
+    }
+
+    /// <summary>Appends an early-start or fatal diagnostic directly to the durable PublisherStudio log without depending on DI or the configured logger pipeline.</summary>
+    /// <param name="message">Diagnostic message to persist.</param>
+    /// <param name="exception">Optional exception to include in full.</param>
+    private static void TryAppendBootstrapDiagnostic(string message, Exception? exception = null)
+    {
+        try
+        {
+            var logPath = PublisherApplicationDataPaths.ResolveUserPath("PublisherStudio.log");
+            var directory = Path.GetDirectoryName(logPath);
+            if (!string.IsNullOrWhiteSpace(directory))
+                Directory.CreateDirectory(directory);
+
+            var entry = $"{DateTimeOffset.UtcNow:O} [Bootstrap] {message}";
+            if (exception is not null)
+                entry += Environment.NewLine + exception;
+            File.AppendAllText(logPath, entry + Environment.NewLine);
+        }
+        catch (Exception diagnosticException) when (diagnosticException is IOException or UnauthorizedAccessException)
+        {
+            System.Diagnostics.Trace.TraceError($"PublisherStudio could not persist bootstrap diagnostics: {diagnosticException}");
         }
     }
 

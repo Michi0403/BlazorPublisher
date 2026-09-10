@@ -6,7 +6,7 @@ Run `Prepare-DevExpressAssets.cmd`. A clean source package intentionally omits g
 
 ## The application reports a port override warning
 
-PublisherStudio uses the configured Kestrel endpoint as the authority. The maintained default is `127.0.0.1:58071`. Remove conflicting `ASPNETCORE_URLS` or launch-profile addresses when you want a quiet startup log.
+PublisherStudio prefers `127.0.0.1:58071`, but packaged startup preflights the requested loopback port and falls back to an OS-assigned port when Windows rejects it (for example because the port belongs to an excluded/reserved range). The actual endpoint written to `runtime/server.json` is authoritative. Remove conflicting `ASPNETCORE_URLS` or launch-profile addresses when diagnosing custom-host startup.
 
 ## LocalGPT is not discovered
 

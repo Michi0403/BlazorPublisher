@@ -1,4 +1,5 @@
 using System.Net;
+using System.Net.Sockets;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -47,25 +48,74 @@ public sealed class ApplicationPortResolver(
                 if (!string.Equals(args[index], "--port", StringComparison.OrdinalIgnoreCase)) continue;
                 if (index + 1 < args.Count && int.TryParse(args[index + 1], out var port) && port is >= 0 and <= 65535)
                 {
-                    logger.LogInformation("PublisherStudio port {Port} was selected from the command line.", port);
-                    return port;
+                    var resolvedPort = ResolveAvailableLoopbackPort(port, "the command line");
+                    logger.LogInformation("PublisherStudio port {Port} was selected from the command line; effective loopback port is {EffectivePort}.", port, resolvedPort);
+                    return resolvedPort;
                 }
             }
 
             var configured = Environment.GetEnvironmentVariable(systemVariables.PortEnvironmentVariableName);
-            var resolved = int.TryParse(configured, out var environmentPort) && environmentPort is >= 0 and <= 65535
+            var requested = int.TryParse(configured, out var environmentPort) && environmentPort is >= 0 and <= 65535
                 ? environmentPort
                 : systemVariables.DefaultPort;
+            var source = string.IsNullOrWhiteSpace(configured) ? "the system-variable default" : systemVariables.PortEnvironmentVariableName;
+            var resolved = ResolveAvailableLoopbackPort(requested, source);
             logger.LogInformation(
-                "PublisherStudio loopback port {Port} was selected from {Source}.",
-                resolved,
-                string.IsNullOrWhiteSpace(configured) ? "the system-variable default" : systemVariables.PortEnvironmentVariableName);
+                "PublisherStudio loopback port {RequestedPort} was selected from {Source}; effective loopback port is {EffectivePort}.",
+                requested,
+                source,
+                resolved);
             return resolved;
         }
         catch (Exception exception)
         {
             logger.LogError(exception, "PublisherStudio port resolution failed.");
             throw;
+        }
+    }
+
+    /// <summary>
+    /// Keeps the preferred PublisherStudio loopback port when Windows permits binding it and otherwise selects an OS-assigned free loopback port.
+    /// This protects packaged startup from excluded/reserved Windows port ranges while preserving the configured port whenever it is usable.
+    /// </summary>
+    /// <param name="requestedPort">Preferred port, or zero to request an operating-system assigned port.</param>
+    /// <param name="source">Human-readable source used for diagnostics.</param>
+    /// <returns>A loopback port that was bindable during the preflight probe.</returns>
+    private int ResolveAvailableLoopbackPort(int requestedPort, string source)
+    {
+        TcpListener? listener = null;
+        try
+        {
+            listener = new TcpListener(IPAddress.Loopback, requestedPort);
+            listener.Start();
+            var effectivePort = ((IPEndPoint)listener.LocalEndpoint).Port;
+            return effectivePort;
+        }
+        catch (SocketException exception) when (requestedPort > 0)
+        {
+            logger.LogWarning(
+                exception,
+                "PublisherStudio cannot bind preferred loopback port {RequestedPort} from {Source}; selecting an OS-assigned loopback port instead.",
+                requestedPort,
+                source);
+        }
+        finally
+        {
+            listener?.Stop();
+        }
+
+        listener = null;
+        try
+        {
+            listener = new TcpListener(IPAddress.Loopback, 0);
+            listener.Start();
+            var fallbackPort = ((IPEndPoint)listener.LocalEndpoint).Port;
+            logger.LogInformation("PublisherStudio selected fallback loopback port {Port}.", fallbackPort);
+            return fallbackPort;
+        }
+        finally
+        {
+            listener?.Stop();
         }
     }
 }

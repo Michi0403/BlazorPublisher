@@ -8,8 +8,8 @@ namespace PublisherStudio.BusinessObjects;
 /// </summary>
 public sealed class FileLoggerCoreOptions
 {
-    /// <summary>Allows callers to override the default runtime-directory log destination when a specific file is required.</summary>
-    /// <value>An explicit log file path, or an empty value to use the current application runtime directory.</value>
+    /// <summary>Allows callers to override the durable per-user log destination when a specific file is required.</summary>
+    /// <value>An explicit log file path, or an empty value to use the durable per-user PublisherStudio root.</value>
     [JsonInclude]
     public string? FilePath { get; set; }
 

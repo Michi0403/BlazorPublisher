@@ -7,7 +7,8 @@ using PublisherStudio.BusinessObjects;
 namespace PublisherStudio.Services.Logging;
 
 /// <summary>
-/// Writes PublisherStudio application log entries to a background file queue using the same runtime-directory fallback as LocalGPT.
+/// Writes PublisherStudio application log entries to a background file queue.
+/// Blank destinations resolve to the durable per-user PublisherStudio root rather than the executable or current working directory.
 /// </summary>
 public sealed class FileLogger : ILogger, IDisposable
 {
@@ -38,9 +39,7 @@ public sealed class FileLogger : ILogger, IDisposable
         {
             ArgumentNullException.ThrowIfNull(optionsMonitor);
             options = optionsMonitor.CurrentValue;
-            realPath = string.IsNullOrWhiteSpace(options.FilePath)
-                ? Path.Combine(Directory.GetCurrentDirectory(), "PublisherStudio.log")
-                : Path.GetFullPath(Environment.ExpandEnvironmentVariables(options.FilePath));
+            realPath = ResolveLogPath(options);
             try
             {
                 var directory = Path.GetDirectoryName(realPath);
@@ -63,6 +62,37 @@ public sealed class FileLogger : ILogger, IDisposable
         {
             System.Diagnostics.Trace.TraceError($"PublisherStudio file logger initialization failed for category '{categoryName}': {exception}");
             throw;
+        }
+    }
+
+    /// <summary>Resolves the log target to durable per-user storage while still honoring explicit absolute overrides outside the application payload.</summary>
+    /// <param name="currentOptions">Current file logger options.</param>
+    /// <returns>An absolute log path that does not depend on the process current directory.</returns>
+    private string ResolveLogPath(FileLoggerCoreOptions currentOptions)
+    {
+        try
+        {
+            var defaultPath = PublisherApplicationDataPaths.ResolveUserPath("PublisherStudio.log");
+            var configured = currentOptions.FilePath?.Trim();
+            if (string.IsNullOrWhiteSpace(configured))
+                return defaultPath;
+
+            configured = Environment.ExpandEnvironmentVariables(configured);
+            if (!Path.IsPathRooted(configured))
+                return PublisherApplicationDataPaths.ResolveUserPath(configured);
+
+            var fullConfigured = Path.GetFullPath(configured);
+            var applicationRoot = Path.GetFullPath(AppContext.BaseDirectory);
+            var relativeToApplication = Path.GetRelativePath(applicationRoot, fullConfigured);
+            var outsideApplication = relativeToApplication.Equals("..", StringComparison.Ordinal)
+                || relativeToApplication.StartsWith($"..{Path.DirectorySeparatorChar}", StringComparison.Ordinal)
+                || Path.IsPathRooted(relativeToApplication);
+            return outsideApplication ? fullConfigured : defaultPath;
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
+        {
+            System.Diagnostics.Trace.TraceWarning($"PublisherStudio could not resolve its normal log path: {exception.Message}");
+            return Path.Combine(Path.GetTempPath(), "PublisherStudio", "PublisherStudio.log");
         }
     }
 

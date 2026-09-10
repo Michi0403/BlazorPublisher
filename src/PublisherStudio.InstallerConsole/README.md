@@ -11,7 +11,7 @@ Double-clicking setup with no command-line arguments:
 3. extracts the setup ZIP into the same root;
 4. checks FFmpeg;
 5. creates the required Desktop and Start Menu entries;
-6. starts PublisherStudio on port `58071`.
+6. starts PublisherStudio on preferred port `58071`, with runtime fallback to an OS-assigned loopback port when that port cannot be bound.
 
 The installation keeps the runtime wrappers from the release ZIP. A Windows x64 installation therefore contains:
 

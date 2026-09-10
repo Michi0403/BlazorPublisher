@@ -34,14 +34,14 @@ Double-clicking `PublisherStudio.Setup.exe` performs the normal install/update p
 3. download and refresh the matching setup release;
 4. ensure FFmpeg is available;
 5. create the required Desktop and Start Menu shortcuts;
-6. start PublisherStudio on port `58071`.
+6. start PublisherStudio on preferred port `58071`, falling back to an OS-assigned loopback port if Windows rejects that port.
 
 No command-line argument is required.
 The setup queries the newest published GitHub release and requires exact runtime assets. On Windows x64 those assets are `winx64.zip` and `setupwinx64.zip`; a missing pair is an error rather than permission to install another architecture.
 
 ## Updates
 
-Normal updates extract reviewed release files over the existing product root. The root is not deleted unless `--force-delete` is explicitly supplied. Files that are not part of the incoming release remain untouched.
+Normal updates stage and validate both the application and setup archives before replacing the architecture-specific runtime/setup wrapper directories as one rollback-capable transaction. The surrounding `%LOCALAPPDATA%\PublisherStudio` user-data root is preserved. The root is not deleted unless `--force-delete` is explicitly supplied.
 
 When setup is started from its installed setup folder, it continues from a temporary copy before extraction. This lets the installed setup executable and launchers be replaced during the same one-click update.
 

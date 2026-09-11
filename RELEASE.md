@@ -1,9 +1,11 @@
-# PublisherStudio 3.5.9
+# PublisherStudio 3.6.0
 
-PublisherStudio 3.5.9 is a narrow maintenance release over 3.5.8 that fixes documentation contract drift exposed by the real Visual Studio rebuild.
+PublisherStudio 3.6.0 proactively repairs the same macOS release defects exposed by the LocalGPT 4.0.8 coordinator run.
 
-The installer update helper now documents the three parameters it actually accepts, removing the stale parameter tags that produced CS1572/CS1573 warnings. The two shared-file-logging `Dispose` methods now describe queue draining, provider ownership, and single-writer shutdown semantics in enough detail to satisfy the existing XML documentation quality policy without weakening that policy.
+The apphost JIT entitlement is now a checked-in minimal plist. The early macOS trust preflight validates that exact file with `plutil`, and native signing normalizes and lints a temporary XML1 copy before `codesign`. This moves entitlement-format failures ahead of the expensive documentation and package lane.
 
-No runtime behavior was intentionally changed. The 3.5.8 installer compile repair, maintained logging baseline, single shared writer, renderer-affinity work, Story Editor attachment guard, and LocalGPT-aligned overlay installer are retained.
+The documentation browser renderer also watches for a stable, structurally complete PDF while the browser is still alive. Once complete, a lingering renderer is closed immediately rather than consuming the full 480-second safety timeout for every successful PDF part.
 
-See `CHANGELOG-v3.5.9-XML-DOCUMENTATION-CONTRACT-REPAIR.md` and `VALIDATION-v3.5.9-source.md`.
+The 3.5.9 XML documentation repair and earlier logging, installer, render-affinity, and overlay-deployment protections remain intact.
+
+See `CHANGELOG-v3.6.0-MACOS-SIGNING-PDF-RENDER-LATENCY-REPAIR.md` and `VALIDATION-v3.6.0-source.md`.

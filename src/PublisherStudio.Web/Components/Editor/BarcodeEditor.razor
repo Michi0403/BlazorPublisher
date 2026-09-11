@@ -202,7 +202,7 @@
             var request = _generationRequest;
             try
             {
-                _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js?v=3.6.1").ConfigureAwait(true);
+                _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js?v=3.6.2").ConfigureAwait(true);
                 var svg = await _module.InvokeAsync<string>("generateBarcodeSvg", _draft).ConfigureAwait(true);
                 if (request != _generationRequest) return;
                 _svg = svg;

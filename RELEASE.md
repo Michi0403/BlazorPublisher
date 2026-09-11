@@ -1,11 +1,9 @@
-# PublisherStudio 3.6.1
+# PublisherStudio 3.6.2
 
-PublisherStudio 3.6.1 adds a dependency-light Matrix-style operator control plane to the setup console so long install/update operations remain controllable without opening a separate OS terminal window.
+PublisherStudio 3.6.2 makes the expensive DocFX/browser-PDF release stage adaptive to available system memory. The application runtime is unchanged: Publisher logging, overlay installation, Panel Studio behavior, localization, InteractiveServer render affinity, and the 3.6.1 Matrix installer operator controls are preserved.
 
-The setup ASCII wall now accepts `:operator on|off`, `:shells`, `:shell`, `:jobs`, `:cancel`, `:signal`, `:clear`, and ordinary shell command lines through redirected host shells. Auto shell resolution is host-aware and can use zsh, bash, sh, pwsh/PowerShell, or cmd when available. Meta controls remain reachable even when ordinary shell forwarding is switched off.
+On an 8–10 GiB machine the documentation pipeline selects 8-page PDF chunks, a 768 MiB Chromium JavaScript heap, a 1024 MiB Node heap, and DocFX max parallelism 1. A 64 GiB-class machine keeps 100-page chunks and the existing high-memory heap budget. Low-memory hosts also serialize PublisherStudio and LocalGPT heavyweight documentation stages.
 
-Ctrl+C and `:cancel` request a shared setup cancellation token. Download streams, retry delays, process waits, FFmpeg provisioning and main install/update stages observe that token. Setup-owned child processes are registered for inspection/signaling and best-effort process-tree cleanup; human-started shell repair jobs remain separately classified so setup cancellation does not silently terminate them.
+The print-book builder now avoids duplicate full-page HTML retention, keeps metadata-only front matter, removes temporary chunk HTML immediately, and trims transient managed memory between chunks in low-memory mode.
 
-The existing overlay/in-place installer contract, logging single-writer design, InteractiveServer renderer-affinity, 3.5.9 XML-documentation repair, and 3.6.0 macOS signing/PDF-render protections remain intact.
-
-See `CHANGELOG-v3.6.1-MATRIX-INSTALLER-OPERATOR-CONTROL.md` and `VALIDATION-v3.6.1-source.md`.
+See `CHANGELOG-v3.6.2-ADAPTIVE-LOW-MEMORY-DOCUMENTATION-BUILD.md` and `VALIDATION-v3.6.2-source.md`.

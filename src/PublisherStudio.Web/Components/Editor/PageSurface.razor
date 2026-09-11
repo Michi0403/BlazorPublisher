@@ -988,7 +988,7 @@
                     $"{State.Document.View.GridSpacingMm.ToString("R", CultureInfo.InvariantCulture)}|{State.ConnectorTool}|{selectionKey}|{clipboardKey}";
                 var dataVisualLayoutKey = $"{State.CurrentPage.Id:N}|{State.Revision}|{State.Document.Zoom.ToString("R", CultureInfo.InvariantCulture)}|{State.Document.View.CanvasZoomMode}";
 
-                _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js?v=3.6.0").ConfigureAwait(true);
+                _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js?v=3.6.1").ConfigureAwait(true);
                 if (initializationKey != _canvasInitializationKey)
                 {
                     _self ??= DotNetObjectReference.Create(this);
@@ -1073,7 +1073,7 @@
     {
         try
         {
-            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js?v=3.6.0").ConfigureAwait(true);
+            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js?v=3.6.1").ConfigureAwait(true);
             var zoom = await _module.InvokeAsync<double>(
                 "calculateFitZoom",
                 "publisher-stage",
@@ -2084,7 +2084,7 @@
             {
                 try
                 {
-                    _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js?v=3.6.0").ConfigureAwait(true);
+                    _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js?v=3.6.1").ConfigureAwait(true);
                     var point = await _module.InvokeAsync<double[]>("elementRelativePoint", "publisher-page", element.Id.ToString("D"), args.ClientX, args.ClientY).ConfigureAwait(true);
                     if (point.Length >= 2)
                     {

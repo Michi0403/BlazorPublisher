@@ -108,7 +108,7 @@ internal static class Program
         {
             FileName = detachedExecutable,
             UseShellExecute = false,
-            CreateNoWindow = false,
+            CreateNoWindow = true,
             WorkingDirectory = Environment.CurrentDirectory
         };
         foreach (var arg in args)
@@ -185,6 +185,8 @@ internal static class Program
             var logger = loggerFactory.CreateLogger("Startup");
             logger.LogInformation("Configured app configuration.");
             logger.LogInformation("Persistent setup transcript: {SetupLogPath}", setupLogPath);
+            SetupOperatorConsole.Start(logger);
+            SetupOperatorConsole.ThrowIfCancellationRequested();
 
             if (options.ShowHelp)
             {
@@ -206,27 +208,38 @@ internal static class Program
 
             try
             {
+                SetupOperatorConsole.ThrowIfCancellationRequested();
                 try
                 {
                     if (options.InstallPublisherStudio || options.UpdatePublisherStudio)
                         await InstallPublisherStudioAsync(options, logger).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException)
+                {
+                    throw;
                 }
                 catch (Exception ex)
                 {
                     logger.LogError(ex, "PublisherStudio installation/update failed before the existing installation was modified.");
                     return 1;
                 }
+                SetupOperatorConsole.ThrowIfCancellationRequested();
                 try
                 {
                     if (options.CheckFfmpeg && !options.InstallFfmpeg)
                         FfmpegProvisioner.ReportStatus(logger);
                     else if (!options.SkipFfmpeg && (options.InstallFfmpeg || options.InstallPublisherStudio || options.UpdatePublisherStudio))
-                        await FfmpegProvisioner.EnsureInstalledAsync(logger).ConfigureAwait(false);
+                        await FfmpegProvisioner.EnsureInstalledAsync(logger, SetupOperatorConsole.CancellationToken).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException)
+                {
+                    throw;
                 }
                 catch (Exception ex)
                 {
                     logger.LogError(ex, "Error while checking or installing FFmpeg.");
                 }
+                SetupOperatorConsole.ThrowIfCancellationRequested();
                 try
                 {
                     if (options.DesktopShortcuts || options.StartMenuShortcuts)
@@ -236,6 +249,7 @@ internal static class Program
                 {
                     logger.LogError(ex, "Error in ProvisionWindowsShortcuts.");
                 }
+                SetupOperatorConsole.ThrowIfCancellationRequested();
                 try
                 {
                     if (options.StartPublisherStudio)
@@ -250,6 +264,10 @@ internal static class Program
                 logger.LogDebug("Done.");
                 return 0;
             }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
                 logger.LogError(ex, $"Error in Setup: {ex.ToString()}");
@@ -258,10 +276,19 @@ internal static class Program
                 return 1;
             }
         }
+        catch (OperationCanceledException ex)
+        {
+            Console.WriteLine($"Setup cancelled: {ex.Message}");
+            return 130;
+        }
         catch (Exception ex)
         {
             Console.WriteLine($"Error in RunAsync {ex.ToString()}");
             return -1;
+        }
+        finally
+        {
+            SetupOperatorConsole.Stop();
         }
     }
 
@@ -381,6 +408,10 @@ internal static class Program
 
             logger.LogDebug($"PublisherStudio installed to '{targetPath}'.");
             logger.LogInformation($"PublisherStudio app and setup/bootstrap files now reside in '{targetPath}'.");
+                }
+        catch (OperationCanceledException)
+        {
+            throw;
         }
         catch (Exception ex)
         {
@@ -1684,7 +1715,8 @@ internal static class Program
         {
             try
             {
-                using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(45));
+                using var requestTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(45));
+                using var timeout = CancellationTokenSource.CreateLinkedTokenSource(requestTimeout.Token, SetupOperatorConsole.CancellationToken);
                 using var request = new HttpRequestMessage(HttpMethod.Get, url);
                 request.Headers.Accept.ParseAdd("application/vnd.github+json");
                 using var response = await Http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, timeout.Token).ConfigureAwait(false);
@@ -1692,13 +1724,17 @@ internal static class Program
                 await using var stream = await response.Content.ReadAsStreamAsync(timeout.Token).ConfigureAwait(false);
                 return await JsonDocument.ParseAsync(stream, cancellationToken: timeout.Token).ConfigureAwait(false);
             }
+            catch (OperationCanceledException) when (SetupOperatorConsole.CancellationToken.IsCancellationRequested)
+            {
+                throw;
+            }
             catch (Exception exception)
             {
                 lastError = exception;
                 if (attempt == maxAttempts) break;
                 var delay = TimeSpan.FromSeconds(attempt * 2);
                 logger.LogWarning(exception, "GitHub release lookup attempt {Attempt}/{Attempts} failed. Retrying in {Seconds} seconds.", attempt, maxAttempts, delay.TotalSeconds);
-                await Task.Delay(delay).ConfigureAwait(false);
+                await Task.Delay(delay, SetupOperatorConsole.CancellationToken).ConfigureAwait(false);
             }
         }
 
@@ -1770,7 +1806,8 @@ internal static class Program
                 if (resumeAt > 0)
                     logger.LogInformation("Resuming at {Offset} instead of restarting from zero.", FormatBytes(resumeAt, logger));
 
-                using var totalTimeout = new CancellationTokenSource(TimeSpan.FromMinutes(45));
+                using var transferTimeout = new CancellationTokenSource(TimeSpan.FromMinutes(45));
+                using var totalTimeout = CancellationTokenSource.CreateLinkedTokenSource(transferTimeout.Token, SetupOperatorConsole.CancellationToken);
                 using var request = new HttpRequestMessage(HttpMethod.Get, url);
                 request.Headers.UserAgent.ParseAdd($"PublisherStudioSetupTool/{SetupSemanticVersion}");
                 request.Headers.Accept.ParseAdd("*/*");
@@ -1871,6 +1908,10 @@ internal static class Program
                 logger.LogInformation("Download complete: {Path} ({Size}) in {Elapsed:mm\\:ss}.", outFile, FormatBytes(actualSize, logger), transferStarted.Elapsed);
                 return;
             }
+            catch (OperationCanceledException) when (SetupOperatorConsole.CancellationToken.IsCancellationRequested)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
                 lastError = ex;
@@ -1881,7 +1922,7 @@ internal static class Program
 
                 var delay = TimeSpan.FromSeconds(Math.Min(20, 2 * attempt * attempt));
                 logger.LogInformation("Retrying in {Seconds} seconds...", delay.TotalSeconds);
-                await Task.Delay(delay).ConfigureAwait(false);
+                await Task.Delay(delay, SetupOperatorConsole.CancellationToken).ConfigureAwait(false);
             }
         }
 
@@ -1938,7 +1979,7 @@ internal static class Program
                 catch (Exception ex) when ((ex is IOException or UnauthorizedAccessException) && i < 10)
                 {
                     logger.LogWarning(ex, "Could not finalize downloaded file {Source} as {Destination}. Retry {Attempt}/10.", source, destination, i);
-                    await Task.Delay(TimeSpan.FromMilliseconds(300 * i)).ConfigureAwait(false);
+                    await Task.Delay(TimeSpan.FromMilliseconds(300 * i), SetupOperatorConsole.CancellationToken).ConfigureAwait(false);
                 }
             }
 
@@ -1946,6 +1987,10 @@ internal static class Program
                 throw new FileNotFoundException($"Source file for move does not exist: {source}", source);
 
             File.Move(source, destination, overwrite: true);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
         }
         catch (Exception ex)
         {
@@ -2061,7 +2106,7 @@ internal static class Program
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
-                CreateNoWindow = false
+                CreateNoWindow = true
             };
 
             process.OutputDataReceived += (_, e) => { if (e.Data is not null) logger.LogInformation(e.Data); };
@@ -2070,12 +2115,26 @@ internal static class Program
             if (!process.Start())
                 throw new InvalidOperationException($"Could not start process: {fileName}");
 
+            using var processRegistration = SetupOperatorConsole.TrackProcess(process, Path.GetFileName(fileName));
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();
-            await process.WaitForExitAsync().ConfigureAwait(false);
+            try
+            {
+                await process.WaitForExitAsync(SetupOperatorConsole.CancellationToken).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                if (!process.HasExited)
+                    process.Kill(entireProcessTree: true);
+                throw;
+            }
 
             if (process.ExitCode != 0)
                 throw new InvalidOperationException($"Command failed with exit code {process.ExitCode}: {fileName} {arguments}");
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
         }
         catch (Exception ex)
         {

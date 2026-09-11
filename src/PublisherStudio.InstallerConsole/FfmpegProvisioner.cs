@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using PublisherStudio.InstallerConsole.Helper;
 
 
 namespace PublisherStudio.InstallerConsole;
@@ -306,6 +307,10 @@ ProvisioningFinished:
             await process.WaitForExitAsync(timeout.Token).ConfigureAwait(false);
             return process.ExitCode == 0;
         }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
         catch
         {
             return false;
@@ -335,6 +340,7 @@ ProvisioningFinished:
 
             using var process = new Process { StartInfo = startInfo };
             if (!process.Start()) return new ProcessRunResult(-1, false);
+            using var processRegistration = SetupOperatorConsole.TrackProcess(process, command.DisplayName);
 
             var lastActivityTicks = DateTimeOffset.UtcNow.UtcDateTime.Ticks;
             void MarkActivity() => Interlocked.Exchange(ref lastActivityTicks, DateTimeOffset.UtcNow.UtcDateTime.Ticks);
@@ -388,6 +394,10 @@ ProvisioningFinished:
         catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
         {
             return new ProcessRunResult(-1, true);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
         }
         catch (Exception exception)
         {

@@ -145,7 +145,8 @@ if ([int]::TryParse([string]$env:FUTURE2_DOCUMENTATION_BROWSER_PDF_MAX_PAGES, [r
 }
 $browserPdfTimeoutMilliseconds = 480000
 $configuredBrowserTimeout = 0
-if ([int]::TryParse([string]$env:FUTURE2_DOCUMENTATION_BROWSER_PDF_TIMEOUT, [ref]$configuredBrowserTimeout) -and $configuredBrowserTimeout -gt 0) {
+$browserPdfTimeoutExplicit = [int]::TryParse([string]$env:FUTURE2_DOCUMENTATION_BROWSER_PDF_TIMEOUT, [ref]$configuredBrowserTimeout) -and $configuredBrowserTimeout -gt 0
+if ($browserPdfTimeoutExplicit) {
     $browserPdfTimeoutMilliseconds = $configuredBrowserTimeout
 }
 function Get-PublisherStudioDocumentationSystemMemoryBytes {
@@ -254,11 +255,25 @@ $configuredDocfxParallelism = 0
 if ([int]::TryParse([string]$env:FUTURE2_DOCUMENTATION_DOCFX_MAX_PARALLELISM, [ref]$configuredDocfxParallelism) -and $configuredDocfxParallelism -ge 1) {
     $docfxBuildMaxParallelism = [Math]::Min(32, $configuredDocfxParallelism)
 }
+# Constrained hosts must fail a sick browser quickly enough to recycle it rather than spending
+# many minutes inside one chunk. An operator-supplied timeout remains authoritative.
+if ($documentationLowMemoryMode -and -not $browserPdfTimeoutExplicit) {
+    $browserPdfTimeoutMilliseconds = [Math]::Min($browserPdfTimeoutMilliseconds, 90000)
+}
+$browserPdfPostRenderStabilityMilliseconds = if ($documentationLowMemoryMode) { 15000 } else { 180000 }
+$browserPdfChunkRetries = if ($documentationLowMemoryMode) { 1 } else { 1 }
+$configuredBrowserChunkRetries = 0
+if ([int]::TryParse([string]$env:FUTURE2_DOCUMENTATION_BROWSER_PDF_CHUNK_RETRIES, [ref]$configuredBrowserChunkRetries) -and $configuredBrowserChunkRetries -ge 0) {
+    $browserPdfChunkRetries = [Math]::Min(5, $configuredBrowserChunkRetries)
+}
+$monolithicPdfFallbackOverride = [string]::Equals([string]$env:FUTURE2_DOCUMENTATION_ALLOW_MONOLITHIC_PDF_FALLBACK, '1', [StringComparison]::OrdinalIgnoreCase) -or
+    [string]::Equals([string]$env:FUTURE2_DOCUMENTATION_ALLOW_MONOLITHIC_PDF_FALLBACK, 'true', [StringComparison]::OrdinalIgnoreCase)
+$allowMonolithicPdfFallback = (-not $documentationLowMemoryMode) -or $monolithicPdfFallbackOverride
 $documentationSerializeHeavyStages = $documentationLowMemoryMode -or
     [string]::Equals([string]$env:FUTURE2_DOCUMENTATION_SERIALIZE_HEAVY_STAGES, '1', [StringComparison]::OrdinalIgnoreCase) -or
     [string]::Equals([string]$env:FUTURE2_DOCUMENTATION_SERIALIZE_HEAVY_STAGES, 'true', [StringComparison]::OrdinalIgnoreCase)
 if ($documentationSystemMemoryGiB -gt 0) {
-    Write-Host ("PublisherStudio documentation memory policy: {0:n1} GiB system RAM -> {1} PDF page(s)/chunk, Chromium JS heap {2} MiB, Node heap {3} MiB, DocFX max parallelism {4}. Low-memory mode={5}." -f $documentationSystemMemoryGiB,$browserPdfChunkPages,$browserJavaScriptHeapMb,$documentationNodeHeapMb,$docfxBuildMaxParallelism,$documentationLowMemoryMode) -ForegroundColor DarkCyan
+    Write-Host ("PublisherStudio documentation memory policy: {0:n1} GiB system RAM -> {1} PDF page(s)/chunk, Chromium JS heap {2} MiB, Node heap {3} MiB, DocFX max parallelism {4}, browser timeout {5} ms, chunk retries {6}. Low-memory mode={7}; monolithic fallback={8}." -f $documentationSystemMemoryGiB,$browserPdfChunkPages,$browserJavaScriptHeapMb,$documentationNodeHeapMb,$docfxBuildMaxParallelism,$browserPdfTimeoutMilliseconds,$browserPdfChunkRetries,$documentationLowMemoryMode,$allowMonolithicPdfFallback) -ForegroundColor DarkCyan
 }
 $pdfCompressionTriggerBytes = 134217728L
 # A standalone handbook larger than 256 MiB is already too large for a sane desktop-app release.
@@ -2019,6 +2034,38 @@ function Stop-PortableProcessTree {
     try { $Process.Kill() } catch { }
 }
 
+function Stop-PublisherStudioDocumentationBrowserProfileProcesses {
+    param([Parameter(Mandatory)][string]$ProfileRoot)
+
+    # Browser children sometimes outlive the parent process. Kill only processes whose command line
+    # contains this build's unique temporary profile path, so a developer's normal browser session
+    # is never targeted.
+    try {
+        if ([Runtime.InteropServices.RuntimeInformation]::IsOSPlatform([Runtime.InteropServices.OSPlatform]::Windows)) {
+            foreach ($candidate in @(Get-CimInstance -ClassName Win32_Process -ErrorAction SilentlyContinue)) {
+                $commandLine = [string]$candidate.CommandLine
+                if (-not [string]::IsNullOrWhiteSpace($commandLine) -and $commandLine.IndexOf($ProfileRoot, [StringComparison]::OrdinalIgnoreCase) -ge 0) {
+                    try { Stop-Process -Id ([int]$candidate.ProcessId) -Force -ErrorAction SilentlyContinue } catch { }
+                }
+            }
+        }
+        else {
+            $psPath = if (Test-Path -LiteralPath '/bin/ps' -PathType Leaf) { '/bin/ps' } else { 'ps' }
+            foreach ($line in @(& $psPath '-axo' 'pid=,command=' 2>$null)) {
+                if ([string]$line -notmatch '^\s*(\d+)\s+(.*)$') { continue }
+                $pidValue = 0
+                if (-not [int]::TryParse([string]$Matches[1], [ref]$pidValue) -or $pidValue -le 1 -or $pidValue -eq $PID) { continue }
+                $commandLine = [string]$Matches[2]
+                if ($commandLine.IndexOf($ProfileRoot, [StringComparison]::Ordinal) -lt 0) { continue }
+                try { & /bin/kill -TERM $pidValue 2>$null } catch { }
+                Start-Sleep -Milliseconds 150
+                try { & /bin/kill -KILL $pidValue 2>$null } catch { }
+            }
+        }
+    }
+    catch { }
+}
+
 function Invoke-PublisherStudioBrowserPdf {
     param(
         [Parameter(Mandatory)][string]$BrowserPath,
@@ -2038,15 +2085,21 @@ function Invoke-PublisherStudioBrowserPdf {
         [pscustomobject]@{ Name = "tagged"; AccessibilityMode = "tagged-pdf-required"; ExtraFlags = @("--export-tagged-pdf", "--generate-pdf-document-outline") },
         [pscustomobject]@{ Name = "compatibility"; AccessibilityMode = "html-accessibility-fallback"; ExtraFlags = @() }
     )
+    # On constrained hosts do not multiply a sick renderer by retrying the legacy headless engine.
+    # The outer chunk retry will instead recycle the entire renderer with a fresh isolated profile.
+    $headlessModes = if ($documentationLowMemoryMode) { @("--headless=new") } else { @("--headless=new", "--headless") }
 
     foreach ($renderProfile in $renderProfiles) {
-        foreach ($headlessMode in @("--headless=new", "--headless")) {
+        foreach ($headlessMode in $headlessModes) {
             Remove-Item -LiteralPath $PdfPath -Force -ErrorAction SilentlyContinue
             # Keep Chromium's volatile profile outside the print-book directory. Chromium child
             # processes can retire profile files asynchronously, which makes recursive Remove-Item
             # race with disappearing files on Windows PowerShell.
             $profileRoot = Join-Path $profileParentRoot ("browser-profile-" + [Guid]::NewGuid().ToString('N'))
-            New-Item -ItemType Directory -Path $profileRoot -Force | Out-Null
+            $profileCacheRoot = Join-Path $profileRoot 'cache'
+            $profileCrashRoot = Join-Path $profileRoot 'crash'
+            New-Item -ItemType Directory -Path $profileCacheRoot -Force | Out-Null
+            New-Item -ItemType Directory -Path $profileCrashRoot -Force | Out-Null
             try {
                 $arguments = @(
                     $headlessMode,
@@ -2064,6 +2117,8 @@ function Invoke-PublisherStudioBrowserPdf {
                     "--no-service-autorun",
                     "--no-first-run",
                     "--no-default-browser-check",
+                    "--disk-cache-dir=$profileCacheRoot",
+                    "--crash-dumps-dir=$profileCrashRoot",
                     "--allow-file-access-from-files",
                     "--hide-scrollbars",
                     "--run-all-compositor-stages-before-draw",
@@ -2129,6 +2184,7 @@ function Invoke-PublisherStudioBrowserPdf {
                     try { $process.WaitForExit() } catch { }
                     $lastExitCode = [int]$process.ExitCode
                 }
+                Stop-PublisherStudioDocumentationBrowserProfileProcesses -ProfileRoot $profileRoot
                 $output = @()
                 try { $output += @(([string]$stdoutTask.Result -split "`r?`n") | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }) } catch { }
                 try { $output += @(([string]$stderrTask.Result -split "`r?`n") | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }) } catch { }
@@ -2139,7 +2195,8 @@ function Invoke-PublisherStudioBrowserPdf {
                 }
                 $lastObservedLength = -1L
                 $stableLengthChecks = 0
-                for ($attempt = 0; $attempt -lt 360; $attempt++) {
+                $postRenderPollCount = [Math]::Max(8, [int][Math]::Ceiling($browserPdfPostRenderStabilityMilliseconds / 500.0))
+                for ($attempt = 0; $attempt -lt $postRenderPollCount; $attempt++) {
                     $pdfFile = Get-Item -LiteralPath $PdfPath -ErrorAction SilentlyContinue
                     if ($null -ne $pdfFile -and $pdfFile.Length -gt 0) {
                         if ($pdfFile.Length -eq $lastObservedLength) {
@@ -2176,12 +2233,47 @@ function Invoke-PublisherStudioBrowserPdf {
                 }
             }
             finally {
+                Stop-PublisherStudioDocumentationBrowserProfileProcesses -ProfileRoot $profileRoot
                 Remove-PublisherStudioTemporaryPath -Path $profileRoot -Attempts 8 -DelayMilliseconds 250
             }
         }
     }
 
     return [pscustomobject]@{ Succeeded = $false; ExitCode = $lastExitCode; Diagnostics = @($diagnostics); HeadlessMode = ""; RenderMode = ""; AccessibilityMode = "unavailable" }
+}
+
+
+function Invoke-PublisherStudioBrowserPdfWithRetry {
+    param(
+        [Parameter(Mandatory)][string]$BrowserPath,
+        [Parameter(Mandatory)][string]$HtmlPath,
+        [Parameter(Mandatory)][string]$PdfPath,
+        [Parameter(Mandatory)][string]$WorkingRoot,
+        [Parameter(Mandatory)][string]$ContextLabel,
+        [long]$MinimumBytes = 1048576
+    )
+
+    $combinedDiagnostics = [System.Collections.Generic.List[string]]::new()
+    $lastResult = $null
+    $maximumAttempts = 1 + $browserPdfChunkRetries
+    for ($renderAttempt = 1; $renderAttempt -le $maximumAttempts; $renderAttempt++) {
+        if ($renderAttempt -gt 1) {
+            Write-Host "Retrying $ContextLabel with a fresh isolated browser profile (attempt $renderAttempt of $maximumAttempts)..." -ForegroundColor Yellow
+            Remove-Item -LiteralPath $PdfPath -Force -ErrorAction SilentlyContinue
+            if ($documentationLowMemoryMode) {
+                [GC]::Collect(2, [GCCollectionMode]::Optimized, $true, $true)
+                [GC]::WaitForPendingFinalizers()
+            }
+            Start-Sleep -Milliseconds 500
+        }
+        $lastResult = Invoke-PublisherStudioBrowserPdf -BrowserPath $BrowserPath -HtmlPath $HtmlPath -PdfPath $PdfPath -WorkingRoot $WorkingRoot -MinimumBytes $MinimumBytes
+        foreach ($line in @($lastResult.Diagnostics)) { $combinedDiagnostics.Add("attempt $renderAttempt/${maximumAttempts}: $line") }
+        if ($lastResult.Succeeded) {
+            return [pscustomobject]@{ Succeeded = $true; ExitCode = [int]$lastResult.ExitCode; Diagnostics = @($combinedDiagnostics); HeadlessMode = [string]$lastResult.HeadlessMode; RenderMode = [string]$lastResult.RenderMode; AccessibilityMode = [string]$lastResult.AccessibilityMode; AttemptCount = $renderAttempt }
+        }
+    }
+    $exitCode = if ($null -ne $lastResult) { [int]$lastResult.ExitCode } else { -1 }
+    return [pscustomobject]@{ Succeeded = $false; ExitCode = $exitCode; Diagnostics = @($combinedDiagnostics); HeadlessMode = ''; RenderMode = ''; AccessibilityMode = 'unavailable'; AttemptCount = $maximumAttempts }
 }
 
 
@@ -2221,7 +2313,7 @@ function Invoke-PublisherStudioChunkedBrowserPdf {
             Remove-Item -LiteralPath $frontMatterPdf -Force -ErrorAction SilentlyContinue
             Write-Host "Printing complete documentation PDF cover/index for $indexedPages source pages with the installed browser..." -ForegroundColor DarkCyan
             $timer = [Diagnostics.Stopwatch]::StartNew()
-            $frontMatterResult = Invoke-PublisherStudioBrowserPdf -BrowserPath $BrowserPath -HtmlPath $frontMatterHtml -PdfPath $frontMatterPdf -WorkingRoot $chunkRoot -MinimumBytes 65536
+            $frontMatterResult = Invoke-PublisherStudioBrowserPdfWithRetry -BrowserPath $BrowserPath -HtmlPath $frontMatterHtml -PdfPath $frontMatterPdf -WorkingRoot $chunkRoot -ContextLabel "documentation PDF cover/index" -MinimumBytes 65536
             $timer.Stop()
             if (-not $frontMatterResult.Succeeded) {
                 foreach ($line in @($frontMatterResult.Diagnostics)) { $diagnostics.Add([string]$line) }
@@ -2251,7 +2343,7 @@ function Invoke-PublisherStudioChunkedBrowserPdf {
                 Remove-Item -LiteralPath $chunkPdf -Force -ErrorAction SilentlyContinue
                 Write-Host "Printing documentation PDF chunk $chunkNumber ($writtenPages source pages; start $start of $TotalPageCount) with the installed browser..." -ForegroundColor DarkCyan
                 $timer = [Diagnostics.Stopwatch]::StartNew()
-                $result = Invoke-PublisherStudioBrowserPdf -BrowserPath $BrowserPath -HtmlPath $htmlPath -PdfPath $chunkPdf -WorkingRoot $chunkRoot -MinimumBytes 65536
+                $result = Invoke-PublisherStudioBrowserPdfWithRetry -BrowserPath $BrowserPath -HtmlPath $htmlPath -PdfPath $chunkPdf -WorkingRoot $chunkRoot -ContextLabel "documentation PDF chunk $chunkNumber" -MinimumBytes 65536
                 $timer.Stop()
                 if (-not $result.Succeeded) {
                     foreach ($line in @($result.Diagnostics)) { $diagnostics.Add([string]$line) }
@@ -3096,8 +3188,8 @@ Use the grouped API navigation to browse namespaces, types, properties, methods,
         $requiresChunkedBrowserPdf = -not [string]::IsNullOrWhiteSpace($PackagingTool) -and $pdfSourcePageCount -gt $browserPdfChunkPages
 
         # Prefer the HTML browser path. Large release documentation is authoritative through adaptive browser chunks;
-        # the DocFX PDF plug-in is retained only as a compatibility fallback for smaller documentation sets where
-        # a bounded fallback cannot create the historic multi-gigabyte release payload.
+        # the DocFX PDF plug-in is retained only as a compatibility fallback for non-chunked, non-low-memory
+        # documentation unless an operator explicitly accepts the monolithic fallback risk.
         if ($pdfSourcePageCount -gt 0) {
             $browserResult = $null
             try {
@@ -3156,10 +3248,10 @@ Use the grouped API navigation to browse namespaces, types, properties, methods,
             }
         }
 
-        if (-not $pdfGenerated -and $requiresChunkedBrowserPdf) {
+        if (-not $pdfGenerated -and (($requiresChunkedBrowserPdf -and -not $monolithicPdfFallbackOverride) -or -not $allowMonolithicPdfFallback)) {
             $browserDiagnostics = @($warnings | Where-Object { $_ -match '(?i)browser|Edge|Chrome|Chromium' } | Select-Object -Last 8) -join ' | '
             if ([string]::IsNullOrWhiteSpace($browserDiagnostics)) { $browserDiagnostics = 'No browser diagnostic was captured.' }
-            throw "PublisherStudio has $pdfSourcePageCount printable documentation pages and requires the adaptive browser-chunk PDF pipeline for a bounded release artifact. Refusing the legacy DocFX PDF fallback because it can generate multi-gigabyte PDFs. Browser diagnostics: $browserDiagnostics"
+            throw "PublisherStudio PDF rendering could not complete through the bounded browser path. The monolithic DocFX/Playwright fallback is disabled for chunked or low-memory documentation builds because it can exhaust memory and bypass durable chunk recovery. Set FUTURE2_DOCUMENTATION_ALLOW_MONOLITHIC_PDF_FALLBACK=1 only for an intentional operator override. Browser diagnostics: $browserDiagnostics"
         }
 
         if (-not $pdfGenerated) {
@@ -3413,7 +3505,11 @@ foreach ($publishRoot in $publishRoots) {
         htmlPreflightValidated = $htmlPreflightValidated
         pdfTimeoutMilliseconds = $pdfTimeoutMilliseconds
         browserPdfTimeoutMilliseconds = $browserPdfTimeoutMilliseconds
+        browserPdfPostRenderStabilityMilliseconds = $browserPdfPostRenderStabilityMilliseconds
         browserPdfChunkPages = $browserPdfChunkPages
+        browserPdfChunkRetries = $browserPdfChunkRetries
+        allowMonolithicPdfFallback = $allowMonolithicPdfFallback
+        monolithicPdfFallbackOverride = $monolithicPdfFallbackOverride
         documentationSystemMemoryBytes = $documentationSystemMemoryBytes
         documentationSystemMemoryGiB = $documentationSystemMemoryGiB
         documentationLowMemoryMode = $documentationLowMemoryMode

@@ -7,4 +7,9 @@
     <LocalGptWireProtocolVersion>2.1.1</LocalGptWireProtocolVersion>
     <LocalGptWireProtocolPackageDirectory Condition="'$(LocalGptWireProtocolPackageDirectory)' == ''">$(MSBuildThisFileDirectory)packages</LocalGptWireProtocolPackageDirectory>
   </PropertyGroup>
+  <ItemGroup>
+    <AssemblyMetadata Include="RepositoryUrl" Value="$(RepositoryUrl)" />
+    <AssemblyMetadata Include="Owner" Value="$(Authors)" />
+    <AssemblyMetadata Include="License" Value="$(PackageLicenseExpression)" />
+  </ItemGroup>
 </Project>

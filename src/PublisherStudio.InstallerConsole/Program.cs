@@ -24,10 +24,6 @@ namespace PublisherStudio.InstallerConsole;
 internal static class Program
 {
     /// <summary>
-    /// Defines the PublisherStudio repo constant used by <see cref="Program"/> so callers and internal logic share the same stable value.
-    /// </summary>
-    private const string PublisherStudioRepo = "Michi0403/BlazorPublisher";
-    /// <summary>
     /// Stores the shared read-only HTTP value used by <see cref="Program"/> across instances of the containing type.
     /// </summary>
     private static readonly HttpClient Http = CreateHttpClient();
@@ -38,14 +34,7 @@ internal static class Program
 
     /// <summary>Returns the installer assembly semantic version used by diagnostics and HTTP identification.</summary>
     /// <value>The current setup assembly version normalized to major.minor.build.</value>
-    private static string SetupSemanticVersion
-    {
-        get
-        {
-            var version = typeof(Program).Assembly.GetName().Version;
-            return version is null ? "0.0.0" : $"{version.Major}.{version.Minor}.{version.Build}";
-        }
-    }
+    private static string SetupSemanticVersion => global::ProjectConsoleIdentity.ConsoleProductIdentity.Version;
 
     /// <summary>Resolves the durable setup transcript path beneath the current PublisherStudio per-user directory, with a temporary fallback only when that root cannot be created.</summary>
     /// <returns>An absolute writable path for PublisherStudio setup diagnostics.</returns>
@@ -128,12 +117,13 @@ internal static class Program
     /// <returns>The int produced by the operation.</returns>
     public static async Task<int> Main(string[] args)
     {
+        global::ProjectConsoleIdentity.ConsoleProductIdentity.WriteStartupHeader();
+
         if (TryStartDetachedSetup(args))
             return 0;
 
         var launchedByDoubleClick = args.Length == 0 && Environment.UserInteractive;
 
-        Console.WriteLine($"PublisherStudio Setup {SetupSemanticVersion}");
         var options = CliOptions.Parse(args);
         if (args.Length == 0)
             Console.WriteLine("No command-line action was supplied. Running the default install, update, shortcut, and start routine.");
@@ -309,7 +299,7 @@ internal static class Program
             var setupZipPath = options.PublisherStudioSetupZipPath ?? Path.Combine(Environment.CurrentDirectory, expectedSetupAsset);
 
             await EnsureReleaseAssetAsync(
-                PublisherStudioRepo,
+                global::ProjectConsoleIdentity.ConsoleProductIdentity.RepositorySlug,
                 expectedApplicationAsset,
                 zipPath,
                 options.PublisherStudioZipPath,
@@ -319,7 +309,7 @@ internal static class Program
                 runtimeIdentifier: runtimeIdentifier).ConfigureAwait(false);
 
             await EnsureReleaseAssetAsync(
-                PublisherStudioRepo,
+                global::ProjectConsoleIdentity.ConsoleProductIdentity.RepositorySlug,
                 expectedSetupAsset,
                 setupZipPath,
                 options.PublisherStudioSetupZipPath,

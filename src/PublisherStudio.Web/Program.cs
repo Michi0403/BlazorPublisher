@@ -33,6 +33,7 @@ public static class Program
         WebApplication app;
         try
         {
+            global::ProjectConsoleIdentity.ConsoleProductIdentity.WriteStartupHeader();
             TryAppendBootstrapDiagnostic($"PublisherStudio process starting. assembly={typeof(Program).Assembly.GetName().Version}; executable={Environment.ProcessPath ?? "unknown"}; base={AppContext.BaseDirectory}");
             app = BuildWebApp(args);
         }

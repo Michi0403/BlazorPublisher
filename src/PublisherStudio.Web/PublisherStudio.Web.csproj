@@ -6,7 +6,8 @@
     <InvariantGlobalization>false</InvariantGlobalization>
     <RootNamespace>PublisherStudio</RootNamespace>
     <AssemblyName>PublisherStudio.Web</AssemblyName>
-    <Version>3.6.4</Version>
+    <Version>3.6.6</Version>
+    <Product>PublisherStudio</Product>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);1591</NoWarn>
     <ApplicationIcon>..\..\assets\PublisherStudio.ico</ApplicationIcon>
@@ -111,5 +112,10 @@
     </ItemGroup>
     <Error Condition="'@(MissingPublisherStudioConfigurationFile)' != ''" Text="PublisherStudio publish output is missing configuration files: @(MissingPublisherStudioConfigurationFile, ', ')" />
   </Target>
+
+
+  <ItemGroup>
+    <Compile Include="..\Shared\ConsoleProductIdentity.cs" Link="ConsoleProductIdentity.cs" />
+  </ItemGroup>
 
 </Project>

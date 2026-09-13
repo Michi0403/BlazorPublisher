@@ -192,8 +192,9 @@ button { cursor: pointer; }
 }
 
 /* Sharp CSS layout zoom is the publication default in Chromium/Edge. DevExtreme
-   widgets deliberately keep transform scaling because their pointer, Gallery,
-   Map, and virtual-layout calculations assume unzoomed CSS coordinates. */
+   widgets and independently composited iframe/panel surfaces deliberately keep
+   transform scaling so pointer geometry and embedded render layers stay attached
+   to the movable publication element during designer interaction. */
 @supports (zoom: 1) {
     .publication-page.zoom-mode-css .publication-element-content:not(.zoom-transform-compat) {
         zoom: var(--publisher-editor-zoom, 1);

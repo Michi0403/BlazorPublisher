@@ -1137,7 +1137,7 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
             lastCanvasClick: null,
             externalDropPreview: null,
             insertDropPreview: null,
-            keyboardActive: false,
+            keyboardActive: document.activeElement === stage || stage.contains(document.activeElement),
             internalClipboardArmed: normalizedConfig.internalClipboardAvailable,
             externalClipboardLikely: false,
             pendingPasteTimer: 0,
@@ -1160,18 +1160,44 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
          } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.lostPointerCapture@933', __javascriptError); throw __javascriptError; }};
         handlers.windowPointerDown = event => { try {
             if (state.operation && !state.stage.contains(event.target)) resetPointerOperation(state, true);
-            if (state.stage.contains(event.target)) state.keyboardActive = true;
+            if (state.stage.contains(event.target)) {
+                state.keyboardActive = true;
+                state.gamepad?.schedule?.();
+            } else if (!state.operation) {
+                state.keyboardActive = false;
+                state.gamepad?.cancel?.();
+            }
          } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.windowPointerDown@936', __javascriptError); throw __javascriptError; }};
         handlers.windowPointerUp = event => { try { return (pointerUp(state, event)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.windowPointerUp@940', __javascriptError); throw __javascriptError; } };
         handlers.windowPointerCancel = event => { try { return (pointerCancel(state, event)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.windowPointerCancel@941', __javascriptError); throw __javascriptError; } };
         handlers.windowBlur = () => { try {
             state.externalClipboardLikely = true;
             resetPointerOperation(state, true);
+            state.gamepad?.cancel?.();
          } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.windowBlur@942', __javascriptError); throw __javascriptError; }};
+        handlers.windowFocus = () => { try {
+            if (document.activeElement === state.stage || state.stage.contains(document.activeElement)) {
+                state.keyboardActive = true;
+                state.gamepad?.schedule?.();
+            }
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.windowFocus', __javascriptError); throw __javascriptError; }};
+        handlers.stageFocusIn = () => { try {
+            state.keyboardActive = true;
+            state.gamepad?.schedule?.();
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.stageFocusIn', __javascriptError); throw __javascriptError; }};
+        handlers.stageFocusOut = event => { try {
+            if (!event.relatedTarget || !state.stage.contains(event.relatedTarget)) {
+                state.keyboardActive = false;
+                state.gamepad?.cancel?.();
+            }
+         } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.stageFocusOut', __javascriptError); throw __javascriptError; }};
         handlers.visibilityChange = () => { try {
             if (document.hidden) {
                 state.externalClipboardLikely = true;
                 resetPointerOperation(state, true);
+                state.gamepad?.cancel?.();
+            } else {
+                state.gamepad?.schedule?.();
             }
          } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.visibilityChange@946', __javascriptError); throw __javascriptError; }};
         handlers.stagePointerLeave = () => { try {
@@ -1208,6 +1234,13 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
         handlers.publisherNavigate = event => { try { return (scheduleComponentNavigation(state, event.detail)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.publisherNavigate@983', __javascriptError); throw __javascriptError; } };
         handlers.publisherOpenUrl = event => { try { return (scheduleComponentUrl(state, event.detail)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.publisherOpenUrl@984', __javascriptError); throw __javascriptError; } };
         handlers.mapViewportChanged = event => { try { return (commitMapViewportEvent(state, event)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.mapViewportChanged@985', __javascriptError); throw __javascriptError; } };
+        handlers.gamepadConnected = () => { try {
+            if (document.activeElement === state.stage || state.stage.contains(document.activeElement)) state.keyboardActive = true;
+            state.gamepad?.schedule?.();
+        } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.gamepadConnected', __javascriptError); throw __javascriptError; } };
+        handlers.gamepadDisconnected = () => { try {
+            if (!publisherConnectedGamepad()) state.gamepad?.cancel?.();
+        } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:handlers.gamepadDisconnected', __javascriptError); throw __javascriptError; } };
 
         // Capture phase keeps selection alive even when nested media, SVG, chart,
         // or animation content stops pointer events in its own component tree.
@@ -1224,6 +1257,11 @@ export function initializeCanvas(stageId, scrollId, pageId, horizontalRulerId, v
         window.addEventListener('publisherstudio:navigate', handlers.publisherNavigate);
         window.addEventListener('publisherstudio:open-url', handlers.publisherOpenUrl);
         window.addEventListener('blur', handlers.windowBlur);
+        window.addEventListener('focus', handlers.windowFocus);
+        stage.addEventListener('focusin', handlers.stageFocusIn);
+        stage.addEventListener('focusout', handlers.stageFocusOut);
+        window.addEventListener('gamepadconnected', handlers.gamepadConnected);
+        window.addEventListener('gamepaddisconnected', handlers.gamepadDisconnected);
         document.addEventListener('visibilitychange', handlers.visibilityChange);
         stage.addEventListener('pointerleave', handlers.stagePointerLeave);
         stage.addEventListener('wheel', handlers.stageWheel, { passive: false });
@@ -1302,7 +1340,7 @@ export function disposeCanvas(stageId) { try {
     clearInsertionDrag(state);
     clearExternalDropPreview(state);
     state.resizeObserver?.disconnect?.();
-    if (state.gamepad?.frame) cancelAnimationFrame(state.gamepad.frame);
+    state.gamepad?.cancel?.();
     state.gamepad = null;
     for (const timer of state.cropTimers?.values?.() || []) clearTimeout(timer);
     state.cropTimers?.clear?.();
@@ -1335,6 +1373,11 @@ export function disposeCanvas(stageId) { try {
     window.removeEventListener('publisherstudio:navigate', handlers.publisherNavigate);
     window.removeEventListener('publisherstudio:open-url', handlers.publisherOpenUrl);
     window.removeEventListener('blur', handlers.windowBlur);
+    window.removeEventListener('focus', handlers.windowFocus);
+    stage.removeEventListener('focusin', handlers.stageFocusIn);
+    stage.removeEventListener('focusout', handlers.stageFocusOut);
+    window.removeEventListener('gamepadconnected', handlers.gamepadConnected);
+    window.removeEventListener('gamepaddisconnected', handlers.gamepadDisconnected);
     document.removeEventListener('visibilitychange', handlers.visibilityChange);
 
     state.dotnet = null;
@@ -1493,23 +1536,35 @@ function canvasDocumentKeyDown(state, event) { try {
     }
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:canvasDocumentKeyDown@1209', __javascriptError); throw __javascriptError; }}
 
+function publisherConnectedGamepad() { try {
+    if (typeof navigator.getGamepads !== 'function') return null;
+    return [...(navigator.getGamepads?.() || [])].find(Boolean) || null;
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:publisherConnectedGamepad', __javascriptError); return null; }}
+
 function startCanvasGamepad(state) { try {
     if (state.gamepad || typeof navigator.getGamepads !== 'function') return;
-    const controller = { frame: 0, buttons: [], axisX: 0, axisY: 0, nextRepeat: 0 };
+    const controller = { frame: 0, buttons: [], axisX: 0, axisY: 0, nextRepeat: 0, schedule: null, cancel: null };
     state.gamepad = controller;
-    const pressed = (gamepad, index) => { try { return (Boolean(gamepad?.buttons?.[index]?.pressed || number(gamepad?.buttons?.[index]?.value) > .55)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:pressed@1266', __javascriptError); throw __javascriptError; } };
+    const pressed = (gamepad, index) => { try { return (Boolean(gamepad?.buttons?.[index]?.pressed || number(gamepad?.buttons?.[index]?.value) > .55)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:canvasGamepadPressed', __javascriptError); throw __javascriptError; } };
     const edge = (gamepad, index) => { try {
         const value = pressed(gamepad, index);
         const previous = Boolean(controller.buttons[index]);
         controller.buttons[index] = value;
         return value && !previous;
-     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:edge@1267', __javascriptError); throw __javascriptError; }};
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:canvasGamepadEdge', __javascriptError); throw __javascriptError; }};
+    controller.cancel = () => { try {
+        if (controller.frame) cancelAnimationFrame(controller.frame);
+        controller.frame = 0;
+        controller.buttons = [];
+        controller.axisX = 0;
+        controller.axisY = 0;
+        controller.nextRepeat = 0;
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:canvasGamepadCancel', __javascriptError); throw __javascriptError; }};
     const tick = time => { try {
-        if (state.gamepad !== controller || !state.stage?.isConnected) return;
-        controller.frame = requestAnimationFrame(tick);
-        if (document.hidden || !state.keyboardActive) return;
-        const gamepad = [...(navigator.getGamepads?.() || [])].find(Boolean);
-        if (!gamepad) return;
+        controller.frame = 0;
+        if (state.gamepad !== controller || !state.stage?.isConnected || document.hidden || !state.keyboardActive) return;
+        const gamepad = publisherConnectedGamepad();
+        if (!gamepad) { controller.cancel(); return; }
         const axisX = Math.abs(number(gamepad.axes?.[0])) > .45 ? Math.sign(number(gamepad.axes?.[0])) : 0;
         const axisY = Math.abs(number(gamepad.axes?.[1])) > .45 ? Math.sign(number(gamepad.axes?.[1])) : 0;
         const x = (pressed(gamepad, 14) ? -1 : pressed(gamepad, 15) ? 1 : 0) || axisX;
@@ -1523,16 +1578,20 @@ function startCanvasGamepad(state) { try {
         } else controller.nextRepeat = 0;
         controller.axisX = x;
         controller.axisY = y;
-
         if (edge(gamepad, 4)) safeDotNet(state, 'KeyboardLayerMove', 'backward');
         if (edge(gamepad, 5)) safeDotNet(state, 'KeyboardLayerMove', 'forward');
         if (edge(gamepad, 6)) safeDotNet(state, 'KeyboardLayerMove', 'back');
         if (edge(gamepad, 7)) safeDotNet(state, 'KeyboardLayerMove', 'front');
         if (edge(gamepad, 2)) safeDotNet(state, 'KeyboardDuplicate');
         if (edge(gamepad, 1)) safeDotNet(state, 'ClearSelectionFromCanvas');
-     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:tick@1273', __javascriptError); throw __javascriptError; }};
-    controller.frame = requestAnimationFrame(tick);
- } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:startCanvasGamepad@1262', __javascriptError); throw __javascriptError; }}
+        controller.schedule();
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:canvasGamepadTick', __javascriptError); throw __javascriptError; }};
+    controller.schedule = () => { try {
+        if (controller.frame || state.gamepad !== controller || !state.stage?.isConnected || document.hidden || !state.keyboardActive || !publisherConnectedGamepad()) return;
+        controller.frame = requestAnimationFrame(tick);
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:canvasGamepadSchedule', __javascriptError); throw __javascriptError; }};
+    controller.schedule();
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:startCanvasGamepad', __javascriptError); throw __javascriptError; }}
 
 function canvasKeyDown(state, event) { try {
     canvasDocumentKeyDown(state, event);
@@ -2274,6 +2333,7 @@ function designerContextMenu(state, event) { try {
 function pointerDown(state, event) { try {
     if (event.button !== 0 || event.target.closest('.ruler-canvas,.corner-ruler')) return;
     state.keyboardActive = true;
+    state.gamepad?.schedule?.();
     try { clearPublicationPreview(state.page?.id || state.page); }
     catch (error) { console.warn('Publisher animation preview cleanup failed.', error); }
     if (state.operation) resetPointerOperation(state, true);
@@ -2540,12 +2600,13 @@ function pointerDown(state, event) { try {
         return;
     }
     const pendingToggle = additive && wasSelected;
-    if (!pendingToggle && (!wasSelected || additive)) {
+    const selectionCommitPending = !pendingToggle && (!wasSelected || additive);
+    if (selectionCommitPending)
         optimisticSelectElement(state, element, additive);
-        safeDotNet(state, 'SelectElement', id, additive);
+    if (element.classList.contains('locked') || element.matches('[data-connector-id]')) {
+        if (selectionCommitPending) safeDotNet(state, 'SelectElement', id, additive);
+        return;
     }
-    if (element.classList.contains('locked')) return;
-    if (element.matches('[data-connector-id]')) return;
 
     const handle = visualHandle || event.target.closest('[data-resize-handle]');
     const image = element.querySelector('img');
@@ -2568,6 +2629,7 @@ function pointerDown(state, event) { try {
         wasSelected,
         additive,
         pendingToggle,
+        selectionCommitPending,
         moving,
         movingIds: new Set(moving.map(item => { try { return (item.id); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:moving.map@2338', __javascriptError); throw __javascriptError; } })),
         movingBounds: groupBounds,
@@ -2900,11 +2962,15 @@ function pointerUp(state, event) { try {
             if (operation.pendingToggle) {
                 optimisticSelectElement(state, operation.element, true);
                 safeDotNet(state, 'SelectElement', operation.id, true);
+            } else if (operation.selectionCommitPending) {
+                safeDotNet(state, 'SelectElement', operation.id, true);
             }
             state.lastCanvasClick = null;
             return;
         }
-        if (operation.wasSelected && (operation.moving?.length || 0) > 1) {
+        if (operation.selectionCommitPending)
+            safeDotNet(state, 'SelectElement', operation.id, false);
+        else if (operation.wasSelected && (operation.moving?.length || 0) > 1) {
             optimisticSelectElement(state, operation.element, false);
             safeDotNet(state, 'SelectElement', operation.id, false);
         }
@@ -7102,23 +7168,29 @@ function panelStudioInvoke(binding, command, amount = 1) { try {
 
 function startPanelStudioGamepad(binding) { try {
     if (typeof navigator.getGamepads !== 'function') return;
-    const state = { frame: 0, buttons: [], nextRepeat: 0, axisX: 0, axisY: 0 };
-    const pressed = (gamepad, index) => { try { return (Boolean(gamepad?.buttons?.[index]?.pressed || number(gamepad?.buttons?.[index]?.value) > .55)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:pressed@6705', __javascriptError); throw __javascriptError; } };
+    const state = { frame: 0, buttons: [], nextRepeat: 0, axisX: 0, axisY: 0, schedule: null, cancel: null };
+    const pressed = (gamepad, index) => { try { return (Boolean(gamepad?.buttons?.[index]?.pressed || number(gamepad?.buttons?.[index]?.value) > .55)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:panelGamepadPressed', __javascriptError); throw __javascriptError; } };
     const edge = (gamepad, index) => { try {
         const value = pressed(gamepad, index);
         const previous = Boolean(state.buttons[index]);
         state.buttons[index] = value;
         return value && !previous;
-     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:edge@6706', __javascriptError); throw __javascriptError; }};
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:panelGamepadEdge', __javascriptError); throw __javascriptError; }};
+    state.cancel = () => { try {
+        if (state.frame) cancelAnimationFrame(state.frame);
+        state.frame = 0;
+        state.buttons = [];
+        state.axisX = 0;
+        state.axisY = 0;
+        state.nextRepeat = 0;
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:panelGamepadCancel', __javascriptError); throw __javascriptError; }};
     const tick = time => { try {
-        if (binding.disposed || !binding.element?.isConnected) return;
-        state.frame = requestAnimationFrame(tick);
-        if (document.hidden || binding.element.dataset.panelStudioArrange !== 'true') return;
+        state.frame = 0;
+        if (binding.disposed || !binding.element?.isConnected || document.hidden || binding.element.dataset.panelStudioArrange !== 'true') return;
         const active = document.activeElement === binding.element || binding.element.contains(document.activeElement);
         if (!active) return;
-        const gamepad = [...(navigator.getGamepads?.() || [])].find(Boolean);
-        if (!gamepad) return;
-
+        const gamepad = publisherConnectedGamepad();
+        if (!gamepad) { state.cancel(); return; }
         const axisX = Math.abs(number(gamepad.axes?.[0])) > .45 ? Math.sign(number(gamepad.axes?.[0])) : 0;
         const axisY = Math.abs(number(gamepad.axes?.[1])) > .45 ? Math.sign(number(gamepad.axes?.[1])) : 0;
         const dpadX = pressed(gamepad, 14) ? -1 : pressed(gamepad, 15) ? 1 : 0;
@@ -7137,21 +7209,31 @@ function startPanelStudioGamepad(binding) { try {
         } else state.nextRepeat = 0;
         state.axisX = x;
         state.axisY = y;
-
-        // Steam Deck / standard gamepad: bumpers move one layer, triggers move to edge,
-        // X duplicates. Interaction mode remains an explicit UI choice. Destructive delete remains
-        // keyboard/context-menu only to avoid accidental controller data loss.
         if (edge(gamepad, 4)) panelStudioInvoke(binding, 'backward');
         if (edge(gamepad, 5)) panelStudioInvoke(binding, 'forward');
         if (edge(gamepad, 6)) panelStudioInvoke(binding, 'back');
         if (edge(gamepad, 7)) panelStudioInvoke(binding, 'front');
         if (edge(gamepad, 2)) panelStudioInvoke(binding, 'duplicate');
-        // Interaction mode is intentionally changed only by explicit UI controls.
-        // A connected or noisy gamepad must never switch the editor out of arrange mode.
-     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:tick@6712', __javascriptError); throw __javascriptError; }};
-    state.frame = requestAnimationFrame(tick);
+        state.schedule();
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:panelGamepadTick', __javascriptError); throw __javascriptError; }};
+    state.schedule = () => { try {
+        if (state.frame || binding.disposed || !binding.element?.isConnected || document.hidden || binding.element.dataset.panelStudioArrange !== 'true') return;
+        const active = document.activeElement === binding.element || binding.element.contains(document.activeElement);
+        if (!active || !publisherConnectedGamepad()) return;
+        state.frame = requestAnimationFrame(tick);
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:panelGamepadSchedule', __javascriptError); throw __javascriptError; }};
+    binding.element.addEventListener('focusin', state.schedule, { signal: binding.controller.signal });
+    binding.element.addEventListener('pointerdown', state.schedule, { signal: binding.controller.signal });
+    document.addEventListener('visibilitychange', () => { try {
+        if (document.hidden) state.cancel(); else state.schedule();
+    } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:panelGamepadVisibility', __javascriptError); throw __javascriptError; } }, { signal: binding.controller.signal });
+    window.addEventListener('blur', state.cancel, { signal: binding.controller.signal });
+    window.addEventListener('focus', state.schedule, { signal: binding.controller.signal });
+    window.addEventListener('gamepadconnected', state.schedule, { signal: binding.controller.signal });
+    window.addEventListener('gamepaddisconnected', () => { try { if (!publisherConnectedGamepad()) state.cancel(); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:panelGamepadDisconnected', __javascriptError); throw __javascriptError; } }, { signal: binding.controller.signal });
     binding.gamepad = state;
- } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:startPanelStudioGamepad@6702', __javascriptError); throw __javascriptError; }}
+    state.schedule();
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:startPanelStudioGamepad', __javascriptError); throw __javascriptError; }}
 
 export function unbindPanelStudioDropSurface(element) { try {
     if (!(element instanceof HTMLElement)) return;
@@ -7162,7 +7244,7 @@ export function unbindPanelStudioDropSurface(element) { try {
     binding.cancelPointer?.();
     binding.controller?.abort?.();
     try { binding.layoutObserver?.disconnect?.(); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:suppressed-catch@6782', __caughtJavaScriptError); }
-    if (binding.gamepad?.frame) cancelAnimationFrame(binding.gamepad.frame);
+    binding.gamepad?.cancel?.();
     panelStudioDropBindings.delete(element);
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:unbindPanelStudioDropSurface@6755', __javascriptError); throw __javascriptError; }}
 

@@ -1,8 +1,5 @@
 # PublisherStudio
 
-<img width="2408" height="1506" alt="12DAD162-386B-41B9-A596-A20DE64896E9" src="https://github.com/user-attachments/assets/0f1ab3b8-8a58-4718-97d4-4548afe8f93e" />
-<img width="2408" height="1506" alt="F85FA186-735C-4D66-8C8E-35CFE675AB34" src="https://github.com/user-attachments/assets/3bf6ed1c-41db-4711-8068-07b317f92662" />
-
 PublisherStudio is an open-source, local-first .NET 10 and Blazor publishing environment for documents, stories, pictures, spreadsheets, presentations, websites, video, streaming, and reusable interactive panels. It is designed to remain useful as a standalone application while optionally cooperating with LocalGPT and organic 1-Wire peers.
 
 ## Future2 role

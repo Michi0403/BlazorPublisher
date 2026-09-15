@@ -199,8 +199,7 @@
     <PublisherStudioDocumentationRepositoryRoot>$(MSBuildThisFileDirectory).</PublisherStudioDocumentationRepositoryRoot>
     <PublisherStudioDocumentationOutputRoot>$(TargetDir)wwwroot/help-docs</PublisherStudioDocumentationOutputRoot>
     <BuildPublisherStudioDocumentation Condition="'$(BuildPublisherStudioDocumentation)' == ''">true</BuildPublisherStudioDocumentation>
-    <RequirePublisherStudioDocumentationPdf Condition="'$(RequirePublisherStudioDocumentationPdf)' == '' and '$(Configuration)' == 'Release'">true</RequirePublisherStudioDocumentationPdf>
-    <RequirePublisherStudioDocumentationPdf Condition="'$(RequirePublisherStudioDocumentationPdf)' == ''">false</RequirePublisherStudioDocumentationPdf>
+    <RequirePublisherStudioDocumentationPdf Condition="'$(RequirePublisherStudioDocumentationPdf)' == ''">true</RequirePublisherStudioDocumentationPdf>
     <PublisherStudioDocumentationPdfArgument Condition="'$(RequirePublisherStudioDocumentationPdf)' == 'true'">-RequirePdf</PublisherStudioDocumentationPdfArgument>
     <PublisherStudioPagesPdfArgument Condition="'$(RequirePublisherStudioDocumentationPdf)' != 'true'">-AllowMissingPdf</PublisherStudioPagesPdfArgument>
   </PropertyGroup>

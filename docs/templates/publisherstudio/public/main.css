@@ -2217,6 +2217,12 @@ html.publisherstudio-kawaii-docs .publisherstudio-root-toc .offcanvas-body {
   padding: .8rem .65rem;
 }
 
+/* v3.7.4: managed-reference/API pages do not receive the conceptual root-toc marker,
+   so give their left navigation the same breathing room as Overview and Guide. */
+html.publisherstudio-kawaii-docs body[data-yaml-mime="ManagedReference"] > main > .toc-offcanvas .offcanvas-body {
+  padding: .8rem .65rem;
+}
+
 html.publisherstudio-kawaii-docs article > p,
 html.publisherstudio-kawaii-docs article > ul,
 html.publisherstudio-kawaii-docs article > ol,

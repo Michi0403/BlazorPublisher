@@ -185,4 +185,9 @@ PublisherStudio uses the maintained LocalGPT deployment contract with PublisherS
 - Normal install and update extraction must not delete the product root. Whole-root deletion remains explicit through `--force-delete` only.
 - Former `--*-blazorpublisher` switches may remain input aliases for old shortcuts, but all maintained files, messages, profiles, tests, and documentation use PublisherStudio names.
 - `Build-Release.ps1`, publish profiles, installer guards, launch profiles, repository tests, and public documentation must enforce this same contract. A conflicting repository instruction is a defect and must be replaced, not allow-listed.
+## Documentation viewport-decoration containment
+
+Documentation cursor paws, paw trails, click bursts, hover sparkles, satellites, stars, and similar decorative effects must not change document geometry. Pointer-following/transient effects must live inside the dedicated fixed `.publisherstudio-pointer-overlay`, which is viewport-sized, paint/layout contained, clipped, pointer-transparent, and explicitly excluded from the documentation body content-stacking selector. Use `clientX`/`clientY` coordinates only for effects inside that viewport overlay. Never append transient pointer decorations directly to normal body flow.
+
+A documentation-background or decorative-only request must not change article, navigation, footer, rail, scroll, sizing, or stacking behavior unless the task explicitly asks for such a layout change. The regression contract is simple: moving the pointer, creating trails, or animating decorative objects must not change `scrollWidth` or `scrollHeight`. `build/Assert-DocumentationPointerOverlay.ps1` enforces the source-level containment contract on normal builds.
 

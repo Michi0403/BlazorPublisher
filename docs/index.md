@@ -1,6 +1,6 @@
 # PublisherStudio documentation
 
-**Version 3.6.9**
+**Version 3.7.3**
 
 PublisherStudio is a local-first publishing workspace for page layout, stories, spreadsheets, pictures, audio, video, streaming, interactive content, and self-contained exports.
 
@@ -36,7 +36,7 @@ Browse publishing and export behavior, privacy boundaries, the optional LocalGPT
 
 ## Architecture at a glance
 
-```
+<div class="mermaid publisherstudio-mermaid-diagram">
 flowchart LR
     U[Human author] --> UI[Blazor + DevExpress workspace]
     UI --> APP[Application services]
@@ -47,7 +47,7 @@ flowchart LR
     DOC --> STORE[(Local project data)]
     MEDIA --> DEVICE[Approved local devices]
     WIRE --> PEER[Approved LocalGPT peer]
-```
+</div>
 
 The editable publication remains authoritative. Browser runtimes accelerate interaction and rendering, while C# services own project state, validation, persistence, export, and approved external connections.
 
@@ -57,4 +57,4 @@ The conceptual pages are built together with compiler-generated XML documentatio
 
 The packaged PDF is built from the same reviewed Kawaii HTML tree as the website. It contains every maintained PublisherStudio chapter and every generated API namespace/type page; a tiny source-only or fallback PDF is rejected by the release and Pages gates.
 
-[🐾 Download the Kawaii handbook](~/PublisherStudio-3.6.9.pdf)
+[🐾 Download the Kawaii handbook](~/PublisherStudio-3.7.3.pdf)

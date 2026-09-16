@@ -13,14 +13,14 @@ PublisherStudio is a dependency-injection-oriented modular monolith. The design 
 
 Reusable work flows toward Services and BusinessObjects. Services do not depend on Components, Controllers, Hubs, or HostedServices. Specialized use cases stay in a `UseCases` subnamespace below their owning service area rather than becoming a competing application root.
 
-```
+<div class="mermaid publisherstudio-mermaid-diagram">
 flowchart LR
   UI[Blazor Components] --> S[Reusable Services]
   C[Controllers: backend request entry] --> S
   HB[Hubs: persistent connection entry] --> S
   HS[HostedServices: lifetime work] --> S
   S --> BO[BusinessObjects]
-```
+</div>
 
 ## Service-owned behavior
 

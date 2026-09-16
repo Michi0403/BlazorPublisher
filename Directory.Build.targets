@@ -27,6 +27,7 @@
     <PanelStudioInteractionLifecycleScript>$(MSBuildThisFileDirectory)build/Assert-PanelStudioInteractionLifecycle.ps1</PanelStudioInteractionLifecycleScript>
     <PanelStudioAuthoringGeometryScript>$(MSBuildThisFileDirectory)build/Assert-PanelStudioAuthoringGeometry.ps1</PanelStudioAuthoringGeometryScript>
     <JavaScriptDiagnosticsScript>$(MSBuildThisFileDirectory)build/Assert-JavaScriptDiagnostics.ps1</JavaScriptDiagnosticsScript>
+    <DocumentationPointerOverlayScript>$(MSBuildThisFileDirectory)build/Assert-DocumentationPointerOverlay.ps1</DocumentationPointerOverlayScript>
     <PublishConfigurationScript>$(MSBuildThisFileDirectory)build/Assert-PublishConfiguration.ps1</PublishConfigurationScript>
     <InstallerWorkflowScript>$(MSBuildThisFileDirectory)build/Assert-InstallerWorkflow.ps1</InstallerWorkflowScript>
     <XmlDocumentationCoverageScript>$(MSBuildThisFileDirectory)build/Assert-XmlDocumentationCoverage.ps1</XmlDocumentationCoverageScript>
@@ -168,8 +169,15 @@
     <Exec Command="&quot;$(RepositoryPowerShell)&quot; $(RepositoryPowerShellArguments) -File &quot;$(JavaScriptDiagnosticsScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
   </Target>
 
-  <Target Name="AssertPublisherPublishConfiguration"
+  <Target Name="AssertPublisherDocumentationPointerOverlay"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherJavaScriptDiagnostics"
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipDocumentationPointerOverlayGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web'">
+    <Error Condition="!Exists('$(DocumentationPointerOverlayScript)')" Text="Documentation pointer-overlay guard script is missing: $(DocumentationPointerOverlayScript)" />
+    <Exec Command="&quot;$(RepositoryPowerShell)&quot; $(RepositoryPowerShellArguments) -File &quot;$(DocumentationPointerOverlayScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
+  </Target>
+
+  <Target Name="AssertPublisherPublishConfiguration"
+          BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherDocumentationPointerOverlay"
           Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipPublishConfigurationGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web'">
     <Error Condition="!Exists('$(PublishConfigurationScript)')" Text="Publish configuration guard script is missing: $(PublishConfigurationScript)" />
     <Exec Command="&quot;$(RepositoryPowerShell)&quot; $(RepositoryPowerShellArguments) -File &quot;$(PublishConfigurationScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />

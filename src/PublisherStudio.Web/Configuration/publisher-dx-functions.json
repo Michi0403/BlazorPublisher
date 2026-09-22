@@ -688,6 +688,62 @@
       "source": "PublisherStudio object store"
     },
     {
+      "key": "publisher.file.formats",
+      "displayName": "PublisherStudio file formats",
+      "description": "Returns the maintained PublisherStudio document, spreadsheet, picture, audio and video format families with current media-runtime availability.",
+      "controller": "OrganicPlugins",
+      "method": "POST",
+      "route": "/api/organic/capabilities/publisher.file.formats",
+      "parameterSchemaJson": "{\"type\":\"object\",\"properties\":{}}",
+      "organs": [
+        "eyes"
+      ],
+      "skills": [
+        "document",
+        "spreadsheet",
+        "picture",
+        "audio",
+        "video",
+        "format-routing"
+      ],
+      "requiredSkillKeys": [
+        "document",
+        "spreadsheet",
+        "picture",
+        "audio",
+        "video",
+        "format-routing"
+      ],
+      "uiActivationKeys": [],
+      "isOnline": true,
+      "isEnabled": true,
+      "isReadOnly": true,
+      "requiresHumanConfirmation": false,
+      "supportsScheduling": false,
+      "supportsRecurringExecution": false,
+      "requiresHumanInteractionOnTargetSystem": false,
+      "requiresAutomatedInteractionOnTargetSystem": false,
+      "interactionValueSchemaJson": "{\"type\":\"object\",\"properties\":{}}",
+      "inputContract": "Parameters matching: {\"type\":\"object\",\"properties\":{}}",
+      "outputContract": "A bounded JSON WorkResult associated with the original CorrelationId.",
+      "securityContract": "Requires an explicitly linked peer and the PublisherStudio exposure/invocation permission matrix.",
+      "organicUseCase": "Allows LocalGPT to route dropped files only to PublisherStudio format families that PublisherStudio actually maintains.",
+      "suggestedCouncilRoles": [
+        "document",
+        "spreadsheet",
+        "picture",
+        "audio",
+        "video",
+        "format-routing"
+      ],
+      "isExposedToPeer": true,
+      "allowPeerInvocation": true,
+      "requiresFrontendUserConfirmation": false,
+      "interactionEditor": 0,
+      "configurationKey": "publisher:publisher.file.formats",
+      "source": "PublisherStudio object store"
+    },
+    {
       "key": "publisher.documentation.profile",
       "displayName": "PublisherStudio documentation profile",
       "description": "Returns the active same-origin HTML, PDF and API documentation routes and availability state without opening a browser or exposing filesystem paths.",

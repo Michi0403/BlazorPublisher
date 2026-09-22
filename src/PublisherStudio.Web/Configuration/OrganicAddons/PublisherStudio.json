@@ -17,7 +17,8 @@
     "publisher.publication.manage",
     "publisher.streaming.manage",
     "publisher.automation.run",
-    "publisher.code.inspect"
+    "publisher.code.inspect",
+    "publisher.file.formats"
   ],
   "uiActivationKeys": [
     "localgpt.publisher.spreadsheet.request",

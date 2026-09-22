@@ -41,7 +41,10 @@ public sealed class ObjectStoreOrganicCapabilityCatalog(
             var mediaCapability = capabilities.FirstOrDefault(item =>
                 string.Equals(item.Key, "publisher.media.capabilities", StringComparison.OrdinalIgnoreCase));
             if (mediaCapability is not null)
+            {
                 mediaCapability.Description = $"{mediaCapability.Description.Trim()} FFmpeg available: {media.Available}.";
+                mediaCapability.IsOnline = media.Available;
+            }
 
             logger.LogInformation($"Published {capabilities.Count} PublisherStudio DX function descriptor(s) from the serializable object store through the shared 1-Wire contract.");
             return capabilities;

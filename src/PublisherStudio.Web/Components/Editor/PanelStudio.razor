@@ -1701,6 +1701,24 @@
         }
     }
 
+    /// <summary>Routes analog controller commands into Panel Studio's existing semantic command path without synthesizing keyboard input.</summary>
+    /// <param name="command">Semantic Panel Studio command selected by the controller adapter.</param>
+    /// <param name="amount">Analog movement magnitude supplied for commands that adjust element position.</param>
+    /// <returns>A task that completes after the existing Panel Studio command path processes the controller action.</returns>
+    [JSInvokable]
+    public Task PanelStudioControllerCommand(string command, double amount = 1)
+    {
+        try
+        {
+            return PanelStudioCommand(command, amount);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(PanelStudioControllerCommand)} failed.");
+            throw;
+        }
+    }
+
     /// <summary>
     /// Performs run panel interop for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
     /// </summary>

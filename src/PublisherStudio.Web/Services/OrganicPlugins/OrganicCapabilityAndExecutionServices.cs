@@ -14,9 +14,11 @@ namespace PublisherStudio.Services.OrganicPlugins;
 /// Maintains the authoritative directory of organic capability entries used for discovery, validation, and runtime lookup.
 /// </summary>
 /// <param name="mediaConversion">Media conversion service dependency used by the organic capability workflow to provide the corresponding application capability.</param>
+/// <param name="fileFormats">Authoritative PublisherStudio format-capability service used to advertise current document and media routing support.</param>
 /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class OrganicCapabilityCatalog(
     IMediaConversionService mediaConversion,
+    IPublisherFileFormatCapabilityService fileFormats,
     ILogger<OrganicCapabilityCatalog> logger) : IOrganicCapabilityCatalog
 {
     /// <summary>
@@ -38,6 +40,7 @@ public sealed class OrganicCapabilityCatalog(
     try
     {
             var media = await mediaConversion.GetCapabilitiesAsync(cancellationToken).ConfigureAwait(false);
+            var formatSnapshot = await fileFormats.GetCapabilitiesAsync(cancellationToken).ConfigureAwait(false);
             var capabilities = new List<OrganicCapabilityDescriptor>
             {
                 Capability("publisher.screen.capture", "Eyes: screen capture", "Captures one user-selected screen or window only after PublisherStudio confirmation and the browser's current getDisplayMedia prompt.", "eyes", false, true, false),
@@ -53,8 +56,12 @@ public sealed class OrganicCapabilityCatalog(
                 Capability("publisher.text.edit.request", "Request reviewed text", "Opens a bounded PublisherStudio text editor after approval, returns the user's saved text through the same CorrelationId, then closes the editor automatically.", "hands", false, true, false),
                 Capability("publisher.website.content.request", "Request approved web/document content", "Returns user-approved bounded HTML, DIV or document content plus an optional source URL for LocalGPT chat and other organic clients.", "eyes", true, true, false),
                 Capability("publisher.business-context", "PublisherStudio project/API context", "Returns the current domain, service and controller context for grounded council planning.", "eyes", true, false, false),
-                Capability("publisher.media.capabilities", "FFmpeg/media capabilities", $"Returns the installed PublisherStudio media conversion capability map. FFmpeg available: {media.Available}.", "eyes", true, false, false)
+                Capability("publisher.media.capabilities", "FFmpeg/media capabilities", $"Returns the installed PublisherStudio media conversion capability map. FFmpeg available: {media.Available}.", "eyes", true, false, false),
+                Capability("publisher.file.formats", "PublisherStudio file formats", "Returns the maintained PublisherStudio document, spreadsheet, picture, audio and video format families with current media-runtime availability.", "eyes", true, false, false)
             };
+            var formatCapability = capabilities.FirstOrDefault(item => string.Equals(item.Key, "publisher.file.formats", StringComparison.OrdinalIgnoreCase));
+            if (formatCapability is not null)
+                formatCapability.ParameterSchemaJson = BuildFileFormatSchema(formatSnapshot);
             logger.LogDebug("Published {CapabilityCount} PublisherStudio organic capabilities.", capabilities.Count);
             return capabilities;
     
@@ -68,6 +75,37 @@ public sealed class OrganicCapabilityCatalog(
         throw;
     }
 }
+
+    /// <summary>Serializes the live PublisherStudio format families into bounded 1-Wire capability metadata without moving format ownership into the organic layer.</summary>
+    /// <param name="snapshot">Current PublisherStudio format-capability snapshot used as the source of advertised family metadata.</param>
+    /// <returns>A JSON schema extension containing the current PublisherStudio format-family capability records.</returns>
+    private string BuildFileFormatSchema(PublisherFileFormatCapabilitySnapshot snapshot)
+    {
+        try
+        {
+            var payload = new Dictionary<string, object?>
+            {
+                ["type"] = "object",
+                ["properties"] = new Dictionary<string, object?>(),
+                ["additionalProperties"] = false,
+                ["x-publisher-format-families"] = snapshot.Families.Select(family => new
+                {
+                    key = family.Key,
+                    displayName = family.DisplayName,
+                    extensions = family.Extensions,
+                    directImportAvailable = family.DirectImportAvailable,
+                    requiresMediaRuntime = family.RequiresMediaRuntime,
+                    runtimeAvailable = family.RuntimeAvailable
+                }).ToList()
+            };
+            return JsonSerializer.Serialize(payload);
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Building PublisherStudio 1-Wire file-format metadata failed.");
+            throw;
+        }
+    }
 
     /// <summary>
     /// Retrieves skills in the organic capability directory so callers observe a consistent, authoritative runtime view.
@@ -459,6 +497,7 @@ public sealed class OrganicCapabilityCatalog(
 /// <param name="businessContext">Business object context service dependency used by the organic work executor workflow to provide the corresponding application capability.</param>
 /// <param name="documentation">Publisher documentation catalog service dependency used by the organic work executor workflow to provide the corresponding application capability.</param>
 /// <param name="mediaConversion">Media conversion service dependency used by the organic work executor workflow to provide the corresponding application capability.</param>
+/// <param name="fileFormats">Authoritative format-capability service used when executing the read-only PublisherStudio file-format capability route.</param>
 /// <param name="resultStore">Organic result store dependency used by the organic work executor workflow to provide the corresponding application capability.</param>
 /// <param name="recurringScreenReader">Recurring screen reader service dependency used by the organic work executor workflow to provide the corresponding application capability.</param>
 /// <param name="runtimePolicy">Runtime policy containing persisted operator-owned payload limits.</param>
@@ -472,6 +511,7 @@ public sealed class OrganicWorkExecutor(
     IBusinessObjectContextService businessContext,
     IPublisherDocumentationCatalogService documentation,
     IMediaConversionService mediaConversion,
+    IPublisherFileFormatCapabilityService fileFormats,
     IOrganicResultStore resultStore,
     IRecurringScreenReaderService recurringScreenReader,
     PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService runtimePolicy,
@@ -522,6 +562,7 @@ public sealed class OrganicWorkExecutor(
                     "publisher.business-context" => businessContext.CreateSnapshot(),
                     "publisher.documentation.profile" => new { Status = documentation.GetStatus(), HtmlRoute = "/api/documentation/html/index.html", ApiRoute = "/api/documentation/html/api/index.html", PdfRoute = "/api/documentation/pdf", ProfileRoute = "/api/documentation/profile" },
                     "publisher.media.capabilities" => await mediaConversion.GetCapabilitiesAsync(cancellationToken).ConfigureAwait(false),
+                    "publisher.file.formats" => await fileFormats.GetCapabilitiesAsync(cancellationToken).ConfigureAwait(false),
                     _ => throw new KeyNotFoundException($"Unknown organic capability '{envelope.CapabilityKey}'.")
                 };
             }

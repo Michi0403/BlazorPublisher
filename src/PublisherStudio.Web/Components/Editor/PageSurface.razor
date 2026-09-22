@@ -988,7 +988,7 @@
                     $"{State.Document.View.GridSpacingMm.ToString("R", CultureInfo.InvariantCulture)}|{State.ConnectorTool}|{selectionKey}|{clipboardKey}";
                 var dataVisualLayoutKey = $"{State.CurrentPage.Id:N}|{State.Revision}|{State.Document.Zoom.ToString("R", CultureInfo.InvariantCulture)}|{State.Document.View.CanvasZoomMode}";
 
-                _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js?v=3.7.4").ConfigureAwait(true);
+                _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js?v=3.7.6").ConfigureAwait(true);
                 if (initializationKey != _canvasInitializationKey)
                 {
                     _self ??= DotNetObjectReference.Create(this);
@@ -1073,7 +1073,7 @@
     {
         try
         {
-            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js?v=3.7.4").ConfigureAwait(true);
+            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js?v=3.7.6").ConfigureAwait(true);
             var zoom = await _module.InvokeAsync<double>(
                 "calculateFitZoom",
                 "publisher-stage",
@@ -1944,6 +1944,21 @@
             throw;
         }
     }
+    /// <summary>Applies bounded analog controller movement directly to the selected canvas element instead of emulating keyboard arrows.</summary>
+    /// <param name="dx">Horizontal controller-axis delta applied through the existing editor-state nudge invariant.</param>
+    /// <param name="dy">Vertical controller-axis delta applied through the existing editor-state nudge invariant.</param>
+    [JSInvokable] public void ControllerNudge(double dx, double dy) {
+        try
+        {
+            State.NudgeSelection(dx, dy);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ControllerNudge)} failed.");
+            throw;
+        }
+    }
+
     /// <summary>
     /// Performs keyboard layer move for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
     /// </summary>
@@ -1968,6 +1983,40 @@
             throw;
         }
     }
+    /// <summary>Routes direct controller layer actions through the same editor-state invariants as the established keyboard layer commands.</summary>
+    /// <param name="command">Layer-order command such as front, forward, backward, or back.</param>
+    [JSInvokable] public void ControllerLayerMove(string command)
+    {
+        try { KeyboardLayerMove(command); }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ControllerLayerMove)} failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Duplicates the current selection from a direct controller action.</summary>
+    [JSInvokable] public void ControllerDuplicate()
+    {
+        try { State.DuplicateSelected(); }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ControllerDuplicate)} failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Clears the current selection from a direct controller action.</summary>
+    [JSInvokable] public void ControllerClearSelection()
+    {
+        try { State.SelectElement(null); }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PageSurface)}.{nameof(ControllerClearSelection)} failed.");
+            throw;
+        }
+    }
+
     /// <summary>
     /// Performs report canvas interaction error for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
     /// </summary>
@@ -2084,7 +2133,7 @@
             {
                 try
                 {
-                    _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js?v=3.7.4").ConfigureAwait(true);
+                    _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js?v=3.7.6").ConfigureAwait(true);
                     var point = await _module.InvokeAsync<double[]>("elementRelativePoint", "publisher-page", element.Id.ToString("D"), args.ClientX, args.ClientY).ConfigureAwait(true);
                     if (point.Length >= 2)
                     {

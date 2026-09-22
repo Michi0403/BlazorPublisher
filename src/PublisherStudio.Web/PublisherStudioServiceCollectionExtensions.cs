@@ -97,6 +97,7 @@ public static class PublisherStudioServiceCollectionExtensions
         AddSingleton<PublicationComponentService, PublicationComponentService>(services);
         AddSingleton<PanelDocumentService, PanelDocumentService>(services);
         AddSingleton<IMediaConversionService, MediaConversionService>(services);
+        AddSingleton<IPublisherFileFormatCapabilityService, PublisherFileFormatCapabilityService>(services);
         AddSingleton<PublicationWebhookStore, PublicationWebhookStore>(services);
         AddSingleton<PublicationLiveDataRegistry, PublicationLiveDataRegistry>(services);
         AddSingleton<PublicationWebDataService, PublicationWebDataService>(services);

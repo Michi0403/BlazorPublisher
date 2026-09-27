@@ -31,6 +31,8 @@
     <PublishConfigurationScript>$(MSBuildThisFileDirectory)build/Assert-PublishConfiguration.ps1</PublishConfigurationScript>
     <InstallerWorkflowScript>$(MSBuildThisFileDirectory)build/Assert-InstallerWorkflow.ps1</InstallerWorkflowScript>
     <XmlDocumentationCoverageScript>$(MSBuildThisFileDirectory)build/Assert-XmlDocumentationCoverage.ps1</XmlDocumentationCoverageScript>
+    <DevExpressComponentRetentionScript>$(MSBuildThisFileDirectory)build/Assert-DevExpressComponentRetention.ps1</DevExpressComponentRetentionScript>
+    <RazorMaintenanceArchitectureScript>$(MSBuildThisFileDirectory)build/Assert-RazorMaintenanceArchitecture.ps1</RazorMaintenanceArchitectureScript>
   </PropertyGroup>
 
   <Target Name="EnsurePublisherWireProtocolPackage"
@@ -71,8 +73,22 @@
     <Exec Command="&quot;$(RepositoryPowerShell)&quot; $(RepositoryPowerShellArguments) -File &quot;$(LocalizationIntegrityScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
   </Target>
 
-  <Target Name="AssertPublisherOperationalDiagnostics"
+  <Target Name="AssertPublisherDevExpressComponentRetention"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherLocalizationIntegrity"
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipDevExpressComponentRetentionGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web'">
+    <Error Condition="!Exists('$(DevExpressComponentRetentionScript)')" Text="DevExpress component retention guard script is missing: $(DevExpressComponentRetentionScript)" />
+    <Exec Command="&quot;$(RepositoryPowerShell)&quot; $(RepositoryPowerShellArguments) -File &quot;$(DevExpressComponentRetentionScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
+  </Target>
+
+  <Target Name="AssertPublisherRazorMaintenanceArchitecture"
+          BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherDevExpressComponentRetention"
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipRazorMaintenanceArchitectureGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web'">
+    <Error Condition="!Exists('$(RazorMaintenanceArchitectureScript)')" Text="Razor maintenance architecture guard script is missing: $(RazorMaintenanceArchitectureScript)" />
+    <Exec Command="&quot;$(RepositoryPowerShell)&quot; $(RepositoryPowerShellArguments) -File &quot;$(RazorMaintenanceArchitectureScript)&quot; -Product publisherstudio" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
+  </Target>
+
+  <Target Name="AssertPublisherOperationalDiagnostics"
+          BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherStudioRazorComponentAttributeExpressions"
           Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipOperationalDiagnosticsGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web'">
     <Error Condition="!Exists('$(OperationalDiagnosticsScript)')" Text="Operational diagnostics guard script is missing: $(OperationalDiagnosticsScript)" />
     <Exec Command="&quot;$(RepositoryPowerShell)&quot; $(RepositoryPowerShellArguments) -File &quot;$(OperationalDiagnosticsScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
@@ -262,6 +278,18 @@
     </ItemGroup>
     <Error Condition="'@(PublisherStudioDocumentationPublishFiles)' == ''" Text="No generated PublisherStudio documentation files were available for publish: $(PublisherStudioDocumentationOutputRoot)" />
     <Message Importance="High" Text="Added @(PublisherStudioDocumentationPublishFiles->Count()) generated documentation files to the PublisherStudio publish payload." />
+  </Target>
+
+
+  <PropertyGroup>
+    <RazorComponentAttributeExpressionsScript>$(MSBuildThisFileDirectory)build/Assert-RazorComponentAttributeExpressions.ps1</RazorComponentAttributeExpressionsScript>
+  </PropertyGroup>
+
+  <Target Name="AssertPublisherStudioRazorComponentAttributeExpressions"
+          BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherRazorMaintenanceArchitecture"
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipRazorComponentAttributeExpressionsGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web'">
+    <Error Condition="!Exists('$(RazorComponentAttributeExpressionsScript)')" Text="Razor component-attribute guard script is missing: $(RazorComponentAttributeExpressionsScript)" />
+    <Exec Condition="Exists('$(RazorComponentAttributeExpressionsScript)')" Command="&quot;$(RepositoryPowerShell)&quot; $(RepositoryPowerShellArguments) -File &quot;$(RazorComponentAttributeExpressionsScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
   </Target>
 
 </Project>

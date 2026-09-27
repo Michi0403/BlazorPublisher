@@ -7,6 +7,10 @@
 @inject IPublisherRuntimePolicyDataService RuntimePolicy
 @inject PublicationEditorTextService EditorText
 
+<div class="razor-component-boundary">
+<DxFormLayout CssClass="razor-component-layout-owner PageSurface">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext001">
 <div id="publisher-stage" class="publication-stage @(State.Document.View.RulersVisible ? null : "rulers-hidden") @(State.ConnectorTool != ConnectorToolKind.None ? "connector-tool-active" : null) @(!SelectionVisualsEnabled ? "selection-visuals-suppressed" : null) @(!InteractionEnabled ? "canvas-interaction-suspended" : null)"
      tabindex="0" @oncontextmenu="ShowPageContextMenu" @oncontextmenu:preventDefault>
     @if (State.Document.View.RulersVisible)
@@ -608,17 +612,17 @@
                 <Items>
                     <DxContextMenuItem Text="Chart" Click="InsertChart" />
                     <DxContextMenuItem Text="Pie / doughnut" Click="InsertPie" />
-                    <DxContextMenuItem Text="Polar chart" Click="InsertPolar" />
+                    <DxContextMenuItem Text="Polar Chart" Click="InsertPolar" />
                     <DxContextMenuItem Text="Sparkline" Click="InsertSparkline" />
-                    <DxContextMenuItem Text="Bar gauge" Click="InsertBarGauge" />
-                    <DxContextMenuItem Text="Circular gauge" Click="InsertCircularGauge" />
-                    <DxContextMenuItem Text="Linear gauge" Click="InsertLinearGauge" />
-                    <DxContextMenuItem Text="Range selector" Click="InsertRangeSelector" />
-                    <DxContextMenuItem Text="Sankey diagram" Click="InsertSankey" />
+                    <DxContextMenuItem Text="Bar Gauge" Click="InsertBarGauge" />
+                    <DxContextMenuItem Text="Circular Gauge" Click="InsertCircularGauge" />
+                    <DxContextMenuItem Text="Linear Gauge" Click="InsertLinearGauge" />
+                    <DxContextMenuItem Text="Range Selector" Click="InsertRangeSelector" />
+                    <DxContextMenuItem Text="Sankey Diagram" Click="InsertSankey" />
                     <DxContextMenuItem Text="Funnel" Click="InsertFunnel" />
                     <DxContextMenuItem Text="Pyramid" Click="InsertPyramid" />
-                    <DxContextMenuItem Text="Tree map" Click="InsertTreeMap" />
-                    <DxContextMenuItem Text="Data table" Click="InsertDataTable" />
+                    <DxContextMenuItem Text="Tree Map" Click="InsertTreeMap" />
+                    <DxContextMenuItem Text="Data Table" Click="InsertDataTable" />
                     <DxContextMenuItem Text="KPI progress" Click="InsertKpi" />
                 </Items>
             </DxContextMenuItem>
@@ -657,6 +661,11 @@
         }
     </Items>
 </DxContextMenu>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+</div>
+
 
 @code {
 
@@ -825,7 +834,7 @@
     /// Gets the timeline command text value that forms part of the page surface state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The timeline command text value exposed by <see cref="PageSurface"/>.</value>
-    private string TimelineCommandText => TimelineVisible ? "✓ Timeline pane" : "Timeline pane";
+    private string TimelineCommandText => GetTimelineCommandTextForRender();
 
     /// <summary>
     /// Stores the internal context menu state used by <see cref="PageSurface"/> while executing its surrounding workflow.
@@ -879,74 +888,44 @@
     /// Gets the pixels per mm value that forms part of the page surface state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The pixels per mm value exposed by <see cref="PageSurface"/>.</value>
-    private double PixelsPerMm => RuntimePolicy.BasePixelsPerMillimeter * State.Document.Zoom;
+    private double PixelsPerMm => GetPixelsPerMmForRender();
     /// <summary>
     /// Gets the canvas zoom mode class value that forms part of the page surface state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The canvas zoom mode class value exposed by <see cref="PageSurface"/>.</value>
-    private string CanvasZoomModeClass => State.Document.View.CanvasZoomMode == PublicationCanvasZoomMode.Transform
-        ? "zoom-mode-transform"
-        : "zoom-mode-css";
+    private string CanvasZoomModeClass => GetCanvasZoomModeClassForRender();
     /// <summary>
     /// Gets the unit label value that forms part of the page surface state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The unit label value exposed by <see cref="PageSurface"/>.</value>
-    private string UnitLabel => State.Document.View.RulerUnit switch
-    {
-        MeasurementUnit.Millimeter => "mm",
-        MeasurementUnit.Centimeter => "cm",
-        MeasurementUnit.Inch => "in",
-        MeasurementUnit.Pixel => "px",
-        _ => "mm"
-    };
+    private string UnitLabel => GetUnitLabelForRender();
 
     /// <summary>
     /// Gets a value indicating whether map component selected applies to the page surface state.
     /// </summary>
     /// <value>The is map component selected value exposed by <see cref="PageSurface"/>.</value>
-    private bool IsMapComponentSelected => State.SelectedElement is DevExtremeComponentElement { ComponentKind: PublicationComponentKind.Map or PublicationComponentKind.VectorMap };
+    private bool IsMapComponentSelected => GetIsMapComponentSelectedForRender();
     /// <summary>
     /// Gets the pointer state text value that forms part of the page surface state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The pointer state text value exposed by <see cref="PageSurface"/>.</value>
-    private string PointerStateText => State.ConnectorTool != ConnectorToolKind.None
-        ? State.ConnectorTool switch
-        {
-            ConnectorToolKind.Arrow => "Draw arrow connector",
-            ConnectorToolKind.SignalConnector => "Draw signal connector",
-            ConnectorToolKind.SignalArrow => "Draw signal arrow",
-            _ => "Draw connector"
-        }
-        : State.CropMode ? "Crop picture"
-        : State.ContentPanMode && IsMapComponentSelected ? "Pan / zoom map content"
-        : State.ContentPanMode ? "Position visible content"
-        : State.HasMultipleSelection ? $"Move {State.SelectedElements.Count} objects"
-        : IsMapComponentSelected ? "Move map object"
-        : "Select / move";
+    private string PointerStateText => GetPointerStateTextForRender();
     /// <summary>
     /// Gets the connector tool title value that forms part of the page surface state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The connector tool title value exposed by <see cref="PageSurface"/>.</value>
-    private string ConnectorToolTitle => State.ConnectorTool switch
-    {
-        ConnectorToolKind.Arrow => "Arrow connector",
-        ConnectorToolKind.SignalConnector => "Signal connector",
-        ConnectorToolKind.SignalArrow => "Signal arrow",
-        _ => "Connector"
-    };
+    private string ConnectorToolTitle => GetConnectorToolTitleForRender();
     /// <summary>
     /// Gets the connector tool hint value that forms part of the page surface state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The connector tool hint value exposed by <see cref="PageSurface"/>.</value>
-    private string ConnectorToolHint => State.ConnectorTool is ConnectorToolKind.SignalConnector or ConnectorToolKind.SignalArrow
-        ? "Drag from any object port or empty canvas point to another port or canvas point. Signal actions work offline in exported HTML. Press Esc to stop."
-        : "Drag from a round object port to another port. Press Esc to stop.";
+    private string ConnectorToolHint => GetConnectorToolHintForRender();
 
     /// <summary>
     /// Gets a value indicating whether reset pointer state applies to the page surface state.
     /// </summary>
     /// <value>The can reset pointer state value exposed by <see cref="PageSurface"/>.</value>
-    private bool CanResetPointerState => State.ConnectorTool != ConnectorToolKind.None || State.CropMode || State.ContentPanMode;
+    private bool CanResetPointerState => GetCanResetPointerStateForRender();
 
     /// <summary>
     /// Gets the page style value that forms part of the page surface state consumed or produced by the surrounding workflow.
@@ -988,7 +967,7 @@
                     $"{State.Document.View.GridSpacingMm.ToString("R", CultureInfo.InvariantCulture)}|{State.ConnectorTool}|{selectionKey}|{clipboardKey}";
                 var dataVisualLayoutKey = $"{State.CurrentPage.Id:N}|{State.Revision}|{State.Document.Zoom.ToString("R", CultureInfo.InvariantCulture)}|{State.Document.View.CanvasZoomMode}";
 
-                _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js?v=3.7.6").ConfigureAwait(true);
+                _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js?v=3.9.1").ConfigureAwait(true);
                 if (initializationKey != _canvasInitializationKey)
                 {
                     _self ??= DotNetObjectReference.Create(this);
@@ -1073,7 +1052,7 @@
     {
         try
         {
-            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js?v=3.7.6").ConfigureAwait(true);
+            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js?v=3.9.1").ConfigureAwait(true);
             var zoom = await _module.InvokeAsync<double>(
                 "calculateFitZoom",
                 "publisher-stage",
@@ -2133,7 +2112,7 @@
             {
                 try
                 {
-                    _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js?v=3.7.6").ConfigureAwait(true);
+                    _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js?v=3.9.1").ConfigureAwait(true);
                     var point = await _module.InvokeAsync<double[]>("elementRelativePoint", "publisher-page", element.Id.ToString("D"), args.ClientX, args.ClientY).ConfigureAwait(true);
                     if (point.Length >= 2)
                     {
@@ -4004,17 +3983,17 @@
     {
         DataVisualKind.CartesianChart => "Chart",
         DataVisualKind.PieChart => "Pie / doughnut",
-        DataVisualKind.PolarChart => "Polar chart",
+        DataVisualKind.PolarChart => "Polar Chart",
         DataVisualKind.Sparkline => "Sparkline",
-        DataVisualKind.BarGauge => "Bar gauge",
-        DataVisualKind.CircularGauge => "Circular gauge",
-        DataVisualKind.LinearGauge => "Linear gauge",
-        DataVisualKind.RangeSelector => "Range selector",
-        DataVisualKind.Sankey => "Sankey diagram",
+        DataVisualKind.BarGauge => "Bar Gauge",
+        DataVisualKind.CircularGauge => "Circular Gauge",
+        DataVisualKind.LinearGauge => "Linear Gauge",
+        DataVisualKind.RangeSelector => "Range Selector",
+        DataVisualKind.Sankey => "Sankey Diagram",
         DataVisualKind.Funnel => "Funnel",
         DataVisualKind.Pyramid => "Pyramid",
-        DataVisualKind.TreeMap => "Tree map",
-        DataVisualKind.DataTable => "Data table",
+        DataVisualKind.TreeMap => "Tree Map",
+        DataVisualKind.DataTable => "Data Table",
         _ => "KPI progress"
     };
         }
@@ -5678,7 +5657,7 @@
         {
             return shape.Shape == PublicationShape.Line
         ? $"background:{shape.Stroke};height:{ContentMm(Math.Max(shape.StrokeWidth, .3))};top:50%;position:absolute;width:100%"
-        : $"background:{shape.Fill};border:{ContentMm(shape.StrokeWidth)} solid {shape.Stroke};border-radius:{(shape.Shape == PublicationShape.Ellipse ? "50%" : shape.Shape == PublicationShape.RoundedRectangle ? ContentMm(shape.CornerRadiusMm) : "0")}";
+        : $"background:{shape.Fill};border:{ContentMm(shape.StrokeWidth)} solid {shape.Stroke};border-radius:{(shape.Shape == PublicationShape.Ellipse ? "50%" : shape.Shape is PublicationShape.Rectangle or PublicationShape.RoundedRectangle ? ContentMm(shape.CornerRadiusMm) : "0")}";
         }
         catch (Exception __componentMethodException)
         {
@@ -6046,4 +6025,170 @@
 
 
 
+
+
+    /// <summary>Computes TimelineCommandText for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetTimelineCommandTextForRender()
+    {
+        try
+        {
+            return TimelineVisible ? "✓ Timeline pane" : "Timeline pane";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PageSurface.TimelineCommandText failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes PixelsPerMm for the render path with component-local diagnostics.</summary>
+    /// <returns>The double produced by the operation.</returns>
+    private double GetPixelsPerMmForRender()
+    {
+        try
+        {
+            return RuntimePolicy.BasePixelsPerMillimeter * State.Document.Zoom;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PageSurface.PixelsPerMm failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes CanvasZoomModeClass for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetCanvasZoomModeClassForRender()
+    {
+        try
+        {
+            return State.Document.View.CanvasZoomMode == PublicationCanvasZoomMode.Transform
+        ? "zoom-mode-transform"
+        : "zoom-mode-css";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PageSurface.CanvasZoomModeClass failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes UnitLabel for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetUnitLabelForRender()
+    {
+        try
+        {
+            return State.Document.View.RulerUnit switch
+    {
+        MeasurementUnit.Millimeter => "mm",
+        MeasurementUnit.Centimeter => "cm",
+        MeasurementUnit.Inch => "in",
+        MeasurementUnit.Pixel => "px",
+        _ => "mm"
+    };
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PageSurface.UnitLabel failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes IsMapComponentSelected for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetIsMapComponentSelectedForRender()
+    {
+        try
+        {
+            return State.SelectedElement is DevExtremeComponentElement { ComponentKind: PublicationComponentKind.Map or PublicationComponentKind.VectorMap };
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PageSurface.IsMapComponentSelected failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes PointerStateText for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetPointerStateTextForRender()
+    {
+        try
+        {
+            return State.ConnectorTool != ConnectorToolKind.None
+        ? State.ConnectorTool switch
+        {
+            ConnectorToolKind.Arrow => "Draw arrow connector",
+            ConnectorToolKind.SignalConnector => "Draw signal connector",
+            ConnectorToolKind.SignalArrow => "Draw signal arrow",
+            _ => "Draw connector"
+        }
+        : State.CropMode ? "Crop picture"
+        : State.ContentPanMode && IsMapComponentSelected ? "Pan / zoom map content"
+        : State.ContentPanMode ? "Position visible content"
+        : State.HasMultipleSelection ? $"Move {State.SelectedElements.Count} objects"
+        : IsMapComponentSelected ? "Move map object"
+        : "Select / move";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PageSurface.PointerStateText failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes ConnectorToolTitle for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetConnectorToolTitleForRender()
+    {
+        try
+        {
+            return State.ConnectorTool switch
+    {
+        ConnectorToolKind.Arrow => "Arrow connector",
+        ConnectorToolKind.SignalConnector => "Signal connector",
+        ConnectorToolKind.SignalArrow => "Signal arrow",
+        _ => "Connector"
+    };
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PageSurface.ConnectorToolTitle failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes ConnectorToolHint for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetConnectorToolHintForRender()
+    {
+        try
+        {
+            return State.ConnectorTool is ConnectorToolKind.SignalConnector or ConnectorToolKind.SignalArrow
+        ? "Drag from any object port or empty canvas point to another port or canvas point. Signal actions work offline in exported HTML. Press Esc to stop."
+        : "Drag from a round object port to another port. Press Esc to stop.";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PageSurface.ConnectorToolHint failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes CanResetPointerState for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetCanResetPointerStateForRender()
+    {
+        try
+        {
+            return State.ConnectorTool != ConnectorToolKind.None || State.CropMode || State.ContentPanMode;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PageSurface.CanResetPointerState failed.");
+            throw;
+        }
+    }
 }

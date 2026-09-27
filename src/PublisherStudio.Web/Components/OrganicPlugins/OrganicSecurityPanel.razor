@@ -4,7 +4,14 @@
 @inject IJSRuntime JS
 @inject ILogger<OrganicSecurityPanel> Logger
 
-<section class="organic-card organic-security-card" data-testid="organic-runtime-security">
+<div class="razor-component-boundary">
+<DxFormLayout CssClass="razor-component-layout-owner OrganicSecurityPanel">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext001">
+<DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext002">
+        <div class="organic-card organic-security-card" data-testid="organic-runtime-security">
     <header class="organic-section-header">
         <div>
             <h2>Runtime 1-Wire identity and MFA trust</h2>
@@ -87,7 +94,15 @@
             }
         </article>
     </div>
-</section>
+</div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+</div>
+
 
 @code {
 

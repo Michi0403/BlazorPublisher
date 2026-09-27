@@ -72,6 +72,15 @@ if (-not (Test-Path -LiteralPath $DocumentationRoot -PathType Container)) {
 }
 $versionedDocumentationPdfs = @(Get-ChildItem -LiteralPath $DocumentationRoot -File -Filter 'PublisherStudio-*.pdf' -ErrorAction SilentlyContinue)
 $expectedDocumentationPdf = 'PublisherStudio-' + $expectedVersion + '.pdf'
+$currentDocumentationPdf = @($versionedDocumentationPdfs | Where-Object { [string]::Equals($_.Name, $expectedDocumentationPdf, [StringComparison]::OrdinalIgnoreCase) })
+if ($currentDocumentationPdf.Count -eq 1 -and $versionedDocumentationPdfs.Count -gt 1) {
+    $staleDocumentationPdfs = @($versionedDocumentationPdfs | Where-Object { -not [string]::Equals($_.Name, $expectedDocumentationPdf, [StringComparison]::OrdinalIgnoreCase) })
+    foreach ($stalePdf in $staleDocumentationPdfs) {
+        Remove-Item -LiteralPath $stalePdf.FullName -Force -ErrorAction Stop
+        Write-Host "Pruned stale generated Pages PDF $($stalePdf.Name); current documentation remains $expectedDocumentationPdf." -ForegroundColor DarkCyan
+    }
+    $versionedDocumentationPdfs = @(Get-ChildItem -LiteralPath $DocumentationRoot -File -Filter 'PublisherStudio-*.pdf' -ErrorAction SilentlyContinue)
+}
 $foundPdfNames = @($versionedDocumentationPdfs | ForEach-Object { $_.Name })
 
 if ($versionedDocumentationPdfs.Count -eq 0 -and $AllowMissingPdf) {

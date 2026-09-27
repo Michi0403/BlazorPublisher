@@ -13,10 +13,24 @@
 @inject PublicationEditorTextService EditorText
 
 @inject ISupervisedTaskRunner TaskRunner
+<div class="razor-component-boundary">
+<DxFormLayout CssClass="razor-component-layout-owner MediaStudio">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext001">
 @if (Visible)
 {
-    <div class="editor-modal-backdrop media-studio-backdrop">
-        <section id="media-studio-window" class="media-studio-window" tabindex="0" role="dialog" aria-modal="true" aria-label="@(IsVideo ? LT("Video Studio") : LT("Audio Studio"))">
+    <DxPopup Visible="true"
+         Width="min(1800px, 98vw)"
+         Height="min(1180px, 96vh)"
+         MaxHeight="96vh"
+         CloseOnOutsideClick="false"
+         CloseOnEscape="false"
+         ShowHeader="false">
+    <BodyContentTemplate Context="publisherPopupContext">
+        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext002">
+        <div id="media-studio-window" class="media-studio-window" tabindex="0" aria-label="@(IsVideo ? LT("Video Studio") : LT("Audio Studio"))">
             <header class="media-studio-titlebar">
                 <div>
                     <strong>@(IsVideo ? LT("Video Studio") : LT("Audio Studio"))</strong>
@@ -453,7 +467,10 @@
                 </div>
 
                 <aside class="media-studio-properties">
-                    <section>
+                    <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext003">
+        <div>
                         <h3>@LT("Clip")</h3>
                         <label>@LT("Name")<input value="@_name" @onchange="ChangeName" /></label>
                         <div class="property-grid two">
@@ -466,13 +483,19 @@
                             <input type="range" min="0" max="1" step="0.01" value="@Inv(_volume)" @oninput="ChangeVolume" /> </label>
                         <label class="check-row"><input type="checkbox" checked="@_muted" @onchange="ToggleMuted" /> @LT("Muted")</label>
                         <label class="check-row"><input type="checkbox" checked="@_loop" @onchange="ToggleLoop" /> @LT("Loop selected range")</label>
-                    </section>
+                    </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
 
                     @if (IsVideo)
                     {
                         @if (HasVideoProject)
                         {
-                            <section class="media-video-project-properties">
+                            <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext004">
+        <div class="media-video-project-properties">
                                 <h3>@LT("Imported video project")</h3>
                                 <p class="property-note"><b>@VideoProjectTitle</b> · @VideoProjectFormatSummary</p>
                                 <div class="media-video-project-summary">
@@ -503,9 +526,15 @@
                                     </details>
                                 }
                                 <p class="property-note">@LT("All imported tracks, gaps, source references, markers and transitions stay in the canonical project. This editor displays and edits the selected video-track projection; preserved audio and additional video tracks remain available for later orchestration.")</p>
-                            </section>
+                            </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
                         }
-                        <section class="media-video-selection-properties">
+                        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext005">
+        <div class="media-video-selection-properties">
                             <h3>@LT("Selected clip time")</h3>
                             <p class="property-note"><b>@SelectedClipName</b> · @LT("source timestamps stay linked to the highlighted clip in the project sequence.")</p>
                             <label>@LT("Selection type")
@@ -543,9 +572,15 @@
                             </div>
                             <label class="check-row"><input type="checkbox" checked="@_autoCreateSelectionLayers" @onchange="ToggleAutoCreateSelectionLayers" /> @LT("Create/reuse one effect layer for every committed range")</label>
                             <p class="property-note">@LT("A point creates one cutline. A range is persisted on its own selection layer, so filters and frame regions render only inside that time span. Dropped video is inserted only inside this selection.")</p>
-                        </section>
+                        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
 
-                        <section class="media-cut-sections-properties">
+                        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext006">
+        <div class="media-cut-sections-properties">
                             <h3>@LT("Saved cut sections")</h3>
                             <p class="property-note">@LT("The current selection stays editable. Save any number of independent ranges as cut sections without replacing the active selection.")</p>
                             <div class="media-cut-section-list">
@@ -566,9 +601,15 @@
                                 <DxButton Text='@LT("Use section")' Enabled="@(SelectedCutSection is not null)" Click="UseSelectedCutSection" />
                                 <DxButton Text='@LT("Remove")' Enabled="@(SelectedCutSection is not null)" Click="RemoveSelectedCutSection" />
                             </div>
-                        </section>
+                        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
 
-                        <section class="media-video-layer-properties">
+                        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext007">
+        <div class="media-video-layer-properties">
                             <h3>@LT("Video layers")</h3>
                             <p class="property-note">@LT("Each layer owns its frame region, temporal range and live filter stack. Layers are rendered from bottom to top.")</p>
                             <div class="media-video-layer-list">
@@ -650,9 +691,15 @@
                                     <p class="property-note">@LT("The canvas blob remains interactive in HTML export. The OpenSCAD solid is an interchange/render source and must be baked for native mesh-quality video output.")</p>
                                 }
                             }
-                        </section>
+                        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
 
-                        <section class="media-video-filter-properties">
+                        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext008">
+        <div class="media-video-filter-properties">
                             <h3>@LT("Effect stack")</h3>
                             <p class="property-note">@LT("Drag effects to reorder them. Every effect remains non-destructive and belongs to the selected video layer.")</p>
                             <div class="media-video-filter-add">
@@ -711,9 +758,15 @@
                                     <DxButton Text='@LT("Remove filter")' Click="RemoveSelectedVideoFilter" />
                                 </div>
                             }
-                        </section>
+                        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
 
-                        <section>
+                        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext009">
+        <div>
                             <h3>@LT("Video inside play canvas")</h3>
                             <label>@LT("Fit mode")
                                 <select value="@_videoFitMode" @onchange="ChangeVideoFitMode">
@@ -729,10 +782,16 @@
                                 <DxButton Text='@LT("Stretch")' Click="VideoFitStretch" />
                             </div>
                             <p class="property-note">@LT("Fit whole preserves the full frame, Fill canvas crops overflow, and Stretch fills the play canvas without preserving the source aspect ratio. The selected mode is saved with the publication video.")</p>
-                        </section>
+                        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
                     }
 
-                    <section>
+                    <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext010">
+        <div>
                         <h3>@LT("Timeline playback")</h3>
                         <label>@LT("Start behavior")
                             <select value="@_playbackTrigger" @onchange="ChangePlaybackTrigger">
@@ -743,20 +802,32 @@
                             </select>
                         </label>
                         <label class="check-row"><input type="checkbox" checked="@_autoPlay" @onchange="ToggleAutoPlay" /> @LT("Play during page preview/export")</label>
-                    </section>
+                    </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
 
                     @if (!IsVideo)
                     {
-                        <section>
+                        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext011">
+        <div>
                             <h3>@LT("Simple mix")</h3>
                             <label>@LT("Fade in") <b>@Time(_fadeIn)</b><input type="range" min="0" max="@Inv(MaxFade)" step="0.05" value="@Inv(_fadeIn)" @oninput="ChangeFadeIn" /></label>
                             <label>@LT("Fade out") <b>@Time(_fadeOut)</b><input type="range" min="0" max="@Inv(MaxFade)" step="0.05" value="@Inv(_fadeOut)" @oninput="ChangeFadeOut" /></label>
                             <p class="property-note">@LT("Edits are non-destructive. The source stays embedded while the selected range, fades, volume, and playback rate are stored in the publication timeline.")</p>
-                        </section>
+                        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
                     }
                     else
                     {
-                        <section>
+                        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext012">
+        <div>
                             <h3>@LT("Video frame region")</h3>
                             <p class="property-note">@LT("Editing the") <b>@ActiveFrameRegionName</b> @LT("on") <b>@(SelectedVideoLayer?.Name ?? LT("the selected video layer"))</b>. @LT("A grabbed point remains selected until another point or the canvas is selected. Delete/Backspace removes that exact point.")</p>
                             @if (SelectedVideoLayer is not null)
@@ -784,8 +855,14 @@
                                     </div>
                                 </div>
                             }
-                        </section>
-                        <section>
+                        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+                        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext013">
+        <div>
                             <h3>@LT("Recording capture quality")</h3>
                             <div class="property-grid two">
                                 <label>@LT("Quality selection")
@@ -891,15 +968,24 @@
                             </div>
                             <p class="property-note"><b>@RecordingSizeSummary</b> · @(_recordingAdaptiveQuality ? LT("smart bitrate / codec selection") : $"{_recordingFrameRate} fps · {_recordingVideoBitrateKbps} kbps"). @LT("The browser share picker still decides which screen, window, or tab is captured; PublisherStudio never assumes one user's monitor resolution.")</p>
                             <p class="property-note">@LT("Smart adaptive mode waits for the real capture-track settings, then uses browser MediaCapabilities where available plus configurable runtime quality policy to select codec, video bitrate, audio bitrate, and smoothness fallbacks. Manual mode keeps every explicit control available.")</p>
-                        </section>
-                        <section>
+                        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+                        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext014">
+        <div>
                             <h3>@LT("Video")</h3>
                             <p class="property-note">@LT("Camera and screen recording use the browser’s MediaRecorder. Completed recordings stay in the browser until this studio closes, remain downloadable at their original size, and are embedded only when you insert or apply them.")</p>
                             @if (HasRetainedRecording)
                             {
                                 <p class="property-note"><b>@LT("Completed recording:")</b> @FormatBytes(_retainedRecordingSizeBytes). @LT("Download remains available even if embedding fails because the browser or computer runs out of memory.")</p>
                             }
-                        </section>
+                        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
                     }
                 </aside>
             </div>
@@ -915,8 +1001,12 @@
                     <DxButton Text="@ApplyButtonText" Enabled="@(HasSource && !_recording && !_recordingStopping && !_recordingPlacementRequired && !_recordingStartPlacementRequired && !_renderingVideoExport && !_saving && !_embedding)" Click="Save" RenderStyle="ButtonRenderStyle.Primary" />
                 </div>
             </footer>
-        </section>
-    </div>
+        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+        </BodyContentTemplate>
+</DxPopup>
 }
 
 <DxContextMenu @ref="_mediaContextMenu">
@@ -995,6 +1085,11 @@
 <InputFile id="media-studio-insert-file-input" class="hidden-file-input" accept="@Accept" OnChange="LoadInsertedFile" />
 <InputFile id="media-studio-project-input" class="hidden-file-input" accept=".otio,.otioz,.mlt,.kdenlive,.xges,.osp,.edl" OnChange="LoadVideoProject" />
 <InputFile id="media-studio-project-media-input" class="hidden-file-input" accept="video/*,audio/*,image/*" multiple OnChange="RelinkVideoProjectMedia" />
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+</div>
+
 
 @code {
 
@@ -1446,33 +1541,33 @@
     /// Gets a value indicating whether video applies to the media studio state.
     /// </summary>
     /// <value>The is video value exposed by <see cref="MediaStudio"/>.</value>
-    private bool IsVideo => Kind == PublicationElementKind.Video;
+    private bool IsVideo => GetIsVideoForRender();
     /// <summary>
     /// Gets a value indicating whether retained recording applies to the media studio state.
     /// </summary>
     /// <value>The has retained recording value exposed by <see cref="MediaStudio"/>.</value>
-    private bool HasRetainedRecording => _hasRetainedRecording && _retainedRecordingSizeBytes > 0;
+    private bool HasRetainedRecording => GetHasRetainedRecordingForRender();
     /// <summary>Gets whether the browser-retained recording or the currently selected embedded media can be downloaded.</summary>
     /// <value><see langword="true"/> when a downloadable current media source exists; otherwise <see langword="false"/>.</value>
-    private bool CanDownloadCurrentMedia => HasRetainedRecording || (SelectedSegment is { IsGap: false } && !string.IsNullOrWhiteSpace(_previewSource));
+    private bool CanDownloadCurrentMedia => GetCanDownloadCurrentMediaForRender();
     /// <summary>Gets the output command label that distinguishes a fresh recording from an embedded selected source.</summary>
     /// <value>The localized download command text for the active source.</value>
-    private string DownloadMediaText => HasRetainedRecording ? LT("Download recording") : LT("Download selected source");
+    private string DownloadMediaText => GetDownloadMediaTextForRender();
     /// <summary>
     /// Gets the recording policy value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The recording policy value exposed by <see cref="MediaStudio"/>.</value>
-    private PublisherMediaSessionDefaultsPolicy RecordingPolicy => RuntimePolicy.MediaSessionDefaults;
+    private PublisherMediaSessionDefaultsPolicy RecordingPolicy => GetRecordingPolicyForRender();
     /// <summary>
     /// Gets the recording target width value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The recording target width value exposed by <see cref="MediaStudio"/>.</value>
-    private int RecordingTargetWidth => ResolveRecordingSizeSelection(_recordingSizeMode).Width;
+    private int RecordingTargetWidth => GetRecordingTargetWidthForRender();
     /// <summary>
     /// Gets the recording target height value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The recording target height value exposed by <see cref="MediaStudio"/>.</value>
-    private int RecordingTargetHeight => ResolveRecordingSizeSelection(_recordingSizeMode).Height;
+    private int RecordingTargetHeight => GetRecordingTargetHeightForRender();
     /// <summary>
     /// Gets the recording size summary value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
@@ -1494,205 +1589,185 @@
     /// Gets a value indicating whether video project applies to the media studio state.
     /// </summary>
     /// <value>The has video project value exposed by <see cref="MediaStudio"/>.</value>
-    private bool HasVideoProject => IsVideo && _videoProject is { Tracks.Count: > 0 };
+    private bool HasVideoProject => GetHasVideoProjectForRender();
     /// <summary>
     /// Gets the project video tracks collection maintained or exposed by this media studio instance for downstream processing.
     /// </summary>
     /// <value>The project video tracks value exposed by <see cref="MediaStudio"/>.</value>
-    private IReadOnlyList<MediaTimelineTrack> ProjectVideoTracks => _videoProject?.Tracks
-        .Where(track => track.Kind == MediaTimelineTrackKind.Video)
-        .OrderBy(track => track.Order)
-        .ToList() ?? [];
+    private IReadOnlyList<MediaTimelineTrack> ProjectVideoTracks => GetProjectVideoTracksForRender();
     /// <summary>
     /// Gets the video project missing media count that quantifies the associated media studio data.
     /// </summary>
     /// <value>The video project missing media count value exposed by <see cref="MediaStudio"/>.</value>
-    private int VideoProjectMissingMediaCount => _videoProject?.Tracks
-        .SelectMany(track => track.Segments)
-        .Count(segment => !segment.IsGap && string.IsNullOrWhiteSpace(segment.DataUrl) && segment.SourceReference.Missing) ?? 0;
+    private int VideoProjectMissingMediaCount => GetVideoProjectMissingMediaCountForRender();
     /// <summary>
     /// Gets the video project title value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The video project title value exposed by <see cref="MediaStudio"/>.</value>
-    private string VideoProjectTitle => _videoProject?.Name ?? "Video project";
+    private string VideoProjectTitle => GetVideoProjectTitleForRender();
     /// <summary>
     /// Gets the video project format summary value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The video project format summary value exposed by <see cref="MediaStudio"/>.</value>
-    private string VideoProjectFormatSummary => _videoProject is null
-        ? string.Empty
-        : string.IsNullOrWhiteSpace(_videoProject.SourceFormatVersion)
-            ? _videoProject.SourceFormat
-            : $"{_videoProject.SourceFormat} {_videoProject.SourceFormatVersion}";
+    private string VideoProjectFormatSummary => GetVideoProjectFormatSummaryForRender();
     /// <summary>
     /// Gets the video project canvas summary value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The video project canvas summary value exposed by <see cref="MediaStudio"/>.</value>
-    private string VideoProjectCanvasSummary => _videoProject is null
-        ? string.Empty
-        : $"{_videoProject.Width} × {_videoProject.Height} · {_videoProject.FrameRate:0.###} fps";
+    private string VideoProjectCanvasSummary => GetVideoProjectCanvasSummaryForRender();
     /// <summary>
     /// Gets the video project track summary value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The video project track summary value exposed by <see cref="MediaStudio"/>.</value>
-    private string VideoProjectTrackSummary => _videoProject is null
-        ? string.Empty
-        : $"{_videoProject.Tracks.Count} track{(_videoProject.Tracks.Count == 1 ? string.Empty : "s")} · {_videoProject.Transitions.Count} transition{(_videoProject.Transitions.Count == 1 ? string.Empty : "s")}";
+    private string VideoProjectTrackSummary => GetVideoProjectTrackSummaryForRender();
     /// <summary>
     /// Gets the video project missing summary value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The video project missing summary value exposed by <see cref="MediaStudio"/>.</value>
-    private string VideoProjectMissingSummary => VideoProjectMissingMediaCount == 0
-        ? "All referenced media linked"
-        : $"{VideoProjectMissingMediaCount} missing media reference{(VideoProjectMissingMediaCount == 1 ? string.Empty : "s")}";
+    private string VideoProjectMissingSummary => GetVideoProjectMissingSummaryForRender();
     /// <summary>
     /// Gets the selected segment value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The selected segment value exposed by <see cref="MediaStudio"/>.</value>
-    private PublicationMediaSegment? SelectedSegment => _segments.FirstOrDefault(segment => segment.Id == _selectedSegmentId);
+    private PublicationMediaSegment? SelectedSegment => GetSelectedSegmentForRender();
     /// <summary>
     /// Gets the selected timeline segments collection maintained or exposed by this media studio instance for downstream processing.
     /// </summary>
     /// <value>The selected timeline segments value exposed by <see cref="MediaStudio"/>.</value>
-    private IReadOnlyList<PublicationMediaSegment> SelectedTimelineSegments => _segments
-        .Where(segment => _selectedSegmentIds.Contains(segment.Id))
-        .ToList();
+    private IReadOnlyList<PublicationMediaSegment> SelectedTimelineSegments => GetSelectedTimelineSegmentsForRender();
     /// <summary>Gets whether one or more playable selected clips can be exported as selected ranges.</summary>
     /// <value>The can export selected timeline ranges value exposed by <see cref="MediaStudio"/>.</value>
-    private bool CanExportSelectedTimelineRanges => IsVideo
-        && !_renderingVideoExport
-        && !_renderingTimelineSelectionExport
-        && SelectedTimelineSegments.Any(IsPlayableSegment);
+    private bool CanExportSelectedTimelineRanges => GetCanExportSelectedTimelineRangesForRender();
     /// <summary>
     /// Gets the selected video layers collection maintained or exposed by this media studio instance for downstream processing.
     /// </summary>
     /// <value>The selected video layers value exposed by <see cref="MediaStudio"/>.</value>
-    private IReadOnlyList<VideoEffectLayer> SelectedVideoLayers => SelectedSegment?.VideoLayers ?? [];
+    private IReadOnlyList<VideoEffectLayer> SelectedVideoLayers => GetSelectedVideoLayersForRender();
     /// <summary>
     /// Gets the selected video layer value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The selected video layer value exposed by <see cref="MediaStudio"/>.</value>
-    private VideoEffectLayer? SelectedVideoLayer => SelectedSegment?.VideoLayers.FirstOrDefault(layer => layer.Id == _selectedVideoLayerId);
+    private VideoEffectLayer? SelectedVideoLayer => GetSelectedVideoLayerForRender();
     /// <summary>
     /// Gets the selected video filters collection maintained or exposed by this media studio instance for downstream processing.
     /// </summary>
     /// <value>The selected video filters value exposed by <see cref="MediaStudio"/>.</value>
-    private IReadOnlyList<VideoEffectFilter> SelectedVideoFilters => SelectedVideoLayer?.Filters ?? [];
+    private IReadOnlyList<VideoEffectFilter> SelectedVideoFilters => GetSelectedVideoFiltersForRender();
     /// <summary>
     /// Gets the selected video filter value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The selected video filter value exposed by <see cref="MediaStudio"/>.</value>
-    private VideoEffectFilter? SelectedVideoFilter => SelectedVideoLayer?.Filters.FirstOrDefault(filter => filter.Id == _selectedVideoFilterId);
+    private VideoEffectFilter? SelectedVideoFilter => GetSelectedVideoFilterForRender();
     /// <summary>
     /// Gets the selected cut sections collection maintained or exposed by this media studio instance for downstream processing.
     /// </summary>
     /// <value>The selected cut sections value exposed by <see cref="MediaStudio"/>.</value>
-    private IReadOnlyList<MediaTemporalSection> SelectedCutSections => SelectedSegment?.CutSections ?? [];
+    private IReadOnlyList<MediaTemporalSection> SelectedCutSections => GetSelectedCutSectionsForRender();
     /// <summary>
     /// Gets the selected cut section value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The selected cut section value exposed by <see cref="MediaStudio"/>.</value>
-    private MediaTemporalSection? SelectedCutSection => SelectedSegment?.CutSections.FirstOrDefault(section => section.Id == _selectedCutSectionId);
+    private MediaTemporalSection? SelectedCutSection => GetSelectedCutSectionForRender();
     /// <summary>
     /// Gets the selected segment index value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The selected segment index value exposed by <see cref="MediaStudio"/>.</value>
-    private int SelectedSegmentIndex => _selectedSegmentId is Guid id ? _segments.FindIndex(segment => segment.Id == id) : -1;
+    private int SelectedSegmentIndex => GetSelectedSegmentIndexForRender();
     /// <summary>
     /// Gets a value indicating whether selected segment applies to the media studio state.
     /// </summary>
     /// <value>The has selected segment value exposed by <see cref="MediaStudio"/>.</value>
-    private bool HasSelectedSegment => SelectedSegment is not null;
+    private bool HasSelectedSegment => GetHasSelectedSegmentForRender();
     /// <summary>
     /// Gets a value indicating whether source applies to the media studio state.
     /// </summary>
     /// <value>The has source value exposed by <see cref="MediaStudio"/>.</value>
-    private bool HasSource => (_segments.Count > 0 || !string.IsNullOrWhiteSpace(_dataUrl) || HasRetainedRecording || HasVideoProject) && (_duration > 0 || _segments.Count > 0 || HasVideoProject);
+    private bool HasSource => GetHasSourceForRender();
     /// <summary>
     /// Gets a value indicating whether paste section applies to the media studio state.
     /// </summary>
     /// <value>The can paste section value exposed by <see cref="MediaStudio"/>.</value>
-    private bool CanPasteSection => _clipClipboard is not null;
+    private bool CanPasteSection => GetCanPasteSectionForRender();
     /// <summary>
     /// Gets a value indicating whether delete section applies to the media studio state.
     /// </summary>
     /// <value>The can delete section value exposed by <see cref="MediaStudio"/>.</value>
-    private bool CanDeleteSection => _segments.Count > 0 && HasSelectedSegment;
+    private bool CanDeleteSection => GetCanDeleteSectionForRender();
     /// <summary>
     /// Gets a value indicating whether add cut line applies to the media studio state.
     /// </summary>
     /// <value>The can add cut line value exposed by <see cref="MediaStudio"/>.</value>
-    private bool CanAddCutLine => HasSource && _segments.Count > 0;
+    private bool CanAddCutLine => GetCanAddCutLineForRender();
     /// <summary>
     /// Gets a value indicating whether remove cut line applies to the media studio state.
     /// </summary>
     /// <value>The can remove cut line value exposed by <see cref="MediaStudio"/>.</value>
-    private bool CanRemoveCutLine => SelectedSegmentIndex > 0 && TimelineEdits.CanMergeBoundary(_segments, SelectedSegmentIndex);
+    private bool CanRemoveCutLine => GetCanRemoveCutLineForRender();
     /// <summary>
     /// Gets a value indicating whether cut video selection applies to the media studio state.
     /// </summary>
     /// <value>The can cut video selection value exposed by <see cref="MediaStudio"/>.</value>
-    private bool CanCutVideoSelection => IsVideo && HasSelectedSegment && (_videoSelectionIsPoint || VideoSelectionEnd - VideoSelectionStart >= .01);
+    private bool CanCutVideoSelection => GetCanCutVideoSelectionForRender();
     /// <summary>
     /// Gets a value indicating whether use video selection as trim applies to the media studio state.
     /// </summary>
     /// <value>The can use video selection as trim value exposed by <see cref="MediaStudio"/>.</value>
-    private bool CanUseVideoSelectionAsTrim => IsVideo && HasSelectedSegment && !_videoSelectionIsPoint && VideoSelectionEnd - VideoSelectionStart >= .01;
+    private bool CanUseVideoSelectionAsTrim => GetCanUseVideoSelectionAsTrimForRender();
     /// <summary>
     /// Gets a value indicating whether copy video selection applies to the media studio state.
     /// </summary>
     /// <value>The can copy video selection value exposed by <see cref="MediaStudio"/>.</value>
-    private bool CanCopyVideoSelection => CanUseVideoSelectionAsTrim;
+    private bool CanCopyVideoSelection => GetCanCopyVideoSelectionForRender();
     /// <summary>
     /// Gets a value indicating whether save cut section applies to the media studio state.
     /// </summary>
     /// <value>The can save cut section value exposed by <see cref="MediaStudio"/>.</value>
-    private bool CanSaveCutSection => IsVideo && HasSelectedSegment && !_videoSelectionIsPoint && VideoSelectionEnd - VideoSelectionStart >= .01;
+    private bool CanSaveCutSection => GetCanSaveCutSectionForRender();
     /// <summary>
     /// Gets a value indicating whether apply selection to layer applies to the media studio state.
     /// </summary>
     /// <value>The can apply selection to layer value exposed by <see cref="MediaStudio"/>.</value>
-    private bool CanApplySelectionToLayer => CanSaveCutSection && SelectedVideoLayer is not null;
+    private bool CanApplySelectionToLayer => GetCanApplySelectionToLayerForRender();
     /// <summary>
     /// Gets the selected video layer index value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The selected video layer index value exposed by <see cref="MediaStudio"/>.</value>
-    private int SelectedVideoLayerIndex => SelectedSegment?.VideoLayers.FindIndex(layer => layer.Id == _selectedVideoLayerId) ?? -1;
+    private int SelectedVideoLayerIndex => GetSelectedVideoLayerIndexForRender();
     /// <summary>
     /// Gets a value indicating whether move video layer up applies to the media studio state.
     /// </summary>
     /// <value>The can move video layer up value exposed by <see cref="MediaStudio"/>.</value>
-    private bool CanMoveVideoLayerUp => SelectedVideoLayerIndex >= 0 && SelectedVideoLayerIndex < (SelectedSegment?.VideoLayers.Count ?? 0) - 1;
+    private bool CanMoveVideoLayerUp => GetCanMoveVideoLayerUpForRender();
     /// <summary>
     /// Gets a value indicating whether move video layer down applies to the media studio state.
     /// </summary>
     /// <value>The can move video layer down value exposed by <see cref="MediaStudio"/>.</value>
-    private bool CanMoveVideoLayerDown => SelectedVideoLayerIndex > 0;
+    private bool CanMoveVideoLayerDown => GetCanMoveVideoLayerDownForRender();
     /// <summary>
     /// Gets a value indicating whether delete video layer applies to the media studio state.
     /// </summary>
     /// <value>The can delete video layer value exposed by <see cref="MediaStudio"/>.</value>
-    private bool CanDeleteVideoLayer => SelectedVideoLayer is not null && (SelectedSegment?.VideoLayers.Count ?? 0) > 1;
+    private bool CanDeleteVideoLayer => GetCanDeleteVideoLayerForRender();
     /// <summary>
     /// Gets the selected video filter index value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The selected video filter index value exposed by <see cref="MediaStudio"/>.</value>
-    private int SelectedVideoFilterIndex => SelectedVideoLayer?.Filters.FindIndex(filter => filter.Id == _selectedVideoFilterId) ?? -1;
+    private int SelectedVideoFilterIndex => GetSelectedVideoFilterIndexForRender();
     /// <summary>
     /// Gets a value indicating whether move video filter up applies to the media studio state.
     /// </summary>
     /// <value>The can move video filter up value exposed by <see cref="MediaStudio"/>.</value>
-    private bool CanMoveVideoFilterUp => SelectedVideoFilterIndex >= 0 && SelectedVideoFilterIndex < (SelectedVideoLayer?.Filters.Count ?? 0) - 1;
+    private bool CanMoveVideoFilterUp => GetCanMoveVideoFilterUpForRender();
     /// <summary>
     /// Gets a value indicating whether move video filter down applies to the media studio state.
     /// </summary>
     /// <value>The can move video filter down value exposed by <see cref="MediaStudio"/>.</value>
-    private bool CanMoveVideoFilterDown => SelectedVideoFilterIndex > 0;
+    private bool CanMoveVideoFilterDown => GetCanMoveVideoFilterDownForRender();
     /// <summary>
     /// Gets the sequence duration value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The sequence duration value exposed by <see cref="MediaStudio"/>.</value>
-    private double SequenceDuration => Math.Max(.01, TimelineEdits.TimelineLength(_segments, _playbackRate));
+    private double SequenceDuration => GetSequenceDurationForRender();
     /// <summary>
     /// Gets the cut boundary positions collection maintained or exposed by this media studio instance for downstream processing.
     /// </summary>
@@ -1709,81 +1784,77 @@
     /// Gets the stored active frame points collection maintained or exposed by this media studio instance for downstream processing.
     /// </summary>
     /// <value>The stored active frame points value exposed by <see cref="MediaStudio"/>.</value>
-    private List<MediaFramePoint> StoredActiveFramePoints => _editingMorphRegion ? _morphClipPolygon : _frameClipPolygon;
+    private List<MediaFramePoint> StoredActiveFramePoints => GetStoredActiveFramePointsForRender();
     /// <summary>
     /// Gets the active frame points collection maintained or exposed by this media studio instance for downstream processing.
     /// </summary>
     /// <value>The active frame points value exposed by <see cref="MediaStudio"/>.</value>
-    private IReadOnlyList<MediaFramePoint> ActiveFramePoints => _frameRegionEditing ? _frameDraft : StoredActiveFramePoints;
+    private IReadOnlyList<MediaFramePoint> ActiveFramePoints => GetActiveFramePointsForRender();
     /// <summary>
     /// Gets the selected frame point value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The selected frame point value exposed by <see cref="MediaStudio"/>.</value>
-    private MediaFramePoint? SelectedFramePoint => _selectedFramePointIndex is int index && index >= 0 && index < ActiveFramePoints.Count ? ActiveFramePoints[index] : null;
+    private MediaFramePoint? SelectedFramePoint => GetSelectedFramePointForRender();
     /// <summary>
     /// Gets a value indicating whether frame region applies to the media studio state.
     /// </summary>
     /// <value>The has frame region value exposed by <see cref="MediaStudio"/>.</value>
-    private bool HasFrameRegion => _frameClipPolygon.Count >= 3;
+    private bool HasFrameRegion => GetHasFrameRegionForRender();
     /// <summary>
     /// Gets a value indicating whether morph region applies to the media studio state.
     /// </summary>
     /// <value>The has morph region value exposed by <see cref="MediaStudio"/>.</value>
-    private bool HasMorphRegion => _morphClipPolygon.Count >= 3;
+    private bool HasMorphRegion => GetHasMorphRegionForRender();
     /// <summary>
     /// Gets a value indicating whether active frame region inverted applies to the media studio state.
     /// </summary>
     /// <value>The active frame region inverted value exposed by <see cref="MediaStudio"/>.</value>
-    private bool ActiveFrameRegionInverted => _editingMorphRegion
-        ? SelectedVideoLayer?.MorphRegion?.Inverted == true
-        : SelectedVideoLayer?.Region?.Inverted == true;
+    private bool ActiveFrameRegionInverted => GetActiveFrameRegionInvertedForRender();
     /// <summary>
     /// Gets the active frame region name value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The active frame region name value exposed by <see cref="MediaStudio"/>.</value>
-    private string ActiveFrameRegionName => _editingMorphRegion ? "morph target" : "source region";
+    private string ActiveFrameRegionName => GetActiveFrameRegionNameForRender();
     /// <summary>
     /// Gets a value indicating whether finish frame region applies to the media studio state.
     /// </summary>
     /// <value>The can finish frame region value exposed by <see cref="MediaStudio"/>.</value>
-    private bool CanFinishFrameRegion => _frameRegionEditing && _frameDraft.Count >= 3;
+    private bool CanFinishFrameRegion => GetCanFinishFrameRegionForRender();
     /// <summary>
     /// Gets a value indicating whether paste frame region applies to the media studio state.
     /// </summary>
     /// <value>The can paste frame region value exposed by <see cref="MediaStudio"/>.</value>
-    private bool CanPasteFrameRegion => _frameClipboard.Count >= 3;
+    private bool CanPasteFrameRegion => GetCanPasteFrameRegionForRender();
     /// <summary>
     /// Gets a value indicating whether create selection layer applies to the media studio state.
     /// </summary>
     /// <value>The can create selection layer value exposed by <see cref="MediaStudio"/>.</value>
-    private bool CanCreateSelectionLayer => CanSaveCutSection;
+    private bool CanCreateSelectionLayer => GetCanCreateSelectionLayerForRender();
     /// <summary>
     /// Gets a value indicating whether insert layer into mainframe applies to the media studio state.
     /// </summary>
     /// <value>The can insert layer into mainframe value exposed by <see cref="MediaStudio"/>.</value>
-    private bool CanInsertLayerIntoMainframe => SelectedVideoLayer is { Kind: VideoEffectLayerKind.Blob3D };
+    private bool CanInsertLayerIntoMainframe => GetCanInsertLayerIntoMainframeForRender();
     /// <summary>
     /// Gets the video selection start value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The video selection start value exposed by <see cref="MediaStudio"/>.</value>
-    private double VideoSelectionStart => _videoSelectionIsPoint ? _videoSelectionPointSeconds : _videoSelectionStartSeconds;
+    private double VideoSelectionStart => GetVideoSelectionStartForRender();
     /// <summary>
     /// Gets the video selection end value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The video selection end value exposed by <see cref="MediaStudio"/>.</value>
-    private double VideoSelectionEnd => _videoSelectionIsPoint ? _videoSelectionPointSeconds : _videoSelectionEndSeconds;
+    private double VideoSelectionEnd => GetVideoSelectionEndForRender();
     /// <summary>
     /// Gets the video selection label value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The video selection label value exposed by <see cref="MediaStudio"/>.</value>
-    private string VideoSelectionLabel => _videoSelectionIsPoint ? LT("Timestamp") : LT("Range");
+    private string VideoSelectionLabel => GetVideoSelectionLabelForRender();
     /// <summary>
     /// Gets the video selection readout value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The video selection readout value exposed by <see cref="MediaStudio"/>.</value>
-    private string VideoSelectionReadout => _videoSelectionIsPoint
-        ? $"/ {Time(_duration)}"
-        : $"— {Time(VideoSelectionEnd)} / {Time(_duration)}";
+    private string VideoSelectionReadout => GetVideoSelectionReadoutForRender();
     /// <summary>
     /// Gets the video selection timeline start value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
@@ -1798,60 +1869,52 @@
     /// Gets the video selection detailed summary value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The video selection detailed summary value exposed by <see cref="MediaStudio"/>.</value>
-    private string VideoSelectionDetailedSummary => _videoSelectionIsPoint
-        ? $"Source timestamp {Time(VideoSelectionStart)} · project timestamp {Time(VideoSelectionTimelineStart)}"
-        : $"Source {Time(VideoSelectionStart)} — {Time(VideoSelectionEnd)} · project {Time(VideoSelectionTimelineStart)} — {Time(VideoSelectionTimelineEnd)} · {Time(VideoSelectionEnd - VideoSelectionStart)} selected";
+    private string VideoSelectionDetailedSummary => GetVideoSelectionDetailedSummaryForRender();
     /// <summary>
     /// Gets the video or audio selection title value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The video or audio selection title value exposed by <see cref="MediaStudio"/>.</value>
-    private string VideoOrAudioSelectionTitle => IsVideo && _videoSelectionIsPoint ? LT("Selected timestamp") : LT("Selected range");
+    private string VideoOrAudioSelectionTitle => GetVideoOrAudioSelectionTitleForRender();
     /// <summary>
     /// Gets the video or audio selection summary value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The video or audio selection summary value exposed by <see cref="MediaStudio"/>.</value>
-    private string VideoOrAudioSelectionSummary => IsVideo && _videoSelectionIsPoint
-        ? $"{SelectedClipName} · {Time(_videoSelectionPointSeconds)} / {Time(_duration)}"
-        : IsVideo
-            ? $"{SelectedClipName} · {Time(VideoSelectionStart)} — {Time(VideoSelectionEnd)} / {Time(_duration)}"
-            : $"{Time(_trimStart)} — {Time(_trimEnd)} / {Time(_duration)}";
+    private string VideoOrAudioSelectionSummary => GetVideoOrAudioSelectionSummaryForRender();
     /// <summary>
     /// Gets the selected clip name value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The selected clip name value exposed by <see cref="MediaStudio"/>.</value>
-    private string SelectedClipName => SelectedSegment?.Name ?? (IsVideo ? LT("No selected video clip") : LT("No selected audio clip"));
+    private string SelectedClipName => GetSelectedClipNameForRender();
     /// <summary>
     /// Gets the send to converter menu text value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The send to converter menu text value exposed by <see cref="MediaStudio"/>.</value>
-    private string SendToConverterMenuText => IsVideo ? LT("Send selected clip/range to Media Converter") : LT("Send selected audio clip to Media Converter");
+    private string SendToConverterMenuText => GetSendToConverterMenuTextForRender();
     /// <summary>
     /// Gets the selected segment timeline start value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The selected segment timeline start value exposed by <see cref="MediaStudio"/>.</value>
-    private double SelectedSegmentTimelineStart => SelectedSegmentIndex >= 0
-        ? TimelineEdits.SegmentTimelineStart(_segments, SelectedSegmentIndex, _playbackRate)
-        : 0;
+    private double SelectedSegmentTimelineStart => GetSelectedSegmentTimelineStartForRender();
     /// <summary>
     /// Gets the selected segment source start value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The selected segment source start value exposed by <see cref="MediaStudio"/>.</value>
-    private double SelectedSegmentSourceStart => SelectedSegment?.TrimStartSeconds ?? 0;
+    private double SelectedSegmentSourceStart => GetSelectedSegmentSourceStartForRender();
     /// <summary>
     /// Gets the selected segment source end value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The selected segment source end value exposed by <see cref="MediaStudio"/>.</value>
-    private double SelectedSegmentSourceEnd => SelectedSegment?.EffectiveTrimEndSeconds ?? 0;
+    private double SelectedSegmentSourceEnd => GetSelectedSegmentSourceEndForRender();
     /// <summary>
     /// Gets the selected segment effective rate value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The selected segment effective rate value exposed by <see cref="MediaStudio"/>.</value>
-    private double SelectedSegmentEffectiveRate => Math.Max(.0001, Math.Max(.1, _playbackRate) * Math.Max(.0001, Math.Abs(SelectedSegment?.Speed ?? 1)));
+    private double SelectedSegmentEffectiveRate => GetSelectedSegmentEffectiveRateForRender();
     /// <summary>
     /// Gets a value indicating whether pending insert has range applies to the media studio state.
     /// </summary>
     /// <value>The pending insert has range value exposed by <see cref="MediaStudio"/>.</value>
-    private bool PendingInsertHasRange => _pendingInsertMaximumSourceSeconds - _pendingInsertMinimumSourceSeconds > .01;
+    private bool PendingInsertHasRange => GetPendingInsertHasRangeForRender();
     /// <summary>
     /// Gets the video time overlay style value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
@@ -1893,36 +1956,32 @@
     /// Gets the video sequence selection start style value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The video sequence selection start style value exposed by <see cref="MediaStudio"/>.</value>
-    private string VideoSequenceSelectionStartStyle => $"left:{Percent(VideoSelectionTimelineStart / Math.Max(.01, SequenceDuration))}";
+    private string VideoSequenceSelectionStartStyle => GetVideoSequenceSelectionStartStyleForRender();
     /// <summary>
     /// Gets the video sequence selection end style value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The video sequence selection end style value exposed by <see cref="MediaStudio"/>.</value>
-    private string VideoSequenceSelectionEndStyle => $"left:{Percent(VideoSelectionTimelineEnd / Math.Max(.01, SequenceDuration))}";
+    private string VideoSequenceSelectionEndStyle => GetVideoSequenceSelectionEndStyleForRender();
     /// <summary>
     /// Gets the video sequence selection title value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The video sequence selection title value exposed by <see cref="MediaStudio"/>.</value>
-    private string VideoSequenceSelectionTitle => _videoSelectionIsPoint
-        ? $"{SelectedClipName}: timestamp {Time(VideoSelectionStart)}"
-        : $"{SelectedClipName}: selected {Time(VideoSelectionStart)} — {Time(VideoSelectionEnd)}";
+    private string VideoSequenceSelectionTitle => GetVideoSequenceSelectionTitleForRender();
     /// <summary>
     /// Gets the frame polyline points value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The frame polyline points value exposed by <see cref="MediaStudio"/>.</value>
-    private string FramePolylinePoints => string.Join(" ", ActiveFramePoints.Select(point => $"{Inv(point.X * 1000)},{Inv(point.Y * 1000)}"));
+    private string FramePolylinePoints => GetFramePolylinePointsForRender();
     /// <summary>
     /// Gets the frame polygon points value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The frame polygon points value exposed by <see cref="MediaStudio"/>.</value>
-    private string FramePolygonPoints => FramePolylinePoints;
+    private string FramePolygonPoints => GetFramePolygonPointsForRender();
     /// <summary>
     /// Gets the frame dim path used by this media studio instance to locate the associated file-system resource.
     /// </summary>
     /// <value>The frame dim path value exposed by <see cref="MediaStudio"/>.</value>
-    private string FrameDimPath => ActiveFramePoints.Count >= 3
-        ? $"M 0 0 H 1000 V 1000 H 0 Z M {string.Join(" L ", ActiveFramePoints.Select(point => $"{Inv(point.X * 1000)} {Inv(point.Y * 1000)}"))} Z"
-        : "M 0 0 H 1000 V 1000 H 0 Z";
+    private string FrameDimPath => GetFrameDimPathForRender();
     /// <summary>
     /// Gets the video preview style value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
@@ -1984,86 +2043,67 @@
     /// Gets the selected section summary value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The selected section summary value exposed by <see cref="MediaStudio"/>.</value>
-    private string SelectedSectionSummary => SelectedSegment is { } segment
-        ? _selectedSegmentIds.Count > 1
-            ? $"{_selectedSegmentIds.Count} {LT("sections")} · {segment.Name}"
-            : $"{segment.Name} · {Time(segment.SourceLengthSeconds / Math.Max(.1, _playbackRate))}"
-        : LT("None");
+    private string SelectedSectionSummary => GetSelectedSectionSummaryForRender();
     /// <summary>
     /// Gets the import menu text value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The import menu text value exposed by <see cref="MediaStudio"/>.</value>
-    private string ImportMenuText => IsVideo ? LT("Import video…") : LT("Import audio…");
+    private string ImportMenuText => GetImportMenuTextForRender();
     /// <summary>
     /// Gets the accept value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The accept value exposed by <see cref="MediaStudio"/>.</value>
-    private string Accept => IsVideo ? "video/mp4,video/webm,video/ogg,video/quicktime" : "audio/mpeg,audio/wav,audio/ogg,audio/webm,audio/mp4,audio/aac,audio/flac";
+    private string Accept => GetAcceptForRender();
     /// <summary>
     /// Gets the MIME label value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The MIME label value exposed by <see cref="MediaStudio"/>.</value>
-    private string MimeLabel => string.IsNullOrWhiteSpace(_mimeType) ? (IsVideo ? LT("Video") : LT("Audio")) : _mimeType;
+    private string MimeLabel => GetMimeLabelForRender();
     /// <summary>
     /// Gets the source status value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The source status value exposed by <see cref="MediaStudio"/>.</value>
-    private string SourceStatus => _renderingTimelineSelectionExport
-        ? LT("Exporting selected ranges…")
-        : _renderingVideoExport
-        ? LT("Rendering effects to video…")
-        : _recordingStopping
-        ? LT("Finalizing recording…")
-        : _recording
-            ? LT("Recording…")
-        : _embedding
-            ? $"{LT("Embedding recording")} · {_embeddingProgress:0}%"
-            : HasRetainedRecording
-                ? $"{LT("Recording ready")} · {FormatBytes(_retainedRecordingSizeBytes)} · {LT("download protected")}"
-                : HasSource ? $"{LT("Ready")} · {Time(_trimEnd - _trimStart)} {LT("selected")}" : LT("No source");
+    private string SourceStatus => GetSourceStatusForRender();
     /// <summary>
     /// Gets the apply button text value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The apply button text value exposed by <see cref="MediaStudio"/>.</value>
-    private string ApplyButtonText => _embedding ? $"{LT("Embedding")} {_embeddingProgress:0}%" : _saving ? LT("Applying…") : EditingExisting ? LT("Apply media") : LT("Insert media");
+    private string ApplyButtonText => GetApplyButtonTextForRender();
     /// <summary>
     /// Gets the footer status value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The footer status value exposed by <see cref="MediaStudio"/>.</value>
-    private string FooterStatus => _error ?? _warning ??
-        (HasRetainedRecording
-            ? $"{MimeLabel} · {Time(_duration)} · {FormatBytes(_retainedRecordingSizeBytes)} · {LT("available to download")}"
-            : HasSource ? $"{MimeLabel} · {Time(_duration)}" : LT("Import or record a source to begin."));
+    private string FooterStatus => GetFooterStatusForRender();
     /// <summary>
     /// Gets the display waveform collection maintained or exposed by this media studio instance for downstream processing.
     /// </summary>
     /// <value>The display waveform value exposed by <see cref="MediaStudio"/>.</value>
-    private IEnumerable<double> DisplayWaveform => _waveform.Count > 0 ? _waveform : Enumerable.Repeat(.22, 64);
+    private IEnumerable<double> DisplayWaveform => GetDisplayWaveformForRender();
     /// <summary>
     /// Gets the max fade value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The max fade value exposed by <see cref="MediaStudio"/>.</value>
-    private double MaxFade => Math.Max(.05, Math.Min(10, (_trimEnd - _trimStart) / Math.Max(.25, _playbackRate) / 2));
+    private double MaxFade => GetMaxFadeForRender();
     /// <summary>
     /// Gets the range selector end value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The range selector end value exposed by <see cref="MediaStudio"/>.</value>
-    private double RangeSelectorEnd => Math.Max(.01, double.IsFinite(_duration) ? _duration : 0);
+    private double RangeSelectorEnd => GetRangeSelectorEndForRender();
     /// <summary>
     /// Gets the range selector min range value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The range selector min range value exposed by <see cref="MediaStudio"/>.</value>
-    private double RangeSelectorMinRange => Math.Min(.05, RangeSelectorEnd);
+    private double RangeSelectorMinRange => GetRangeSelectorMinRangeForRender();
     /// <summary>
     /// Gets the major tick value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The major tick value exposed by <see cref="MediaStudio"/>.</value>
-    private double MajorTick => _duration switch { <= 10 => 1, <= 30 => 5, <= 120 => 10, <= 600 => 60, _ => 300 };
+    private double MajorTick => GetMajorTickForRender();
     /// <summary>
     /// Gets the minor tick value that forms part of the media studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The minor tick value exposed by <see cref="MediaStudio"/>.</value>
-    private double MinorTick => Math.Max(.1, MajorTick / 5);
+    private double MinorTick => GetMinorTickForRender();
 
     /// <summary>
     /// Handles the parameters set lifecycle or event notification for <see cref="MediaStudio"/>, updating the state required by the surrounding workflow.
@@ -2383,7 +2423,7 @@
         try
         {
             if (_disposed) throw new ObjectDisposedException(nameof(MediaStudio));
-            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=3.7.6").ConfigureAwait(true);
+            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=3.9.1").ConfigureAwait(true);
             _self ??= DotNetObjectReference.Create(this);
             if (SessionId != Guid.Empty)
             {
@@ -9554,4 +9594,1378 @@
         }
     }
 
+
+
+    /// <summary>Computes IsVideo for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetIsVideoForRender()
+    {
+        try
+        {
+            return Kind == PublicationElementKind.Video;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.IsVideo failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes HasRetainedRecording for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetHasRetainedRecordingForRender()
+    {
+        try
+        {
+            return _hasRetainedRecording && _retainedRecordingSizeBytes > 0;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.HasRetainedRecording failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes CanDownloadCurrentMedia for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetCanDownloadCurrentMediaForRender()
+    {
+        try
+        {
+            return HasRetainedRecording || (SelectedSegment is { IsGap: false } && !string.IsNullOrWhiteSpace(_previewSource));
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.CanDownloadCurrentMedia failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes DownloadMediaText for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetDownloadMediaTextForRender()
+    {
+        try
+        {
+            return HasRetainedRecording ? LT("Download recording") : LT("Download selected source");
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.DownloadMediaText failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes RecordingPolicy for the render path with component-local diagnostics.</summary>
+    /// <returns>The publisher media session defaults policy produced by the operation.</returns>
+    private PublisherMediaSessionDefaultsPolicy GetRecordingPolicyForRender()
+    {
+        try
+        {
+            return RuntimePolicy.MediaSessionDefaults;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.RecordingPolicy failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes RecordingTargetWidth for the render path with component-local diagnostics.</summary>
+    /// <returns>The int produced by the operation.</returns>
+    private int GetRecordingTargetWidthForRender()
+    {
+        try
+        {
+            return ResolveRecordingSizeSelection(_recordingSizeMode).Width;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.RecordingTargetWidth failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes RecordingTargetHeight for the render path with component-local diagnostics.</summary>
+    /// <returns>The int produced by the operation.</returns>
+    private int GetRecordingTargetHeightForRender()
+    {
+        try
+        {
+            return ResolveRecordingSizeSelection(_recordingSizeMode).Height;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.RecordingTargetHeight failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes HasVideoProject for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetHasVideoProjectForRender()
+    {
+        try
+        {
+            return IsVideo && _videoProject is { Tracks.Count: > 0 };
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.HasVideoProject failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes ProjectVideoTracks for the render path with component-local diagnostics.</summary>
+    /// <returns>The collection produced by the operation.</returns>
+    private IReadOnlyList<MediaTimelineTrack> GetProjectVideoTracksForRender()
+    {
+        try
+        {
+            return _videoProject?.Tracks
+        .Where(track => track.Kind == MediaTimelineTrackKind.Video)
+        .OrderBy(track => track.Order)
+        .ToList() ?? [];
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.ProjectVideoTracks failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes VideoProjectMissingMediaCount for the render path with component-local diagnostics.</summary>
+    /// <returns>The int produced by the operation.</returns>
+    private int GetVideoProjectMissingMediaCountForRender()
+    {
+        try
+        {
+            return _videoProject?.Tracks
+        .SelectMany(track => track.Segments)
+        .Count(segment => !segment.IsGap && string.IsNullOrWhiteSpace(segment.DataUrl) && segment.SourceReference.Missing) ?? 0;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.VideoProjectMissingMediaCount failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes VideoProjectTitle for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetVideoProjectTitleForRender()
+    {
+        try
+        {
+            return _videoProject?.Name ?? "Video project";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.VideoProjectTitle failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes VideoProjectFormatSummary for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetVideoProjectFormatSummaryForRender()
+    {
+        try
+        {
+            return _videoProject is null
+        ? string.Empty
+        : string.IsNullOrWhiteSpace(_videoProject.SourceFormatVersion)
+            ? _videoProject.SourceFormat
+            : $"{_videoProject.SourceFormat} {_videoProject.SourceFormatVersion}";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.VideoProjectFormatSummary failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes VideoProjectCanvasSummary for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetVideoProjectCanvasSummaryForRender()
+    {
+        try
+        {
+            return _videoProject is null
+        ? string.Empty
+        : $"{_videoProject.Width} × {_videoProject.Height} · {_videoProject.FrameRate:0.###} fps";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.VideoProjectCanvasSummary failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes VideoProjectTrackSummary for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetVideoProjectTrackSummaryForRender()
+    {
+        try
+        {
+            return _videoProject is null
+        ? string.Empty
+        : $"{_videoProject.Tracks.Count} track{(_videoProject.Tracks.Count == 1 ? string.Empty : "s")} · {_videoProject.Transitions.Count} transition{(_videoProject.Transitions.Count == 1 ? string.Empty : "s")}";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.VideoProjectTrackSummary failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes VideoProjectMissingSummary for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetVideoProjectMissingSummaryForRender()
+    {
+        try
+        {
+            return VideoProjectMissingMediaCount == 0
+        ? "All referenced media linked"
+        : $"{VideoProjectMissingMediaCount} missing media reference{(VideoProjectMissingMediaCount == 1 ? string.Empty : "s")}";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.VideoProjectMissingSummary failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SelectedSegment for the render path with component-local diagnostics.</summary>
+    /// <returns>The publication media segment produced by the operation.</returns>
+    private PublicationMediaSegment? GetSelectedSegmentForRender()
+    {
+        try
+        {
+            return _segments.FirstOrDefault(segment => segment.Id == _selectedSegmentId);
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.SelectedSegment failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SelectedTimelineSegments for the render path with component-local diagnostics.</summary>
+    /// <returns>The collection produced by the operation.</returns>
+    private IReadOnlyList<PublicationMediaSegment> GetSelectedTimelineSegmentsForRender()
+    {
+        try
+        {
+            return _segments
+        .Where(segment => _selectedSegmentIds.Contains(segment.Id))
+        .ToList();
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.SelectedTimelineSegments failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes CanExportSelectedTimelineRanges for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetCanExportSelectedTimelineRangesForRender()
+    {
+        try
+        {
+            return IsVideo
+        && !_renderingVideoExport
+        && !_renderingTimelineSelectionExport
+        && SelectedTimelineSegments.Any(IsPlayableSegment);
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.CanExportSelectedTimelineRanges failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SelectedVideoLayers for the render path with component-local diagnostics.</summary>
+    /// <returns>The collection produced by the operation.</returns>
+    private IReadOnlyList<VideoEffectLayer> GetSelectedVideoLayersForRender()
+    {
+        try
+        {
+            return SelectedSegment?.VideoLayers ?? [];
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.SelectedVideoLayers failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SelectedVideoLayer for the render path with component-local diagnostics.</summary>
+    /// <returns>The video effect layer produced by the operation.</returns>
+    private VideoEffectLayer? GetSelectedVideoLayerForRender()
+    {
+        try
+        {
+            return SelectedSegment?.VideoLayers.FirstOrDefault(layer => layer.Id == _selectedVideoLayerId);
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.SelectedVideoLayer failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SelectedVideoFilters for the render path with component-local diagnostics.</summary>
+    /// <returns>The collection produced by the operation.</returns>
+    private IReadOnlyList<VideoEffectFilter> GetSelectedVideoFiltersForRender()
+    {
+        try
+        {
+            return SelectedVideoLayer?.Filters ?? [];
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.SelectedVideoFilters failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SelectedVideoFilter for the render path with component-local diagnostics.</summary>
+    /// <returns>The video effect filter produced by the operation.</returns>
+    private VideoEffectFilter? GetSelectedVideoFilterForRender()
+    {
+        try
+        {
+            return SelectedVideoLayer?.Filters.FirstOrDefault(filter => filter.Id == _selectedVideoFilterId);
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.SelectedVideoFilter failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SelectedCutSections for the render path with component-local diagnostics.</summary>
+    /// <returns>The collection produced by the operation.</returns>
+    private IReadOnlyList<MediaTemporalSection> GetSelectedCutSectionsForRender()
+    {
+        try
+        {
+            return SelectedSegment?.CutSections ?? [];
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.SelectedCutSections failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SelectedCutSection for the render path with component-local diagnostics.</summary>
+    /// <returns>The media temporal section produced by the operation.</returns>
+    private MediaTemporalSection? GetSelectedCutSectionForRender()
+    {
+        try
+        {
+            return SelectedSegment?.CutSections.FirstOrDefault(section => section.Id == _selectedCutSectionId);
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.SelectedCutSection failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SelectedSegmentIndex for the render path with component-local diagnostics.</summary>
+    /// <returns>The int produced by the operation.</returns>
+    private int GetSelectedSegmentIndexForRender()
+    {
+        try
+        {
+            return _selectedSegmentId is Guid id ? _segments.FindIndex(segment => segment.Id == id) : -1;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.SelectedSegmentIndex failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes HasSelectedSegment for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetHasSelectedSegmentForRender()
+    {
+        try
+        {
+            return SelectedSegment is not null;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.HasSelectedSegment failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes HasSource for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetHasSourceForRender()
+    {
+        try
+        {
+            return (_segments.Count > 0 || !string.IsNullOrWhiteSpace(_dataUrl) || HasRetainedRecording || HasVideoProject) && (_duration > 0 || _segments.Count > 0 || HasVideoProject);
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.HasSource failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes CanPasteSection for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetCanPasteSectionForRender()
+    {
+        try
+        {
+            return _clipClipboard is not null;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.CanPasteSection failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes CanDeleteSection for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetCanDeleteSectionForRender()
+    {
+        try
+        {
+            return _segments.Count > 0 && HasSelectedSegment;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.CanDeleteSection failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes CanAddCutLine for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetCanAddCutLineForRender()
+    {
+        try
+        {
+            return HasSource && _segments.Count > 0;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.CanAddCutLine failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes CanRemoveCutLine for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetCanRemoveCutLineForRender()
+    {
+        try
+        {
+            return SelectedSegmentIndex > 0 && TimelineEdits.CanMergeBoundary(_segments, SelectedSegmentIndex);
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.CanRemoveCutLine failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes CanCutVideoSelection for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetCanCutVideoSelectionForRender()
+    {
+        try
+        {
+            return IsVideo && HasSelectedSegment && (_videoSelectionIsPoint || VideoSelectionEnd - VideoSelectionStart >= .01);
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.CanCutVideoSelection failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes CanUseVideoSelectionAsTrim for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetCanUseVideoSelectionAsTrimForRender()
+    {
+        try
+        {
+            return IsVideo && HasSelectedSegment && !_videoSelectionIsPoint && VideoSelectionEnd - VideoSelectionStart >= .01;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.CanUseVideoSelectionAsTrim failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes CanCopyVideoSelection for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetCanCopyVideoSelectionForRender()
+    {
+        try
+        {
+            return CanUseVideoSelectionAsTrim;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.CanCopyVideoSelection failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes CanSaveCutSection for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetCanSaveCutSectionForRender()
+    {
+        try
+        {
+            return IsVideo && HasSelectedSegment && !_videoSelectionIsPoint && VideoSelectionEnd - VideoSelectionStart >= .01;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.CanSaveCutSection failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes CanApplySelectionToLayer for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetCanApplySelectionToLayerForRender()
+    {
+        try
+        {
+            return CanSaveCutSection && SelectedVideoLayer is not null;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.CanApplySelectionToLayer failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SelectedVideoLayerIndex for the render path with component-local diagnostics.</summary>
+    /// <returns>The int produced by the operation.</returns>
+    private int GetSelectedVideoLayerIndexForRender()
+    {
+        try
+        {
+            return SelectedSegment?.VideoLayers.FindIndex(layer => layer.Id == _selectedVideoLayerId) ?? -1;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.SelectedVideoLayerIndex failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes CanMoveVideoLayerUp for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetCanMoveVideoLayerUpForRender()
+    {
+        try
+        {
+            return SelectedVideoLayerIndex >= 0 && SelectedVideoLayerIndex < (SelectedSegment?.VideoLayers.Count ?? 0) - 1;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.CanMoveVideoLayerUp failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes CanMoveVideoLayerDown for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetCanMoveVideoLayerDownForRender()
+    {
+        try
+        {
+            return SelectedVideoLayerIndex > 0;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.CanMoveVideoLayerDown failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes CanDeleteVideoLayer for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetCanDeleteVideoLayerForRender()
+    {
+        try
+        {
+            return SelectedVideoLayer is not null && (SelectedSegment?.VideoLayers.Count ?? 0) > 1;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.CanDeleteVideoLayer failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SelectedVideoFilterIndex for the render path with component-local diagnostics.</summary>
+    /// <returns>The int produced by the operation.</returns>
+    private int GetSelectedVideoFilterIndexForRender()
+    {
+        try
+        {
+            return SelectedVideoLayer?.Filters.FindIndex(filter => filter.Id == _selectedVideoFilterId) ?? -1;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.SelectedVideoFilterIndex failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes CanMoveVideoFilterUp for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetCanMoveVideoFilterUpForRender()
+    {
+        try
+        {
+            return SelectedVideoFilterIndex >= 0 && SelectedVideoFilterIndex < (SelectedVideoLayer?.Filters.Count ?? 0) - 1;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.CanMoveVideoFilterUp failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes CanMoveVideoFilterDown for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetCanMoveVideoFilterDownForRender()
+    {
+        try
+        {
+            return SelectedVideoFilterIndex > 0;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.CanMoveVideoFilterDown failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SequenceDuration for the render path with component-local diagnostics.</summary>
+    /// <returns>The double produced by the operation.</returns>
+    private double GetSequenceDurationForRender()
+    {
+        try
+        {
+            return Math.Max(.01, TimelineEdits.TimelineLength(_segments, _playbackRate));
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.SequenceDuration failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes StoredActiveFramePoints for the render path with component-local diagnostics.</summary>
+    /// <returns>The collection produced by the operation.</returns>
+    private List<MediaFramePoint> GetStoredActiveFramePointsForRender()
+    {
+        try
+        {
+            return _editingMorphRegion ? _morphClipPolygon : _frameClipPolygon;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.StoredActiveFramePoints failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes ActiveFramePoints for the render path with component-local diagnostics.</summary>
+    /// <returns>The collection produced by the operation.</returns>
+    private IReadOnlyList<MediaFramePoint> GetActiveFramePointsForRender()
+    {
+        try
+        {
+            return _frameRegionEditing ? _frameDraft : StoredActiveFramePoints;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.ActiveFramePoints failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SelectedFramePoint for the render path with component-local diagnostics.</summary>
+    /// <returns>The media frame point produced by the operation.</returns>
+    private MediaFramePoint? GetSelectedFramePointForRender()
+    {
+        try
+        {
+            return _selectedFramePointIndex is int index && index >= 0 && index < ActiveFramePoints.Count ? ActiveFramePoints[index] : null;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.SelectedFramePoint failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes HasFrameRegion for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetHasFrameRegionForRender()
+    {
+        try
+        {
+            return _frameClipPolygon.Count >= 3;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.HasFrameRegion failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes HasMorphRegion for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetHasMorphRegionForRender()
+    {
+        try
+        {
+            return _morphClipPolygon.Count >= 3;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.HasMorphRegion failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes ActiveFrameRegionInverted for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetActiveFrameRegionInvertedForRender()
+    {
+        try
+        {
+            return _editingMorphRegion
+        ? SelectedVideoLayer?.MorphRegion?.Inverted == true
+        : SelectedVideoLayer?.Region?.Inverted == true;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.ActiveFrameRegionInverted failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes ActiveFrameRegionName for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetActiveFrameRegionNameForRender()
+    {
+        try
+        {
+            return _editingMorphRegion ? "morph target" : "source region";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.ActiveFrameRegionName failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes CanFinishFrameRegion for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetCanFinishFrameRegionForRender()
+    {
+        try
+        {
+            return _frameRegionEditing && _frameDraft.Count >= 3;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.CanFinishFrameRegion failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes CanPasteFrameRegion for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetCanPasteFrameRegionForRender()
+    {
+        try
+        {
+            return _frameClipboard.Count >= 3;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.CanPasteFrameRegion failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes CanCreateSelectionLayer for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetCanCreateSelectionLayerForRender()
+    {
+        try
+        {
+            return CanSaveCutSection;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.CanCreateSelectionLayer failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes CanInsertLayerIntoMainframe for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetCanInsertLayerIntoMainframeForRender()
+    {
+        try
+        {
+            return SelectedVideoLayer is { Kind: VideoEffectLayerKind.Blob3D };
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.CanInsertLayerIntoMainframe failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes VideoSelectionStart for the render path with component-local diagnostics.</summary>
+    /// <returns>The double produced by the operation.</returns>
+    private double GetVideoSelectionStartForRender()
+    {
+        try
+        {
+            return _videoSelectionIsPoint ? _videoSelectionPointSeconds : _videoSelectionStartSeconds;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.VideoSelectionStart failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes VideoSelectionEnd for the render path with component-local diagnostics.</summary>
+    /// <returns>The double produced by the operation.</returns>
+    private double GetVideoSelectionEndForRender()
+    {
+        try
+        {
+            return _videoSelectionIsPoint ? _videoSelectionPointSeconds : _videoSelectionEndSeconds;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.VideoSelectionEnd failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes VideoSelectionLabel for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetVideoSelectionLabelForRender()
+    {
+        try
+        {
+            return _videoSelectionIsPoint ? LT("Timestamp") : LT("Range");
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.VideoSelectionLabel failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes VideoSelectionReadout for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetVideoSelectionReadoutForRender()
+    {
+        try
+        {
+            return _videoSelectionIsPoint
+        ? $"/ {Time(_duration)}"
+        : $"— {Time(VideoSelectionEnd)} / {Time(_duration)}";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.VideoSelectionReadout failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes VideoSelectionDetailedSummary for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetVideoSelectionDetailedSummaryForRender()
+    {
+        try
+        {
+            return _videoSelectionIsPoint
+        ? $"Source timestamp {Time(VideoSelectionStart)} · project timestamp {Time(VideoSelectionTimelineStart)}"
+        : $"Source {Time(VideoSelectionStart)} — {Time(VideoSelectionEnd)} · project {Time(VideoSelectionTimelineStart)} — {Time(VideoSelectionTimelineEnd)} · {Time(VideoSelectionEnd - VideoSelectionStart)} selected";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.VideoSelectionDetailedSummary failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes VideoOrAudioSelectionTitle for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetVideoOrAudioSelectionTitleForRender()
+    {
+        try
+        {
+            return IsVideo && _videoSelectionIsPoint ? LT("Selected timestamp") : LT("Selected range");
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.VideoOrAudioSelectionTitle failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes VideoOrAudioSelectionSummary for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetVideoOrAudioSelectionSummaryForRender()
+    {
+        try
+        {
+            return IsVideo && _videoSelectionIsPoint
+        ? $"{SelectedClipName} · {Time(_videoSelectionPointSeconds)} / {Time(_duration)}"
+        : IsVideo
+            ? $"{SelectedClipName} · {Time(VideoSelectionStart)} — {Time(VideoSelectionEnd)} / {Time(_duration)}"
+            : $"{Time(_trimStart)} — {Time(_trimEnd)} / {Time(_duration)}";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.VideoOrAudioSelectionSummary failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SelectedClipName for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetSelectedClipNameForRender()
+    {
+        try
+        {
+            return SelectedSegment?.Name ?? (IsVideo ? LT("No selected video clip") : LT("No selected audio clip"));
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.SelectedClipName failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SendToConverterMenuText for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetSendToConverterMenuTextForRender()
+    {
+        try
+        {
+            return IsVideo ? LT("Send selected clip/range to Media Converter") : LT("Send selected audio clip to Media Converter");
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.SendToConverterMenuText failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SelectedSegmentTimelineStart for the render path with component-local diagnostics.</summary>
+    /// <returns>The double produced by the operation.</returns>
+    private double GetSelectedSegmentTimelineStartForRender()
+    {
+        try
+        {
+            return SelectedSegmentIndex >= 0
+        ? TimelineEdits.SegmentTimelineStart(_segments, SelectedSegmentIndex, _playbackRate)
+        : 0;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.SelectedSegmentTimelineStart failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SelectedSegmentSourceStart for the render path with component-local diagnostics.</summary>
+    /// <returns>The double produced by the operation.</returns>
+    private double GetSelectedSegmentSourceStartForRender()
+    {
+        try
+        {
+            return SelectedSegment?.TrimStartSeconds ?? 0;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.SelectedSegmentSourceStart failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SelectedSegmentSourceEnd for the render path with component-local diagnostics.</summary>
+    /// <returns>The double produced by the operation.</returns>
+    private double GetSelectedSegmentSourceEndForRender()
+    {
+        try
+        {
+            return SelectedSegment?.EffectiveTrimEndSeconds ?? 0;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.SelectedSegmentSourceEnd failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SelectedSegmentEffectiveRate for the render path with component-local diagnostics.</summary>
+    /// <returns>The double produced by the operation.</returns>
+    private double GetSelectedSegmentEffectiveRateForRender()
+    {
+        try
+        {
+            return Math.Max(.0001, Math.Max(.1, _playbackRate) * Math.Max(.0001, Math.Abs(SelectedSegment?.Speed ?? 1)));
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.SelectedSegmentEffectiveRate failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes PendingInsertHasRange for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetPendingInsertHasRangeForRender()
+    {
+        try
+        {
+            return _pendingInsertMaximumSourceSeconds - _pendingInsertMinimumSourceSeconds > .01;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.PendingInsertHasRange failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes VideoSequenceSelectionStartStyle for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetVideoSequenceSelectionStartStyleForRender()
+    {
+        try
+        {
+            return $"left:{Percent(VideoSelectionTimelineStart / Math.Max(.01, SequenceDuration))}";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.VideoSequenceSelectionStartStyle failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes VideoSequenceSelectionEndStyle for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetVideoSequenceSelectionEndStyleForRender()
+    {
+        try
+        {
+            return $"left:{Percent(VideoSelectionTimelineEnd / Math.Max(.01, SequenceDuration))}";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.VideoSequenceSelectionEndStyle failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes VideoSequenceSelectionTitle for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetVideoSequenceSelectionTitleForRender()
+    {
+        try
+        {
+            return _videoSelectionIsPoint
+        ? $"{SelectedClipName}: timestamp {Time(VideoSelectionStart)}"
+        : $"{SelectedClipName}: selected {Time(VideoSelectionStart)} — {Time(VideoSelectionEnd)}";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.VideoSequenceSelectionTitle failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes FramePolylinePoints for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetFramePolylinePointsForRender()
+    {
+        try
+        {
+            return EditorText.BuildMediaStudioSvgPoints(ActiveFramePoints);
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.FramePolylinePoints failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes FramePolygonPoints for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetFramePolygonPointsForRender()
+    {
+        try
+        {
+            return FramePolylinePoints;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.FramePolygonPoints failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes FrameDimPath for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetFrameDimPathForRender()
+    {
+        try
+        {
+            return EditorText.BuildMediaStudioSvgDimPath(ActiveFramePoints);
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.FrameDimPath failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SelectedSectionSummary for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetSelectedSectionSummaryForRender()
+    {
+        try
+        {
+            return SelectedSegment is { } segment
+        ? _selectedSegmentIds.Count > 1
+            ? $"{_selectedSegmentIds.Count} {LT("sections")} · {segment.Name}"
+            : $"{segment.Name} · {Time(segment.SourceLengthSeconds / Math.Max(.1, _playbackRate))}"
+        : LT("None");
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.SelectedSectionSummary failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes ImportMenuText for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetImportMenuTextForRender()
+    {
+        try
+        {
+            return IsVideo ? LT("Import video…") : LT("Import audio…");
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.ImportMenuText failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes Accept for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetAcceptForRender()
+    {
+        try
+        {
+            return IsVideo ? "video/mp4,video/webm,video/ogg,video/quicktime" : "audio/mpeg,audio/wav,audio/ogg,audio/webm,audio/mp4,audio/aac,audio/flac";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.Accept failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes MimeLabel for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetMimeLabelForRender()
+    {
+        try
+        {
+            return string.IsNullOrWhiteSpace(_mimeType) ? (IsVideo ? LT("Video") : LT("Audio")) : _mimeType;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.MimeLabel failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SourceStatus for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetSourceStatusForRender()
+    {
+        try
+        {
+            return _renderingTimelineSelectionExport
+        ? LT("Exporting selected ranges…")
+        : _renderingVideoExport
+        ? LT("Rendering effects to video…")
+        : _recordingStopping
+        ? LT("Finalizing recording…")
+        : _recording
+            ? LT("Recording…")
+        : _embedding
+            ? $"{LT("Embedding recording")} · {_embeddingProgress:0}%"
+            : HasRetainedRecording
+                ? $"{LT("Recording ready")} · {FormatBytes(_retainedRecordingSizeBytes)} · {LT("download protected")}"
+                : HasSource ? $"{LT("Ready")} · {Time(_trimEnd - _trimStart)} {LT("selected")}" : LT("No source");
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.SourceStatus failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes ApplyButtonText for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetApplyButtonTextForRender()
+    {
+        try
+        {
+            return _embedding ? $"{LT("Embedding")} {_embeddingProgress:0}%" : _saving ? LT("Applying…") : EditingExisting ? LT("Apply media") : LT("Insert media");
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.ApplyButtonText failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes FooterStatus for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetFooterStatusForRender()
+    {
+        try
+        {
+            return _error ?? _warning ??
+        (HasRetainedRecording
+            ? $"{MimeLabel} · {Time(_duration)} · {FormatBytes(_retainedRecordingSizeBytes)} · {LT("available to download")}"
+            : HasSource ? $"{MimeLabel} · {Time(_duration)}" : LT("Import or record a source to begin."));
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.FooterStatus failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes DisplayWaveform for the render path with component-local diagnostics.</summary>
+    /// <returns>The collection produced by the operation.</returns>
+    private IEnumerable<double> GetDisplayWaveformForRender()
+    {
+        try
+        {
+            return _waveform.Count > 0 ? _waveform : Enumerable.Repeat(.22, 64);
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.DisplayWaveform failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes MaxFade for the render path with component-local diagnostics.</summary>
+    /// <returns>The double produced by the operation.</returns>
+    private double GetMaxFadeForRender()
+    {
+        try
+        {
+            return Math.Max(.05, Math.Min(10, (_trimEnd - _trimStart) / Math.Max(.25, _playbackRate) / 2));
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.MaxFade failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes RangeSelectorEnd for the render path with component-local diagnostics.</summary>
+    /// <returns>The double produced by the operation.</returns>
+    private double GetRangeSelectorEndForRender()
+    {
+        try
+        {
+            return Math.Max(.01, double.IsFinite(_duration) ? _duration : 0);
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.RangeSelectorEnd failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes RangeSelectorMinRange for the render path with component-local diagnostics.</summary>
+    /// <returns>The double produced by the operation.</returns>
+    private double GetRangeSelectorMinRangeForRender()
+    {
+        try
+        {
+            return Math.Min(.05, RangeSelectorEnd);
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.RangeSelectorMinRange failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes MajorTick for the render path with component-local diagnostics.</summary>
+    /// <returns>The double produced by the operation.</returns>
+    private double GetMajorTickForRender()
+    {
+        try
+        {
+            return _duration switch { <= 10 => 1, <= 30 => 5, <= 120 => 10, <= 600 => 60, _ => 300 };
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.MajorTick failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes MinorTick for the render path with component-local diagnostics.</summary>
+    /// <returns>The double produced by the operation.</returns>
+    private double GetMinorTickForRender()
+    {
+        try
+        {
+            return Math.Max(.1, MajorTick / 5);
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaStudio.MinorTick failed.");
+            throw;
+        }
+    }
 }

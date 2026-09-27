@@ -5,10 +5,24 @@
 @inject IJSRuntime JS
 
 @inject ILogger<BarcodeEditor> Logger
+<div class="razor-component-boundary">
+<DxFormLayout CssClass="razor-component-layout-owner BarcodeEditor">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext001">
 @if (Visible && Item is not null)
 {
-    <div class="modal-backdrop">
-        <section class="barcode-editor-dialog" role="dialog" aria-modal="true" aria-label="Barcode editor">
+    <DxPopup Visible="true"
+         Width="min(1800px, 98vw)"
+         Height="min(1180px, 96vh)"
+         MaxHeight="96vh"
+         CloseOnOutsideClick="false"
+         CloseOnEscape="false"
+         ShowHeader="false">
+    <BodyContentTemplate Context="publisherPopupContext">
+        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext002">
+        <div class="barcode-editor-dialog" aria-label="Barcode editor">
             <header><div><strong>Barcode Studio</strong><span>@FormatSummary</span></div><button type="button" class="window-close" @onclick="Cancel">×</button></header>
             <DxRibbon CssClass="barcode-editor-ribbon categorized-ribbon" SizeMode="SizeMode.Small" AdaptivityAutoCollapseItemsToGroups="false">
                 <DxRibbonTab Text="Barcode">
@@ -73,8 +87,12 @@
                 </div>
             </div>
             <footer><DxButton Text="Cancel" Click="Cancel" /><DxButton Text="Insert / Apply" RenderStyle="ButtonRenderStyle.Primary" Enabled="@string.IsNullOrWhiteSpace(_error)" Click="Save" /></footer>
-        </section>
-    </div>
+        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+        </BodyContentTemplate>
+</DxPopup>
 
     <DxContextMenu @ref="_menu"><Items>
         <DxContextMenuItem Text="Regenerate" Click="RefreshNow" />
@@ -89,6 +107,11 @@
         }
     </Items></DxContextMenu>
 }
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+</div>
+
 
 @code {
 
@@ -202,7 +225,7 @@
             var request = _generationRequest;
             try
             {
-                _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js?v=3.7.6").ConfigureAwait(true);
+                _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js?v=3.9.1").ConfigureAwait(true);
                 var svg = await _module.InvokeAsync<string>("generateBarcodeSvg", _draft).ConfigureAwait(true);
                 if (request != _generationRequest) return;
                 _svg = svg;
@@ -503,14 +526,12 @@
     /// Gets the transparency command text value that forms part of the barcode editor state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The transparency command text value exposed by <see cref="BarcodeEditor"/>.</value>
-    private string TransparencyCommandText => _draft.TransparentBackground ? "Use solid background" : "Use transparent background";
+    private string TransparencyCommandText => GetTransparencyCommandTextForRender();
     /// <summary>
     /// Gets the format summary value that forms part of the barcode editor state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The format summary value exposed by <see cref="BarcodeEditor"/>.</value>
-    private string FormatSummary => _draft.Format == PublicationBarcodeFormat.QrCode
-        ? $"QR Code · correction {_draft.ErrorCorrection} · {_draft.ModuleShape} · {(_draft.TransparentBackground ? "transparent" : "solid background")}"
-        : $"{FormatName(_draft.Format)} · {_draft.ModuleShape} bars · {(_draft.TransparentBackground ? "transparent" : "solid background")}";
+    private string FormatSummary => GetFormatSummaryForRender();
     /// <summary>
     /// Sets format for <see cref="BarcodeEditor"/>, keeping the operation consistent with the state and invariants of the surrounding barcode editor workflow.
     /// </summary>
@@ -1118,4 +1139,37 @@
         }
     }
 
+
+
+    /// <summary>Computes TransparencyCommandText for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetTransparencyCommandTextForRender()
+    {
+        try
+        {
+            return _draft.TransparentBackground ? "Use solid background" : "Use transparent background";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property BarcodeEditor.TransparencyCommandText failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes FormatSummary for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetFormatSummaryForRender()
+    {
+        try
+        {
+            return _draft.Format == PublicationBarcodeFormat.QrCode
+        ? $"QR Code · correction {_draft.ErrorCorrection} · {_draft.ModuleShape} · {(_draft.TransparentBackground ? "transparent" : "solid background")}"
+        : $"{FormatName(_draft.Format)} · {_draft.ModuleShape} bars · {(_draft.TransparentBackground ? "transparent" : "solid background")}";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property BarcodeEditor.FormatSummary failed.");
+            throw;
+        }
+    }
 }

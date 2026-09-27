@@ -643,6 +643,15 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
         });
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/liveDataInterop.js:polarOptions@534', __javascriptError); throw __javascriptError; }}
 
+    function funnelLabelText(info) { try {
+        const argument = info?.item?.argument ?? info?.argument ?? info?.argumentText ?? "";
+        const valueText = info?.valueText ?? info?.item?.value ?? info?.value ?? "";
+        const category = String(argument ?? "").trim();
+        const value = String(valueText ?? "").trim();
+        if (category && value) return `${category}: ${value}`;
+        return category || value;
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/liveDataInterop.js:funnelLabelText', __javascriptError); throw __javascriptError; }}
+
     function renderWidget(element, config, rows) { try {
         config.__element = element;
         if (!window.jQuery || !window.DevExpress) { fallback(element, config, rows, "DevExtreme browser assets are not loaded."); return null; }
@@ -677,7 +686,7 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
                 plugin = "dxSankey"; options = Object.assign(common(config), { dataSource: rows.map(row => { try { return (({ source: String(get(row, config.argumentField)), target: String(get(row, config.targetField)), weight: measure(config, row, valueField) })); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/liveDataInterop.js:callback:rows.map@590', __javascriptError); throw __javascriptError; } }), sourceField: "source", targetField: "target", weightField: "weight", label: { visible: !!config.showLabels } }); break;
             case "Funnel":
             case "Pyramid":
-                plugin = "dxFunnel"; options = Object.assign(common(config), { dataSource: points, argumentField: "argument", valueField: "value", inverted: kind === "Pyramid", label: { visible: !!config.showLabels } }); break;
+                plugin = "dxFunnel"; options = Object.assign(common(config), { dataSource: points, argumentField: "argument", valueField: "value", inverted: kind === "Pyramid", label: { visible: !!config.showLabels, customizeText: funnelLabelText } }); break;
             case "TreeMap":
                 plugin = "dxTreeMap"; options = Object.assign(common(config), { dataSource: rows.map((row, index) => { try { return (({ id: String(get(row, config.argumentField) || index), parent: String(get(row, config.parentField)), label: String(get(row, config.argumentField)), value: measure(config, row, valueField) })); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/liveDataInterop.js:callback:rows.map@595', __javascriptError); throw __javascriptError; } }), idField: "id", parentField: "parent", labelField: "label", valueField: "value", tooltip: visualTooltip(config) }); break;
             case "DataTable":

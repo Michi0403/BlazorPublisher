@@ -1154,11 +1154,24 @@ button { cursor: pointer; }
 
 .data-visual-editor-body { display: grid; grid-template-columns: 220px minmax(330px, 430px) minmax(420px, 1fr); min-height: 0; }
 .visual-type-list { display: flex; min-height: 0; flex-direction: column; gap: 5px; padding: 9px; overflow: auto; border-right: 1px solid #d6dce3; background: #f3f6f9; }
-.visual-type-list button { display: grid; grid-template-columns: 34px minmax(0,1fr); gap: 1px 8px; padding: 8px; text-align: left; border: 1px solid #cbd5e1; border-radius: 4px; background: white; }
-.visual-type-list button.selected { border-color: #2f75b5; background: #e7f2fb; }
-.visual-type-icon { grid-row: 1 / span 2; align-self: center; color: #2f75b5; font-size: 25px; text-align: center; }
-.visual-type-list small { color: #64748b; font-size: 9px; }
+/* Data-visual chooser: local DevExpress primary-button semantics must stay readable on the Office/Bootstrap light surface. */
+.visual-type-list button { display: grid; grid-template-columns: 34px minmax(0,1fr); gap: 1px 8px; padding: 8px; text-align: left; border: 1px solid var(--bs-border-color, #cbd5e1) !important; border-radius: 4px; color: var(--bs-body-color, #212529) !important; -webkit-text-fill-color: currentColor; background: var(--bs-body-bg, #fff) !important; }
+.visual-type-list button strong { color: var(--bs-body-color, #212529) !important; -webkit-text-fill-color: currentColor; }
+.visual-type-list button.selected { border-color: var(--bs-primary, #2f75b5) !important; color: var(--bs-primary-text-emphasis, #0f4b78) !important; background: var(--bs-primary-bg-subtle, #e7f2fb) !important; }
+.visual-type-list button.selected strong { color: inherit !important; -webkit-text-fill-color: currentColor; }
+.visual-type-icon { grid-row: 1 / span 2; align-self: center; color: var(--bs-primary, #2f75b5); font-size: 25px; text-align: center; }
+.visual-type-list small { color: var(--bs-secondary-color, #64748b) !important; -webkit-text-fill-color: currentColor; font-size: 9px; }
+.visual-type-list button.selected small { color: #365d78 !important; }
 .visual-settings { display: flex; min-height: 0; flex-direction: column; gap: 9px; padding: 12px; overflow: auto; border-right: 1px solid #d6dce3; }
+/* Checkbox rows are one control/value unit; the generic label grid must never stack the checkbox over its caption. */
+.visual-settings label.check-row,
+.value-field-picker label.check-row { display: flex !important; flex-direction: row; align-items: center; gap: 7px; min-height: 24px; }
+.visual-settings label.check-row > dxbl-checkbox,
+.visual-settings label.check-row > .dxbl-checkbox,
+.value-field-picker label.check-row > dxbl-checkbox,
+.value-field-picker label.check-row > .dxbl-checkbox { flex: 0 0 auto; }
+.visual-settings label.check-row > small,
+.value-field-picker label.check-row > small { margin-left: auto; }
 .value-field-picker { display: grid; max-height: 155px; gap: 3px; padding: 7px 9px; overflow: auto; border: 1px solid #cbd5e1; }
 .value-field-picker legend { padding: 0 4px; font-size: 11px; font-weight: 600; }
 .value-field-picker small { margin-left: auto; color: #64748b; }
@@ -1370,7 +1383,7 @@ button { cursor: pointer; }
 .media-range-selector { padding: 7px 9px 2px; border: 1px solid #bdc5cf; border-radius: 4px; background: #fff; }
 .media-range-caption { display: flex; justify-content: space-between; color: #475467; font-size: 10px; }
 .media-studio-properties { min-height: 0; padding: 10px; overflow: auto; border-left: 1px solid #aeb6c0; background: #fafbfc; }
-.media-studio-properties section { display: grid; gap: 8px; padding: 9px; margin-bottom: 9px; border: 1px solid #d2d7de; border-radius: 4px; background: #fff; }
+.media-studio-properties .razor-section-layout-owner > .dxbl-row > dxbl-form-layout-item > .dxbl-fl-ctrl > div { display: grid; gap: 8px; padding: 9px; margin-bottom: 9px; border: 1px solid #d2d7de; border-radius: 4px; background: #fff; }
 .media-studio-properties h3 { margin: 0 0 2px; font-size: 12px; }
 .media-studio-properties label { display: grid; gap: 3px; color: #344054; font-size: 10px; }
 .media-studio-properties input:not([type=checkbox]), .media-studio-properties select { width: 100%; min-width: 0; }
@@ -4636,7 +4649,20 @@ body.publisher-printing [role="menu"], body.publisher-printing [class*="ribbon"]
     line-height: 1;
 }
 .publisher-dialog-close:hover { color: #fff; background: #c42b1c; }
-.website-export-grid { display: grid; gap: 14px; padding: 18px; }
+/* Export dialogs use a fixed responsive popup footprint; their document surface fills it and scrolls internally. */
+.publisher-dialog.website-export-dialog {
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    min-width: 0;
+    min-height: 0;
+    box-sizing: border-box;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto auto;
+    overflow: hidden;
+}
+.website-export-grid { display: grid; min-width: 0; min-height: 0; align-content: start; gap: 14px; padding: 18px; overflow: auto; }
 .website-export-grid > label:not(.publisher-check-row) { display: grid; gap: 5px; }
 .website-export-grid label > span:first-child { font-weight: 650; }
 .website-export-grid select,
@@ -5350,3 +5376,85 @@ body.publisher-printing [role="menu"], body.publisher-printing [class*="ribbon"]
 
 /* Controller cursor is additive: Steam Deck/native mouse and touchpad input remain active in both modes. */
 .publisherstudio-controller-cursor{position:fixed;left:0;top:0;width:20px;height:20px;margin:-10px 0 0 -10px;border:2px solid currentColor;border-radius:50%;z-index:var(--publisher-z-chrome,1500);pointer-events:none;box-shadow:0 0 0 2px #ffffffa8,0 2px 12px #02061799;background:#38bdf844;will-change:transform}.publisherstudio-controller-cursor::after{content:"";position:absolute;left:7px;top:7px;width:3px;height:3px;border-radius:50%;background:currentColor}.publisherstudio-controller-mode-badge{position:fixed;right:14px;bottom:14px;z-index:var(--publisher-z-notification,1800);max-width:min(430px,calc(100vw - 28px));padding:8px 12px;border-radius:999px;background:#0f172aee;color:#e2e8f0;border:1px solid #64748b;box-shadow:0 8px 28px #02061766;font-size:12px;pointer-events:none}.publisherstudio-controller-mode-badge[hidden],.publisherstudio-controller-cursor[hidden]{display:none!important}
+
+
+/* DEVEXPRESS_RAZOR_LAYOUT_COMPATIBILITY
+   The maintenance-only DevExpress FormLayout owners must not become new grid/flex/size boxes.
+   Keeping these wrappers box-neutral preserves the established component geometry while retaining
+   DevExpress semantic ownership and the Razor maintenance contract. */
+.razor-component-boundary,
+.razor-component-boundary > .razor-component-layout-owner,
+.razor-component-boundary > .razor-component-layout-owner > .dxbl-row,
+.razor-component-boundary > .razor-component-layout-owner > .dxbl-row > dxbl-form-layout-item,
+.razor-component-boundary > .razor-component-layout-owner > .dxbl-row > dxbl-form-layout-item > .dxbl-fl-ctrl,
+.razor-section-layout-owner,
+.razor-section-layout-owner > .dxbl-row,
+.razor-section-layout-owner > .dxbl-row > dxbl-form-layout-item,
+.razor-section-layout-owner > .dxbl-row > dxbl-form-layout-item > .dxbl-fl-ctrl {
+    display: contents !important;
+}
+
+
+/* DEVEXPRESS_POPUP_VIEWPORT_CONTRACT
+   DevExpress owns the modal boundary; studio content must fit that boundary rather than recreate
+   the former full-screen backdrop geometry. The body becomes the fallback scroll viewport when a
+   studio needs more space than the current browser window. Dropdown/listbox portals are excluded. */
+dxbl-popup-root > dxbl-popup-cell > dxbl-modal dxbl-modal-dialog.dxbl-popup {
+    max-width: calc(100vw - 1rem) !important;
+    max-height: calc(100dvh - 1rem) !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+}
+
+dxbl-popup-root > dxbl-popup-cell > dxbl-modal dxbl-modal-dialog.dxbl-popup > .dxbl-modal-content {
+    display: flex !important;
+    flex-direction: column !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    overflow: hidden !important;
+}
+
+dxbl-popup-root > dxbl-popup-cell > dxbl-modal dxbl-modal-dialog.dxbl-popup .dxbl-modal-body {
+    flex: 1 1 auto;
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    max-width: 100% !important;
+    max-height: calc(100dvh - 2rem) !important;
+    overflow: auto !important;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable both-edges;
+}
+
+dxbl-popup-root > dxbl-popup-cell > dxbl-modal dxbl-modal-dialog.dxbl-popup .dxbl-modal-body > * {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
+}
+
+/* Studio windows that historically filled a manual backdrop now fill the explicit DxPopup body.
+   Width/height percentage rules therefore resolve against a real popup size and stay inside it. */
+dxbl-popup-root > dxbl-popup-cell > dxbl-modal .dxbl-modal-body > :is(
+    .story-editor-dialog,
+    .spreadsheet-editor-dialog,
+    .data-manager-dialog,
+    .data-visual-editor-dialog,
+    .picture-studio-dialog,
+    .media-studio-window,
+    .barcode-editor-dialog,
+    .component-editor-dialog,
+    .streaming-studio-window,
+    .panel-studio-dialog,
+    .media-converter-dialog,
+    .page-effect-studio-dialog,
+    .new-publication-dialog) {
+    min-width: 0 !important;
+    min-height: 0 !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    box-sizing: border-box;
+    overflow: auto !important;
+    overscroll-behavior: contain;
+}

@@ -49,6 +49,8 @@ public sealed class EditorStateService : IDisposable
     /// Stores the system variable store service dependency used by <see cref="EditorStateService"/> to delegate that application responsibility to its owning collaborator.
     /// </summary>
     private readonly ISystemVariableStoreService _systemVariables;
+    /// <summary>Stores the file localization service used to create culture-appropriate default names for newly inserted visuals.</summary>
+    private readonly IFileLocalizationService _localization;
     /// <summary>
     /// Stores the internal media data state used by <see cref="EditorStateService"/> while executing its surrounding workflow.
     /// </summary>
@@ -111,6 +113,7 @@ public sealed class EditorStateService : IDisposable
     /// <param name="streamingSettings">Publication streaming settings store dependency used by the editor state workflow to provide the corresponding application capability.</param>
     /// <param name="panels">Panel document service dependency used by the editor state workflow to provide the corresponding application capability.</param>
     /// <param name="systemVariables">System variable store service dependency used by the editor state workflow to provide the corresponding application capability.</param>
+    /// <param name="localization">File localization service used for culture-aware default visual names and titles.</param>
     /// <param name="mediaData">Media data value supplied to the editor state operation and used when producing its result.</param>
     /// <param name="elementTraversal">Element traversal value supplied to the editor state operation and used when producing its result.</param>
     /// <param name="richTextFactory">Rich text document factory dependency used by the editor state workflow to provide the corresponding application capability.</param>
@@ -127,6 +130,7 @@ public sealed class EditorStateService : IDisposable
         PublicationStreamingSettingsStore streamingSettings,
         PanelDocumentService panels,
         ISystemVariableStoreService systemVariables,
+        IFileLocalizationService localization,
         PublicationMediaData mediaData,
         PublicationElementTraversal elementTraversal,
         RichTextDocumentFactory richTextFactory,
@@ -143,6 +147,7 @@ public sealed class EditorStateService : IDisposable
         _streamingSettings = streamingSettings;
         _panels = panels;
         _systemVariables = systemVariables;
+        _localization = localization;
         _mediaData = mediaData;
         _elementTraversal = elementTraversal;
         this.logger = logger;
@@ -1796,24 +1801,25 @@ public sealed class EditorStateService : IDisposable
         try
         {
             logger.LogTrace($"Entering EditorStateService.DataVisualName.");
-            return kind switch
-    {
-        DataVisualKind.CartesianChart => "Chart",
-        DataVisualKind.PieChart => "Pie Chart",
-        DataVisualKind.PolarChart => "Polar Chart",
-        DataVisualKind.Sparkline => "Sparkline",
-        DataVisualKind.BarGauge => "Bar Gauge",
-        DataVisualKind.CircularGauge => "Circular Gauge",
-        DataVisualKind.LinearGauge => "Linear Gauge",
-        DataVisualKind.RangeSelector => "Range Selector",
-        DataVisualKind.Sankey => "Sankey Diagram",
-        DataVisualKind.Funnel => "Funnel",
-        DataVisualKind.Pyramid => "Pyramid",
-        DataVisualKind.TreeMap => "Tree Map",
-        DataVisualKind.DataTable => "Data Table",
-        DataVisualKind.KpiProgress => "KPI",
-        _ => "Data Visual"
-    };
+            var canonicalName = kind switch
+            {
+                DataVisualKind.CartesianChart => "Chart",
+                DataVisualKind.PieChart => "Pie Chart",
+                DataVisualKind.PolarChart => "Polar Chart",
+                DataVisualKind.Sparkline => "Sparkline",
+                DataVisualKind.BarGauge => "Bar Gauge",
+                DataVisualKind.CircularGauge => "Circular Gauge",
+                DataVisualKind.LinearGauge => "Linear Gauge",
+                DataVisualKind.RangeSelector => "Range Selector",
+                DataVisualKind.Sankey => "Sankey Diagram",
+                DataVisualKind.Funnel => "Funnel",
+                DataVisualKind.Pyramid => "Pyramid",
+                DataVisualKind.TreeMap => "Tree Map",
+                DataVisualKind.DataTable => "Data Table",
+                DataVisualKind.KpiProgress => "KPI",
+                _ => "Data Visual"
+            };
+            return _localization.GetText(canonicalName);
         }
         catch (Exception exception)
         {

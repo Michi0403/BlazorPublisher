@@ -2,6 +2,10 @@
 @inject PublicationMediaAssetStore MediaAssets
 
 @inject ILogger<WordArtView> Logger
+<div class="razor-component-boundary">
+<DxFormLayout CssClass="razor-component-layout-owner WordArtView">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext001">
 <svg class="wordart-svg"
      viewBox="0 0 1000 300"
      preserveAspectRatio="none"
@@ -260,6 +264,11 @@
                         Text="@DisplayText" />
     }
 </svg>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+</div>
+
 
 @code {
 
@@ -283,42 +292,42 @@
     /// Gets the stable gradient identifier used to identify or correlate this word art view instance with related application state.
     /// </summary>
     /// <value>The gradient identifier value exposed by <see cref="WordArtView"/>.</value>
-    private string GradientId => $"{IdPrefix}-wordart-gradient-{Item.Id:N}";
+    private string GradientId => GetGradientIdForRender();
     /// <summary>
     /// Gets the stable path identifier used to identify or correlate this word art view instance with related application state.
     /// </summary>
     /// <value>The path identifier value exposed by <see cref="WordArtView"/>.</value>
-    private string PathId => $"{IdPrefix}-wordart-path-{Item.Id:N}";
+    private string PathId => GetPathIdForRender();
     /// <summary>
     /// Gets the stable media mask identifier used to identify or correlate this word art view instance with related application state.
     /// </summary>
     /// <value>The media mask identifier value exposed by <see cref="WordArtView"/>.</value>
-    private string MediaMaskId => $"{IdPrefix}-wordart-media-mask-{Item.Id:N}";
+    private string MediaMaskId => GetMediaMaskIdForRender();
     /// <summary>
     /// Gets the path href used by this word art view instance to locate the associated file-system resource.
     /// </summary>
     /// <value>The path href value exposed by <see cref="WordArtView"/>.</value>
-    private string PathHref => $"#{PathId}";
+    private string PathHref => GetPathHrefForRender();
     /// <summary>
     /// Gets the media mask value that forms part of the word art view state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The media mask value exposed by <see cref="WordArtView"/>.</value>
-    private string MediaMask => $"url(#{MediaMaskId})";
+    private string MediaMask => GetMediaMaskForRender();
     /// <summary>
     /// Gets the gradient fill value that forms part of the word art view state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The gradient fill value exposed by <see cref="WordArtView"/>.</value>
-    private string GradientFill => $"url(#{GradientId})";
+    private string GradientFill => GetGradientFillForRender();
     /// <summary>
     /// Gets the display text value that forms part of the word art view state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The display text value exposed by <see cref="WordArtView"/>.</value>
-    private string DisplayText => string.IsNullOrWhiteSpace(Item.Text) ? "WordArt" : Item.Text;
+    private string DisplayText => GetDisplayTextForRender();
     /// <summary>
     /// Gets the font family value that forms part of the word art view state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The font family value exposed by <see cref="WordArtView"/>.</value>
-    private string FontFamily => string.IsNullOrWhiteSpace(Item.FontFamily) ? "Arial Black, Arial, sans-serif" : Item.FontFamily;
+    private string FontFamily => GetFontFamilyForRender();
     /// <summary>
     /// Gets the font size that quantifies the associated word art view data.
     /// </summary>
@@ -328,12 +337,12 @@
     /// Gets the font weight value that forms part of the word art view state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The font weight value exposed by <see cref="WordArtView"/>.</value>
-    private string FontWeight => Item.Bold ? "700" : "400";
+    private string FontWeight => GetFontWeightForRender();
     /// <summary>
     /// Gets the font style value that forms part of the word art view state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The font style value exposed by <see cref="WordArtView"/>.</value>
-    private string FontStyle => Item.Italic ? "italic" : "normal";
+    private string FontStyle => GetFontStyleForRender();
     /// <summary>
     /// Gets the letter spacing value that forms part of the word art view state consumed or produced by the surrounding workflow.
     /// </summary>
@@ -373,77 +382,69 @@
     /// Gets the extrusion layers collection maintained or exposed by this word art view instance for downstream processing.
     /// </summary>
     /// <value>The extrusion layers value exposed by <see cref="WordArtView"/>.</value>
-    private IEnumerable<int> ExtrusionLayers => Enumerable.Range(1, Math.Clamp((int)Math.Round(Item.ExtrudeDepth), 0, 18)).Reverse();
+    private IEnumerable<int> ExtrusionLayers => GetExtrusionLayersForRender();
 
     /// <summary>
     /// Gets the effective fill kind value that forms part of the word art view state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The effective fill kind value exposed by <see cref="WordArtView"/>.</value>
-    private WordArtFillKind EffectiveFillKind => Item.FillKind == WordArtFillKind.Solid && Item.GradientFill
-        ? WordArtFillKind.Gradient
-        : Item.FillKind;
+    private WordArtFillKind EffectiveFillKind => GetEffectiveFillKindForRender();
     /// <summary>
     /// Gets a value indicating whether uses media fill applies to the word art view state.
     /// </summary>
     /// <value>The uses media fill value exposed by <see cref="WordArtView"/>.</value>
-    private bool UsesMediaFill => EffectiveFillKind is WordArtFillKind.Picture or WordArtFillKind.Video;
+    private bool UsesMediaFill => GetUsesMediaFillForRender();
     /// <summary>
     /// Gets a value indicating whether picture source applies to the word art view state.
     /// </summary>
     /// <value>The has picture source value exposed by <see cref="WordArtView"/>.</value>
-    private bool HasPictureSource => Item.FillMediaDataUrl.StartsWith("data:image/", StringComparison.OrdinalIgnoreCase);
+    private bool HasPictureSource => GetHasPictureSourceForRender();
     /// <summary>
     /// Gets a value indicating whether video source applies to the word art view state.
     /// </summary>
     /// <value>The has video source value exposed by <see cref="WordArtView"/>.</value>
-    private bool HasVideoSource => Item.FillMediaDataUrl.StartsWith("data:video/", StringComparison.OrdinalIgnoreCase);
+    private bool HasVideoSource => GetHasVideoSourceForRender();
     /// <summary>
     /// Gets a value indicating whether poster source applies to the word art view state.
     /// </summary>
     /// <value>The has poster source value exposed by <see cref="WordArtView"/>.</value>
-    private bool HasPosterSource => Item.FillMediaPosterDataUrl.StartsWith("data:image/", StringComparison.OrdinalIgnoreCase);
+    private bool HasPosterSource => GetHasPosterSourceForRender();
     /// <summary>
     /// Gets a value indicating whether uses static media image applies to the word art view state.
     /// </summary>
     /// <value>The uses static media image value exposed by <see cref="WordArtView"/>.</value>
     private bool UsesStaticMediaImage =>
-        (EffectiveFillKind == WordArtFillKind.Picture && HasPictureSource) ||
-        (EffectiveFillKind == WordArtFillKind.Video && (StaticMediaFill || !HasVideoSource) && HasPosterSource);
+        GetUsesStaticMediaImageForRender();
     /// <summary>
     /// Gets a value indicating whether uses live video applies to the word art view state.
     /// </summary>
     /// <value>The uses live video value exposed by <see cref="WordArtView"/>.</value>
-    private bool UsesLiveVideo => EffectiveFillKind == WordArtFillKind.Video && !StaticMediaFill && HasVideoSource;
+    private bool UsesLiveVideo => GetUsesLiveVideoForRender();
     /// <summary>
     /// Gets the video media source value that forms part of the word art view state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The video media source value exposed by <see cref="WordArtView"/>.</value>
-    private string VideoMediaSource => UsesLiveVideo ? MediaAssets.Register(Item.Id, Item.FillMediaDataUrl, Item.FillMediaMimeType) : string.Empty;
+    private string VideoMediaSource => GetVideoMediaSourceForRender();
     /// <summary>
     /// Gets the static media source value that forms part of the word art view state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The static media source value exposed by <see cref="WordArtView"/>.</value>
-    private string StaticMediaSource => EffectiveFillKind == WordArtFillKind.Picture ? Item.FillMediaDataUrl : Item.FillMediaPosterDataUrl;
+    private string StaticMediaSource => GetStaticMediaSourceForRender();
     /// <summary>
     /// Gets the media preserve aspect ratio value that forms part of the word art view state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The media preserve aspect ratio value exposed by <see cref="WordArtView"/>.</value>
-    private string MediaPreserveAspectRatio => Item.FillMediaFitMode switch
-    {
-        PublicationVideoFitMode.Stretch => "none",
-        PublicationVideoFitMode.Contain => "xMidYMid meet",
-        _ => "xMidYMid slice"
-    };
+    private string MediaPreserveAspectRatio => GetMediaPreserveAspectRatioForRender();
     /// <summary>
     /// Gets the media x value that forms part of the word art view state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The media x value exposed by <see cref="WordArtView"/>.</value>
-    private string MediaX => Inv(-((Math.Clamp(Item.FillMediaScale, .1, 10) - 1) * 500) + Math.Clamp(Item.FillMediaOffsetXPercent, -100, 100) * 5);
+    private string MediaX => GetMediaXForRender();
     /// <summary>
     /// Gets the media y value that forms part of the word art view state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The media y value exposed by <see cref="WordArtView"/>.</value>
-    private string MediaY => Inv(-((Math.Clamp(Item.FillMediaScale, .1, 10) - 1) * 150) + Math.Clamp(Item.FillMediaOffsetYPercent, -100, 100) * 1.5);
+    private string MediaY => GetMediaYForRender();
     /// <summary>
     /// Gets the media width value that forms part of the word art view state consumed or produced by the surrounding workflow.
     /// </summary>
@@ -458,28 +459,23 @@
     /// Gets the video style value that forms part of the word art view state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The video style value exposed by <see cref="WordArtView"/>.</value>
-    private string VideoStyle => $"width:100%;height:100%;object-fit:{VideoFit};transform:translate({Inv(Item.FillMediaOffsetXPercent)}%,{Inv(Item.FillMediaOffsetYPercent)}%) scale({Inv(Math.Clamp(Item.FillMediaScale, .1, 10))});transform-origin:center center;";
+    private string VideoStyle => GetVideoStyleForRender();
     /// <summary>
     /// Gets the video fit value that forms part of the word art view state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The video fit value exposed by <see cref="WordArtView"/>.</value>
-    private string VideoFit => Item.FillMediaFitMode switch
-    {
-        PublicationVideoFitMode.Contain => "contain",
-        PublicationVideoFitMode.Stretch => "fill",
-        _ => "cover"
-    };
+    private string VideoFit => GetVideoFitForRender();
 
     /// <summary>
     /// Gets the warp path used by this word art view instance to locate the associated file-system resource.
     /// </summary>
     /// <value>The warp path value exposed by <see cref="WordArtView"/>.</value>
-    private string WarpPath => WordArtGeometry.Build(Item);
+    private string WarpPath => GetWarpPathForRender();
     /// <summary>
     /// Gets the path start offset used by this word art view instance to locate the associated file-system resource.
     /// </summary>
     /// <value>The path start offset value exposed by <see cref="WordArtView"/>.</value>
-    private string PathStartOffset => $"{Math.Clamp(Item.PathStartOffsetPercent, 0, 100).ToString("0.##", CultureInfo.InvariantCulture)}%";
+    private string PathStartOffset => GetPathStartOffsetForRender();
 
     /// <summary>
     /// Performs safe color for <see cref="WordArtView"/>, keeping the operation consistent with the state and invariants of the surrounding word art view workflow.
@@ -521,4 +517,423 @@
         }
     }
 
+
+
+    /// <summary>Computes GradientId for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetGradientIdForRender()
+    {
+        try
+        {
+            return $"{IdPrefix}-wordart-gradient-{Item.Id:N}";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property WordArtView.GradientId failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes PathId for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetPathIdForRender()
+    {
+        try
+        {
+            return $"{IdPrefix}-wordart-path-{Item.Id:N}";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property WordArtView.PathId failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes MediaMaskId for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetMediaMaskIdForRender()
+    {
+        try
+        {
+            return $"{IdPrefix}-wordart-media-mask-{Item.Id:N}";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property WordArtView.MediaMaskId failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes PathHref for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetPathHrefForRender()
+    {
+        try
+        {
+            return $"#{PathId}";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property WordArtView.PathHref failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes MediaMask for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetMediaMaskForRender()
+    {
+        try
+        {
+            return $"url(#{MediaMaskId})";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property WordArtView.MediaMask failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes GradientFill for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetGradientFillForRender()
+    {
+        try
+        {
+            return $"url(#{GradientId})";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property WordArtView.GradientFill failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes DisplayText for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetDisplayTextForRender()
+    {
+        try
+        {
+            return string.IsNullOrWhiteSpace(Item.Text) ? "WordArt" : Item.Text;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property WordArtView.DisplayText failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes FontFamily for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetFontFamilyForRender()
+    {
+        try
+        {
+            return string.IsNullOrWhiteSpace(Item.FontFamily) ? "Arial Black, Arial, sans-serif" : Item.FontFamily;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property WordArtView.FontFamily failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes FontWeight for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetFontWeightForRender()
+    {
+        try
+        {
+            return Item.Bold ? "700" : "400";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property WordArtView.FontWeight failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes FontStyle for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetFontStyleForRender()
+    {
+        try
+        {
+            return Item.Italic ? "italic" : "normal";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property WordArtView.FontStyle failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes ExtrusionLayers for the render path with component-local diagnostics.</summary>
+    /// <returns>The collection produced by the operation.</returns>
+    private IEnumerable<int> GetExtrusionLayersForRender()
+    {
+        try
+        {
+            return Enumerable.Range(1, Math.Clamp((int)Math.Round(Item.ExtrudeDepth), 0, 18)).Reverse();
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property WordArtView.ExtrusionLayers failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes EffectiveFillKind for the render path with component-local diagnostics.</summary>
+    /// <returns>The word art fill kind produced by the operation.</returns>
+    private WordArtFillKind GetEffectiveFillKindForRender()
+    {
+        try
+        {
+            return Item.FillKind == WordArtFillKind.Solid && Item.GradientFill
+        ? WordArtFillKind.Gradient
+        : Item.FillKind;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property WordArtView.EffectiveFillKind failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes UsesMediaFill for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetUsesMediaFillForRender()
+    {
+        try
+        {
+            return EffectiveFillKind is WordArtFillKind.Picture or WordArtFillKind.Video;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property WordArtView.UsesMediaFill failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes HasPictureSource for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetHasPictureSourceForRender()
+    {
+        try
+        {
+            return Item.FillMediaDataUrl.StartsWith("data:image/", StringComparison.OrdinalIgnoreCase);
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property WordArtView.HasPictureSource failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes HasVideoSource for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetHasVideoSourceForRender()
+    {
+        try
+        {
+            return Item.FillMediaDataUrl.StartsWith("data:video/", StringComparison.OrdinalIgnoreCase);
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property WordArtView.HasVideoSource failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes HasPosterSource for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetHasPosterSourceForRender()
+    {
+        try
+        {
+            return Item.FillMediaPosterDataUrl.StartsWith("data:image/", StringComparison.OrdinalIgnoreCase);
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property WordArtView.HasPosterSource failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes UsesStaticMediaImage for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetUsesStaticMediaImageForRender()
+    {
+        try
+        {
+            return (EffectiveFillKind == WordArtFillKind.Picture && HasPictureSource) ||
+        (EffectiveFillKind == WordArtFillKind.Video && (StaticMediaFill || !HasVideoSource) && HasPosterSource);
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property WordArtView.UsesStaticMediaImage failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes UsesLiveVideo for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetUsesLiveVideoForRender()
+    {
+        try
+        {
+            return EffectiveFillKind == WordArtFillKind.Video && !StaticMediaFill && HasVideoSource;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property WordArtView.UsesLiveVideo failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes VideoMediaSource for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetVideoMediaSourceForRender()
+    {
+        try
+        {
+            return UsesLiveVideo ? MediaAssets.Register(Item.Id, Item.FillMediaDataUrl, Item.FillMediaMimeType) : string.Empty;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property WordArtView.VideoMediaSource failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes StaticMediaSource for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetStaticMediaSourceForRender()
+    {
+        try
+        {
+            return EffectiveFillKind == WordArtFillKind.Picture ? Item.FillMediaDataUrl : Item.FillMediaPosterDataUrl;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property WordArtView.StaticMediaSource failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes MediaPreserveAspectRatio for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetMediaPreserveAspectRatioForRender()
+    {
+        try
+        {
+            return Item.FillMediaFitMode switch
+    {
+        PublicationVideoFitMode.Stretch => "none",
+        PublicationVideoFitMode.Contain => "xMidYMid meet",
+        _ => "xMidYMid slice"
+    };
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property WordArtView.MediaPreserveAspectRatio failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes MediaX for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetMediaXForRender()
+    {
+        try
+        {
+            return Inv(-((Math.Clamp(Item.FillMediaScale, .1, 10) - 1) * 500) + Math.Clamp(Item.FillMediaOffsetXPercent, -100, 100) * 5);
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property WordArtView.MediaX failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes MediaY for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetMediaYForRender()
+    {
+        try
+        {
+            return Inv(-((Math.Clamp(Item.FillMediaScale, .1, 10) - 1) * 150) + Math.Clamp(Item.FillMediaOffsetYPercent, -100, 100) * 1.5);
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property WordArtView.MediaY failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes VideoStyle for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetVideoStyleForRender()
+    {
+        try
+        {
+            return $"width:100%;height:100%;object-fit:{VideoFit};transform:translate({Inv(Item.FillMediaOffsetXPercent)}%,{Inv(Item.FillMediaOffsetYPercent)}%) scale({Inv(Math.Clamp(Item.FillMediaScale, .1, 10))});transform-origin:center center;";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property WordArtView.VideoStyle failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes VideoFit for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetVideoFitForRender()
+    {
+        try
+        {
+            return Item.FillMediaFitMode switch
+    {
+        PublicationVideoFitMode.Contain => "contain",
+        PublicationVideoFitMode.Stretch => "fill",
+        _ => "cover"
+    };
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property WordArtView.VideoFit failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes WarpPath for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetWarpPathForRender()
+    {
+        try
+        {
+            return WordArtGeometry.Build(Item);
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property WordArtView.WarpPath failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes PathStartOffset for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetPathStartOffsetForRender()
+    {
+        try
+        {
+            return $"{Math.Clamp(Item.PathStartOffsetPercent, 0, 100).ToString("0.##", CultureInfo.InvariantCulture)}%";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property WordArtView.PathStartOffset failed.");
+            throw;
+        }
+    }
 }

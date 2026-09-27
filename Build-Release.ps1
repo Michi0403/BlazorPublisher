@@ -1,4 +1,5 @@
 param(
+    [switch]$CompileOnly,
     [ValidateSet("all", "all-rids", "win-x64", "win-x86", "win-arm64", "linux-x64", "linux-arm64", "osx-x64", "osx-arm64")]
     [string]$Runtime = "all",
     [ValidateSet("Release", "Debug")]
@@ -49,6 +50,10 @@ function Initialize-BuildConsoleEncoding {
 Initialize-BuildConsoleEncoding
 
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
+if ($CompileOnly) {
+    & (Join-Path $root 'build/Invoke-ReleaseCompileValidation.ps1') -Solution 'src/PublisherStudio.sln' -Configuration $Configuration
+    return
+}
 if (-not [string]::IsNullOrWhiteSpace($DocumentationCacheRoot)) {
     $env:FUTURE2_DOCUMENTATION_CACHE_ROOT = [IO.Path]::GetFullPath($DocumentationCacheRoot)
 }

@@ -4,6 +4,10 @@
 @inject NavigationManager Navigation
 
 @inject ILogger<MainLayout> Logger
+<div class="razor-component-boundary">
+<DxFormLayout CssClass="razor-component-layout-owner MainLayout">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext001">
 <main class="application-root">
     <UserNotificationHost />
     <OperationalErrorBoundary @key="Navigation.Uri">
@@ -11,12 +15,22 @@
             @Body
         </ChildContent>
         <ErrorContent Context="exception">
-            <section class="publisher-component-error" role="alert">
+            <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext002">
+        <div class="publisher-component-error" role="alert">
                 <strong>@Localization.Get("Text.PublisherStudio␠could␠not␠render␠this␠view.", fallback: "PublisherStudio could not render this view.")</strong>
                 <span>@Localization.Get("Text.The␠exception␠was␠written␠to␠the␠local␠application␠log.", fallback: "The exception was written to the local application log.")</span>
-            </section>
+            </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
         </ErrorContent>
     </OperationalErrorBoundary>
     <OrganicApprovalBar />
 </main>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+</div>
 

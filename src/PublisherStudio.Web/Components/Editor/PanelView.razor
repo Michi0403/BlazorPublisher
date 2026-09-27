@@ -3,6 +3,10 @@
 @inject PublicationBehaviorService Behaviors
 
 @inject ILogger<PanelView> Logger
+<div class="razor-component-boundary">
+<DxFormLayout CssClass="razor-component-layout-owner PanelView">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext001">
 <div class="publication-panel panel-nav-@Item.NavigationMode.ToString().ToLowerInvariant() panel-layout-@Item.LayoutMode.ToString().ToLowerInvariant() @(DesignerMode ? "panel-designer-preview" : null) @(ForceCanvasLayout ? "panel-force-canvas" : null)"
      data-panel-root
      data-panel-id="@Item.Id"
@@ -22,7 +26,10 @@
         <div class="publication-panel-canvas-region" data-panel-canvas-region>
         @foreach (var view in EnabledViews)
         {
-            <section @key="view.Id" class="publication-panel-view @(Item.LayoutMode == PublicationPanelLayoutMode.Responsive && !ForceCanvasLayout ? "responsive-panel-view" : null)" data-panel-view="@view.Id" data-panel-slug="@view.Slug" hidden="@(view.Id != ActiveViewId)" style="background:@view.Background">
+            <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext002">
+        <div @key="view.Id" class="publication-panel-view @(Item.LayoutMode == PublicationPanelLayoutMode.Responsive && !ForceCanvasLayout ? "responsive-panel-view" : null)" data-panel-view="@view.Id" data-panel-slug="@view.Slug" hidden="@(view.Id != ActiveViewId)" style="background:@view.Background">
                 @foreach (var element in view.Elements.Where(element => element.Visible).OrderBy(element => element.ZIndex))
                 {
                     <div @key="element.Id" class="publication-panel-element kind-@element.Kind.ToString().ToLowerInvariant() @ResponsiveElementClass(element)"
@@ -92,12 +99,20 @@
                         }
                     </div>
                 }
-            </section>
+            </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
         }
         @AuthoringOverlay
         </div>
     </div>
 </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+</div>
+
 
 @code {
 
@@ -137,17 +152,17 @@
     /// Gets the enabled views collection maintained or exposed by this panel view instance for downstream processing.
     /// </summary>
     /// <value>The enabled views value exposed by <see cref="PanelView"/>.</value>
-    private IReadOnlyList<PublicationPanelView> EnabledViews => Item.Views.Where(view => view.Enabled).ToArray();
+    private IReadOnlyList<PublicationPanelView> EnabledViews => GetEnabledViewsForRender();
     /// <summary>
     /// Gets the stable active view identifier used to identify or correlate this panel view instance with related application state.
     /// </summary>
     /// <value>The active view identifier value exposed by <see cref="PanelView"/>.</value>
-    private Guid ActiveViewId => Item.ActiveView?.Id ?? Item.Views.FirstOrDefault()?.Id ?? Guid.Empty;
+    private Guid ActiveViewId => GetActiveViewIdForRender();
     /// <summary>
     /// Gets the panel style value that forms part of the panel view state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The panel style value exposed by <see cref="PanelView"/>.</value>
-    private string PanelStyle => $"background:{Item.Background};border:{Mm(Item.BorderWidthMm)} solid {Item.BorderColor};border-radius:{Mm(Item.CornerRadiusMm)};overflow:{(Item.ClipContent ? "hidden" : "visible")};--panel-canvas-width:{Inv(Item.CanvasWidth)};--panel-canvas-height:{Inv(Item.CanvasHeight)};--panel-canvas-aspect:{Inv(Math.Max(.01, Item.CanvasWidth / Math.Max(.01, Item.CanvasHeight)))}";
+    private string PanelStyle => GetPanelStyleForRender();
     /// <summary>
     /// Performs element style for <see cref="PanelView"/>, keeping the operation consistent with the state and invariants of the surrounding panel view workflow.
     /// </summary>
@@ -209,7 +224,7 @@
         {
             return shape.Shape == PublicationShape.Line
         ? $"background:{shape.Stroke};height:{Mm(Math.Max(shape.StrokeWidth, .3))};top:50%;position:absolute;width:100%"
-        : $"background:{shape.Fill};border:{Mm(shape.StrokeWidth)} solid {shape.Stroke};border-radius:{(shape.Shape == PublicationShape.Ellipse ? "50%" : shape.Shape == PublicationShape.RoundedRectangle ? Mm(shape.CornerRadiusMm) : "0")}";
+        : $"background:{shape.Fill};border:{Mm(shape.StrokeWidth)} solid {shape.Stroke};border-radius:{(shape.Shape == PublicationShape.Ellipse ? "50%" : shape.Shape is PublicationShape.Rectangle or PublicationShape.RoundedRectangle ? Mm(shape.CornerRadiusMm) : "0")}";
         }
         catch (Exception __componentMethodException)
         {
@@ -286,4 +301,50 @@
         }
     }
 
+
+
+    /// <summary>Computes EnabledViews for the render path with component-local diagnostics.</summary>
+    /// <returns>The collection produced by the operation.</returns>
+    private IReadOnlyList<PublicationPanelView> GetEnabledViewsForRender()
+    {
+        try
+        {
+            return Item.Views.Where(view => view.Enabled).ToArray();
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PanelView.EnabledViews failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes ActiveViewId for the render path with component-local diagnostics.</summary>
+    /// <returns>The GUID produced by the operation.</returns>
+    private Guid GetActiveViewIdForRender()
+    {
+        try
+        {
+            return Item.ActiveView?.Id ?? Item.Views.FirstOrDefault()?.Id ?? Guid.Empty;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PanelView.ActiveViewId failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes PanelStyle for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetPanelStyleForRender()
+    {
+        try
+        {
+            return $"background:{Item.Background};border:{Mm(Item.BorderWidthMm)} solid {Item.BorderColor};border-radius:{Mm(Item.CornerRadiusMm)};overflow:{(Item.ClipContent ? "hidden" : "visible")};--panel-canvas-width:{Inv(Item.CanvasWidth)};--panel-canvas-height:{Inv(Item.CanvasHeight)};--panel-canvas-aspect:{Inv(Math.Max(.01, Item.CanvasWidth / Math.Max(.01, Item.CanvasHeight)))}";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PanelView.PanelStyle failed.");
+            throw;
+        }
+    }
 }

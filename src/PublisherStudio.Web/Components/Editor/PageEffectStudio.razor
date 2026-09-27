@@ -2,10 +2,24 @@
 @inject ILogger<PageEffectStudio> Logger
 @inject IUserNotificationService Notifications
 
+<div class="razor-component-boundary">
+<DxFormLayout CssClass="razor-component-layout-owner PageEffectStudio">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext001">
 @if (Visible)
 {
-    <div class="publisher-dialog-backdrop page-effect-studio-backdrop" role="presentation" @onclick="Close">
-        <section class="publisher-dialog page-effect-studio" role="dialog" aria-modal="true" aria-labelledby="page-effect-studio-title" @onclick:stopPropagation>
+    <DxPopup Visible="true"
+         Width="min(1800px, 98vw)"
+         Height="min(1180px, 96vh)"
+         MaxHeight="96vh"
+         CloseOnOutsideClick="false"
+         CloseOnEscape="false"
+         ShowHeader="false">
+    <BodyContentTemplate Context="publisherPopupContext">
+        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext002">
+        <div class="publisher-dialog page-effect-studio" aria-labelledby="page-effect-studio-title" @onclick:stopPropagation>
             <header>
                 <div>
                     <h2 id="page-effect-studio-title">Page appearance & effects</h2>
@@ -15,7 +29,10 @@
             </header>
 
             <div class="page-effect-studio-body">
-                <section class="page-effect-base-color">
+                <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext003">
+        <div class="page-effect-base-color">
                     <h3>Page color</h3>
                     <div class="page-effect-row">
                         <label>Custom page color
@@ -24,9 +41,15 @@
                         <button type="button" @onclick="SetTransparent">Transparent</button>
                         <span class="page-effect-color-value">@State.CurrentPage.Background</span>
                     </div>
-                </section>
+                </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
 
-                <section>
+                <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext004">
+        <div>
                     <div class="page-effect-section-heading">
                         <div>
                             <h3>Effect layers</h3>
@@ -128,16 +151,28 @@
                             }
                         </div>
                     }
-                </section>
+                </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
             </div>
 
             <footer>
                 <span>Changes are publication-native and participate in undo/redo, print, raster/SVG and HTML rendering.</span>
                 <button type="button" class="primary" @onclick="Close">Done</button>
             </footer>
-        </section>
-    </div>
+        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+        </BodyContentTemplate>
+</DxPopup>
 }
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+</div>
+
 
 @code {
 

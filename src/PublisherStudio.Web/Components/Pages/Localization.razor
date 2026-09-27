@@ -6,6 +6,10 @@
 @inject ILogger<Localization> Logger
 @inject NavigationManager Navigation
 
+<div class="razor-component-boundary">
+<DxFormLayout CssClass="razor-component-layout-owner Localization">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext001">
 <PageTitle>@L("Localization.Editor.PageTitle", "PublisherStudio translations")</PageTitle>
 
 <main class="localization-editor-page">
@@ -18,7 +22,10 @@
         <button type="button" @onclick="Back">@L("Localization.Editor.Back", "Back to Publisher")</button>
     </header>
 
-    <section class="localization-editor-toolbar">
+    <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext002">
+        <div class="localization-editor-toolbar">
         <label>@L("Localization.Editor.Culture", "Culture")
             <select value="@_culture" @onchange="ChangeCultureAsync">
                 @foreach (var culture in LocalizationService.GetAvailableCultures())
@@ -30,14 +37,20 @@
         <label>@L("Localization.Editor.Filter", "Filter")<input @bind="_filter" @bind:event="oninput" placeholder='@L("Localization.Editor.SearchPlaceholder", "Search key or text")' /></label>
         <button type="button" @onclick="SaveAsync" disabled="@_saving">@(_saving ? L("Localization.Editor.Saving", "Saving…") : L("Localization.Editor.Save", "Save overrides"))</button>
         <button type="button" @onclick="ApplyCulture">@L("Localization.Editor.UseLanguage", "Use this language")</button>
-    </section>
+    </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
 
     @if (!string.IsNullOrWhiteSpace(_status))
     {
         <p class="localization-editor-status" role="status">@_status</p>
     }
 
-    <section class="localization-editor-grid">
+    <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext003">
+        <div class="localization-editor-grid">
         @foreach (var pair in FilteredStrings)
         {
             <label>
@@ -45,8 +58,16 @@
                 <textarea rows="2" value="@pair.Value" @onchange="args => Update(pair.Key, args.Value?.ToString())"></textarea>
             </label>
         }
-    </section>
+    </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
 </main>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+</div>
+
 
 @code {
 
@@ -75,11 +96,7 @@
     /// Gets the filtered strings collection maintained or exposed by this localization instance for downstream processing.
     /// </summary>
     /// <value>The filtered strings value exposed by <see cref="Localization"/>.</value>
-    private IEnumerable<KeyValuePair<string, string>> FilteredStrings => _strings
-        .Where(pair => string.IsNullOrWhiteSpace(_filter)
-            || pair.Key.Contains(_filter, StringComparison.OrdinalIgnoreCase)
-            || pair.Value.Contains(_filter, StringComparison.OrdinalIgnoreCase))
-        .OrderBy(pair => pair.Key, StringComparer.OrdinalIgnoreCase);
+    private IEnumerable<KeyValuePair<string, string>> FilteredStrings => GetFilteredStringsForRender();
 
     /// <summary>
     /// Handles the initialized lifecycle or event notification for <see cref="Localization"/>, updating the state required by the surrounding workflow.
@@ -244,4 +261,24 @@
         }
     }
 
+
+
+    /// <summary>Computes FilteredStrings for the render path with component-local diagnostics.</summary>
+    /// <returns>The collection produced by the operation.</returns>
+    private IEnumerable<KeyValuePair<string, string>> GetFilteredStringsForRender()
+    {
+        try
+        {
+            return _strings
+        .Where(pair => string.IsNullOrWhiteSpace(_filter)
+            || pair.Key.Contains(_filter, StringComparison.OrdinalIgnoreCase)
+            || pair.Value.Contains(_filter, StringComparison.OrdinalIgnoreCase))
+        .OrderBy(pair => pair.Key, StringComparer.OrdinalIgnoreCase);
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property Localization.FilteredStrings failed.");
+            throw;
+        }
+    }
 }

@@ -1,6 +1,10 @@
 @namespace PublisherStudio.Components.Editor
 
 @inject ILogger<BarcodeView> Logger
+<div class="razor-component-boundary">
+<DxFormLayout CssClass="razor-component-layout-owner BarcodeView">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext001">
 <div class="barcode-view" aria-label="@Item.Name">
     @if (string.IsNullOrWhiteSpace(Item.SvgMarkup))
     {
@@ -11,6 +15,11 @@
         @((MarkupString)Item.SvgMarkup)
     }
 </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+</div>
+
 
 @code {
 

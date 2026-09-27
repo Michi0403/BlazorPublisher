@@ -4,6 +4,10 @@
 
 @inject ILogger<PrintPublication> Logger
 @inject PublicationEditorTextService EditorText
+<div class="razor-component-boundary">
+<DxFormLayout CssClass="razor-component-layout-owner PrintPublication">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext001">
 <div class="print-publication" aria-hidden="true"
      data-publication-culture="@(string.IsNullOrWhiteSpace(Document.ProjectSettings.Culture) ? CultureInfo.CurrentUICulture.Name : Document.ProjectSettings.Culture)"
      data-playback-start="@Document.Playback.StartAutomatically.ToString().ToLowerInvariant()"
@@ -11,7 +15,10 @@
      data-playback-controls="@Document.Playback.ShowControls.ToString().ToLowerInvariant()">
     @foreach (var publicationPage in Document.Pages)
     {
-        <section class="print-page" style="@PageStyle(publicationPage)"
+        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext002">
+        <div class="print-page" style="@PageStyle(publicationPage)"
                  data-publisher-print-fill="true"
                  data-page-id="@publicationPage.Id"
                  data-page-name="@publicationPage.Name"
@@ -164,9 +171,17 @@
                 }
             }
             <PageEffectLayerRenderer Page="publicationPage" Placement="PublicationPageEffectPlacement.Overlay" />
-        </section>
+        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
     }
 </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+</div>
+
 
 @code {
 
@@ -532,7 +547,7 @@
         {
             return s.Shape == PublicationShape.Line
         ? $"background:{s.Stroke};height:{Mm(Math.Max(s.StrokeWidth, .3))};top:50%;position:absolute;width:100%"
-        : $"background:{s.Fill};border:{Mm(s.StrokeWidth)} solid {s.Stroke};border-radius:{(s.Shape == PublicationShape.Ellipse ? "50%" : s.Shape == PublicationShape.RoundedRectangle ? Mm(s.CornerRadiusMm) : "0")}";
+        : $"background:{s.Fill};border:{Mm(s.StrokeWidth)} solid {s.Stroke};border-radius:{(s.Shape == PublicationShape.Ellipse ? "50%" : s.Shape is PublicationShape.Rectangle or PublicationShape.RoundedRectangle ? Mm(s.CornerRadiusMm) : "0")}";
         }
         catch (Exception __componentMethodException)
         {

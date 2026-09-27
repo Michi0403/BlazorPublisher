@@ -39,6 +39,9 @@ require('docs/styles/publisherstudio-kawaii.css','--kawaii-docs-rail-width: clam
 require('build/Build-Documentation.ps1','New-PublisherStudioHtmlPrintBook','Convert-PublisherStudioApiKawaiiDetails','html-browser-print','publisherstudio-kawaii-docs','Copy-Item -Path (Join-Path $siteRoot "*") -Destination $publishRoot -Recurse -Force')
 forbid('build/Build-Documentation.ps1','html-browser-compact-handbook')
 require('build/Update-GitHubPagesSnapshot.ps1','publisherstudio-kawaii-docs.zip','--expected-version')
+require('build/Update-GitHubPagesSnapshot.ps1','Pruned stale generated Pages PDF')
+require('build/Build-Documentation.ps1','Remove-PublisherStudioStaleVersionedPdfs')
+require('build/Build-Documentation.ps1','never merge a new documentation version over stale generated output')
 forbid('build/Update-GitHubPagesSnapshot.ps1','BranchPagesRoot','docs mirror','branch-publishing mirror')
 # The authored docs tree must not be a generated Pages mirror.
 for p in (ROOT/'docs').rglob('*.html'):

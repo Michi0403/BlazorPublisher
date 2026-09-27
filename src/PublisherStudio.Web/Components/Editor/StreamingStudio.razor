@@ -7,10 +7,24 @@
 @using System.Text.Json
 
 @inject ILogger<StreamingStudio> Logger
+<div class="razor-component-boundary">
+<DxFormLayout CssClass="razor-component-layout-owner StreamingStudio">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext001">
 @if (Visible)
 {
-    <div class="editor-modal-backdrop streaming-studio-backdrop">
-        <section class="streaming-studio-window" role="dialog" aria-modal="true" aria-label="Streaming Studio">
+    <DxPopup Visible="true"
+         Width="min(1800px, 98vw)"
+         Height="min(1180px, 96vh)"
+         MaxHeight="96vh"
+         CloseOnOutsideClick="false"
+         CloseOnEscape="false"
+         ShowHeader="false">
+    <BodyContentTemplate Context="publisherPopupContext">
+        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext002">
+        <div class="streaming-studio-window" aria-label="Streaming Studio">
             <header class="subapp-titlebar streaming-studio-titlebar">
                 <div>
                     <strong>Streaming Studio</strong>
@@ -149,7 +163,10 @@
                         }
                         else
                         {
-                            <section class="streaming-settings-card">
+                            <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext003">
+        <div class="streaming-settings-card">
                                 <div class="streaming-card-heading"><div><h3>Identity and delivery</h3><p>Name the profile and choose how PublisherStudio reaches the provider.</p></div></div>
                                 <div class="streaming-form-grid two-column">
                                     <label data-help="A friendly reusable name shown when publication outputs choose this profile."><span>Profile name</span><input @bind="_providerDraft.Name" /></label>
@@ -163,11 +180,17 @@
                                     <label data-help="The channel, account, or live-chat identifier used for provider routing and Chat context."><span>Channel / account ID</span><input @bind="_providerDraft.ChannelId" disabled="@IsTwitchOAuth" /></label>
                                     <label data-help="Public account or channel name. Twitch OAuth fills this from the authorized account."><span>Account name</span><input @bind="_providerDraft.AccountName" disabled="@IsTwitchOAuth" /></label>
                                 </div>
-                            </section>
+                            </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
 
                             @if (_providerDraft.Provider == PublicationStreamProvider.Twitch)
                             {
-                                <section class="streaming-settings-card">
+                                <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext004">
+        <div class="streaming-settings-card">
                                     <div class="streaming-card-heading">
                                         <div><h3>Twitch connection</h3><p>OAuth uses Twitch's public-client device authorization. Password and MFA stay on Twitch.</p></div>
                                         <span class="streaming-state-badge @(_providerDraft.HasStoredOAuthSession ? "enabled" : null)">@TwitchConnectionLabel</span>
@@ -207,9 +230,15 @@
                                     {
                                         <div class="streaming-information-box"><i class="pub-icon pub-icon-command"></i><span>Manual mode keeps the existing endpoint, stream-key, account, and Chat-token fields. Switch to Twitch web login to retrieve the broadcaster identity and stream key through Twitch OAuth.</span></div>
                                     }
-                                </section>
+                                </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
 
-                                <section class="streaming-settings-card">
+                                <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext005">
+        <div class="streaming-settings-card">
                                     <div class="streaming-card-heading"><div><h3>Twitch ingest selection</h3><p>Refresh the official endpoint list and measure connection latency from this computer.</p></div><span class="streaming-summary-value">@TwitchIngestSummary</span></div>
                                     <div class="streaming-oauth-actions">
                                         <button type="button" disabled="@_twitchIngestBusy" @onclick="TestTwitchIngestEndpoints"><i class="pub-icon pub-icon-redo"></i>@(_twitchIngestBusy ? "Testing endpoints…" : "Test Twitch endpoints")</button>
@@ -220,10 +249,16 @@
                                             <label><span>Measured Twitch endpoints</span><select value="@_providerDraft.Endpoint" @onchange="SelectTwitchIngestEndpoint">@foreach (var candidate in _twitchIngestCandidates) { <option value="@candidate.Endpoint">@TwitchIngestOption(candidate)</option> }</select></label>
                                         </div>
                                     }
-                                </section>
+                                </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
                             }
 
-                            <section class="streaming-settings-card">
+                            <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext006">
+        <div class="streaming-settings-card">
                                 <div class="streaming-card-heading"><div><h3>Credentials and Chat</h3><p>Secrets are encrypted for the signed-in operating-system user and never exported with the publication.</p></div></div>
                                 <div class="streaming-form-grid">
                                     @if (!IsTwitchOAuth)
@@ -246,7 +281,10 @@
                                     }
                                     <label class="streaming-check-field" data-help="When enabled, publications can select this provider profile for outputs."><input type="checkbox" @bind="_providerDraft.Enabled" /><span><b>Available to publications</b><small>Hide incomplete or retired profiles without deleting them.</small></span></label>
                                 </div>
-                            </section>
+                            </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
 
                             <div class="streaming-content-actions">
                                 <button type="button" class="primary-button" @onclick="SaveProvider"><i class="pub-icon pub-icon-save"></i>Save provider</button>
@@ -264,7 +302,10 @@
                             <button type="button" class="primary-button" @onclick="AddOutput"><i class="pub-icon pub-icon-newpage"></i>Add output</button>
                         </header>
 
-                        <section class="streaming-settings-card">
+                        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext007">
+        <div class="streaming-settings-card">
                             <div class="streaming-card-heading"><div><h3>Master program</h3><p>The compositor captures the publication once. Smart mode derives its working geometry and encoder targets from the actual browser capture instead of assuming one user's display.</p></div><span class="streaming-summary-value">@_draft.MasterWidth × @_draft.MasterHeight · @_draft.MasterFrameRate fps</span></div>
                             <div class="streaming-form-grid four-column">
                                 <label class="streaming-check-field span-2" data-help="Use actual browser capture settings, runtime quality policy, and encoder capability hints for automatic preselection. Manual fields remain available as fallbacks and overrides."><input type="checkbox" @bind="_draft.AdaptiveMedia.Enabled" /><span><b>Smart adaptive media quality</b><small>Resolution-, frame-rate-, codec-, audio-, and bitrate-aware selection.</small></span></label>
@@ -281,7 +322,10 @@
                                 <label data-help="Manual/fallback frame rate. Smart mode starts from the source-reported frame rate and may reduce it only when the selected policy permits."><span>Master FPS</span><input type="number" min="15" max="120" @bind="_draft.MasterFrameRate" /></label>
                                 <label class="streaming-check-field compact" data-help="Prefer source timestamps from cameras and capture devices to reduce drift when available."><input type="checkbox" @bind="_draft.PreferDeviceTimestamps" /><span><b>Device timestamps</b><small>Prefer capture timing over browser arrival timing.</small></span></label>
                             </div>
-                        </section>
+                        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
 
                         @if (_draft.Outputs.Count == 0)
                         {
@@ -297,7 +341,10 @@
                             <div class="streaming-output-list">
                                 @foreach (var output in _draft.Outputs)
                                 {
-                                    <section class="streaming-output-card @(_selectedOutputId == output.Id ? "selected" : null)"
+                                    <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext008">
+        <div class="streaming-output-card @(_selectedOutputId == output.Id ? "selected" : null)"
                                              @onclick="() => SelectOutput(output.Id)"
                                              @oncontextmenu="args => ShowOutputContextMenu(output, args)"
                                              @oncontextmenu:preventDefault
@@ -325,7 +372,10 @@
                                             <label><span>Keyframe interval (s)</span><input type="number" min="1" max="10" @bind="output.KeyFrameIntervalSeconds" /></label>
                                             <label data-help="Override the provider profile's Chat channel for this output. Leave blank to inherit the profile channel."><span>Chat channel override</span><input @bind="output.ChatChannel" placeholder="Use provider channel when blank" /></label>
                                         </div>
-                                    </section>
+                                    </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
                                 }
                             </div>
                         }
@@ -340,7 +390,10 @@
                         </header>
 
                         <div class="streaming-dashboard-grid">
-                            <section class="streaming-settings-card">
+                            <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext009">
+        <div class="streaming-settings-card">
                                 <div class="streaming-card-heading"><div><h3>Recording plan</h3><p>Choose what is written when a streaming or dry-run session starts.</p></div></div>
                                 <div class="streaming-form-grid two-column">
                                     <label class="streaming-check-field span-2"><input type="checkbox" @bind="_draft.Recording.Enabled" /><span><b>Record when a session starts</b><small>The recording pipeline remains isolated from every provider encoder.</small></span></label>
@@ -350,7 +403,10 @@
                                     <label><span>Segment seconds</span><input type="number" min="2" max="120" @bind="_draft.Recording.SegmentSeconds" /></label>
                                     <label class="streaming-check-field compact"><input type="checkbox" @bind="_draft.Recording.RemuxToMp4AfterStop" /><span><b>Remux MKV to MP4</b><small>Create a convenient MP4 after clean shutdown.</small></span></label>
                                 </div>
-                            </section>
+                            </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
 
                             <aside class="streaming-summary-card">
                                 <i class="pub-icon pub-icon-media"></i>
@@ -362,7 +418,10 @@
 
                         @if (_draft.Recording.Variant == PublicationStreamRecordingVariant.SelectedOutputs)
                         {
-                            <section class="streaming-settings-card">
+                            <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext010">
+        <div class="streaming-settings-card">
                                 <div class="streaming-card-heading"><div><h3>Selected output variants</h3><p>These variants may be recorded even when their public provider output is disabled.</p></div></div>
                                 <div class="streaming-selection-grid">
                                     @foreach (var output in _draft.Outputs)
@@ -374,7 +433,10 @@
                                 {
                                     <p class="streaming-inline-empty">Create publication outputs before selecting output-specific recording variants.</p>
                                 }
-                            </section>
+                            </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
                         }
                     </main>
                 }
@@ -387,7 +449,10 @@
                         </header>
 
                         <div class="streaming-dashboard-grid lan">
-                            <section class="streaming-settings-card">
+                            <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext011">
+        <div class="streaming-settings-card">
                                 <div class="streaming-card-heading"><div><h3>Listener and access</h3><p>LAN exposure remains disabled until you explicitly enable it.</p></div></div>
                                 <div class="streaming-form-grid three-column">
                                     <label class="streaming-check-field span-3"><input type="checkbox" @bind="_draft.Lan.Enabled" /><span><b>Enable LAN output</b><small>Start the listener only while a streaming session is active.</small></span></label>
@@ -396,7 +461,10 @@
                                     <label><span>Viewer limit</span><input type="number" min="1" max="10000" @bind="_draft.Lan.ViewerLimit" /></label>
                                     <label class="streaming-check-field compact"><input type="checkbox" @bind="_draft.Lan.RequireAccessToken" /><span><b>Require access token</b><small>Protect browser and HLS URLs.</small></span></label>
                                 </div>
-                            </section>
+                            </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
 
                             <aside class="streaming-summary-card security">
                                 <i class="pub-icon pub-icon-lock"></i>
@@ -406,7 +474,10 @@
                             </aside>
                         </div>
 
-                        <section class="streaming-settings-card">
+                        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext012">
+        <div class="streaming-settings-card">
                             <div class="streaming-card-heading"><div><h3>Output and protocols</h3><p>Use one LAN encode for the enabled internal delivery protocols.</p></div></div>
                             <div class="streaming-form-grid four-column">
                                 <label data-help="Recommended follows the shared adaptive policy; Custom preserves manual LAN values."><span>Quality preset</span><select value="@_draft.Lan.QualityPreset" @onchange="ChangeLanPreset">@foreach (var value in Enum.GetValues<PublicationStreamQualityPreset>()) { <option value="@value">@value</option> }</select></label>
@@ -427,7 +498,10 @@
                                     <label><span>RTSP port</span><input type="number" min="1024" max="65535" @bind="_draft.Lan.RtspPort" /></label>
                                 </div>
                             }
-                        </section>
+                        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
                     </main>
                 }
                 else if (_tab == "devices")
@@ -438,7 +512,10 @@
                             <button type="button" class="primary-button" @onclick="AddDeviceProfile"><i class="pub-icon pub-icon-newpage"></i>Add device profile</button>
                         </header>
 
-                        <section class="streaming-settings-card">
+                        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext013">
+        <div class="streaming-settings-card">
                             <div class="streaming-card-heading"><div><h3>Saved profiles</h3><p>These machine profiles are reusable across publications.</p></div><span class="streaming-summary-value">@_machine.Devices.Count saved</span></div>
                             @if (_machine.Devices.Count == 0)
                             {
@@ -469,9 +546,15 @@
                                     }
                                 </div>
                             }
-                        </section>
+                        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
 
-                        <section class="streaming-settings-card">
+                        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext014">
+        <div class="streaming-settings-card">
                             <div class="streaming-card-heading"><div><h3>Browser devices</h3><p>Grant permission to reveal camera and microphone labels.</p></div><button type="button" @onclick="RefreshDevices"><i class="pub-icon pub-icon-redo"></i>Refresh browser devices</button></div>
                             @if (_browserDevices.Count == 0)
                             {
@@ -490,9 +573,15 @@
                                     }
                                 </div>
                             }
-                        </section>
+                        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
 
-                        <section class="streaming-settings-card">
+                        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext015">
+        <div class="streaming-settings-card">
                             <div class="streaming-card-heading"><div><h3>Native devices and applications</h3><p>PublisherStudio discovers capture cards, audio devices, and visible processes through its integrated runtime.</p></div><button type="button" @onclick="RefreshNativeDevices"><i class="pub-icon pub-icon-redo"></i>Refresh native devices</button></div>
                             @if (_nativeDevices.Count == 0)
                             {
@@ -511,7 +600,10 @@
                                     }
                                 </div>
                             }
-                        </section>
+                        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
 
                         <div class="streaming-content-actions"><button type="button" class="primary-button" @onclick="SaveMachineOptions"><i class="pub-icon pub-icon-save"></i>Save device profiles</button></div>
                     </main>
@@ -524,7 +616,10 @@
                             <button type="button" class="primary-button" @onclick="SaveMachineOptions"><i class="pub-icon pub-icon-save"></i>Save machine options</button>
                         </header>
 
-                        <section class="streaming-settings-card">
+                        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext016">
+        <div class="streaming-settings-card">
                             <div class="streaming-card-heading"><div><h3>Streaming runtime and program</h3><p>The runtime is part of PublisherStudio; machine settings stay local and page-following behavior is stored with the publication.</p></div></div>
                             <div class="streaming-form-grid three-column">
                                 <label data-help="Path to FFmpeg. Leave blank to search the application folder and the operating-system PATH."><span>FFmpeg path</span><input @bind="_machine.FfmpegPath" placeholder="Auto-detect when blank" /></label>
@@ -535,9 +630,15 @@
                                 <label><span>Fixed program page</span><select @bind="_draft.ProgramPageId" disabled="@_draft.FollowSelectedPage"><option value="">First page</option>@foreach (var documentPage in Document.Pages) { <option value="@documentPage.Id">@documentPage.Name</option> }</select></label>
                             </div>
                             <div class="streaming-information-box"><i class="pub-icon pub-icon-command"></i><span>Auto prefers NVENC, Quick Sync, AMF, or VideoToolbox before software encoding. Capture and encoder services run in the same PublisherStudio process; browser reconnects do not create a second application.</span></div>
-                        </section>
+                        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
 
-                        <section class="streaming-settings-card">
+                        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext017">
+        <div class="streaming-settings-card">
                             <div class="streaming-card-heading"><div><h3>Streaming hotkeys</h3><p>In-app hotkeys require focus. Global hotkeys are registered by PublisherStudio on Windows while a session is active.</p></div><button type="button" @onclick="AddHotkey"><i class="pub-icon pub-icon-newpage"></i>Add hotkey</button></div>
                             <div class="streaming-hotkey-list">
                                 @foreach (var hotkey in _draft.Hotkeys)
@@ -572,7 +673,10 @@
                                     </article>
                                 }
                             </div>
-                        </section>
+                        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
                     </main>
                 }
 
@@ -596,8 +700,12 @@
                     <DxButton Text="Apply streaming setup" Click="Apply" RenderStyle="ButtonRenderStyle.Primary" />
                 </div>
             </footer>
-        </section>
-    </div>
+        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+        </BodyContentTemplate>
+</DxPopup>
 }
 
 <DxContextMenu @ref="_streamingContextMenu">
@@ -650,6 +758,11 @@
         }
     </Items>
 </DxContextMenu>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+</div>
+
 
 @code {
 
@@ -766,174 +879,79 @@
     /// Gets the selected output value that forms part of the streaming studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The selected output value exposed by <see cref="StreamingStudio"/>.</value>
-    private PublicationStreamOutput? SelectedOutput => _selectedOutputId is { } id
-        ? _draft.Outputs.FirstOrDefault(item => item.Id == id)
-        : null;
+    private PublicationStreamOutput? SelectedOutput => GetSelectedOutputForRender();
 
     /// <summary>
     /// Gets a value indicating whether twitch o auth applies to the streaming studio state.
     /// </summary>
     /// <value>The is twitch o auth value exposed by <see cref="StreamingStudio"/>.</value>
-    private bool IsTwitchOAuth => _providerDraft is
-    {
-        Provider: PublicationStreamProvider.Twitch,
-        AuthenticationMode: StreamingProviderAuthenticationMode.OAuth
-    };
+    private bool IsTwitchOAuth => GetIsTwitchOAuthForRender();
 
     /// <summary>
     /// Gets a value indicating whether twitch o auth has chat scopes applies to the streaming studio state.
     /// </summary>
     /// <value>The twitch o auth has chat scopes value exposed by <see cref="StreamingStudio"/>.</value>
-    private bool TwitchOAuthHasChatScopes => _providerDraft is not null
-        && _providerDraft.OAuthScopes.Contains("chat:read", StringComparison.OrdinalIgnoreCase)
-        && _providerDraft.OAuthScopes.Contains("chat:edit", StringComparison.OrdinalIgnoreCase);
+    private bool TwitchOAuthHasChatScopes => GetTwitchOAuthHasChatScopesForRender();
 
     /// <summary>
     /// Gets the twitch client identifier placeholder value that forms part of the streaming studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The twitch client identifier placeholder value exposed by <see cref="StreamingStudio"/>.</value>
-    private string TwitchClientIdPlaceholder => string.IsNullOrWhiteSpace(TwitchOAuth.DefaultClientId)
-        ? "Twitch public application Client ID"
-        : "Configured by PublisherStudio — leave blank to use it";
+    private string TwitchClientIdPlaceholder => GetTwitchClientIdPlaceholderForRender();
 
     /// <summary>
     /// Gets the twitch connection label value that forms part of the streaming studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The twitch connection label value exposed by <see cref="StreamingStudio"/>.</value>
-    private string TwitchConnectionLabel => _providerDraft is null
-        ? "Not configured"
-        : _providerDraft.AuthenticationMode == StreamingProviderAuthenticationMode.Manual
-            ? "Manual mode"
-            : _providerDraft.HasStoredOAuthSession ? "OAuth connected" : "OAuth not connected";
+    private string TwitchConnectionLabel => GetTwitchConnectionLabelForRender();
 
     /// <summary>
     /// Gets the o auth expiry text value that forms part of the streaming studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The o auth expiry text value exposed by <see cref="StreamingStudio"/>.</value>
-    private string OAuthExpiryText => _providerDraft?.OAuthAccessTokenExpiresUtc is { } expiresUtc
-        ? expiresUtc <= DateTimeOffset.UtcNow ? "Refresh required" : $"Refreshes automatically · {expiresUtc.ToLocalTime():g}"
-        : "Managed automatically";
+    private string OAuthExpiryText => GetOAuthExpiryTextForRender();
 
     /// <summary>
     /// Gets the twitch ingest summary value that forms part of the streaming studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The twitch ingest summary value exposed by <see cref="StreamingStudio"/>.</value>
-    private string TwitchIngestSummary => _providerDraft is null || string.IsNullOrWhiteSpace(_providerDraft.IngestServerName)
-        ? "Not measured"
-        : _providerDraft.IngestLatencyMilliseconds is { } milliseconds
-            ? $"{_providerDraft.IngestServerName} · {milliseconds:0} ms"
-            : _providerDraft.IngestServerName;
+    private string TwitchIngestSummary => GetTwitchIngestSummaryForRender();
 
     /// <summary>
     /// Gets the section title value that forms part of the streaming studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The section title value exposed by <see cref="StreamingStudio"/>.</value>
-    private string SectionTitle => _tab switch
-    {
-        "providers" => "Provider profiles",
-        "outputs" => "Publication outputs",
-        "recording" => "Recording",
-        "lan" => "Company / LAN",
-        "devices" => "Devices",
-        _ => "Advanced"
-    };
+    private string SectionTitle => GetSectionTitleForRender();
 
     /// <summary>
     /// Gets the section description value that forms part of the streaming studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The section description value exposed by <see cref="StreamingStudio"/>.</value>
-    private string SectionDescription => _tab switch
-    {
-        "providers" => "Create reusable provider identities and keep stream/Chat secrets in the machine profile store.",
-        "outputs" => "Map the shared publication program to independently scaled and encoded destinations.",
-        "recording" => "Choose clean-master or output-specific files without coupling recording reliability to public delivery.",
-        "lan" => "Expose internal browser, HLS, or RTSP playback only on an explicitly selected address.",
-        "devices" => "Discover browser/native sources and save stable machine profiles for live-source objects.",
-        _ => "Control the integrated streaming runtime, program page, encoder preference, and session hotkeys."
-    };
+    private string SectionDescription => GetSectionDescriptionForRender();
 
     /// <summary>
     /// Gets the section icon value that forms part of the streaming studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The section icon value exposed by <see cref="StreamingStudio"/>.</value>
-    private string SectionIcon => _tab switch
-    {
-        "providers" => "pub-icon-web",
-        "outputs" => "pub-icon-video",
-        "recording" => "pub-icon-media",
-        "lan" => "pub-icon-web",
-        "devices" => "pub-icon-media",
-        _ => "pub-icon-properties"
-    };
+    private string SectionIcon => GetSectionIconForRender();
 
     /// <summary>
     /// Gets the workflow steps collection maintained or exposed by this streaming studio instance for downstream processing.
     /// </summary>
     /// <value>The workflow steps value exposed by <see cref="StreamingStudio"/>.</value>
-    private IReadOnlyList<WorkflowStep> WorkflowSteps => _tab switch
-    {
-        "providers" =>
-        [
-            new(1, "Create a machine profile", "Choose the provider and use OAuth where supported, or keep manual endpoint and key entry."),
-            new(2, "Store credentials", "OAuth sessions, stream keys, and optional Chat secrets are encrypted for the current Windows user."),
-            new(3, "Use it in outputs", "The publication stores only the provider profile ID, never the secret values.")
-        ],
-        "outputs" =>
-        [
-            new(1, "Set the master program", "Choose the shared compositor resolution and frame rate."),
-            new(2, "Add provider variants", "Each output can scale, encode, test, and route Chat independently."),
-            new(3, "Apply the setup", "The publication keeps output settings while machine profiles remain reusable.")
-        ],
-        "recording" =>
-        [
-            new(1, "Enable recording", "Recording begins with a live or dry-run session."),
-            new(2, "Choose the variant", "Record the clean master, each enabled output, or only selected outputs."),
-            new(3, "Prefer crash tolerance", "MKV segments can be remuxed to MP4 after a clean stop.")
-        ],
-        "lan" =>
-        [
-            new(1, "Choose an address", "Use loopback for this computer or a specific LAN adapter address."),
-            new(2, "Enable protocols", "Browser/WebRTC, HLS, and RTSP can be switched independently."),
-            new(3, "Protect access", "Keep viewer limits and access tokens enabled when other devices can connect.")
-        ],
-        "devices" =>
-        [
-            new(1, "Discover sources", "Browser permission reveals cameras/microphones; PublisherStudio finds native devices."),
-            new(2, "Save stable profiles", "Store the identifiers and backend hints once on this machine."),
-            new(3, "Select from live objects", "Publication live-source elements reference the reusable device profile.")
-        ],
-        _ =>
-        [
-            new(1, "Check FFmpeg", "Leave FFmpeg blank for automatic discovery or specify the native executable path."),
-            new(2, "Choose program behavior", "Follow the selected Publisher page or use a fixed program page."),
-            new(3, "Assign hotkeys", "Keep shortcuts local to PublisherStudio or register them globally during sessions.")
-        ]
-    };
+    private IReadOnlyList<WorkflowStep> WorkflowSteps => GetWorkflowStepsForRender();
 
     /// <summary>
     /// Gets the workflow tip value that forms part of the streaming studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The workflow tip value exposed by <see cref="StreamingStudio"/>.</value>
-    private string WorkflowTip => _tab switch
-    {
-        "providers" => "Deleting a provider also removes publication outputs in this draft that reference it. Saved publications are unchanged until Apply.",
-        "outputs" => "Select an output before using ribbon commands such as Recommended settings, Duplicate, or Remove.",
-        "recording" => "Selected-output recording can capture variants even when their public provider delivery is disabled.",
-        "lan" => "127.0.0.1 never exposes the listener to another machine. Use a LAN address only when remote viewers are intended.",
-        "devices" => "Browser device labels are hidden until permission is granted; native discovery depends on operating-system permissions and FFmpeg.",
-        _ => "Machine options are saved separately. Apply streaming setup stores only publication-specific page, output, recording, LAN, and hotkey settings."
-    };
+    private string WorkflowTip => GetWorkflowTipForRender();
 
     /// <summary>
     /// Gets the LAN exposure text value that forms part of the streaming studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The LAN exposure text value exposed by <see cref="StreamingStudio"/>.</value>
-    private string LanExposureText => !_draft.Lan.Enabled
-        ? "Disabled"
-        : string.Equals(_draft.Lan.BindAddress?.Trim(), "127.0.0.1", StringComparison.OrdinalIgnoreCase)
-            || string.Equals(_draft.Lan.BindAddress?.Trim(), "localhost", StringComparison.OrdinalIgnoreCase)
-            ? "This computer only"
-            : $"LAN address {_draft.Lan.BindAddress}";
+    private string LanExposureText => GetLanExposureTextForRender();
 
     /// <summary>
     /// Handles the parameters set async lifecycle or event notification for <see cref="StreamingStudio"/>, updating the state required by the surrounding workflow.
@@ -2724,4 +2742,295 @@
     /// <param name="Text">Text value supplied to the streaming studio operation and used when producing its result.</param>
     private sealed record WorkflowStep(int Number, string Title, string Text);
 
+
+
+    /// <summary>Computes SelectedOutput for the render path with component-local diagnostics.</summary>
+    /// <returns>The publication stream output produced by the operation.</returns>
+    private PublicationStreamOutput? GetSelectedOutputForRender()
+    {
+        try
+        {
+            return _selectedOutputId is { } id
+        ? _draft.Outputs.FirstOrDefault(item => item.Id == id)
+        : null;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property StreamingStudio.SelectedOutput failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes IsTwitchOAuth for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetIsTwitchOAuthForRender()
+    {
+        try
+        {
+            return _providerDraft is
+    {
+        Provider: PublicationStreamProvider.Twitch,
+        AuthenticationMode: StreamingProviderAuthenticationMode.OAuth
+    };
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property StreamingStudio.IsTwitchOAuth failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes TwitchOAuthHasChatScopes for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetTwitchOAuthHasChatScopesForRender()
+    {
+        try
+        {
+            return _providerDraft is not null
+        && _providerDraft.OAuthScopes.Contains("chat:read", StringComparison.OrdinalIgnoreCase)
+        && _providerDraft.OAuthScopes.Contains("chat:edit", StringComparison.OrdinalIgnoreCase);
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property StreamingStudio.TwitchOAuthHasChatScopes failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes TwitchClientIdPlaceholder for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetTwitchClientIdPlaceholderForRender()
+    {
+        try
+        {
+            return string.IsNullOrWhiteSpace(TwitchOAuth.DefaultClientId)
+        ? "Twitch public application Client ID"
+        : "Configured by PublisherStudio — leave blank to use it";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property StreamingStudio.TwitchClientIdPlaceholder failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes TwitchConnectionLabel for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetTwitchConnectionLabelForRender()
+    {
+        try
+        {
+            return _providerDraft is null
+        ? "Not configured"
+        : _providerDraft.AuthenticationMode == StreamingProviderAuthenticationMode.Manual
+            ? "Manual mode"
+            : _providerDraft.HasStoredOAuthSession ? "OAuth connected" : "OAuth not connected";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property StreamingStudio.TwitchConnectionLabel failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes OAuthExpiryText for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetOAuthExpiryTextForRender()
+    {
+        try
+        {
+            return _providerDraft?.OAuthAccessTokenExpiresUtc is { } expiresUtc
+        ? expiresUtc <= DateTimeOffset.UtcNow ? "Refresh required" : $"Refreshes automatically · {expiresUtc.ToLocalTime():g}"
+        : "Managed automatically";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property StreamingStudio.OAuthExpiryText failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes TwitchIngestSummary for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetTwitchIngestSummaryForRender()
+    {
+        try
+        {
+            return _providerDraft is null || string.IsNullOrWhiteSpace(_providerDraft.IngestServerName)
+        ? "Not measured"
+        : _providerDraft.IngestLatencyMilliseconds is { } milliseconds
+            ? $"{_providerDraft.IngestServerName} · {milliseconds:0} ms"
+            : _providerDraft.IngestServerName;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property StreamingStudio.TwitchIngestSummary failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SectionTitle for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetSectionTitleForRender()
+    {
+        try
+        {
+            return _tab switch
+    {
+        "providers" => "Provider profiles",
+        "outputs" => "Publication outputs",
+        "recording" => "Recording",
+        "lan" => "Company / LAN",
+        "devices" => "Devices",
+        _ => "Advanced"
+    };
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property StreamingStudio.SectionTitle failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SectionDescription for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetSectionDescriptionForRender()
+    {
+        try
+        {
+            return _tab switch
+    {
+        "providers" => "Create reusable provider identities and keep stream/Chat secrets in the machine profile store.",
+        "outputs" => "Map the shared publication program to independently scaled and encoded destinations.",
+        "recording" => "Choose clean-master or output-specific files without coupling recording reliability to public delivery.",
+        "lan" => "Expose internal browser, HLS, or RTSP playback only on an explicitly selected address.",
+        "devices" => "Discover browser/native sources and save stable machine profiles for live-source objects.",
+        _ => "Control the integrated streaming runtime, program page, encoder preference, and session hotkeys."
+    };
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property StreamingStudio.SectionDescription failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SectionIcon for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetSectionIconForRender()
+    {
+        try
+        {
+            return _tab switch
+    {
+        "providers" => "pub-icon-web",
+        "outputs" => "pub-icon-video",
+        "recording" => "pub-icon-media",
+        "lan" => "pub-icon-web",
+        "devices" => "pub-icon-media",
+        _ => "pub-icon-properties"
+    };
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property StreamingStudio.SectionIcon failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes WorkflowSteps for the render path with component-local diagnostics.</summary>
+    /// <returns>The collection produced by the operation.</returns>
+    private IReadOnlyList<WorkflowStep> GetWorkflowStepsForRender()
+    {
+        try
+        {
+            return _tab switch
+    {
+        "providers" =>
+        [
+            new(1, "Create a machine profile", "Choose the provider and use OAuth where supported, or keep manual endpoint and key entry."),
+            new(2, "Store credentials", "OAuth sessions, stream keys, and optional Chat secrets are encrypted for the current Windows user."),
+            new(3, "Use it in outputs", "The publication stores only the provider profile ID, never the secret values.")
+        ],
+        "outputs" =>
+        [
+            new(1, "Set the master program", "Choose the shared compositor resolution and frame rate."),
+            new(2, "Add provider variants", "Each output can scale, encode, test, and route Chat independently."),
+            new(3, "Apply the setup", "The publication keeps output settings while machine profiles remain reusable.")
+        ],
+        "recording" =>
+        [
+            new(1, "Enable recording", "Recording begins with a live or dry-run session."),
+            new(2, "Choose the variant", "Record the clean master, each enabled output, or only selected outputs."),
+            new(3, "Prefer crash tolerance", "MKV segments can be remuxed to MP4 after a clean stop.")
+        ],
+        "lan" =>
+        [
+            new(1, "Choose an address", "Use loopback for this computer or a specific LAN adapter address."),
+            new(2, "Enable protocols", "Browser/WebRTC, HLS, and RTSP can be switched independently."),
+            new(3, "Protect access", "Keep viewer limits and access tokens enabled when other devices can connect.")
+        ],
+        "devices" =>
+        [
+            new(1, "Discover sources", "Browser permission reveals cameras/microphones; PublisherStudio finds native devices."),
+            new(2, "Save stable profiles", "Store the identifiers and backend hints once on this machine."),
+            new(3, "Select from live objects", "Publication live-source elements reference the reusable device profile.")
+        ],
+        _ =>
+        [
+            new(1, "Check FFmpeg", "Leave FFmpeg blank for automatic discovery or specify the native executable path."),
+            new(2, "Choose program behavior", "Follow the selected Publisher page or use a fixed program page."),
+            new(3, "Assign hotkeys", "Keep shortcuts local to PublisherStudio or register them globally during sessions.")
+        ]
+    };
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property StreamingStudio.WorkflowSteps failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes WorkflowTip for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetWorkflowTipForRender()
+    {
+        try
+        {
+            return _tab switch
+    {
+        "providers" => "Deleting a provider also removes publication outputs in this draft that reference it. Saved publications are unchanged until Apply.",
+        "outputs" => "Select an output before using ribbon commands such as Recommended settings, Duplicate, or Remove.",
+        "recording" => "Selected-output recording can capture variants even when their public provider delivery is disabled.",
+        "lan" => "127.0.0.1 never exposes the listener to another machine. Use a LAN address only when remote viewers are intended.",
+        "devices" => "Browser device labels are hidden until permission is granted; native discovery depends on operating-system permissions and FFmpeg.",
+        _ => "Machine options are saved separately. Apply streaming setup stores only publication-specific page, output, recording, LAN, and hotkey settings."
+    };
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property StreamingStudio.WorkflowTip failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes LanExposureText for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetLanExposureTextForRender()
+    {
+        try
+        {
+            return !_draft.Lan.Enabled
+        ? "Disabled"
+        : string.Equals(_draft.Lan.BindAddress?.Trim(), "127.0.0.1", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(_draft.Lan.BindAddress?.Trim(), "localhost", StringComparison.OrdinalIgnoreCase)
+            ? "This computer only"
+            : $"LAN address {_draft.Lan.BindAddress}";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property StreamingStudio.LanExposureText failed.");
+            throw;
+        }
+    }
 }

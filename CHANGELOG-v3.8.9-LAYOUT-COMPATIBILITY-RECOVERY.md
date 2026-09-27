@@ -1,0 +1,10 @@
+# PublisherStudio 3.8.9 — DevExpress layout compatibility recovery
+
+- Recovered the established PublisherStudio editor geometry after the DevExpress maintenance-wrapper migration. The mechanical component/section FormLayout shells are now box-neutral so the original ribbon, workspace, navigator, canvas, inspector, spreadsheet, media-studio, and dialog content surfaces again participate in the same grid/flex/height/overflow layout they used before the wrapper regression.
+- Put the compatibility contract in the stylesheet the running application actually loads: `wwwroot/css/site.css`. The previous wrapper rules had been written to legacy `wwwroot/app.css`, which `Components/App.razor` does not load; that legacy file is restored to its pre-migration content instead of creating a second styling path.
+- Retargeted the Media Studio property-card styling that previously depended on the removed HTML `section` element to the preserved content div inside its DevExpress `razor-section-layout-owner`, retaining the old spacing, border, background, and grid behavior without reintroducing native sections.
+- Kept DevExpress Blazor/DevExtreme controls, popups, layouts, and the 25.2.10 asset path intact. This is a geometry/compatibility repair rather than a rollback to native HTML controls.
+- Extended the Razor maintenance architecture audit with `RAZORUI0012`. It now verifies the loaded `css/site.css` reference plus the box-neutral compatibility marker/selector chain, so a future mechanical wrapper change cannot silently recreate the same visual regression.
+- Extended the DevExpress retention guard to protect the new compatibility contract in addition to the existing component-count/native-control rules.
+- Preserved the existing InteractiveServer boundaries. The explicit `@rendermode` set remains unchanged from 3.8.8 and the supplied 3.7.6/2.9.8 baselines; no extra nested circuit boundaries were introduced.
+- Advanced PublisherStudio to 3.8.9, including application/installer/package metadata and versioned CSS/JavaScript/module references.

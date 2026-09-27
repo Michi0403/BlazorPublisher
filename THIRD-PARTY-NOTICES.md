@@ -4,8 +4,8 @@ PublisherStudio uses the following third-party components. Their own license ter
 
 ## DevExpress
 
-- **DevExpress Blazor 25.2.9** and **DevExpress Blazor RichEdit 25.2.9** — commercial DevExpress components.
-- **DevExpress ASP.NET Core Spreadsheet 25.2.9**, **DevExtreme 25.2.9**, and the Spreadsheet browser package — commercial DevExpress components and browser resources.
+- **DevExpress Blazor 25.2.10** and **DevExpress Blazor RichEdit 25.2.10** — commercial DevExpress components.
+- **DevExpress ASP.NET Core Spreadsheet 25.2.10**, **DevExtreme 25.2.10**, and the Spreadsheet browser package — commercial DevExpress components and browser resources.
 - **DevExtreme predefined VectorMap data** (`world.js`, `africa.js`, `canada.js`, `eurasia.js`, `europe.js`, and `usa.js`) — geographic data supplied inside the licensed DevExtreme browser package. DevExpress documents these maps as converted from a free map-data provider; the DevExtreme distribution terms still apply to the packaged scripts.
 
 An appropriately licensed DevExpress development environment is required for the maintained DevExpress-based build. The current repository restores .NET packages from NuGet.org (and the LocalGPT wire-protocol package from its explicit local cache); browser packages are restored through npm according to `package-lock.json`. The official DevExpress license-generation tooling creates the public/runtime key from the licensed build identity. The private DevExpress developer license and `node_modules` are not redistributed in the source ZIP or end-user installation. A licensed build copies the required redistributable browser files and generated public runtime key into the published application's local `wwwroot/vendor` directory for offline runtime use and self-contained HTML export, subject to DevExpress's own terms.

@@ -8,6 +8,10 @@
 
 @inject ILogger<PublicationRibbon> Logger
 @inject ISupervisedTaskRunner TaskRunner
+<div class="razor-component-boundary">
+<DxFormLayout CssClass="razor-component-layout-owner PublicationRibbon">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext001">
 <DxRibbon CssClass="publication-ribbon categorized-ribbon" SizeMode="SizeMode.Medium" AdaptivityAutoCollapseItemsToGroups="true">
     <DxRibbonApplicationTab Text='@LT("File")'>
         <DxRibbonApplicationTabItem Text='@LT("New publication")' IconCssClass="pub-icon pub-icon-newpage" Click="RequestNew" />
@@ -94,17 +98,17 @@
             <DxRibbonItem Text='@LT("Charts and data")' IconCssClass="pub-icon pub-icon-chart" DropDownCssClass="publisher-ribbon-menu">
                 <DxRibbonItem IconCssClass="pub-icon pub-icon-line" Text='@LT("Bar / line chart")' Click="AddChart" />
                 <DxRibbonItem Text='@LT("Pie / doughnut")' IconCssClass="pub-icon pub-icon-chart" Click="AddPieChart" />
-                <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text='@LT("Polar chart")' Click="AddPolarChart" />
+                <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text='@LT("Polar Chart")' Click="AddPolarChart" />
                 <DxRibbonItem IconCssClass="pub-icon pub-icon-line" Text='@LT("Sparkline")' Click="AddSparkline" />
-                <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text='@LT("Bar gauge")' Click="AddBarGauge" />
-                <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text='@LT("Circular gauge")' Click="AddCircularGauge" />
-                <DxRibbonItem IconCssClass="pub-icon pub-icon-line" Text='@LT("Linear gauge")' Click="AddLinearGauge" />
-                <DxRibbonItem IconCssClass="pub-icon pub-icon-line" Text='@LT("Range selector")' Click="AddRangeSelector" />
-                <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text='@LT("Sankey diagram")' Click="AddSankey" />
+                <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text='@LT("Bar Gauge")' Click="AddBarGauge" />
+                <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text='@LT("Circular Gauge")' Click="AddCircularGauge" />
+                <DxRibbonItem IconCssClass="pub-icon pub-icon-line" Text='@LT("Linear Gauge")' Click="AddLinearGauge" />
+                <DxRibbonItem IconCssClass="pub-icon pub-icon-line" Text='@LT("Range Selector")' Click="AddRangeSelector" />
+                <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text='@LT("Sankey Diagram")' Click="AddSankey" />
                 <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text='@LT("Funnel")' Click="AddFunnel" />
                 <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text='@LT("Pyramid")' Click="AddPyramid" />
-                <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text='@LT("Tree map")' Click="AddTreeMap" />
-                <DxRibbonItem Text='@LT("Data table")' IconCssClass="pub-icon pub-icon-chart" Click="AddDataTable" />
+                <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text='@LT("Tree Map")' Click="AddTreeMap" />
+                <DxRibbonItem Text='@LT("Data Table")' IconCssClass="pub-icon pub-icon-chart" Click="AddDataTable" />
                 <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text='@LT("KPI progress")' Click="AddKpi" />
                 <DxRibbonItem Text='@LT("Manage data")' IconCssClass="pub-icon pub-icon-chart" Click="RequestManageData" />
             </DxRibbonItem>
@@ -543,7 +547,7 @@
     </DxRibbonTab>
 
     <DxRibbonTab Text='@LT("Data Tools")' Contextual="true" Visible="IsDataVisualSelected">
-        <DxRibbonGroup Text='@LT("Data visual")' IconCssClass="pub-icon pub-icon-chart">
+        <DxRibbonGroup Text='@LT("Data Visual")' IconCssClass="pub-icon pub-icon-chart">
             <DxRibbonItem Text='@LT("Edit visual")' IconCssClass="pub-icon pub-icon-chart" IsPrimary="true" Click="RequestEditDataVisual" />
             <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text='@LT("Data commands")' DropDownCssClass="publisher-ribbon-menu">
                 <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text='@LT("Manage data")' Click="RequestManageData" />
@@ -553,16 +557,16 @@
             <DxRibbonItem IconCssClass="pub-icon pub-icon-command" Text='@LT("Quick type")' DropDownCssClass="publisher-ribbon-menu">
                 <DxRibbonItem IconCssClass="pub-icon pub-icon-line" Text='@LT("Bar / line chart")' Click="MakeCartesian" />
                 <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text='@LT("Pie")' Click="MakePie" />
-                <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text='@LT("Polar chart")' Click="MakePolar" />
+                <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text='@LT("Polar Chart")' Click="MakePolar" />
                 <DxRibbonItem IconCssClass="pub-icon pub-icon-line" Text='@LT("Sparkline")' Click="MakeSparkline" />
-                <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text='@LT("Bar gauge")' Click="MakeGauge" />
-                <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text='@LT("Circular gauge")' Click="MakeCircularGauge" />
-                <DxRibbonItem IconCssClass="pub-icon pub-icon-line" Text='@LT("Linear gauge")' Click="MakeLinearGauge" />
-                <DxRibbonItem IconCssClass="pub-icon pub-icon-line" Text='@LT("Range selector")' Click="MakeRangeSelector" />
+                <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text='@LT("Bar Gauge")' Click="MakeGauge" />
+                <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text='@LT("Circular Gauge")' Click="MakeCircularGauge" />
+                <DxRibbonItem IconCssClass="pub-icon pub-icon-line" Text='@LT("Linear Gauge")' Click="MakeLinearGauge" />
+                <DxRibbonItem IconCssClass="pub-icon pub-icon-line" Text='@LT("Range Selector")' Click="MakeRangeSelector" />
                 <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text='@LT("Sankey")' Click="MakeSankey" />
                 <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text='@LT("Funnel")' Click="MakeFunnel" />
                 <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text='@LT("Pyramid")' Click="MakePyramid" />
-                <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text='@LT("Tree map")' Click="MakeTreeMap" />
+                <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text='@LT("Tree Map")' Click="MakeTreeMap" />
                 <DxRibbonItem IconCssClass="pub-icon pub-icon-command" Text='@LT("Table")' Click="MakeTable" />
                 <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text='@LT("KPI")' Click="MakeKpi" />
             </DxRibbonItem>
@@ -630,6 +634,11 @@
     </DxRibbonTab>
 
 </DxRibbon>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+</div>
+
 
 @code {
 
@@ -654,12 +663,12 @@
     /// Gets the local GPT button text value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The local GPT button text value exposed by <see cref="PublicationRibbon"/>.</value>
-    private string LocalGptButtonText => LocalGptConnection.State.IsLinked ? "LocalGPT AI Assist" : LocalGptConnection.State.IsConnected ? "Approve LocalGPT link" : "Connect LocalGPT";
+    private string LocalGptButtonText => GetLocalGptButtonTextForRender();
     /// <summary>
     /// Gets a value indicating whether show AI council applies to the publication ribbon state.
     /// </summary>
     /// <value>The can show AI council value exposed by <see cref="PublicationRibbon"/>.</value>
-    private bool CanShowAiCouncil => LocalGptConnection.State.HasCapability("council.run");
+    private bool CanShowAiCouncil => GetCanShowAiCouncilForRender();
 
     /// <summary>
     /// Handles the initialized lifecycle or event notification for <see cref="PublicationRibbon"/>, updating the state required by the surrounding workflow.
@@ -1101,7 +1110,7 @@
     /// Gets the crop command text value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The crop command text value exposed by <see cref="PublicationRibbon"/>.</value>
-    private string CropCommandText => State.CropMode ? "Finish crop" : "Crop";
+    private string CropCommandText => GetCropCommandTextForRender();
     /// <summary>
     /// Gets the rulers text value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
     /// </summary>
@@ -1151,9 +1160,7 @@
     /// Gets the zoom rendering text value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The zoom rendering text value exposed by <see cref="PublicationRibbon"/>.</value>
-    private string ZoomRenderingText => State.Document.View.CanvasZoomMode == PublicationCanvasZoomMode.CssLayout
-        ? "Rendering: sharp CSS"
-        : "Rendering: compact transform";
+    private string ZoomRenderingText => GetZoomRenderingTextForRender();
     /// <summary>
     /// Gets the CSS zoom mode text value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
     /// </summary>
@@ -2332,77 +2339,77 @@
     /// Gets a value indicating whether selection applies to the publication ribbon state.
     /// </summary>
     /// <value>The has selection value exposed by <see cref="PublicationRibbon"/>.</value>
-    private bool HasSelection => State.SelectedElements.Count > 0;
+    private bool HasSelection => GetHasSelectionForRender();
     /// <summary>
     /// Gets a value indicating whether export selection applies to the publication ribbon state.
     /// </summary>
     /// <value>The can export selection value exposed by <see cref="PublicationRibbon"/>.</value>
-    private bool CanExportSelection => State.SelectedElements.Count == 1 && State.SelectedElement is not null and not ConnectorElement;
+    private bool CanExportSelection => GetCanExportSelectionForRender();
     /// <summary>
     /// Gets a value indicating whether align applies to the publication ribbon state.
     /// </summary>
     /// <value>The can align value exposed by <see cref="PublicationRibbon"/>.</value>
-    private bool CanAlign => State.SelectedElement is not null and not ConnectorElement;
+    private bool CanAlign => GetCanAlignForRender();
     /// <summary>
     /// Gets a value indicating whether image selected applies to the publication ribbon state.
     /// </summary>
     /// <value>The is image selected value exposed by <see cref="PublicationRibbon"/>.</value>
-    private bool IsImageSelected => State.SelectedElement is ImageFrameElement;
+    private bool IsImageSelected => GetIsImageSelectedForRender();
     /// <summary>
     /// Gets a value indicating whether text selected applies to the publication ribbon state.
     /// </summary>
     /// <value>The is text selected value exposed by <see cref="PublicationRibbon"/>.</value>
-    private bool IsTextSelected => State.SelectedElement is TextFrameElement;
+    private bool IsTextSelected => GetIsTextSelectedForRender();
     /// <summary>
     /// Gets a value indicating whether shape selected applies to the publication ribbon state.
     /// </summary>
     /// <value>The is shape selected value exposed by <see cref="PublicationRibbon"/>.</value>
-    private bool IsShapeSelected => State.SelectedElement is ShapeElement;
+    private bool IsShapeSelected => GetIsShapeSelectedForRender();
     /// <summary>
     /// Gets a value indicating whether word art selected applies to the publication ribbon state.
     /// </summary>
     /// <value>The is word art selected value exposed by <see cref="PublicationRibbon"/>.</value>
-    private bool IsWordArtSelected => State.SelectedElement is WordArtElement;
+    private bool IsWordArtSelected => GetIsWordArtSelectedForRender();
     /// <summary>
     /// Gets a value indicating whether connector selected applies to the publication ribbon state.
     /// </summary>
     /// <value>The is connector selected value exposed by <see cref="PublicationRibbon"/>.</value>
-    private bool IsConnectorSelected => State.SelectedElement is ConnectorElement;
+    private bool IsConnectorSelected => GetIsConnectorSelectedForRender();
     /// <summary>
     /// Gets a value indicating whether data visual selected applies to the publication ribbon state.
     /// </summary>
     /// <value>The is data visual selected value exposed by <see cref="PublicationRibbon"/>.</value>
-    private bool IsDataVisualSelected => State.SelectedElement is DataVisualElement;
+    private bool IsDataVisualSelected => GetIsDataVisualSelectedForRender();
     /// <summary>
     /// Gets a value indicating whether component selected applies to the publication ribbon state.
     /// </summary>
     /// <value>The is component selected value exposed by <see cref="PublicationRibbon"/>.</value>
-    private bool IsComponentSelected => State.SelectedElement is DevExtremeComponentElement;
+    private bool IsComponentSelected => GetIsComponentSelectedForRender();
     /// <summary>
     /// Gets a value indicating whether map component selected applies to the publication ribbon state.
     /// </summary>
     /// <value>The is map component selected value exposed by <see cref="PublicationRibbon"/>.</value>
-    private bool IsMapComponentSelected => State.SelectedElement is DevExtremeComponentElement { ComponentKind: PublicationComponentKind.Map or PublicationComponentKind.VectorMap };
+    private bool IsMapComponentSelected => GetIsMapComponentSelectedForRender();
     /// <summary>
     /// Gets a value indicating whether spreadsheet selected applies to the publication ribbon state.
     /// </summary>
     /// <value>The is spreadsheet selected value exposed by <see cref="PublicationRibbon"/>.</value>
-    private bool IsSpreadsheetSelected => State.SelectedElement is SpreadsheetElement;
+    private bool IsSpreadsheetSelected => GetIsSpreadsheetSelectedForRender();
     /// <summary>
     /// Gets the spreadsheet grid lines text value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The spreadsheet grid lines text value exposed by <see cref="PublicationRibbon"/>.</value>
-    private string SpreadsheetGridLinesText => State.SelectedElement is SpreadsheetElement { ShowGridLines: true } ? "Hide grid lines" : "Show grid lines";
+    private string SpreadsheetGridLinesText => GetSpreadsheetGridLinesTextForRender();
     /// <summary>
     /// Gets the spreadsheet sheet name text value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The spreadsheet sheet name text value exposed by <see cref="PublicationRibbon"/>.</value>
-    private string SpreadsheetSheetNameText => State.SelectedElement is SpreadsheetElement { ShowSheetName: true } ? "Hide worksheet name" : "Show worksheet name";
+    private string SpreadsheetSheetNameText => GetSpreadsheetSheetNameTextForRender();
     /// <summary>
     /// Gets a value indicating whether media selected applies to the publication ribbon state.
     /// </summary>
     /// <value>The is media selected value exposed by <see cref="PublicationRibbon"/>.</value>
-    private bool IsMediaSelected => State.SelectedElement is PublicationMediaElement;
+    private bool IsMediaSelected => GetIsMediaSelectedForRender();
     /// <summary>
     /// Gets the media muted text value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
     /// </summary>
@@ -2422,22 +2429,22 @@
     /// Gets the shape fill value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The shape fill value exposed by <see cref="PublicationRibbon"/>.</value>
-    private string ShapeFill => (State.SelectedElement as ShapeElement)?.Fill ?? "#ffffff";
+    private string ShapeFill => GetShapeFillForRender();
     /// <summary>
     /// Gets the shape stroke value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The shape stroke value exposed by <see cref="PublicationRibbon"/>.</value>
-    private string ShapeStroke => (State.SelectedElement as ShapeElement)?.Stroke ?? "#000000";
+    private string ShapeStroke => GetShapeStrokeForRender();
     /// <summary>
     /// Gets the connector stroke value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The connector stroke value exposed by <see cref="PublicationRibbon"/>.</value>
-    private string ConnectorStroke => (State.SelectedElement as ConnectorElement)?.Stroke ?? "#245b85";
+    private string ConnectorStroke => GetConnectorStrokeForRender();
     /// <summary>
     /// Gets the page palette color value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The page palette color value exposed by <see cref="PublicationRibbon"/>.</value>
-    private string PagePaletteColor => State.CurrentPage.Background.StartsWith('#') ? State.CurrentPage.Background : "#ffffff";
+    private string PagePaletteColor => GetPagePaletteColorForRender();
     /// <summary>
     /// Stores the internal page colors state used by <see cref="PublicationRibbon"/> while executing its surrounding workflow.
     /// </summary>
@@ -5694,4 +5701,352 @@
         }
     }
 
+
+
+    /// <summary>Computes LocalGptButtonText for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetLocalGptButtonTextForRender()
+    {
+        try
+        {
+            return LocalGptConnection.State.IsLinked ? "LocalGPT AI Assist" : LocalGptConnection.State.IsConnected ? "Approve LocalGPT link" : "Connect LocalGPT";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PublicationRibbon.LocalGptButtonText failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes CanShowAiCouncil for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetCanShowAiCouncilForRender()
+    {
+        try
+        {
+            return LocalGptConnection.State.HasCapability("council.run");
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PublicationRibbon.CanShowAiCouncil failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes CropCommandText for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetCropCommandTextForRender()
+    {
+        try
+        {
+            return State.CropMode ? "Finish crop" : "Crop";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PublicationRibbon.CropCommandText failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes ZoomRenderingText for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetZoomRenderingTextForRender()
+    {
+        try
+        {
+            return State.Document.View.CanvasZoomMode == PublicationCanvasZoomMode.CssLayout
+        ? "Rendering: sharp CSS"
+        : "Rendering: compact transform";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PublicationRibbon.ZoomRenderingText failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes HasSelection for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetHasSelectionForRender()
+    {
+        try
+        {
+            return State.SelectedElements.Count > 0;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PublicationRibbon.HasSelection failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes CanExportSelection for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetCanExportSelectionForRender()
+    {
+        try
+        {
+            return State.SelectedElements.Count == 1 && State.SelectedElement is not null and not ConnectorElement;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PublicationRibbon.CanExportSelection failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes CanAlign for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetCanAlignForRender()
+    {
+        try
+        {
+            return State.SelectedElement is not null and not ConnectorElement;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PublicationRibbon.CanAlign failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes IsImageSelected for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetIsImageSelectedForRender()
+    {
+        try
+        {
+            return State.SelectedElement is ImageFrameElement;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PublicationRibbon.IsImageSelected failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes IsTextSelected for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetIsTextSelectedForRender()
+    {
+        try
+        {
+            return State.SelectedElement is TextFrameElement;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PublicationRibbon.IsTextSelected failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes IsShapeSelected for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetIsShapeSelectedForRender()
+    {
+        try
+        {
+            return State.SelectedElement is ShapeElement;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PublicationRibbon.IsShapeSelected failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes IsWordArtSelected for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetIsWordArtSelectedForRender()
+    {
+        try
+        {
+            return State.SelectedElement is WordArtElement;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PublicationRibbon.IsWordArtSelected failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes IsConnectorSelected for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetIsConnectorSelectedForRender()
+    {
+        try
+        {
+            return State.SelectedElement is ConnectorElement;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PublicationRibbon.IsConnectorSelected failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes IsDataVisualSelected for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetIsDataVisualSelectedForRender()
+    {
+        try
+        {
+            return State.SelectedElement is DataVisualElement;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PublicationRibbon.IsDataVisualSelected failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes IsComponentSelected for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetIsComponentSelectedForRender()
+    {
+        try
+        {
+            return State.SelectedElement is DevExtremeComponentElement;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PublicationRibbon.IsComponentSelected failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes IsMapComponentSelected for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetIsMapComponentSelectedForRender()
+    {
+        try
+        {
+            return State.SelectedElement is DevExtremeComponentElement { ComponentKind: PublicationComponentKind.Map or PublicationComponentKind.VectorMap };
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PublicationRibbon.IsMapComponentSelected failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes IsSpreadsheetSelected for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetIsSpreadsheetSelectedForRender()
+    {
+        try
+        {
+            return State.SelectedElement is SpreadsheetElement;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PublicationRibbon.IsSpreadsheetSelected failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SpreadsheetGridLinesText for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetSpreadsheetGridLinesTextForRender()
+    {
+        try
+        {
+            return State.SelectedElement is SpreadsheetElement { ShowGridLines: true } ? "Hide grid lines" : "Show grid lines";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PublicationRibbon.SpreadsheetGridLinesText failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SpreadsheetSheetNameText for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetSpreadsheetSheetNameTextForRender()
+    {
+        try
+        {
+            return State.SelectedElement is SpreadsheetElement { ShowSheetName: true } ? "Hide worksheet name" : "Show worksheet name";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PublicationRibbon.SpreadsheetSheetNameText failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes IsMediaSelected for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetIsMediaSelectedForRender()
+    {
+        try
+        {
+            return State.SelectedElement is PublicationMediaElement;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PublicationRibbon.IsMediaSelected failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes ShapeFill for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetShapeFillForRender()
+    {
+        try
+        {
+            return (State.SelectedElement as ShapeElement)?.Fill ?? "#ffffff";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PublicationRibbon.ShapeFill failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes ShapeStroke for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetShapeStrokeForRender()
+    {
+        try
+        {
+            return (State.SelectedElement as ShapeElement)?.Stroke ?? "#000000";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PublicationRibbon.ShapeStroke failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes ConnectorStroke for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetConnectorStrokeForRender()
+    {
+        try
+        {
+            return (State.SelectedElement as ConnectorElement)?.Stroke ?? "#245b85";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PublicationRibbon.ConnectorStroke failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes PagePaletteColor for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetPagePaletteColorForRender()
+    {
+        try
+        {
+            return State.CurrentPage.Background.StartsWith('#') ? State.CurrentPage.Background : "#ffffff";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PublicationRibbon.PagePaletteColor failed.");
+            throw;
+        }
+    }
 }

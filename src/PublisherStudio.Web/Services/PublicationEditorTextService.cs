@@ -184,4 +184,66 @@ public sealed class PublicationEditorTextService
         }
     }
 
+    /// <summary>
+    /// Formats Media Converter metadata as newline-separated key/value assignments for the maintained editor readout.
+    /// </summary>
+    /// <param name="metadata">Metadata entries to format.</param>
+    /// <returns>Newline-separated invariant metadata assignments.</returns>
+    public string FormatMediaConversionMetadata(IEnumerable<KeyValuePair<string, string>>? metadata)
+    {
+        try
+        {
+            return string.Join(Environment.NewLine, (metadata ?? Array.Empty<KeyValuePair<string, string>>())
+                .Select(pair => $"{pair.Key}={pair.Value}"));
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, "Formatting Media Converter metadata failed; metadata values were omitted from diagnostics.");
+            return string.Empty;
+        }
+    }
+
+    /// <summary>
+    /// Builds the invariant SVG point-list used by Media Studio's frame editor.
+    /// </summary>
+    /// <param name="points">Normalized media-frame points.</param>
+    /// <returns>Space-separated SVG coordinate pairs in the existing 1000-unit view box.</returns>
+    public string BuildMediaStudioSvgPoints(IEnumerable<MediaFramePoint>? points)
+    {
+        try
+        {
+            return string.Join(" ", (points ?? Array.Empty<MediaFramePoint>()).Select(point =>
+                $"{(point.X * 1000).ToString("0.###", CultureInfo.InvariantCulture)},{(point.Y * 1000).ToString("0.###", CultureInfo.InvariantCulture)}"));
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, "Building Media Studio SVG point text failed; frame coordinates were omitted from diagnostics.");
+            return string.Empty;
+        }
+    }
+
+    /// <summary>
+    /// Builds the invariant SVG dim-path used to shade the area outside Media Studio's active frame polygon.
+    /// </summary>
+    /// <param name="points">Normalized media-frame points.</param>
+    /// <returns>An even-odd SVG path in the existing 1000-unit view box, and the outer rectangle when fewer than three points exist.</returns>
+    public string BuildMediaStudioSvgDimPath(IEnumerable<MediaFramePoint>? points)
+    {
+        try
+        {
+            var pointList = (points ?? Array.Empty<MediaFramePoint>()).ToArray();
+            if (pointList.Length < 3)
+                return "M 0 0 H 1000 V 1000 H 0 Z";
+
+            var polygon = string.Join(" L ", pointList.Select(point =>
+                $"{(point.X * 1000).ToString("0.###", CultureInfo.InvariantCulture)} {(point.Y * 1000).ToString("0.###", CultureInfo.InvariantCulture)}"));
+            return $"M 0 0 H 1000 V 1000 H 0 Z M {polygon} Z";
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, "Building Media Studio SVG dim path failed; frame coordinates were omitted from diagnostics.");
+            return string.Empty;
+        }
+    }
+
 }

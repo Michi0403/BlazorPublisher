@@ -4,10 +4,24 @@
 @inject IUserNotificationService Notifications
 @inject ILogger<NewPublicationDialog> Logger
 
+<div class="razor-component-boundary">
+<DxFormLayout CssClass="razor-component-layout-owner NewPublicationDialog">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext001">
 @if (Visible)
 {
-    <div class="editor-modal-backdrop new-publication-backdrop">
-        <section class="new-publication-dialog" role="dialog" aria-modal="true" aria-label='@LT("New from template")'>
+    <DxPopup Visible="true"
+         Width="min(1800px, 98vw)"
+         Height="min(1180px, 96vh)"
+         MaxHeight="96vh"
+         CloseOnOutsideClick="false"
+         CloseOnEscape="false"
+         ShowHeader="false">
+    <BodyContentTemplate Context="publisherPopupContext">
+        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext002">
+        <div class="new-publication-dialog" aria-label='@LT("New from template")'>
             <header class="new-publication-dialog-header">
                 <div>
                     <strong>@LT("New from template")</strong>
@@ -55,9 +69,18 @@
                 <span>@LT("Local template files stay editable and PublisherStudio never overwrites an existing local template.")</span>
                 <button type="button" class="publisher-dialog-button" @onclick="Cancel">@LT("Cancel")</button>
             </footer>
-        </section>
-    </div>
+        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+        </BodyContentTemplate>
+</DxPopup>
 }
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+</div>
+
 
 @code {
     /// <summary>Stores the currently discovered local complete-publication templates shown by the chooser.</summary>

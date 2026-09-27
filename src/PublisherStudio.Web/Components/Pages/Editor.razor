@@ -24,6 +24,10 @@
 @inject NavigationManager Navigation
 @inject PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService LocalGptConnection
 
+<div class="razor-component-boundary">
+<DxFormLayout CssClass="razor-component-layout-owner Editor">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext001">
 <PageTitle>BlazorPublisher</PageTitle>
 
 <UserNotificationHost />
@@ -280,8 +284,17 @@
 
 @if (_selectedPictureExportVisible)
 {
-    <div class="publisher-dialog-backdrop" role="presentation" @onclick="CloseSelectedPictureExport">
-        <section class="publisher-dialog selected-picture-export-dialog" role="dialog" aria-modal="true" aria-labelledby="selected-picture-export-title" @onclick:stopPropagation>
+    <DxPopup Visible="true"
+         Width="min(760px, 94vw)"
+         MaxHeight="80vh"
+         CloseOnOutsideClick="false"
+         CloseOnEscape="false"
+         ShowHeader="false">
+    <BodyContentTemplate Context="publisherPopupContext">
+        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext002">
+        <div class="publisher-dialog selected-picture-export-dialog" aria-labelledby="selected-picture-export-title" @onclick:stopPropagation>
             <header>
                 <div>
                     <h2 id="selected-picture-export-title">Export Picture Studio object</h2>
@@ -295,14 +308,28 @@
                 <small>Merged export bakes recoloring, paint, effects and all visible layers into the final pixels. Layered SVG preserves the Picture Studio layer document for later editing.</small>
             </div>
             <footer class="publisher-dialog-actions"><button type="button" class="publisher-dialog-button" @onclick="CloseSelectedPictureExport">Cancel</button></footer>
-        </section>
-    </div>
+        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+        </BodyContentTemplate>
+</DxPopup>
 }
 
 @if (_singleWebsiteExportVisible)
 {
-    <div class="publisher-dialog-backdrop" role="presentation" @onclick="CloseSingleWebsiteExport">
-        <section class="publisher-dialog website-export-dialog" role="dialog" aria-modal="true" aria-labelledby="single-website-export-title" @onclick:stopPropagation>
+    <DxPopup Visible="true"
+         Width="min(900px, 94vw)"
+         Height="min(620px, 86vh)"
+         MaxHeight="86vh"
+         CloseOnOutsideClick="false"
+         CloseOnEscape="false"
+         ShowHeader="false">
+    <BodyContentTemplate Context="publisherPopupContext">
+        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext003">
+        <div class="publisher-dialog website-export-dialog" aria-labelledby="single-website-export-title" @onclick:stopPropagation>
             <header>
                 <div>
                     <h2 id="single-website-export-title">@(_singleWebsiteMode == "presentation" ? "Interactive presentation website" : "Single-file website")</h2>
@@ -355,14 +382,28 @@
                     @(_singleWebsiteExporting ? "Exporting…" : "Export HTML")
                 </button>
             </footer>
-        </section>
-    </div>
+        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+        </BodyContentTemplate>
+</DxPopup>
 }
 
 @if (_structuredWebsiteExportVisible)
 {
-    <div class="publisher-dialog-backdrop" role="presentation" @onclick="CloseStructuredWebsiteExport">
-        <section class="publisher-dialog website-export-dialog" role="dialog" aria-modal="true" aria-labelledby="structured-export-title" @onclick:stopPropagation>
+    <DxPopup Visible="true"
+         Width="min(900px, 94vw)"
+         Height="min(620px, 86vh)"
+         MaxHeight="86vh"
+         CloseOnOutsideClick="false"
+         CloseOnEscape="false"
+         ShowHeader="false">
+    <BodyContentTemplate Context="publisherPopupContext">
+        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext004">
+        <div class="publisher-dialog website-export-dialog" aria-labelledby="structured-export-title" @onclick:stopPropagation>
             <header>
                 <div>
                     <h2 id="structured-export-title">Structured website export</h2>
@@ -438,8 +479,12 @@
                     @(_structuredWebsiteExporting ? "Exporting…" : "Export website ZIP")
                 </button>
             </footer>
-        </section>
-    </div>
+        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+        </BodyContentTemplate>
+</DxPopup>
 }
 
 @if (!string.IsNullOrWhiteSpace(_error))
@@ -453,6 +498,11 @@
 }
 
 <DocumentationViewerHost />
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+</div>
+
 
 @code {
 
@@ -465,10 +515,7 @@
     /// </summary>
     /// <value>The mainframe selection visuals enabled value exposed by <see cref="Editor"/>.</value>
     private bool MainframeSelectionVisualsEnabled =>
-        !_storyEditorVisible && !_spreadsheetEditorVisible && !_pictureEditorVisible &&
-        !_dataVisualEditorVisible && !_componentEditorVisible && !_dataManagerVisible && !_mediaStudioVisible &&
-        !_barcodeEditorVisible && !_streamingStudioVisible && !_panelStudioVisible && !_newPublicationDialogVisible &&
-        !_mediaConverterVisible && !_structuredWebsiteExportVisible && !_singleWebsiteExportVisible && !_selectedPictureExportVisible && !_pageEffectStudioVisible;
+        GetMainframeSelectionVisualsEnabledForRender();
     /// <summary>
     /// Stores the internal story editor visible state used by <see cref="Editor"/> while executing its surrounding workflow.
     /// </summary>
@@ -719,11 +766,7 @@
     /// Gets the selection status value that forms part of the editor state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The selection status value exposed by <see cref="Editor"/>.</value>
-    private string SelectionStatus => State.ConnectorTool != ConnectorToolKind.None
-        ? $"{State.ConnectorTool} connector tool — drag from one object port to another; Esc cancels"
-        : State.SelectedElements.Count > 1
-            ? $"{State.SelectedElements.Count} objects selected{(State.SelectedElements.Any(item => item.GroupId is not null) ? " · grouped" : string.Empty)}"
-            : State.SelectedElement is null ? "No selection" : $"{State.SelectedElement.Kind}: {State.SelectedElement.Name}";
+    private string SelectionStatus => GetSelectionStatusForRender();
 
     /// <summary>
     /// Handles the initialized lifecycle or event notification for <see cref="Editor"/>, updating the state required by the surrounding workflow.
@@ -1942,7 +1985,7 @@
             }
             catch (JSException)
             {
-                var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js?v=3.7.6").ConfigureAwait(true);
+                var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js?v=3.9.1").ConfigureAwait(true);
                 await using var configuredModuleAsyncDisposal = module.ConfigureAwait(true);
                 await module.InvokeVoidAsync("clickElementById", id).ConfigureAwait(true);
             }
@@ -2950,7 +2993,7 @@
     /// Gets the current page number value that forms part of the editor state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The current page number value exposed by <see cref="Editor"/>.</value>
-    private int CurrentPageNumber => Math.Max(1, State.Document.Pages.FindIndex(publicationPage => publicationPage.Id == State.SelectedPageId) + 1);
+    private int CurrentPageNumber => GetCurrentPageNumberForRender();
 
     /// <summary>
     /// Opens publication for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
@@ -3436,7 +3479,7 @@
                 var bytes = buffer.ToArray();
                 if (bytes.Length == 0) throw new InvalidDataException("The selected media file is empty.");
 
-                module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=3.7.6").ConfigureAwait(true);
+                module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=3.9.1").ConfigureAwait(true);
                 temporaryAssetId = Guid.NewGuid();
                 var inspectionUrl = MediaAssets.RegisterBytes(temporaryAssetId, bytes, mimeType);
                 MediaSourceInfo info;
@@ -5030,7 +5073,7 @@
     /// Gets a value indicating whether use AI council applies to the editor state.
     /// </summary>
     /// <value>The can use AI council value exposed by <see cref="Editor"/>.</value>
-    private bool CanUseAiCouncil => LocalGptConnection.State.IsLinked && LocalGptConnection.State.HasCapability("council.run");
+    private bool CanUseAiCouncil => GetCanUseAiCouncilForRender();
     /// <summary>
     /// Performs lt for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
     /// </summary>
@@ -5051,12 +5094,12 @@
     /// Gets the current culture value that forms part of the editor state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The current culture value exposed by <see cref="Editor"/>.</value>
-    private string CurrentCulture => Localization.ResolveAvailableCulture(System.Globalization.CultureInfo.CurrentUICulture.Name);
+    private string CurrentCulture => GetCurrentCultureForRender();
     /// <summary>
     /// Gets the language label value that forms part of the editor state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The language label value exposed by <see cref="Editor"/>.</value>
-    private string LanguageLabel => Localization.Get("Text.Language", fallback: "Language");
+    private string LanguageLabel => GetLanguageLabelForRender();
 
     /// <summary>
     /// Performs rename document for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
@@ -5080,7 +5123,7 @@
     /// Gets the zoom percent value that forms part of the editor state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The zoom percent value exposed by <see cref="Editor"/>.</value>
-    private int ZoomPercent => (int)Math.Round(State.Document.Zoom * 100, MidpointRounding.AwayFromZero);
+    private int ZoomPercent => GetZoomPercentForRender();
 
     /// <summary>
     /// Performs change zoom percent for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
@@ -5456,4 +5499,117 @@
         }
     }
 
+
+
+    /// <summary>Computes MainframeSelectionVisualsEnabled for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetMainframeSelectionVisualsEnabledForRender()
+    {
+        try
+        {
+            return !_storyEditorVisible && !_spreadsheetEditorVisible && !_pictureEditorVisible &&
+        !_dataVisualEditorVisible && !_componentEditorVisible && !_dataManagerVisible && !_mediaStudioVisible &&
+        !_barcodeEditorVisible && !_streamingStudioVisible && !_panelStudioVisible && !_newPublicationDialogVisible &&
+        !_mediaConverterVisible && !_structuredWebsiteExportVisible && !_singleWebsiteExportVisible && !_selectedPictureExportVisible && !_pageEffectStudioVisible;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property Editor.MainframeSelectionVisualsEnabled failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SelectionStatus for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetSelectionStatusForRender()
+    {
+        try
+        {
+            return State.ConnectorTool != ConnectorToolKind.None
+        ? $"{State.ConnectorTool} connector tool — drag from one object port to another; Esc cancels"
+        : State.SelectedElements.Count > 1
+            ? $"{State.SelectedElements.Count} objects selected{(State.SelectedElements.Any(item => item.GroupId is not null) ? " · grouped" : string.Empty)}"
+            : State.SelectedElement is null ? "No selection" : $"{State.SelectedElement.Kind}: {State.SelectedElement.Name}";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property Editor.SelectionStatus failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes CurrentPageNumber for the render path with component-local diagnostics.</summary>
+    /// <returns>The int produced by the operation.</returns>
+    private int GetCurrentPageNumberForRender()
+    {
+        try
+        {
+            return Math.Max(1, State.Document.Pages.FindIndex(publicationPage => publicationPage.Id == State.SelectedPageId) + 1);
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property Editor.CurrentPageNumber failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes CanUseAiCouncil for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetCanUseAiCouncilForRender()
+    {
+        try
+        {
+            return LocalGptConnection.State.IsLinked && LocalGptConnection.State.HasCapability("council.run");
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property Editor.CanUseAiCouncil failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes CurrentCulture for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetCurrentCultureForRender()
+    {
+        try
+        {
+            return Localization.ResolveAvailableCulture(System.Globalization.CultureInfo.CurrentUICulture.Name);
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property Editor.CurrentCulture failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes LanguageLabel for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetLanguageLabelForRender()
+    {
+        try
+        {
+            return Localization.Get("Text.Language", fallback: "Language");
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property Editor.LanguageLabel failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes ZoomPercent for the render path with component-local diagnostics.</summary>
+    /// <returns>The int produced by the operation.</returns>
+    private int GetZoomPercentForRender()
+    {
+        try
+        {
+            return (int)Math.Round(State.Document.Zoom * 100, MidpointRounding.AwayFromZero);
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property Editor.ZoomPercent failed.");
+            throw;
+        }
+    }
 }

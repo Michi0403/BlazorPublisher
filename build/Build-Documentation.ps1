@@ -326,6 +326,36 @@ function Remove-PublisherStudioTemporaryPath {
     }
 }
 
+function Remove-PublisherStudioStaleVersionedPdfs {
+    param(
+        [Parameter(Mandatory = $true)][string]$Root,
+        [Parameter(Mandatory = $true)][string]$ExpectedPdfName
+    )
+
+    if (-not (Test-Path -LiteralPath $Root -PathType Container)) { return }
+    $stalePdfs = @(Get-ChildItem -LiteralPath $Root -File -Filter 'PublisherStudio-*.pdf' -ErrorAction SilentlyContinue |
+        Where-Object { -not [string]::Equals($_.Name, $ExpectedPdfName, [StringComparison]::OrdinalIgnoreCase) })
+    foreach ($stalePdf in $stalePdfs) {
+        $removed = $false
+        $lastError = $null
+        for ($attempt = 1; $attempt -le 5 -and -not $removed; $attempt++) {
+            try {
+                Remove-Item -LiteralPath $stalePdf.FullName -Force -ErrorAction Stop
+                $removed = -not (Test-Path -LiteralPath $stalePdf.FullName -PathType Leaf)
+            }
+            catch {
+                $lastError = $_.Exception
+                if ($attempt -lt 5) { Start-Sleep -Milliseconds (150 * $attempt) }
+            }
+        }
+        if (-not $removed) {
+            $detail = if ($null -eq $lastError) { 'unknown file-system failure' } else { $lastError.Message }
+            throw "Could not remove stale generated PublisherStudio documentation PDF '$($stalePdf.FullName)': $detail. Architectural repair: close any process holding the generated help-docs PDF and rerun the build; do not retain multiple versioned PDFs in one generated documentation root."
+        }
+        Write-Host "Pruned stale generated PublisherStudio documentation PDF $($stalePdf.Name)." -ForegroundColor DarkCyan
+    }
+}
+
 function Get-PublisherStudioDocumentationCacheKey {
     param(
         [Parameter(Mandatory)][string]$Assembly,
@@ -335,7 +365,7 @@ function Get-PublisherStudioDocumentationCacheKey {
     )
 
     $parts = [System.Collections.Generic.List[string]]::new()
-    $parts.Add("schema=2")
+    $parts.Add("schema=3")
     $parts.Add("product=PublisherStudio")
     $parts.Add("version=$VersionValue")
     foreach ($inputFile in @($Assembly, $Xml, $PSCommandPath)) {
@@ -2959,6 +2989,7 @@ $documentationCacheManifestData = Restore-PublisherStudioDocumentationHtmlCache 
     -ExpectedKey $documentationCacheKey `
     -ExpectedVersion $Version
 $documentationHtmlCacheReused = $null -ne $documentationCacheManifestData
+Remove-PublisherStudioStaleVersionedPdfs -Root $siteRoot -ExpectedPdfName $pdfName
 if (-not $documentationHtmlCacheReused) {
     Remove-PublisherStudioTemporaryPath -Path $siteRoot -Attempts 8 -DelayMilliseconds 250
 }
@@ -3117,7 +3148,7 @@ Use the grouped API navigation to browse namespaces, types, properties, methods,
 
     if ($docfxBuildSucceeded -and $htmlPreflightValidated -and -not $documentationHtmlCacheReused) {
         $cacheManifest = [ordered]@{
-            schemaVersion = 2
+            schemaVersion = 3
             cacheKey = $documentationCacheKey
             version = $Version
             product = "PublisherStudio"
@@ -3143,9 +3174,13 @@ Use the grouped API navigation to browse namespaces, types, properties, methods,
         throw "PublisherStudio documentation API entry point is missing before publication: $sourceApiIndex"
     }
     foreach ($publishRoot in $publishRoots) {
-        Remove-Item -LiteralPath $publishRoot -Recurse -Force -ErrorAction SilentlyContinue
+        Remove-PublisherStudioTemporaryPath -Path $publishRoot -Attempts 8 -DelayMilliseconds 250
+        if (Test-Path -LiteralPath $publishRoot) {
+            throw "Generated documentation publication root could not be cleared before publishing the current version: $publishRoot. Architectural repair: release the file lock and rerun the build; never merge a new documentation version over stale generated output."
+        }
         New-Item -ItemType Directory -Path $publishRoot -Force | Out-Null
         Copy-Item -Path (Join-Path $siteRoot "*") -Destination $publishRoot -Recurse -Force
+        Remove-PublisherStudioStaleVersionedPdfs -Root $publishRoot -ExpectedPdfName $pdfName
         $publishedApiIndex = Join-Path $publishRoot "api\index.html"
         if (-not (Test-Path -LiteralPath $publishedApiIndex -PathType Leaf)) {
             throw "PublisherStudio documentation API entry point was not published: $publishedApiIndex"
@@ -3463,11 +3498,15 @@ if (-not (Test-Path -LiteralPath $noJekyllPath -PathType Leaf)) {
 }
 
 foreach ($publishRoot in $publishRoots) {
-    Remove-Item -LiteralPath $publishRoot -Recurse -Force -ErrorAction SilentlyContinue
+    Remove-PublisherStudioTemporaryPath -Path $publishRoot -Attempts 8 -DelayMilliseconds 250
+    if (Test-Path -LiteralPath $publishRoot) {
+        throw "Generated documentation publication root could not be cleared before final publication: $publishRoot. Architectural repair: release the file lock and rerun the build; never merge a new documentation version over stale generated output."
+    }
     New-Item -ItemType Directory -Path $publishRoot -Force | Out-Null
     foreach ($siteEntry in Get-ChildItem -LiteralPath $siteRoot -Force) {
         Copy-Item -LiteralPath $siteEntry.FullName -Destination (Join-Path $publishRoot $siteEntry.Name) -Recurse -Force
     }
+    Remove-PublisherStudioStaleVersionedPdfs -Root $publishRoot -ExpectedPdfName $pdfName
     $status = [ordered]@{
         version = $Version
         generatedAtUtc = [DateTime]::UtcNow.ToString("O")

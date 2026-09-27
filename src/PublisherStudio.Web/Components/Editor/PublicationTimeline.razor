@@ -4,7 +4,14 @@
 
 @inject ILogger<PublicationTimeline> Logger
 @inject PublicationEditorTextService EditorText
-<section id="publisher-timeline" class="publication-timeline">
+<div class="razor-component-boundary">
+<DxFormLayout CssClass="razor-component-layout-owner PublicationTimeline">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext001">
+<DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext002">
+        <div id="publisher-timeline" class="publication-timeline">
     <header class="timeline-ribbon-host" @oncontextmenu="ShowBackgroundMenu" @oncontextmenu:preventDefault>
         <DxRibbon CssClass="timeline-ribbon categorized-ribbon" SizeMode="SizeMode.Small" AdaptivityAutoCollapseItemsToGroups="true">
             <DxRibbonTab Text="Timeline">
@@ -135,7 +142,10 @@
                 }
             </div>
         </div>
-</section>
+</div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
 
 <DxContextMenu @ref="_contextMenu">
     <Items>
@@ -182,6 +192,11 @@
         <DxContextMenuItem Text="Close timeline pane" BeginGroup="true" Click="CloseTimeline" />
     </Items>
 </DxContextMenu>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+</div>
+
 
 @code {
 
@@ -265,27 +280,27 @@
     /// Gets the timeline duration value that forms part of the publication timeline state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The timeline duration value exposed by <see cref="PublicationTimeline"/>.</value>
-    private double TimelineDuration => State.EffectivePageTimelineDuration();
+    private double TimelineDuration => GetTimelineDurationForRender();
     /// <summary>
     /// Gets the visible duration value that forms part of the publication timeline state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The visible duration value exposed by <see cref="PublicationTimeline"/>.</value>
-    private double VisibleDuration => Math.Max(.1, _viewEnd - _viewStart);
+    private double VisibleDuration => GetVisibleDurationForRender();
     /// <summary>
     /// Gets the playhead percent value that forms part of the publication timeline state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The playhead percent value exposed by <see cref="PublicationTimeline"/>.</value>
-    private double PlayheadPercent => Math.Clamp((_playhead - _viewStart) / VisibleDuration * 100, 0, 100);
+    private double PlayheadPercent => GetPlayheadPercentForRender();
     /// <summary>
     /// Gets the major tick value that forms part of the publication timeline state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The major tick value exposed by <see cref="PublicationTimeline"/>.</value>
-    private double MajorTick => VisibleDuration switch { <= 5 => .5, <= 15 => 1, <= 45 => 5, <= 180 => 15, <= 600 => 60, _ => 300 };
+    private double MajorTick => GetMajorTickForRender();
     /// <summary>
     /// Gets the minor tick value that forms part of the publication timeline state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The minor tick value exposed by <see cref="PublicationTimeline"/>.</value>
-    private double MinorTick => Math.Max(.05, MajorTick / 5);
+    private double MinorTick => GetMinorTickForRender();
     /// <summary>Gets a scale interval sized for the full overview duration rather than the current zoom window.</summary>
     /// <value>The overview major tick value exposed by <see cref="PublicationTimeline"/>.</value>
     private double OverviewMajorTick
@@ -301,7 +316,7 @@
     }
     /// <summary>Gets a bounded minor interval for the full overview scale so DevExpress does not emit W2003 while zoomed in.</summary>
     /// <value>The overview minor tick value exposed by <see cref="PublicationTimeline"/>.</value>
-    private double OverviewMinorTick => Math.Max(.05, OverviewMajorTick / 5);
+    private double OverviewMinorTick => GetOverviewMinorTickForRender();
     /// <summary>
     /// Gets the ticks collection maintained or exposed by this publication timeline instance for downstream processing.
     /// </summary>
@@ -319,43 +334,33 @@
     /// Gets the rows collection maintained or exposed by this publication timeline instance for downstream processing.
     /// </summary>
     /// <value>The rows value exposed by <see cref="PublicationTimeline"/>.</value>
-    private List<TimelineRow> Rows => State.CurrentPage.Elements
-        .Where(element => element.Animations.Count > 0 || element is PublicationMediaElement || element.Id == State.SelectedElementId)
-        .OrderByDescending(element => element.ZIndex)
-        .Select(element => new TimelineRow(element, element.Animations.OrderBy(item => item.Order).ToList()))
-        .ToList();
+    private List<TimelineRow> Rows => GetRowsForRender();
 
     /// <summary>
     /// Gets the selected animation value that forms part of the publication timeline state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The selected animation value exposed by <see cref="PublicationTimeline"/>.</value>
-    private PublicationAnimation? SelectedAnimation => _selectionKind == TimelineSelectionKind.Animation
-        ? State.CurrentPage.Elements.SelectMany(item => item.Animations).FirstOrDefault(item => item.Id == _selectedId)
-        : null;
+    private PublicationAnimation? SelectedAnimation => GetSelectedAnimationForRender();
     /// <summary>
     /// Gets the selected media value that forms part of the publication timeline state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The selected media value exposed by <see cref="PublicationTimeline"/>.</value>
-    private PublicationMediaElement? SelectedMedia => _selectionKind == TimelineSelectionKind.Media
-        ? State.CurrentPage.Elements.OfType<PublicationMediaElement>().FirstOrDefault(item => item.Id == _selectedId)
-        : null;
+    private PublicationMediaElement? SelectedMedia => GetSelectedMediaForRender();
     /// <summary>
     /// Gets the selected element value that forms part of the publication timeline state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The selected element value exposed by <see cref="PublicationTimeline"/>.</value>
-    private PublicationElement? SelectedElement => _selectionKind == TimelineSelectionKind.Element
-        ? State.CurrentPage.Elements.FirstOrDefault(item => item.Id == _contextElementId)
-        : null;
+    private PublicationElement? SelectedElement => GetSelectedElementForRender();
     /// <summary>
     /// Gets a value indicating whether trim media start applies to the publication timeline state.
     /// </summary>
     /// <value>The can trim media start value exposed by <see cref="PublicationTimeline"/>.</value>
-    private bool CanTrimMediaStart => SelectedMedia is { } media && _playhead > media.TimelineStartSeconds && _playhead < media.TimelineStartSeconds + media.TimelineLengthSeconds - .05;
+    private bool CanTrimMediaStart => GetCanTrimMediaStartForRender();
     /// <summary>
     /// Gets a value indicating whether trim media end applies to the publication timeline state.
     /// </summary>
     /// <value>The can trim media end value exposed by <see cref="PublicationTimeline"/>.</value>
-    private bool CanTrimMediaEnd => SelectedMedia is { } media && _playhead > media.TimelineStartSeconds + .05 && _playhead < media.TimelineStartSeconds + media.TimelineLengthSeconds;
+    private bool CanTrimMediaEnd => GetCanTrimMediaEndForRender();
 
     /// <summary>
     /// Handles the parameters set lifecycle or event notification for <see cref="PublicationTimeline"/>, updating the state required by the surrounding workflow.
@@ -1106,9 +1111,7 @@
     /// Gets the content end value that forms part of the publication timeline state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The content end value exposed by <see cref="PublicationTimeline"/>.</value>
-    private double ContentEnd => Math.Max(1, Math.Max(
-        State.CurrentPage.Elements.SelectMany(item => item.Animations).Select(item => State.EffectiveAnimationStart(item) + AnimationSpan(item)).DefaultIfEmpty(0).Max(),
-        State.CurrentPage.Elements.OfType<PublicationMediaElement>().Select(item => item.TimelineStartSeconds + item.TimelineLengthSeconds).DefaultIfEmpty(0).Max()));
+    private double ContentEnd => GetContentEndForRender();
 
     /// <summary>
     /// Performs insert audio for <see cref="PublicationTimeline"/>, keeping the operation consistent with the state and invariants of the surrounding publication timeline workflow.
@@ -1469,4 +1472,212 @@
         }
     }
 
+
+
+    /// <summary>Computes TimelineDuration for the render path with component-local diagnostics.</summary>
+    /// <returns>The double produced by the operation.</returns>
+    private double GetTimelineDurationForRender()
+    {
+        try
+        {
+            return State.EffectivePageTimelineDuration();
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PublicationTimeline.TimelineDuration failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes VisibleDuration for the render path with component-local diagnostics.</summary>
+    /// <returns>The double produced by the operation.</returns>
+    private double GetVisibleDurationForRender()
+    {
+        try
+        {
+            return Math.Max(.1, _viewEnd - _viewStart);
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PublicationTimeline.VisibleDuration failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes PlayheadPercent for the render path with component-local diagnostics.</summary>
+    /// <returns>The double produced by the operation.</returns>
+    private double GetPlayheadPercentForRender()
+    {
+        try
+        {
+            return Math.Clamp((_playhead - _viewStart) / VisibleDuration * 100, 0, 100);
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PublicationTimeline.PlayheadPercent failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes MajorTick for the render path with component-local diagnostics.</summary>
+    /// <returns>The double produced by the operation.</returns>
+    private double GetMajorTickForRender()
+    {
+        try
+        {
+            return VisibleDuration switch { <= 5 => .5, <= 15 => 1, <= 45 => 5, <= 180 => 15, <= 600 => 60, _ => 300 };
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PublicationTimeline.MajorTick failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes MinorTick for the render path with component-local diagnostics.</summary>
+    /// <returns>The double produced by the operation.</returns>
+    private double GetMinorTickForRender()
+    {
+        try
+        {
+            return Math.Max(.05, MajorTick / 5);
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PublicationTimeline.MinorTick failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes OverviewMinorTick for the render path with component-local diagnostics.</summary>
+    /// <returns>The double produced by the operation.</returns>
+    private double GetOverviewMinorTickForRender()
+    {
+        try
+        {
+            return Math.Max(.05, OverviewMajorTick / 5);
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PublicationTimeline.OverviewMinorTick failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes Rows for the render path with component-local diagnostics.</summary>
+    /// <returns>The collection produced by the operation.</returns>
+    private List<TimelineRow> GetRowsForRender()
+    {
+        try
+        {
+            return State.CurrentPage.Elements
+        .Where(element => element.Animations.Count > 0 || element is PublicationMediaElement || element.Id == State.SelectedElementId)
+        .OrderByDescending(element => element.ZIndex)
+        .Select(element => new TimelineRow(element, element.Animations.OrderBy(item => item.Order).ToList()))
+        .ToList();
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PublicationTimeline.Rows failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SelectedAnimation for the render path with component-local diagnostics.</summary>
+    /// <returns>The publication animation produced by the operation.</returns>
+    private PublicationAnimation? GetSelectedAnimationForRender()
+    {
+        try
+        {
+            return _selectionKind == TimelineSelectionKind.Animation
+        ? State.CurrentPage.Elements.SelectMany(item => item.Animations).FirstOrDefault(item => item.Id == _selectedId)
+        : null;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PublicationTimeline.SelectedAnimation failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SelectedMedia for the render path with component-local diagnostics.</summary>
+    /// <returns>The publication media element produced by the operation.</returns>
+    private PublicationMediaElement? GetSelectedMediaForRender()
+    {
+        try
+        {
+            return _selectionKind == TimelineSelectionKind.Media
+        ? State.CurrentPage.Elements.OfType<PublicationMediaElement>().FirstOrDefault(item => item.Id == _selectedId)
+        : null;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PublicationTimeline.SelectedMedia failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SelectedElement for the render path with component-local diagnostics.</summary>
+    /// <returns>The publication element produced by the operation.</returns>
+    private PublicationElement? GetSelectedElementForRender()
+    {
+        try
+        {
+            return _selectionKind == TimelineSelectionKind.Element
+        ? State.CurrentPage.Elements.FirstOrDefault(item => item.Id == _contextElementId)
+        : null;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PublicationTimeline.SelectedElement failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes CanTrimMediaStart for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetCanTrimMediaStartForRender()
+    {
+        try
+        {
+            return SelectedMedia is { } media && _playhead > media.TimelineStartSeconds && _playhead < media.TimelineStartSeconds + media.TimelineLengthSeconds - .05;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PublicationTimeline.CanTrimMediaStart failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes CanTrimMediaEnd for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetCanTrimMediaEndForRender()
+    {
+        try
+        {
+            return SelectedMedia is { } media && _playhead > media.TimelineStartSeconds + .05 && _playhead < media.TimelineStartSeconds + media.TimelineLengthSeconds;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PublicationTimeline.CanTrimMediaEnd failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes ContentEnd for the render path with component-local diagnostics.</summary>
+    /// <returns>The double produced by the operation.</returns>
+    private double GetContentEndForRender()
+    {
+        try
+        {
+            return Math.Max(1, Math.Max(
+        State.CurrentPage.Elements.SelectMany(item => item.Animations).Select(item => State.EffectiveAnimationStart(item) + AnimationSpan(item)).DefaultIfEmpty(0).Max(),
+        State.CurrentPage.Elements.OfType<PublicationMediaElement>().Select(item => item.TimelineStartSeconds + item.TimelineLengthSeconds).DefaultIfEmpty(0).Max()));
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PublicationTimeline.ContentEnd failed.");
+            throw;
+        }
+    }
 }

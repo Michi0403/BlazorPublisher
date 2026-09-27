@@ -18,6 +18,10 @@
 @inject IJSRuntime JS
 @inject IOptions<OrganicPluginOptions> OrganicOptions
 
+<div class="razor-component-boundary">
+<DxFormLayout CssClass="razor-component-layout-owner OrganicPlugins">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext001">
 <PageTitle>LocalGPT Organic Plugins</PageTitle>
 <UserNotificationHost />
 
@@ -31,7 +35,10 @@
         <button type="button" class="organic-secondary" @onclick="BackToPublisher">Back to PublisherStudio</button>
     </header>
 
-    <section class="organic-status-strip" aria-live="polite">
+    <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext002">
+        <div class="organic-status-strip" aria-live="polite">
         <strong>@(Connection.State.IsLinked ? "Connected and linked" : Connection.State.IsConnected ? "Awaiting LocalGPT approval" : "Not connected")</strong>
         <span>@(Connection.State.IsConnected
             ? Connection.State.DisplayName
@@ -61,9 +68,15 @@
         {
             <span class="organic-note">@_roundTripStatus</span>
         }
-    </section>
+    </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
 
-    <section class="organic-card organic-ai-assist-card" data-testid="publisher-ai-text-generation">
+    <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext003">
+        <div class="organic-card organic-ai-assist-card" data-testid="publisher-ai-text-generation">
         <div class="organic-ai-assist-heading">
             <div>
                 <span class="organic-badge">1-Wire AI</span>
@@ -109,10 +122,16 @@
             </label>
             <p class="organic-note">Auto uses LocalGPT's advertised team keys when available. The override stays useful for custom presets created on the LocalGPT side.</p>
         </details>
-    </section>
+    </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
 
     <div class="organic-grid organic-grid-two">
-        <section class="organic-card">
+        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext004">
+        <div class="organic-card">
             <h2>LocalGPT connection</h2>
             @if (_peers.Count == 0)
             {
@@ -134,9 +153,15 @@
                     }
                 </div>
             }
-        </section>
+        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
 
-        <section class="organic-card organic-workflow-card">
+        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext005">
+        <div class="organic-card organic-workflow-card">
             <h2>Useful AI workflows</h2>
             <div class="organic-capability-grid">
                 <article class="organic-capability"><strong>Writing</strong><p>Generate, rewrite, summarize or review story/document text and insert the approved result in the editor.</p></article>
@@ -144,12 +169,18 @@
                 <article class="organic-capability"><strong>3D / OpenSCAD</strong><p>Use the OpenSCAD team and advertised PublisherStudio 3D capabilities for prompt-driven objects and project guidance.</p></article>
                 <article class="organic-capability"><strong>Project files</strong><p>Use LocalGPT's project/code generation and generic source-file functions instead of forcing a C#-only workflow.</p></article>
             </div>
-        </section>
+        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
     </div>
 
     <details class="organic-advanced-section">
         <summary>Advanced Council request</summary>
-        <section class="organic-card">
+        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext006">
+        <div class="organic-card">
             <h2>Start a custom AI Council round</h2>
             <label>
                 Council team
@@ -173,7 +204,10 @@
                 <label>Parallel models <input type="number" min="1" @bind="_councilRequest.MaxParallelModels" /></label>
             </div>
             <button type="button" class="organic-primary" disabled="@(!CanRunCouncil || string.IsNullOrWhiteSpace(_councilRequest.Prompt))" @onclick="SendCouncilAsync">Submit with user authorization</button>
-        </section>
+        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
     </details>
 
     <details class="organic-advanced-section">
@@ -185,7 +219,10 @@
     {
         <details class="organic-advanced-section">
             <summary>Negotiated LocalGPT routes and capabilities</summary>
-        <section class="organic-card">
+        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext007">
+        <div class="organic-card">
             <h2>Negotiated LocalGPT surface</h2>
             <p class="organic-note">These are the active methods received from LocalGPT during the current 1-Wire handshake. Routes, methods and policy keys remain visible so a user can verify what either application may call.</p>
             <div class="organic-capability-grid">
@@ -214,13 +251,19 @@
                     </tbody>
                 </table>
             </div>
-        </section>
+        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
         </details>
     }
 
     <details class="organic-advanced-section">
         <summary>Protocol settings and diagnostics</summary>
-    <section class="organic-card">
+    <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext008">
+        <div class="organic-card">
         <h2>Active PublisherStudio protocol settings</h2>
         <div class="organic-capability-grid">
             <article class="organic-capability"><strong>Protocol</strong><p>1-Wire @OrganicWireProtocol.Version (minimum @OrganicWireProtocol.MinimumCompatibleVersion)</p></article>
@@ -229,12 +272,18 @@
             <article class="organic-capability"><strong>Limits</strong><p>@OrganicOptions.Value.MaximumMessageBytes bytes · peer expiry @OrganicOptions.Value.PeerExpirySeconds seconds · screen reader minimum @OrganicOptions.Value.MinimumRecurringScreenReaderIntervalSeconds seconds</p></article>
         </div>
         <p class="organic-note">Machine-readable profile: <code>GET /api/organic/onewire/http-json/profile</code>. Documentation profile: <code>GET /api/documentation/profile</code>.</p>
-    </section>
+    </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
     </details>
 
     <details class="organic-advanced-section">
         <summary>PublisherStudio organic capabilities and permissions</summary>
-    <section class="organic-card">
+    <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext009">
+        <div class="organic-card">
         <h2>PublisherStudio organic capabilities</h2>
         <div class="organic-capability-grid">
             @foreach (var capability in _capabilities)
@@ -249,9 +298,15 @@
                 </article>
             }
         </div>
-    </section>
+    </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
 
-    <section class="organic-card">
+    <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext010">
+        <div class="organic-card">
         <h2>Recurring screen-reader help</h2>
         <p class="organic-note">Single-flight scheduling waits for capture and LocalGPT response before the next tick. Intervals are clamped to at least 15 seconds, so requests cannot pile up.</p>
         <div class="organic-form-grid">
@@ -280,10 +335,16 @@
                 }
             </div>
         }
-    </section>
+    </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
 
     <div class="organic-grid organic-grid-two">
-        <section class="organic-card">
+        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext011">
+        <div class="organic-card">
             <h2>Permission matrix</h2>
             <div class="organic-form-grid">
                 <label>
@@ -360,9 +421,15 @@
                     </table>
                 </div>
             }
-        </section>
+        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
 
-        <section class="organic-card">
+        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext012">
+        <div class="organic-card">
             <h2>Pending and recent organ work</h2>
             @if (_work.Count == 0)
             {
@@ -391,11 +458,17 @@
                     }
                 </div>
             }
-        </section>
+        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
     </div>
     </details>
 
-    <section class="organic-card">
+    <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext013">
+        <div class="organic-card">
         <h2>LocalGPT responses and proposals</h2>
         @if (_results.Count == 0 && _textProposals.Count == 0)
         {
@@ -417,8 +490,16 @@
                 @if (!string.IsNullOrWhiteSpace(result.ResultJson)) { <pre>@result.ResultJson</pre> }
             </details>
         }
-    </section>
+    </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
 </main>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+</div>
+
 
 @code {
 
@@ -558,22 +639,17 @@
     /// Gets a value indicating whether run council applies to the organic plugins state.
     /// </summary>
     /// <value>The can run council value exposed by <see cref="OrganicPlugins"/>.</value>
-    private bool CanRunCouncil => Connection.State.IsLinked && Connection.State.HasCapability("council.run");
+    private bool CanRunCouncil => GetCanRunCouncilForRender();
     /// <summary>
     /// Gets a value indicating whether generate text proposal applies to the organic plugins state.
     /// </summary>
     /// <value>The can generate text proposal value exposed by <see cref="OrganicPlugins"/>.</value>
-    private bool CanGenerateTextProposal => CanRunCouncil
-        && _capabilities.Any(item => item.IsEnabled && item.IsOnline && string.Equals(item.Key, "publisher.text.insert.propose", StringComparison.OrdinalIgnoreCase))
-        && !string.IsNullOrWhiteSpace(_textGenerationPrompt)
-        && !string.IsNullOrWhiteSpace(_textGenerationTarget);
+    private bool CanGenerateTextProposal => GetCanGenerateTextProposalForRender();
     /// <summary>
     /// Gets a value indicating whether use screen reader applies to the organic plugins state.
     /// </summary>
     /// <value>The can use screen reader value exposed by <see cref="OrganicPlugins"/>.</value>
-    private bool CanUseScreenReader => Connection.State.IsConnected && Connection.State.IsLinked
-        && Connection.State.HasCapability("localgpt.screenreader.help")
-        && _capabilities.Any(item => item.IsEnabled && item.IsOnline && string.Equals(item.Key, "publisher.screen.capture", StringComparison.OrdinalIgnoreCase));
+    private bool CanUseScreenReader => GetCanUseScreenReaderForRender();
 
     /// <summary>
     /// Gets the council teams collection maintained or exposed by this organic plugins instance for downstream processing.
@@ -1253,4 +1329,55 @@
         }
     }
 
+
+
+    /// <summary>Computes CanRunCouncil for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetCanRunCouncilForRender()
+    {
+        try
+        {
+            return Connection.State.IsLinked && Connection.State.HasCapability("council.run");
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property OrganicPlugins.CanRunCouncil failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes CanGenerateTextProposal for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetCanGenerateTextProposalForRender()
+    {
+        try
+        {
+            return CanRunCouncil
+        && _capabilities.Any(item => item.IsEnabled && item.IsOnline && string.Equals(item.Key, "publisher.text.insert.propose", StringComparison.OrdinalIgnoreCase))
+        && !string.IsNullOrWhiteSpace(_textGenerationPrompt)
+        && !string.IsNullOrWhiteSpace(_textGenerationTarget);
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property OrganicPlugins.CanGenerateTextProposal failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes CanUseScreenReader for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetCanUseScreenReaderForRender()
+    {
+        try
+        {
+            return Connection.State.IsConnected && Connection.State.IsLinked
+        && Connection.State.HasCapability("localgpt.screenreader.help")
+        && _capabilities.Any(item => item.IsEnabled && item.IsOnline && string.Equals(item.Key, "publisher.screen.capture", StringComparison.OrdinalIgnoreCase));
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property OrganicPlugins.CanUseScreenReader failed.");
+            throw;
+        }
+    }
 }

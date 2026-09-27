@@ -6,12 +6,12 @@
     <InvariantGlobalization>false</InvariantGlobalization>
     <RootNamespace>PublisherStudio</RootNamespace>
     <AssemblyName>PublisherStudio.Web</AssemblyName>
-    <Version>3.7.6</Version>
+    <Version>3.9.1</Version>
     <Product>PublisherStudio</Product>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);1591</NoWarn>
     <ApplicationIcon>..\..\assets\PublisherStudio.ico</ApplicationIcon>
-    <DevExpressVersion>25.2.9</DevExpressVersion>
+    <DevExpressVersion>25.2.10</DevExpressVersion>
     <RuntimeIdentifiers>win-x64;win-x86;win-arm64;linux-x64;linux-arm64;osx-x64;osx-arm64</RuntimeIdentifiers>
     <SelfContained Condition="'$(RuntimeIdentifier)' != ''">true</SelfContained>
     <PublishTrimmed>false</PublishTrimmed>
@@ -44,10 +44,10 @@
     <PackageReference Include="DevExpress.Blazor.RichEdit.es" Version="$(DevExpressVersion)" />
     <PackageReference Include="DevExpress.Blazor.RichEdit.ja" Version="$(DevExpressVersion)" />
     <PackageReference Include="DevExpress.AspNetCore.Spreadsheet" Version="$(DevExpressVersion)" />
-    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="10.0.11" />
-    <PackageReference Include="System.CodeDom" Version="10.0.11" />
-    <PackageReference Include="System.Configuration.ConfigurationManager" Version="10.0.11" />
-    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.11" />
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="10.0.12" />
+    <PackageReference Include="System.CodeDom" Version="10.0.12" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="10.0.12" />
+    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.12" />
     <PackageReference Include="System.ServiceModel.Http" Version="10.0.652802" />
     <PackageReference Include="System.ServiceModel.NetTcp" Version="10.0.652802" />
     <PackageReference Include="System.ServiceModel.Primitives" Version="10.0.652802" />

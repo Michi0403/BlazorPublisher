@@ -4,6 +4,10 @@
 
 @inject ILogger<UserNotificationHost> Logger
 @inject ISupervisedTaskRunner TaskRunner
+<div class="razor-component-boundary">
+<DxFormLayout CssClass="razor-component-layout-owner UserNotificationHost">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext001">
 <div class="publisher-notification-host" aria-live="polite" aria-atomic="false">
     @foreach (var message in Notifications.Messages)
     {
@@ -24,6 +28,11 @@
         </article>
     }
 </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+</div>
+
 
 @code {
 

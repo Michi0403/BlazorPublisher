@@ -1,4 +1,5 @@
 param(
+    [switch]$CompileOnly,
     [ValidateSet("Release", "Debug")]
     [string]$Configuration = "Release",
     [string]$WireProtocolVersion = "2.1.1",
@@ -37,6 +38,7 @@ $arguments = @{
 if ($RefreshWireProtocolPackage) { $arguments.RefreshWireProtocolPackage = $true }
 if ($UseBundledWireProtocolPackage) { $arguments.UseBundledWireProtocolPackage = $true }
 if ($UseContainerPackaging) { $arguments.UseContainerPackaging = $true }
+if ($CompileOnly) { $arguments.CompileOnly = $true }
 
 Write-Host "Starting ordered PublisherStudio release build for all maintained runtimes supported by this host..." -ForegroundColor Cyan
 & $releaseScript @arguments

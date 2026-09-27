@@ -1,6 +1,10 @@
 @namespace PublisherStudio.Components.Editor
 
 @inject ILogger<PanelElementPreview> Logger
+<div class="razor-component-boundary">
+<DxFormLayout CssClass="razor-component-layout-owner PanelElementPreview">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext001">
 <div class="panel-element-preview kind-@Item.Kind.ToString().ToLowerInvariant()">
     @switch (Item)
     {
@@ -64,6 +68,11 @@
             break;
     }
 </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+</div>
+
 
 @code {
 

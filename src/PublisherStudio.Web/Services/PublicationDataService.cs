@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.Json;
 using System.Xml.Linq;
 using PublisherStudio.BusinessObjects;
+using PublisherStudio.Services.Configuration;
 
 namespace PublisherStudio.Services;
 
@@ -11,8 +12,9 @@ namespace PublisherStudio.Services;
 /// </summary>
 /// <param name="gridRows">Publication grid row factory dependency used by the publication workflow to provide the corresponding application capability.</param>
 /// <param name="mediaData">Media data value supplied to the publication operation and used when producing its result.</param>
+/// <param name="localization">File-backed localization service used for culture-aware data-visual display text.</param>
 /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
-public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, PublicationMediaData mediaData, ILogger<PublicationDataService> logger)
+public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, PublicationMediaData mediaData, IFileLocalizationService localization, ILogger<PublicationDataService> logger)
 {
     /// <summary>
     /// Creates sample as part of the publication service workflow, applying the service's runtime policy, state management, and diagnostics as required.
@@ -550,6 +552,43 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
         }
     }
 
+    /// <summary>Resolves the display title for a data visual without rewriting a user-authored custom title.</summary>
+    /// <param name="item">Data visual whose persisted title should be resolved for the current UI culture.</param>
+    /// <returns>The culture-aware default title, or the persisted custom title when it is not the canonical default.</returns>
+    public string ResolveVisualDisplayTitle(DataVisualElement item)
+    {
+        try
+        {
+            logger.LogTrace("Resolving culture-aware data visual title for {VisualId}.", item.Id);
+            var canonicalTitle = item.VisualKind switch
+            {
+                DataVisualKind.CartesianChart => "Chart",
+                DataVisualKind.PieChart => "Pie Chart",
+                DataVisualKind.PolarChart => "Polar Chart",
+                DataVisualKind.Sparkline => "Sparkline",
+                DataVisualKind.BarGauge => "Bar Gauge",
+                DataVisualKind.CircularGauge => "Circular Gauge",
+                DataVisualKind.LinearGauge => "Linear Gauge",
+                DataVisualKind.RangeSelector => "Range Selector",
+                DataVisualKind.Sankey => "Sankey Diagram",
+                DataVisualKind.Funnel => "Funnel",
+                DataVisualKind.Pyramid => "Pyramid",
+                DataVisualKind.TreeMap => "Tree Map",
+                DataVisualKind.DataTable => "Data Table",
+                DataVisualKind.KpiProgress => "KPI",
+                _ => "Data Visual"
+            };
+            return string.Equals(item.Title, canonicalTitle, StringComparison.Ordinal)
+                ? localization.GetText(canonicalTitle)
+                : item.Title;
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "PublicationDataService.ResolveVisualDisplayTitle failed: {Message}", exception.Message);
+            throw;
+        }
+    }
+
     /// <summary>
     /// Builds client visual configuration as part of the publication service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
@@ -573,7 +612,7 @@ public sealed class PublicationDataService(IPublicationGridRowFactory gridRows, 
                         pieStyle = item.PieStyle.ToString(),
                         polarStyle = item.PolarStyle.ToString(),
                         sparklineStyle = item.SparklineStyle.ToString(),
-                        item.Title,
+                        title = ResolveVisualDisplayTitle(item),
                         item.ArgumentField,
                         item.SeriesField,
                         argumentMode = item.ArgumentMode.ToString(),

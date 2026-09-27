@@ -1,4 +1,8 @@
 @inject ILogger<Routes> Logger
+<div class="razor-component-boundary">
+<DxFormLayout CssClass="razor-component-layout-owner Routes">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext001">
 <Router AppAssembly="typeof(Program).Assembly">
     <Found Context="routeData">
         <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" />
@@ -10,3 +14,8 @@
         </LayoutView>
     </NotFound>
 </Router>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+</div>
+

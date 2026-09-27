@@ -1,28 +1,43 @@
 @namespace PublisherStudio.Components.Editor
 @inject PublicationDataService DataService
+@inject IFileLocalizationService Localization
 
 @inject ILogger<DataVisualEditor> Logger
+<div class="razor-component-boundary">
+<DxFormLayout CssClass="razor-component-layout-owner DataVisualEditor">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext001">
 @if (Visible && _draft is not null)
 {
-    <div class="modal-backdrop data-modal-backdrop">
-        <section class="data-visual-editor-dialog" role="dialog" aria-modal="true" aria-label="Data visual editor">
+    <DxPopup Visible="true"
+         Width="min(1800px, 98vw)"
+         Height="min(1180px, 96vh)"
+         MaxHeight="96vh"
+         CloseOnOutsideClick="false"
+         CloseOnEscape="false"
+         ShowHeader="false">
+    <BodyContentTemplate Context="publisherPopupContext">
+        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext002">
+        <div class="data-visual-editor-dialog" aria-label='@LT("Data visual editor")'>
             <header>
                 <div>
-                    <strong>Insert / edit data visual</strong>
-                    <span>The complete DevExtreme chart-series workbench plus pies, polar charts, sparklines, gauges, Sankey, funnel, pyramid, tree map, range selector, grid, and KPI.</span>
+                    <strong>@LT("Insert / edit data visual")</strong>
+                    <span>@LT("The complete DevExtreme chart-series workbench plus pies, polar charts, sparklines, gauges, Sankey, funnel, pyramid, tree map, range selector, grid, and KPI.")</span>
                 </div>
-                <button type="button" class="window-close" @onclick="Cancel">×</button>
+                <DxButton CssClass="window-close" Click="Cancel" Text="×" />
             </header>
 
             <DxRibbon CssClass="data-visual-editor-ribbon categorized-ribbon" SizeMode="SizeMode.Small" AdaptivityAutoCollapseItemsToGroups="true">
-                <DxRibbonTab Text="Visual">
-                    <DxRibbonGroup Text="Data" IconCssClass="pub-icon pub-icon-data">
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text="Manage publication data" IsPrimary="true" Click="RequestManage" />
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text="Refresh live data" Click="Refresh" />
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text="Auto-map fields" Click="AutoMapFields" />
+                <DxRibbonTab Text='@LT("Visual")'>
+                    <DxRibbonGroup Text='@LT("Data")' IconCssClass="pub-icon pub-icon-data">
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text='@LT("Manage publication data")' IsPrimary="true" Click="RequestManage" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text='@LT("Refresh live data")' Click="Refresh" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text='@LT("Auto-map fields")' Click="AutoMapFields" />
                     </DxRibbonGroup>
-                    <DxRibbonGroup Text="Options">
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text="Reset visual options" Click="ResetVisualOptions" />
+                    <DxRibbonGroup Text='@LT("Options")'>
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-chart" Text='@LT("Reset visual options")' Click="ResetVisualOptions" />
                     </DxRibbonGroup>
                 </DxRibbonTab>
             </DxRibbon>
@@ -31,235 +46,252 @@
                 <aside class="visual-type-list">
                     @foreach (var kind in Enum.GetValues<DataVisualKind>())
                     {
-                        <button type="button" class="@(_draft.VisualKind == kind ? "selected" : null)" @onclick="() => SetKind(kind)">
+                        <DxButton CssClass="@(_draft.VisualKind == kind ? "selected" : null)" Click="@(() => SetKind(kind))">
                             <span class="visual-type-icon">@KindIcon(kind)</span>
                             <strong>@KindName(kind)</strong>
                             <small>@KindDescription(kind)</small>
-                        </button>
+                        </DxButton>
                     }
                 </aside>
 
                 <main class="visual-settings">
                     <div class="data-form-grid">
-                        <label>Title<input value="@_draft.Title" @onchange="ChangeTitle" /></label>
-                        <label>Data object
-                            <select value="@_draft.DataObjectId" @onchange="ChangeDataObject">
-                                @foreach (var data in State.Document.DataObjects)
-                                {
-                                    <option value="@data.Id">@data.Name (@data.SourceKind)</option>
-                                }
-                            </select>
+                        <label>@LT("Title")
+                            <DxTextBox Text="@_draft.Title" TextChanged="@((string value) => ChangeTitle(new ChangeEventArgs { Value = value }))" CssClass="data-visual-devexpress-editor" />
+                        </label>
+                        <label>@LT("Data object")
+                            <DxComboBox Data="@State.Document.DataObjects"
+                                        Value="@_draft.DataObjectId"
+                                        ValueChanged="@((Guid value) => ChangeDataObject(new ChangeEventArgs { Value = value }))"
+                                        TextFieldName="@nameof(PublicationDataObject.Name)"
+                                        ValueFieldName="@nameof(PublicationDataObject.Id)"
+                                        CssClass="data-visual-devexpress-editor">
+                                <ItemDisplayTemplate>
+                                    <span>@context.DataItem.Name (@LT(Friendly(context.DataItem.SourceKind.ToString())))</span>
+                                </ItemDisplayTemplate>
+                            </DxComboBox>
                         </label>
                     </div>
 
                     @if (CurrentData is null)
                     {
-                        <div class="inline-error">No data object is available. Open the data manager and create one.</div>
+                        <div class="inline-error">@LT("No data object is available. Open the data manager and create one.")</div>
                     }
                     else
                     {
                         <div class="data-form-grid">
-                            <label>Argument / category
-                                <select value="@_draft.ArgumentField" @onchange="ChangeArgumentField">
-                                    @foreach (var column in Columns)
-                                    {
-                                        <option value="@column.Name">@column.Name</option>
-                                    }
-                                </select>
+                            <label>@LT("Argument / category")
+                                <DxComboBox Data="@Columns"
+                                            Value="@_draft.ArgumentField"
+                                            ValueChanged="@((string value) => ChangeArgumentField(new ChangeEventArgs { Value = value }))"
+                                            TextFieldName="@nameof(PublicationDataColumn.Name)"
+                                            ValueFieldName="@nameof(PublicationDataColumn.Name)"
+                                            CssClass="data-visual-devexpress-editor" />
                             </label>
-                            <label>Series grouping (optional)
-                                <select value="@_draft.SeriesField" @onchange="ChangeSeriesField">
-                                    <option value="">None</option>
-                                    @foreach (var column in Columns)
-                                    {
-                                        <option value="@column.Name">@column.Name</option>
-                                    }
-                                </select>
+                            <label>@LT("Series grouping (optional)")
+                                <DxComboBox Data="@Columns"
+                                            Value="@_draft.SeriesField"
+                                            ValueChanged="@((string value) => ChangeSeriesField(new ChangeEventArgs { Value = value }))"
+                                            TextFieldName="@nameof(PublicationDataColumn.Name)"
+                                            ValueFieldName="@nameof(PublicationDataColumn.Name)"
+                                            NullText='@LT("None")'
+                                            ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                                            CssClass="data-visual-devexpress-editor" />
                             </label>
                         </div>
 
                         @if (_draft.VisualKind != DataVisualKind.DataTable)
                         {
                             <div class="data-form-grid chart-data-semantics">
-                                <label>Argument axis
-                                    <select value="@_draft.ArgumentMode" @onchange="ChangeArgumentMode">
-                                        @foreach (var mode in Enum.GetValues<DataVisualArgumentMode>())
-                                        {
-                                            <option value="@mode">@Friendly(mode.ToString())</option>
-                                        }
-                                    </select>
+                                <label>@LT("Argument axis")
+                                    <DxComboBox Data="@ArgumentModeOptions"
+                                                Value="@_draft.ArgumentMode"
+                                                ValueChanged="@((DataVisualArgumentMode value) => ChangeArgumentMode(new ChangeEventArgs { Value = value.ToString() }))"
+                                                CssClass="data-visual-devexpress-editor">
+                                        <ItemDisplayTemplate>@LT(Friendly(context.DataItem.ToString()))</ItemDisplayTemplate>
+                                    </DxComboBox>
                                 </label>
-                                <label>Repeated categories
-                                    <select value="@_draft.AggregationMode" @onchange="ChangeAggregationMode" disabled="@(!SupportsAggregation)">
-                                        @foreach (var mode in Enum.GetValues<DataVisualAggregationMode>())
-                                        {
-                                            <option value="@mode">@AggregationLabel(mode)</option>
-                                        }
-                                    </select>
+                                <label>@LT("Repeated categories")
+                                    <DxComboBox Data="@AggregationModeOptions"
+                                                Value="@_draft.AggregationMode"
+                                                ValueChanged="@((DataVisualAggregationMode value) => ChangeAggregationMode(new ChangeEventArgs { Value = value.ToString() }))"
+                                                Enabled="@SupportsAggregation"
+                                                CssClass="data-visual-devexpress-editor">
+                                        <ItemDisplayTemplate>@LT(AggregationLabel(context.DataItem))</ItemDisplayTemplate>
+                                    </DxComboBox>
                                 </label>
-                                <label>Point order
-                                    <select value="@_draft.SortMode" @onchange="ChangeSortMode">
-                                        @foreach (var mode in Enum.GetValues<DataVisualSortMode>())
-                                        {
-                                            <option value="@mode">@Friendly(mode.ToString())</option>
-                                        }
-                                    </select>
+                                <label>@LT("Point order")
+                                    <DxComboBox Data="@SortModeOptions"
+                                                Value="@_draft.SortMode"
+                                                ValueChanged="@((DataVisualSortMode value) => ChangeSortMode(new ChangeEventArgs { Value = value.ToString() }))"
+                                                CssClass="data-visual-devexpress-editor">
+                                        <ItemDisplayTemplate>@LT(Friendly(context.DataItem.ToString()))</ItemDisplayTemplate>
+                                    </DxComboBox>
                                 </label>
-                                <div class="chart-mapping-advice"><strong>Mapping check</strong><span>@MappingAdvice</span><button type="button" @onclick="AutoMapFields">Auto-map</button></div>
+                                <div class="chart-mapping-advice"><strong>@LT("Mapping check")</strong><span>@LT(MappingAdvice)</span><DxButton Text='@LT("Auto-map")' Click="AutoMapFields" /></div>
                             </div>
 
                             <fieldset class="value-field-picker">
-                                <legend>@(AllowsMultipleValueFields ? "Data fields" : "Data field")</legend>
+                                <legend>@LT(AllowsMultipleValueFields ? "Data fields" : "Data field")</legend>
                                 @foreach (var column in MeasureColumns)
                                 {
                                     <label class="check-row">
-                                        <input type="checkbox"
-                                               checked="@_draft.ValueFields.Contains(column.Name, StringComparer.OrdinalIgnoreCase)"
-                                               @onchange="(ChangeEventArgs args) => ToggleValueField(column.Name, args)" />
-                                        @column.Name <small>@column.ValueKind</small>
+                                        <DxCheckBox Checked="@_draft.ValueFields.Contains(column.Name, StringComparer.OrdinalIgnoreCase)"
+                                                    CheckedChanged="@((bool value) => ToggleValueField(column.Name, new ChangeEventArgs { Value = value }))" />
+                                        @column.Name <small>@LT(Friendly(column.ValueKind.ToString()))</small>
                                     </label>
                                 }
                                 @if (MeasureColumns.Count == 0)
                                 {
-                                    <small>No field was detected in this data object.</small>
+                                    <small>@LT("No field was detected in this data object.")</small>
                                 }
                                 else
                                 {
-                                    <small class="field-measure-help">Numbers are plotted directly, Boolean values use 1/0, and non-empty text or date values count as 1.</small>
+                                    <small class="field-measure-help">@LT("Numbers are plotted directly, Boolean values use 1/0, and non-empty text or date values count as 1.")</small>
                                 }
                             </fieldset>
                         }
 
                         @if (_draft.VisualKind == DataVisualKind.CartesianChart)
                         {
-                            <label>Chart subtype
-                                <select value="@_draft.CartesianStyle" @onchange="ChangeCartesianStyle">
-                                    @foreach (var value in Enum.GetValues<CartesianChartStyle>())
-                                    {
-                                        <option value="@value">@Friendly(value.ToString())</option>
-                                    }
-                                </select>
+                            <label>@LT("Chart subtype")
+                                <DxComboBox Data="@CartesianStyleOptions"
+                                            Value="@_draft.CartesianStyle"
+                                            ValueChanged="@((CartesianChartStyle value) => ChangeCartesianStyle(new ChangeEventArgs { Value = value.ToString() }))"
+                                            CssClass="data-visual-devexpress-editor">
+                                    <ItemDisplayTemplate>@LT(Friendly(context.DataItem.ToString()))</ItemDisplayTemplate>
+                                </DxComboBox>
                             </label>
                         }
                         else if (_draft.VisualKind == DataVisualKind.PieChart)
                         {
-                            <label>Pie subtype
-                                <select value="@_draft.PieStyle" @onchange="ChangePieStyle">
-                                    @foreach (var value in Enum.GetValues<PieChartStyle>())
-                                    {
-                                        <option value="@value">@Friendly(value.ToString())</option>
-                                    }
-                                </select>
+                            <label>@LT("Pie subtype")
+                                <DxComboBox Data="@PieStyleOptions"
+                                            Value="@_draft.PieStyle"
+                                            ValueChanged="@((PieChartStyle value) => ChangePieStyle(new ChangeEventArgs { Value = value.ToString() }))"
+                                            CssClass="data-visual-devexpress-editor">
+                                    <ItemDisplayTemplate>@LT(Friendly(context.DataItem.ToString()))</ItemDisplayTemplate>
+                                </DxComboBox>
                             </label>
                         }
                         else if (_draft.VisualKind == DataVisualKind.PolarChart)
                         {
-                            <label>Polar subtype
-                                <select value="@_draft.PolarStyle" @onchange="ChangePolarStyle">
-                                    @foreach (var value in Enum.GetValues<PolarChartStyle>())
-                                    {
-                                        <option value="@value">@Friendly(value.ToString())</option>
-                                    }
-                                </select>
+                            <label>@LT("Polar subtype")
+                                <DxComboBox Data="@PolarStyleOptions"
+                                            Value="@_draft.PolarStyle"
+                                            ValueChanged="@((PolarChartStyle value) => ChangePolarStyle(new ChangeEventArgs { Value = value.ToString() }))"
+                                            CssClass="data-visual-devexpress-editor">
+                                    <ItemDisplayTemplate>@LT(Friendly(context.DataItem.ToString()))</ItemDisplayTemplate>
+                                </DxComboBox>
                             </label>
                         }
                         else if (_draft.VisualKind == DataVisualKind.Sparkline)
                         {
-                            <label>Sparkline subtype
-                                <select value="@_draft.SparklineStyle" @onchange="ChangeSparklineStyle">
-                                    @foreach (var value in Enum.GetValues<SparklineChartStyle>())
-                                    {
-                                        <option value="@value">@Friendly(value.ToString())</option>
-                                    }
-                                </select>
+                            <label>@LT("Sparkline subtype")
+                                <DxComboBox Data="@SparklineStyleOptions"
+                                            Value="@_draft.SparklineStyle"
+                                            ValueChanged="@((SparklineChartStyle value) => ChangeSparklineStyle(new ChangeEventArgs { Value = value.ToString() }))"
+                                            CssClass="data-visual-devexpress-editor">
+                                    <ItemDisplayTemplate>@LT(Friendly(context.DataItem.ToString()))</ItemDisplayTemplate>
+                                </DxComboBox>
                             </label>
                         }
 
                         @if (_draft.VisualKind == DataVisualKind.CartesianChart && (_draft.CartesianStyle is CartesianChartStyle.RangeArea or CartesianChartStyle.RangeBar))
                         {
                             <div class="data-form-grid">
-                                @FieldSelect("Low value", _draft.LowValueField, ChangeLowValueField, NumericColumns)
-                                @FieldSelect("High value", _draft.HighValueField, ChangeHighValueField, NumericColumns)
+                                <label>@LT("Low value")<DxComboBox Data="@NumericColumns" Value="@_draft.LowValueField" ValueChanged="@((string? value) => ChangeLowValueField(new ChangeEventArgs { Value = value }))" TextFieldName="@nameof(PublicationDataColumn.Name)" ValueFieldName="@nameof(PublicationDataColumn.Name)" CssClass="data-visual-devexpress-editor" /></label>
+                                <label>@LT("High value")<DxComboBox Data="@NumericColumns" Value="@_draft.HighValueField" ValueChanged="@((string? value) => ChangeHighValueField(new ChangeEventArgs { Value = value }))" TextFieldName="@nameof(PublicationDataColumn.Name)" ValueFieldName="@nameof(PublicationDataColumn.Name)" CssClass="data-visual-devexpress-editor" /></label>
                             </div>
                         }
                         @if (_draft.VisualKind == DataVisualKind.CartesianChart && _draft.CartesianStyle == CartesianChartStyle.Bubble)
                         {
-                            @FieldSelect("Bubble size", _draft.SizeField, ChangeSizeField, NumericColumns)
+                            <label>@LT("Bubble size")<DxComboBox Data="@NumericColumns" Value="@_draft.SizeField" ValueChanged="@((string? value) => ChangeSizeField(new ChangeEventArgs { Value = value }))" TextFieldName="@nameof(PublicationDataColumn.Name)" ValueFieldName="@nameof(PublicationDataColumn.Name)" CssClass="data-visual-devexpress-editor" /></label>
                         }
                         @if (_draft.VisualKind == DataVisualKind.CartesianChart && (_draft.CartesianStyle is CartesianChartStyle.Candlestick or CartesianChartStyle.Stock))
                         {
                             <div class="data-form-grid financial-field-grid">
-                                @FieldSelect("Open", _draft.OpenValueField, ChangeOpenValueField, NumericColumns)
-                                @FieldSelect("High", _draft.HighValueField, ChangeHighValueField, NumericColumns)
-                                @FieldSelect("Low", _draft.LowValueField, ChangeLowValueField, NumericColumns)
-                                @FieldSelect("Close", _draft.CloseValueField, ChangeCloseValueField, NumericColumns)
+                                <label>@LT("Open")<DxComboBox Data="@NumericColumns" Value="@_draft.OpenValueField" ValueChanged="@((string? value) => ChangeOpenValueField(new ChangeEventArgs { Value = value }))" TextFieldName="@nameof(PublicationDataColumn.Name)" ValueFieldName="@nameof(PublicationDataColumn.Name)" CssClass="data-visual-devexpress-editor" /></label>
+                                <label>@LT("High")<DxComboBox Data="@NumericColumns" Value="@_draft.HighValueField" ValueChanged="@((string? value) => ChangeHighValueField(new ChangeEventArgs { Value = value }))" TextFieldName="@nameof(PublicationDataColumn.Name)" ValueFieldName="@nameof(PublicationDataColumn.Name)" CssClass="data-visual-devexpress-editor" /></label>
+                                <label>@LT("Low")<DxComboBox Data="@NumericColumns" Value="@_draft.LowValueField" ValueChanged="@((string? value) => ChangeLowValueField(new ChangeEventArgs { Value = value }))" TextFieldName="@nameof(PublicationDataColumn.Name)" ValueFieldName="@nameof(PublicationDataColumn.Name)" CssClass="data-visual-devexpress-editor" /></label>
+                                <label>@LT("Close")<DxComboBox Data="@NumericColumns" Value="@_draft.CloseValueField" ValueChanged="@((string? value) => ChangeCloseValueField(new ChangeEventArgs { Value = value }))" TextFieldName="@nameof(PublicationDataColumn.Name)" ValueFieldName="@nameof(PublicationDataColumn.Name)" CssClass="data-visual-devexpress-editor" /></label>
                             </div>
                         }
                         @if (_draft.VisualKind == DataVisualKind.Sankey)
                         {
-                            @FieldSelect("Target node", _draft.TargetField, ChangeTargetField, Columns)
+                            <label>@LT("Target node")<DxComboBox Data="@Columns" Value="@_draft.TargetField" ValueChanged="@((string? value) => ChangeTargetField(new ChangeEventArgs { Value = value }))" TextFieldName="@nameof(PublicationDataColumn.Name)" ValueFieldName="@nameof(PublicationDataColumn.Name)" CssClass="data-visual-devexpress-editor" /></label>
                         }
                         @if (_draft.VisualKind == DataVisualKind.TreeMap)
                         {
-                            @FieldSelect("Parent field (optional)", _draft.ParentField, ChangeParentField, Columns, true)
+                            <label>@LT("Parent field (optional)")<DxComboBox Data="@Columns" Value="@_draft.ParentField" ValueChanged="@((string? value) => ChangeParentField(new ChangeEventArgs { Value = value }))" TextFieldName="@nameof(PublicationDataColumn.Name)" ValueFieldName="@nameof(PublicationDataColumn.Name)" NullText='@LT("None")' ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" CssClass="data-visual-devexpress-editor" /></label>
                         }
 
                         @if (_draft.VisualKind is DataVisualKind.BarGauge or DataVisualKind.CircularGauge or DataVisualKind.LinearGauge or DataVisualKind.KpiProgress)
                         {
                             <div class="data-form-grid">
-                                <label>Minimum<input type="number" step="any" value="@Inv(_draft.MinimumValue)" @onchange="ChangeMinimum" /></label>
-                                <label>Maximum<input type="number" step="any" value="@Inv(_draft.MaximumValue)" @onchange="ChangeMaximum" /></label>
+                                <label>@LT("Minimum")<DxSpinEdit T="double" Value="@_draft.MinimumValue" ValueChanged="@((double value) => ChangeMinimum(new ChangeEventArgs { Value = value }))" CssClass="data-visual-devexpress-editor" /></label>
+                                <label>@LT("Maximum")<DxSpinEdit T="double" Value="@_draft.MaximumValue" ValueChanged="@((double value) => ChangeMaximum(new ChangeEventArgs { Value = value }))" CssClass="data-visual-devexpress-editor" /></label>
                             </div>
                         }
                         @if (_draft.VisualKind == DataVisualKind.DataTable)
                         {
                             <div class="data-form-grid">
-                                <label>Maximum rows<input type="number" min="1" max="100" value="@_draft.RowLimit" @onchange="ChangeRowLimit" /></label>
-                                <label class="check-row"><input type="checkbox" checked="@_draft.TableShowFilterRow" @onchange="ToggleFilterRow" /> Interactive filter row</label>
+                                <label>@LT("Maximum rows")<DxSpinEdit T="int" MinValue="1" MaxValue="100" Value="@_draft.RowLimit" ValueChanged="@((int value) => ChangeRowLimit(new ChangeEventArgs { Value = value }))" CssClass="data-visual-devexpress-editor" /></label>
+                                <label class="check-row"><DxCheckBox Checked="@_draft.TableShowFilterRow" CheckedChanged="@((bool value) => ToggleFilterRow(new ChangeEventArgs { Value = value }))" /> @LT("Interactive filter row")</label>
                             </div>
                         }
 
                         <div class="visual-option-grid">
-                            <label class="check-row"><input type="checkbox" checked="@_draft.ShowTitle" @onchange="ToggleTitle" /> Show title</label>
+                            <label class="check-row"><DxCheckBox Checked="@_draft.ShowTitle" CheckedChanged="@((bool value) => ToggleTitle(new ChangeEventArgs { Value = value }))" /> @LT("Show title")</label>
                             @if (_draft.VisualKind is DataVisualKind.CartesianChart or DataVisualKind.PieChart or DataVisualKind.PolarChart or DataVisualKind.BarGauge or DataVisualKind.Sankey)
                             {
-                                <label class="check-row"><input type="checkbox" checked="@_draft.ShowLegend" @onchange="ToggleLegend" /> Show legend</label>
+                                <label class="check-row"><DxCheckBox Checked="@_draft.ShowLegend" CheckedChanged="@((bool value) => ToggleLegend(new ChangeEventArgs { Value = value }))" /> @LT("Show legend")</label>
                             }
                             @if (_draft.VisualKind is DataVisualKind.PieChart or DataVisualKind.PolarChart or DataVisualKind.Sankey or DataVisualKind.Funnel or DataVisualKind.Pyramid)
                             {
-                                <label class="check-row"><input type="checkbox" checked="@_draft.ShowLabels" @onchange="ToggleLabels" /> Show point labels</label>
+                                <label class="check-row"><DxCheckBox Checked="@_draft.ShowLabels" CheckedChanged="@((bool value) => ToggleLabels(new ChangeEventArgs { Value = value }))" /> @LT("Show point labels")</label>
                             }
                         </div>
                     }
                 </main>
 
-                <section class="visual-live-preview">
-                    <div class="pane-heading"><strong>Live preview</strong><span>@CurrentData?.Name</span></div>
+                <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext003">
+        <div class="visual-live-preview">
+                    <div class="pane-heading"><strong>@LT("Live preview")</strong><span>@CurrentData?.Name</span></div>
                     <div class="visual-preview-frame"
                          tabindex="0"
-                         title="Right-click for visual commands"
+                         title='@LT("Right-click for visual commands")'
                          @oncontextmenu="ShowVisualContextMenu"
                          @oncontextmenu:preventDefault
                          @oncontextmenu:stopPropagation>
                         <DataVisualView Document="State.Document" Item="_draft" CurrentPageId="State.SelectedPageId" />
                     </div>
-                    <p>Visuals remain live DevExpress components on the publication canvas. Web bindings are refreshed by the local monolith and standalone HTML can optionally continue polling with embedded JavaScript.</p>
-                </section>
+                    <p>@LT("Visuals remain live DevExpress components on the publication canvas. Web bindings are refreshed by the local monolith and standalone HTML can optionally continue polling with embedded JavaScript.")</p>
+                </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
             </div>
 
             <footer>
                 <span>@ValidationText</span>
-                <div><DxButton Text="Cancel" Click="Cancel" /><DxButton Text="Apply to object" Click="Save" RenderStyle="ButtonRenderStyle.Primary" Enabled="@CanSave" /></div>
+                <div><DxButton Text='@LT("Cancel")' Click="Cancel" /><DxButton Text='@LT("Apply to object")' Click="Save" RenderStyle="ButtonRenderStyle.Primary" Enabled="@CanSave" /></div>
             </footer>
-        </section>
-    </div>
+        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+        </BodyContentTemplate>
+</DxPopup>
 
     <DxContextMenu @ref="_visualContextMenu">
         <Items>
-            <DxContextMenuItem Text="Apply changes" IconCssClass="pub-icon pub-icon-edit" Enabled="@CanSave" Click="Save" />
-            <DxContextMenuItem Text="Refresh live data" IconCssClass="pub-icon pub-icon-data" Click="Refresh" />
-            <DxContextMenuItem Text="Manage publication data…" IconCssClass="pub-icon pub-icon-data" Click="RequestManage" />
-            <DxContextMenuItem Text="Visual type" BeginGroup="true">
+            <DxContextMenuItem Text='@LT("Apply changes")' IconCssClass="pub-icon pub-icon-edit" Enabled="@CanSave" Click="Save" />
+            <DxContextMenuItem Text='@LT("Refresh live data")' IconCssClass="pub-icon pub-icon-data" Click="Refresh" />
+            <DxContextMenuItem Text='@LT("Manage publication data…")' IconCssClass="pub-icon pub-icon-data" Click="RequestManage" />
+            <DxContextMenuItem Text='@LT("Visual type")' BeginGroup="true">
                 <Items>
                     <DxContextMenuItem Text="@(CheckedText(_draft.VisualKind == DataVisualKind.CartesianChart, KindName(DataVisualKind.CartesianChart)))" Click="SetCartesianChart" />
                     <DxContextMenuItem Text="@(CheckedText(_draft.VisualKind == DataVisualKind.PieChart, KindName(DataVisualKind.PieChart)))" Click="SetPieChart" />
@@ -277,23 +309,28 @@
                     <DxContextMenuItem Text="@(CheckedText(_draft.VisualKind == DataVisualKind.KpiProgress, KindName(DataVisualKind.KpiProgress)))" Click="SetKpiProgress" />
                 </Items>
             </DxContextMenuItem>
-            <DxContextMenuItem Text="@(CheckedText(_draft.ShowTitle, "Show title"))" Click="ToggleTitleMenu" />
+            <DxContextMenuItem Text="@(CheckedText(_draft.ShowTitle, LT("Show title")))" Click="ToggleTitleMenu" />
             @if (_draft.VisualKind is DataVisualKind.CartesianChart or DataVisualKind.PieChart or DataVisualKind.PolarChart or DataVisualKind.BarGauge or DataVisualKind.Sankey)
             {
-                <DxContextMenuItem Text="@(CheckedText(_draft.ShowLegend, "Show legend"))" Click="ToggleLegendMenu" />
+                <DxContextMenuItem Text="@(CheckedText(_draft.ShowLegend, LT("Show legend")))" Click="ToggleLegendMenu" />
             }
             @if (_draft.VisualKind is DataVisualKind.PieChart or DataVisualKind.PolarChart or DataVisualKind.Sankey or DataVisualKind.Funnel or DataVisualKind.Pyramid)
             {
-                <DxContextMenuItem Text="@(CheckedText(_draft.ShowLabels, "Show point labels"))" Click="ToggleLabelsMenu" />
+                <DxContextMenuItem Text="@(CheckedText(_draft.ShowLabels, LT("Show point labels")))" Click="ToggleLabelsMenu" />
             }
             @if (_draft.VisualKind == DataVisualKind.DataTable)
             {
-                <DxContextMenuItem Text="@(CheckedText(_draft.TableShowFilterRow, "Interactive filter row"))" Click="ToggleFilterRowMenu" />
+                <DxContextMenuItem Text="@(CheckedText(_draft.TableShowFilterRow, LT("Interactive filter row")))" Click="ToggleFilterRowMenu" />
             }
-            <DxContextMenuItem Text="Reset visual options" BeginGroup="true" Click="ResetVisualOptions" />
+            <DxContextMenuItem Text='@LT("Reset visual options")' BeginGroup="true" Click="ResetVisualOptions" />
         </Items>
     </DxContextMenu>
 }
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+</div>
+
 
 @code {
 
@@ -339,38 +376,58 @@
     /// Stores the internal draft state used by <see cref="DataVisualEditor"/> while executing its surrounding workflow.
     /// </summary>
     private DataVisualElement? _draft;
+    /// <summary>Gets the stable argument-mode options bound to the DevExpress combo box.</summary>
+    /// <value>The argument-mode options prepared outside Razor attribute syntax.</value>
+    private IReadOnlyList<DataVisualArgumentMode> ArgumentModeOptions { get; } = Enum.GetValues<DataVisualArgumentMode>();
+    /// <summary>Gets the stable aggregation-mode options bound to the DevExpress combo box.</summary>
+    /// <value>The aggregation-mode options prepared outside Razor attribute syntax.</value>
+    private IReadOnlyList<DataVisualAggregationMode> AggregationModeOptions { get; } = Enum.GetValues<DataVisualAggregationMode>();
+    /// <summary>Gets the stable sort-mode options bound to the DevExpress combo box.</summary>
+    /// <value>The sort-mode options prepared outside Razor attribute syntax.</value>
+    private IReadOnlyList<DataVisualSortMode> SortModeOptions { get; } = Enum.GetValues<DataVisualSortMode>();
+    /// <summary>Gets the stable Cartesian chart-style options bound to the DevExpress combo box.</summary>
+    /// <value>The Cartesian chart-style options prepared outside Razor attribute syntax.</value>
+    private IReadOnlyList<CartesianChartStyle> CartesianStyleOptions { get; } = Enum.GetValues<CartesianChartStyle>();
+    /// <summary>Gets the stable pie chart-style options bound to the DevExpress combo box.</summary>
+    /// <value>The pie chart-style options prepared outside Razor attribute syntax.</value>
+    private IReadOnlyList<PieChartStyle> PieStyleOptions { get; } = Enum.GetValues<PieChartStyle>();
+    /// <summary>Gets the stable polar chart-style options bound to the DevExpress combo box.</summary>
+    /// <value>The polar chart-style options prepared outside Razor attribute syntax.</value>
+    private IReadOnlyList<PolarChartStyle> PolarStyleOptions { get; } = Enum.GetValues<PolarChartStyle>();
+    /// <summary>Gets the stable sparkline chart-style options bound to the DevExpress combo box.</summary>
+    /// <value>The sparkline chart-style options prepared outside Razor attribute syntax.</value>
+    private IReadOnlyList<SparklineChartStyle> SparklineStyleOptions { get; } = Enum.GetValues<SparklineChartStyle>();
+
     /// <summary>
     /// Gets the current data value that forms part of the data visual editor state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The current data value exposed by <see cref="DataVisualEditor"/>.</value>
-    private PublicationDataObject? CurrentData => _draft is null ? null : State.Document.DataObjects.FirstOrDefault(data => data.Id == _draft.DataObjectId);
+    private PublicationDataObject? CurrentData => GetCurrentDataForRender();
     /// <summary>
     /// Gets the columns collection maintained or exposed by this data visual editor instance for downstream processing.
     /// </summary>
     /// <value>The columns value exposed by <see cref="DataVisualEditor"/>.</value>
-    private IReadOnlyList<PublicationDataColumn> Columns => DataService.ResolveColumns(CurrentData);
+    private IReadOnlyList<PublicationDataColumn> Columns => GetColumnsForRender();
     /// <summary>
     /// Gets the measure columns collection maintained or exposed by this data visual editor instance for downstream processing.
     /// </summary>
     /// <value>The measure columns value exposed by <see cref="DataVisualEditor"/>.</value>
-    private IReadOnlyList<PublicationDataColumn> MeasureColumns => NumericColumns.Count > 0 ? NumericColumns : Columns;
+    private IReadOnlyList<PublicationDataColumn> MeasureColumns => GetMeasureColumnsForRender();
     /// <summary>
     /// Gets the numeric columns collection maintained or exposed by this data visual editor instance for downstream processing.
     /// </summary>
     /// <value>The numeric columns value exposed by <see cref="DataVisualEditor"/>.</value>
-    private IReadOnlyList<PublicationDataColumn> NumericColumns => Columns
-        .Where(column => column.ValueKind is PublicationDataValueKind.Number or PublicationDataValueKind.Boolean)
-        .ToArray();
+    private IReadOnlyList<PublicationDataColumn> NumericColumns => GetNumericColumnsForRender();
     /// <summary>
     /// Gets a value indicating whether allows multiple value fields applies to the data visual editor state.
     /// </summary>
     /// <value>The allows multiple value fields value exposed by <see cref="DataVisualEditor"/>.</value>
-    private bool AllowsMultipleValueFields => _draft?.VisualKind is DataVisualKind.CartesianChart or DataVisualKind.PolarChart or DataVisualKind.BarGauge or DataVisualKind.CircularGauge or DataVisualKind.LinearGauge;
+    private bool AllowsMultipleValueFields => GetAllowsMultipleValueFieldsForRender();
     /// <summary>
     /// Gets a value indicating whether aggregation applies to the data visual editor state.
     /// </summary>
     /// <value>The supports aggregation value exposed by <see cref="DataVisualEditor"/>.</value>
-    private bool SupportsAggregation => _draft?.VisualKind is DataVisualKind.CartesianChart or DataVisualKind.PieChart or DataVisualKind.PolarChart or DataVisualKind.Sparkline or DataVisualKind.RangeSelector or DataVisualKind.Funnel or DataVisualKind.Pyramid;
+    private bool SupportsAggregation => GetSupportsAggregationForRender();
     /// <summary>
     /// Gets the mapping advice value that forms part of the data visual editor state consumed or produced by the surrounding workflow.
     /// </summary>
@@ -380,18 +437,12 @@
     /// Gets a value indicating whether save applies to the data visual editor state.
     /// </summary>
     /// <value>The can save value exposed by <see cref="DataVisualEditor"/>.</value>
-    private bool CanSave => _draft is not null && CurrentData is not null && ValidateFields(_draft);
+    private bool CanSave => GetCanSaveForRender();
     /// <summary>
     /// Gets the validation text value that forms part of the data visual editor state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The validation text value exposed by <see cref="DataVisualEditor"/>.</value>
-    private string ValidationText => CurrentData is null
-        ? "Choose or create a data object."
-        : _draft is not null && !ValidateFields(_draft)
-            ? "Choose the required argument, value, range, financial, target, or hierarchy fields for this visual."
-            : CurrentData.SourceKind == PublicationDataSourceKind.Web
-                ? "This visual uses an embedded snapshot and the configured web binding."
-                : "The visual uses publication data stored in the document.";
+    private string ValidationText => GetValidationTextForRender();
 
     /// <summary>
     /// Handles the parameters set lifecycle or event notification for <see cref="DataVisualEditor"/>, updating the state required by the surrounding workflow.
@@ -1292,6 +1343,22 @@
         }
     }
 
+    /// <summary>Translates a source UI string through the file-backed localization catalog.</summary>
+    /// <param name="text">English source text used as the localization lookup value.</param>
+    /// <returns>The localized string for the current UI culture.</returns>
+    private string LT(string text)
+    {
+        try
+        {
+            return Localization.GetText(text);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DataVisualEditor)}.{nameof(LT)} failed.");
+            throw;
+        }
+    }
+
     /// <summary>
     /// Performs kind icon for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
     /// </summary>
@@ -1323,7 +1390,7 @@
     private string KindName(DataVisualKind kind) {
         try
         {
-            return Friendly(kind.ToString());
+            return LT(Friendly(kind.ToString()));
         }
         catch (Exception __componentMethodException)
         {
@@ -1339,7 +1406,7 @@
     private string KindDescription(DataVisualKind kind) {
         try
         {
-            return kind switch
+            return LT(kind switch
     {
         DataVisualKind.CartesianChart => "All 23 DevExtreme XY, range, bubble, stock, and candlestick series",
         DataVisualKind.PieChart => "Pie or doughnut composition",
@@ -1355,49 +1422,11 @@
         DataVisualKind.TreeMap => "Hierarchical area map",
         DataVisualKind.DataTable => "DevExpress data grid",
         _ => "Single value with progress indicator"
-    };
+    });
         }
         catch (Exception __componentMethodException)
         {
             Logger.LogError(__componentMethodException, $"Component method {nameof(DataVisualEditor)}.{nameof(KindDescription)} failed.");
-            throw;
-        }
-    }
-
-    /// <summary>
-    /// Performs field select for <see cref="DataVisualEditor"/>, keeping the operation consistent with the state and invariants of the surrounding data visual editor workflow.
-    /// </summary>
-    /// <param name="label">Label value supplied to the data visual editor operation and used when producing its result.</param>
-    /// <param name="value">Value value supplied to the data visual editor operation and used when producing its result.</param>
-    /// <param name="changed">Changed value supplied to the data visual editor operation and used when producing its result.</param>
-    /// <param name="columns">Publication data column dependency used by the data visual editor workflow to provide the corresponding application capability.</param>
-    /// <param name="allowNone">Value indicating whether allow none should apply to this operation.</param>
-    /// <returns>The render fragment produced by the operation.</returns>
-    private RenderFragment FieldSelect(string label, string value, Action<ChangeEventArgs> changed, IReadOnlyList<PublicationDataColumn> columns, bool allowNone = false) {
-        try
-        {
-            return builder =>
-    {
-        var sequence = 0;
-        builder.OpenElement(sequence++, "label");
-        builder.AddContent(sequence++, label);
-        builder.OpenElement(sequence++, "select");
-        builder.AddAttribute(sequence++, "value", value);
-        builder.AddAttribute(sequence++, "onchange", EventCallback.Factory.Create(this, changed));
-        if (allowNone)
-        {
-            builder.OpenElement(sequence++, "option"); builder.AddAttribute(sequence++, "value", ""); builder.AddContent(sequence++, "None"); builder.CloseElement();
-        }
-        foreach (var column in columns)
-        {
-            builder.OpenElement(sequence++, "option"); builder.AddAttribute(sequence++, "value", column.Name); builder.AddContent(sequence++, column.Name); builder.CloseElement();
-        }
-        builder.CloseElement(); builder.CloseElement();
-    };
-        }
-        catch (Exception __componentMethodException)
-        {
-            Logger.LogError(__componentMethodException, $"Component method {nameof(DataVisualEditor)}.{nameof(FieldSelect)} failed.");
             throw;
         }
     }
@@ -1652,4 +1681,133 @@
         }
     }
 
+
+
+    /// <summary>Computes CurrentData for the render path with component-local diagnostics.</summary>
+    /// <returns>The publication data object produced by the operation.</returns>
+    private PublicationDataObject? GetCurrentDataForRender()
+    {
+        try
+        {
+            return _draft is null ? null : State.Document.DataObjects.FirstOrDefault(data => data.Id == _draft.DataObjectId);
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property DataVisualEditor.CurrentData failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes Columns for the render path with component-local diagnostics.</summary>
+    /// <returns>The collection produced by the operation.</returns>
+    private IReadOnlyList<PublicationDataColumn> GetColumnsForRender()
+    {
+        try
+        {
+            return DataService.ResolveColumns(CurrentData);
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property DataVisualEditor.Columns failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes MeasureColumns for the render path with component-local diagnostics.</summary>
+    /// <returns>The collection produced by the operation.</returns>
+    private IReadOnlyList<PublicationDataColumn> GetMeasureColumnsForRender()
+    {
+        try
+        {
+            return NumericColumns.Count > 0 ? NumericColumns : Columns;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property DataVisualEditor.MeasureColumns failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes NumericColumns for the render path with component-local diagnostics.</summary>
+    /// <returns>The collection produced by the operation.</returns>
+    private IReadOnlyList<PublicationDataColumn> GetNumericColumnsForRender()
+    {
+        try
+        {
+            return Columns
+        .Where(column => column.ValueKind is PublicationDataValueKind.Number or PublicationDataValueKind.Boolean)
+        .ToArray();
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property DataVisualEditor.NumericColumns failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes AllowsMultipleValueFields for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetAllowsMultipleValueFieldsForRender()
+    {
+        try
+        {
+            return _draft?.VisualKind is DataVisualKind.CartesianChart or DataVisualKind.PolarChart or DataVisualKind.BarGauge or DataVisualKind.CircularGauge or DataVisualKind.LinearGauge;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property DataVisualEditor.AllowsMultipleValueFields failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SupportsAggregation for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetSupportsAggregationForRender()
+    {
+        try
+        {
+            return _draft?.VisualKind is DataVisualKind.CartesianChart or DataVisualKind.PieChart or DataVisualKind.PolarChart or DataVisualKind.Sparkline or DataVisualKind.RangeSelector or DataVisualKind.Funnel or DataVisualKind.Pyramid;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property DataVisualEditor.SupportsAggregation failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes CanSave for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetCanSaveForRender()
+    {
+        try
+        {
+            return _draft is not null && CurrentData is not null && ValidateFields(_draft);
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property DataVisualEditor.CanSave failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes ValidationText for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetValidationTextForRender()
+    {
+        try
+        {
+            return CurrentData is null
+        ? LT("Choose or create a data object.")
+        : _draft is not null && !ValidateFields(_draft)
+            ? LT("Choose the required argument, value, range, financial, target, or hierarchy fields for this visual.")
+            : CurrentData.SourceKind == PublicationDataSourceKind.Web
+                ? LT("This visual uses an embedded snapshot and the configured web binding.")
+                : LT("The visual uses publication data stored in the document.");
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property DataVisualEditor.ValidationText failed.");
+            throw;
+        }
+    }
 }

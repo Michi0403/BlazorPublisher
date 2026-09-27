@@ -4,6 +4,10 @@
 @inject PublicationMediaAssetStore MediaAssets
 
 @inject ILogger<VideoMediaView> Logger
+<div class="razor-component-boundary">
+<DxFormLayout CssClass="razor-component-layout-owner VideoMediaView">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext001">
 <div class="publication-video-renderer" style="background:@Item.Background">
     <video id="@VideoId"
            class="publication-video-source"
@@ -31,6 +35,11 @@
     <canvas id="@CanvasId" class="publication-video-effect-canvas" aria-hidden="true"></canvas>
     <span class="media-object-badge">▶ @Time(Item.TimelineLengthSeconds)</span>
 </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+</div>
+
 
 @code {
 
@@ -44,17 +53,17 @@
     /// Gets the stable runtime key used to identify or correlate this video media view instance with related application state.
     /// </summary>
     /// <value>The runtime key value exposed by <see cref="VideoMediaView"/>.</value>
-    private string RuntimeKey => $"publication-video-{Item.Id:N}";
+    private string RuntimeKey => GetRuntimeKeyForRender();
     /// <summary>
     /// Gets the stable video identifier used to identify or correlate this video media view instance with related application state.
     /// </summary>
     /// <value>The video identifier value exposed by <see cref="VideoMediaView"/>.</value>
-    private string VideoId => $"publication-video-source-{Item.Id:N}";
+    private string VideoId => GetVideoIdForRender();
     /// <summary>
     /// Gets the stable canvas identifier used to identify or correlate this video media view instance with related application state.
     /// </summary>
     /// <value>The canvas identifier value exposed by <see cref="VideoMediaView"/>.</value>
-    private string CanvasId => $"publication-video-effects-{Item.Id:N}";
+    private string CanvasId => GetCanvasIdForRender();
     /// <summary>
     /// Tracks whether the browser video-effects runtime has installed this media instance; static prerender instances remain false.
     /// </summary>
@@ -63,17 +72,12 @@
     /// Gets the poster value that forms part of the video media view state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The poster value exposed by <see cref="VideoMediaView"/>.</value>
-    private string Poster => Item.EffectiveSegments.FirstOrDefault()?.PosterDataUrl is { Length: > 0 } poster ? poster : Item.PosterDataUrl;
+    private string Poster => GetPosterForRender();
     /// <summary>
     /// Gets the fit mode value that forms part of the video media view state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The fit mode value exposed by <see cref="VideoMediaView"/>.</value>
-    private string FitMode => Item.FitMode switch
-    {
-        PublicationVideoFitMode.Contain => "contain",
-        PublicationVideoFitMode.Stretch => "fill",
-        _ => "cover"
-    };
+    private string FitMode => GetFitModeForRender();
 
     /// <summary>
     /// Handles the after render async lifecycle or event notification for <see cref="VideoMediaView"/>, updating the state required by the surrounding workflow.
@@ -237,4 +241,85 @@
         }
     }
 
+
+
+    /// <summary>Computes RuntimeKey for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetRuntimeKeyForRender()
+    {
+        try
+        {
+            return $"publication-video-{Item.Id:N}";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property VideoMediaView.RuntimeKey failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes VideoId for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetVideoIdForRender()
+    {
+        try
+        {
+            return $"publication-video-source-{Item.Id:N}";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property VideoMediaView.VideoId failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes CanvasId for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetCanvasIdForRender()
+    {
+        try
+        {
+            return $"publication-video-effects-{Item.Id:N}";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property VideoMediaView.CanvasId failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes Poster for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetPosterForRender()
+    {
+        try
+        {
+            return Item.EffectiveSegments.FirstOrDefault()?.PosterDataUrl is { Length: > 0 } poster ? poster : Item.PosterDataUrl;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property VideoMediaView.Poster failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes FitMode for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetFitModeForRender()
+    {
+        try
+        {
+            return Item.FitMode switch
+    {
+        PublicationVideoFitMode.Contain => "contain",
+        PublicationVideoFitMode.Stretch => "fill",
+        _ => "cover"
+    };
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property VideoMediaView.FitMode failed.");
+            throw;
+        }
+    }
 }

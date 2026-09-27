@@ -1,6 +1,10 @@
 @inject SystemFontCatalog SystemFonts
 
 @inject ILogger<SystemFontPicker> Logger
+<div class="razor-component-boundary">
+<DxFormLayout CssClass="razor-component-layout-owner SystemFontPicker">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext001">
 <div class="system-font-picker @CssClass">
     <input type="text"
            class="system-font-picker-input"
@@ -29,6 +33,11 @@
         <option value="@font"></option>
     }
 </datalist>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+</div>
+
 
 @code {
 

@@ -24,8 +24,18 @@ foreach ($file in $razorFiles) {
     $componentName = [IO.Path]::GetFileNameWithoutExtension($file.Name)
     $expected = "@inject ILogger<$componentName> Logger"
     $text = Get-Content -LiteralPath $file.FullName -Raw
-    $count = ([regex]::Matches($text, [regex]::Escape($expected))).Count
-    if ($count -ne 1) { Fail "Every Razor component must own exactly one typed ILogger injection '$expected'; found $count in $($file.FullName)." }
+    $matches = [regex]::Matches($text, [regex]::Escape($expected))
+    $count = $matches.Count
+    if ($count -ne 1) {
+        $relative = $file.FullName.Substring($RepositoryRoot.Length).TrimStart([char[]]@([char]'\', [char]'/')).Replace('\','/')
+        $lineNumber = 1
+        if ($count -gt 0) {
+            $lineNumber = 1 + $text.Substring(0, $matches[0].Index).Split([char]10).Count - 1
+        }
+        Write-Output ("{0}({1},1): error RAZORLOG0001: Every Razor component must own exactly one typed ILogger injection '{2}'; found {3}." -f $relative, $lineNumber, $expected, $count)
+        Write-Output "  Architectural choices: restore exactly one typed component logger in the top directive block. Keep component-local diagnostics; do not weaken the rule into a global-only logger or remove the failing operation."
+        Fail "Typed component logger ownership failed for $relative."
+    }
 }
 
 $mainLayout = Get-Content -LiteralPath $mainLayoutPath -Raw

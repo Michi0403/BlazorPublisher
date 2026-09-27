@@ -12,6 +12,10 @@
 @inject IPagePresetCatalog PagePresets
 
 @inject ILogger<InspectorPanel> Logger
+<div class="razor-component-boundary">
+<DxFormLayout CssClass="razor-component-layout-owner InspectorPanel">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext001">
 <aside class="inspector-panel">
     <div class="inspector-tabs four">
         <button class="@PropertiesTabClass" @onclick="ShowProperties">@LT("Properties")</button>
@@ -83,7 +87,10 @@
     else if (_tab == "page")
     {
         <div class="property-scroll">
-            <section class="property-section">
+            <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext002">
+        <div class="property-section">
                 <h3>@LT("View language")</h3>
                 <label>@LT("Application language")
                     <select value="@ApplicationCulture" @onchange="ChangeApplicationCulture">
@@ -105,9 +112,15 @@
                     <button type="button" @onclick="OpenTranslationEditor">@LT("Edit all application strings")</button>
                 </div>
                 <p class="property-note">@LT("The application choice is stored for this browser. The publication choice controls standalone HTML language metadata and remains editable per document.")</p>
-            </section>
+            </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
 
-            <section class="property-section">
+            <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext003">
+        <div class="property-section">
                 <h3>@LT("Page format")</h3>
                 <label>@LT("Preset")
                     <select value="@CurrentPresetKey" @onchange="ChangePagePreset">
@@ -130,9 +143,15 @@
                     <DxButton Text='@LT("Transparent")' Click="SetTransparentPage" />
                     <DxButton Text='@LT("White")' Click="SetWhitePage" />
                 </div>
-            </section>
+            </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
 
-            <section class="property-section">
+            <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext004">
+        <div class="property-section">
                 <h3>@LT("Presentation timeline")</h3>
                 <label>@LT("Page duration (seconds)")
                     <input type="number" min="1" max="3600" step="0.1" value="@Inv(State.CurrentPage.TimelineDurationSeconds)" @onchange="ChangePageTimelineDuration" />
@@ -142,9 +161,15 @@
                     <DxButton Text='@LT("10 seconds")' Click="SetTenSecondTimeline" />
                 </div>
                 <p class="property-note">@LT("Effective duration:") @Time(State.EffectivePageTimelineDuration()). @LT("The timeline expands automatically when media or animation clips extend beyond the page duration.")</p>
-            </section>
+            </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
 
-            <section class="property-section">
+            <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext005">
+        <div class="property-section">
                 <h3>@LT("Canvas and rulers")</h3>
                 <label>@LT("Ruler unit")
                     <select value="@State.Document.View.RulerUnit" @onchange="ChangeRulerUnit">
@@ -167,9 +192,15 @@
                     <DxButton Text='@LT("Horizontal guide")' Click="AddHorizontalGuide" />
                 </div>
                 <DxButton Text='@LT("Clear guides")' Enabled="@(State.CurrentPage.Guides.Count > 0)" Click="ClearGuides" CssClass="wide-button" />
-            </section>
+            </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
 
-            <section class="property-section">
+            <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext006">
+        <div class="property-section">
                 <h3>@LT("Export")</h3>
                 <label>@LT("Raster export DPI")
                     <select value="@State.Document.View.ExportDpi" @onchange="ChangeExportDpi">
@@ -184,7 +215,10 @@
                 </label>
                 <label class="check-row"><input type="checkbox" checked="@State.Document.View.CompressPageArchives" @onchange="ToggleCompressPageArchives" /> @LT("Compress multi-page ZIP archives")</label>
                 <p class="property-note">@LT("PNG preserves page and image transparency. JPEG always receives a white background. Multi-page image archives reuse the structured-website ZIP compressor when enabled.")</p>
-            </section>
+            </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
         </div>
     }
     else if (State.SelectedElement is { } element)
@@ -192,15 +226,24 @@
         <div class="property-scroll">
             @if (element is PanelElement panelElement)
             {
-                <section class="property-section">
+                <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext007">
+        <div class="property-section">
                     <h3>@LT("Panel / dashboard")</h3>
                     <p class="property-note">@panelElement.Views.Count authored view(s), rendered with the same components in Mainframe, Panel Studio and HTML exports.</p>
                     <DxButton Text='@LT("Edit in Panel Studio")' Click="RequestEditPanel" CssClass="wide-button" />
-                </section>
+                </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
             }
             @if (element is HtmlEmbedElement htmlEmbed)
             {
-                <section class="property-section">
+                <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext008">
+        <div class="property-section">
                     <h3>@LT("Web content")</h3>
                     <div class="media-export-compatibility @HtmlSupportCss(htmlEmbed.HtmlExportSupport)">
                         <b>@HtmlSupportLabel(htmlEmbed.HtmlExportSupport)</b>
@@ -215,9 +258,15 @@
                     }
                     <p class="property-note">@LT("Edit isolated HTML, CSS and optional JavaScript inside Panel Studio.")</p>
                     <DxButton Text='@LT("Edit in Panel Studio")' Click="RequestEditPanel" CssClass="wide-button" />
-                </section>
+                </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
             }
-            <section class="property-section">
+            <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext009">
+        <div class="property-section">
                 <h3>@LT("Object")</h3>
                 <label>@LT("Name")<input value="@element.Name" @onchange="ChangeName" /></label>
                 @if (element is not ConnectorElement)
@@ -237,11 +286,17 @@
                 }
                 <label class="check-row"><input type="checkbox" checked="@element.Visible" @onchange="ToggleVisible" /> @LT("Visible")</label>
                 <label class="check-row"><input type="checkbox" checked="@element.Locked" @onchange="ToggleLocked" /> @LT("Locked")</label>
-            </section>
+            </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
 
             @if (element is ImageFrameElement image)
             {
-                <section class="property-section picture-properties">
+                <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext010">
+        <div class="property-section picture-properties">
                     <h3>@LT("Picture")</h3>
                     <DxButton Text='@LT("Edit in Picture Studio")' Click="RequestEditPicture" CssClass="wide-button" />
                     <div class="property-button-row">
@@ -264,9 +319,15 @@
                     @RangeField("Grayscale", image.Grayscale, 0, 1, .01, "grayscale")
                     @RangeField("Sepia", image.Sepia, 0, 1, .01, "sepia")
                     @RangeField("Blur", image.Blur, 0, 12, .1, "blur")
-                </section>
+                </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
 
-                <section class="property-section picture-color-tools">
+                <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext011">
+        <div class="property-section picture-color-tools">
                     <h3>@LT("Recolor and transparency")</h3>
                     <label>@LT("Color treatment")
                         <select value="@image.TintMode" @onchange="ChangeTintMode">
@@ -298,9 +359,15 @@
                         <DxButton Text='@LT("Restore original")' Click="RequestRestoreOriginalPicture" />
                     </div>
                     <p class="property-note">@LT("Recolor and tint preserve the picture's alpha channel. “Make transparent” edits a copy; Restore Original keeps the imported source.")</p>
-                </section>
+                </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
 
-                <section class="property-section">
+                <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext012">
+        <div class="property-section">
                     <h3>@LT("Picture frame")</h3>
                     <label>@LT("Mask")
                         <select value="@image.MaskShape" @onchange="ChangeImageMask">
@@ -316,11 +383,17 @@
                     <label class="check-row"><input type="checkbox" checked="@image.FlipHorizontal" @onchange="ToggleFlipHorizontal" /> @LT("Flip horizontal")</label>
                     <label class="check-row"><input type="checkbox" checked="@image.FlipVertical" @onchange="ToggleFlipVertical" /> @LT("Flip vertical")</label>
                     <label>@LT("Alt text")<input value="@image.AltText" @onchange="ChangeAltText" /></label>
-                </section>
+                </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
             }
             else if (element is TextFrameElement text)
             {
-                <section class="property-section">
+                <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext013">
+        <div class="property-section">
                     <h3>@LT("Text frame")</h3>
                     @RangeField("Padding", text.PaddingMm, 0, 20, .1, "padding")
                     @ColorField("Background", text.Background, "textBackground")
@@ -335,11 +408,17 @@
                         </select>
                     </label>
                     <DxButton Text='@LT("Edit story")' Click="RequestEditStory" CssClass="wide-button" />
-                </section>
+                </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
             }
             else if (element is WordArtElement wordArt)
             {
-                <section class="property-section wordart-properties">
+                <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext014">
+        <div class="property-section wordart-properties">
                     <h3>@LT("WordArt / LogoArt")</h3>
                     <label>@LT("Text")<textarea rows="3" value="@wordArt.Text" @onchange="ChangeWordArtText"></textarea></label>
                     <label>@LT("Font family")
@@ -418,11 +497,17 @@
                     <label class="check-row"><input type="checkbox" checked="@wordArt.Bold" @onchange="ToggleWordArtBold" /> @LT("Bold")</label>
                     <label class="check-row"><input type="checkbox" checked="@wordArt.Italic" @onchange="ToggleWordArtItalic" /> @LT("Italic")</label>
                     <label class="check-row"><input type="checkbox" checked="@wordArt.ShadowEnabled" @onchange="ToggleWordArtShadow" /> @LT("Shadow")</label>
-                </section>
+                </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
             }
             else if (element is PublicationMediaElement media)
             {
-                <section class="property-section media-properties">
+                <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext015">
+        <div class="property-section media-properties">
                     <h3>@(media is VideoElement ? "Video" : "Audio")</h3>
                     <DxButton Text='@LT("Edit in Media Studio")' Click="RequestEditMedia" RenderStyle="ButtonRenderStyle.Primary" CssClass="wide-button" />
                     <div class="property-grid two">
@@ -471,11 +556,17 @@
                         <label class="check-row"><input type="checkbox" checked="@audio.ShowControls" @onchange="ToggleAudioControls" /> @LT("Show controls")</label>
                     }
                     <p class="property-note">@LT("The source remains embedded. Trimming, fades, playback rate, and timeline placement are non-destructive.")</p>
-                </section>
+                </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
             }
             else if (element is LiveSourceElement liveSource)
             {
-                <section class="property-section live-source-properties">
+                <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext016">
+        <div class="property-section live-source-properties">
                     <h3>@LT("Live source")</h3>
                     <div class="data-source-summary">
                         <span><b>@LT("Kind:")</b> @liveSource.SourceKind</span>
@@ -657,11 +748,17 @@
                     <label class="check-row"><input type="checkbox" checked="@liveSource.Muted" @onchange="ToggleLiveMuted" /> @LT("Mute preview / visual source")</label>
                     <label class="check-row"><input type="checkbox" checked="@liveSource.UseDeviceTimestamp" @onchange="ToggleLiveDeviceTimestamp" /> @LT("Use device timestamps")</label>
                     <p class="property-note">@LT("Camera, screen, window, tab, microphone, and network media can preview through browser APIs. Isolated application/system audio and native devices are resolved by PublisherStudio's integrated streaming runtime.")</p>
-                </section>
+                </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
             }
             else if (element is SpreadsheetElement spreadsheet)
             {
-                <section class="property-section spreadsheet-properties">
+                <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext017">
+        <div class="property-section spreadsheet-properties">
                     <h3>@LT("Spreadsheet")</h3>
                     <div class="data-source-summary">
                         <span><b>@LT("Workbook:")</b> @spreadsheet.WorkbookFileName</span>
@@ -688,22 +785,34 @@
                     @ColorField("Border", spreadsheet.BorderColor, "spreadsheetBorder")
                     @RangeField("Border width", spreadsheet.BorderWidthMm, 0, 5, .05, "spreadsheetBorderWidth")
                     <p class="property-note">@LT("Double-click the frame to open the full DevExpress Spreadsheet component. Workbook content stays embedded in the publication.")</p>
-                </section>
+                </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
             }
             else if (element is BarcodeElement barcode)
             {
-                <section class="property-section barcode-properties">
+                <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext018">
+        <div class="property-section barcode-properties">
                     <h3>@LT("Barcode / QR")</h3>
                     <div class="inspector-barcode-preview"><BarcodeView Item="barcode" /></div>
                     <p class="property-note"><b>@barcode.Format</b> · @barcode.Value</p>
                     <DxButton Text='@LT("Edit barcode")' Click="RequestEditBarcode" RenderStyle="ButtonRenderStyle.Primary" CssClass="wide-button" />
                     <DxButton Text='@LT("Insert another barcode")' Click="RequestInsertBarcode" CssClass="wide-button" />
-                </section>
+                </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
             }
             else if (element is DataVisualElement dataVisual)
             {
-                <section class="property-section data-visual-properties">
-                    <h3>@LT("Data visual")</h3>
+                <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext019">
+        <div class="property-section data-visual-properties">
+                    <h3>@LT("Data Visual")</h3>
                     <p class="property-note">@DataVisualDescription(dataVisual). The source is stored once in the publication and may be reused by several visuals.</p>
                     <label>@LT("Title")<input value="@dataVisual.Title" @onchange="ChangeDataVisualTitle" /></label>
                     <div class="data-source-summary">
@@ -721,11 +830,17 @@
                     @ColorField("Background", dataVisual.Background, "dataBackground")
                     @ColorField("Border", dataVisual.BorderColor, "dataBorder")
                     @RangeField("Border width", dataVisual.BorderWidthMm, 0, 5, .05, "dataBorderWidth")
-                </section>
+                </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
             }
             else if (element is DevExtremeComponentElement component)
             {
-                <section class="property-section component-properties">
+                <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext020">
+        <div class="property-section component-properties">
                     <h3>@LT("Interactive component")</h3>
                     <p class="property-note">@LT("Browser-native") @Components.ComponentName(component.ComponentKind), @LT("exported with the same embedded DevExtreme runtime as the interactive charts.")</p>
                     <div class="data-source-summary">
@@ -742,11 +857,17 @@
                     @ColorField("Background", component.Background, "componentBackground")
                     @ColorField("Border", component.BorderColor, "componentBorder")
                     @RangeField("Border width", component.BorderWidthMm, 0, 5, .05, "componentBorderWidth")
-                </section>
+                </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
             }
             else if (element is ConnectorElement connector)
             {
-                <section class="property-section connector-properties">
+                <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext021">
+        <div class="property-section connector-properties">
                     <h3>@(connector.Signal.Enabled ? "Signal Arrow / Connector" : "Connector")</h3>
                     <p class="property-note">@LT("Normal connectors snap object-to-object. Signal connectors may also end at an exact canvas point and execute offline click, hover, transform, visibility, media, highlight, CSS-class, animation, or chained-signal actions in HTML and video output.")</p>
                     <label>@LT("Path")
@@ -808,9 +929,15 @@
                             }
                         </div>
                     }
-                </section>
+                </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
 
-                <section class="property-section signal-connector-properties">
+                <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext022">
+        <div class="property-section signal-connector-properties">
                     <h3>@LT("Signal runtime")</h3>
                     <label class="check-row"><input type="checkbox" checked="@connector.Signal.Enabled" @onchange="ToggleSignalEnabled" /> @LT("Enable dynamic signal")</label>
                     <label class="check-row"><input type="checkbox" checked="@connector.Signal.LineVisible" @onchange="ToggleSignalLineVisible" /> @LT("Draw arrow / connector while it runs")</label>
@@ -854,9 +981,15 @@
                         <label class="check-row"><input type="checkbox" checked="@connector.Signal.AutoReverse" @onchange="ToggleSignalAutoReverse" /> @LT("Auto reverse")</label>
                     </div>
                     <DxButton Text='@LT("Preview signal now")' Click="PreviewSignal" RenderStyle="ButtonRenderStyle.Primary" CssClass="wide-button" />
-                </section>
+                </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
 
-                <section class="property-section signal-motion-properties">
+                <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext023">
+        <div class="property-section signal-motion-properties">
                     <h3>@LT("Travel morph / transform")</h3>
                     <label>@LT("Target object")
                         <select value="@GuidText(connector.Signal.MotionTargetElementId)" @onchange="ChangeSignalMotionTarget">
@@ -880,9 +1013,15 @@
                         <label>@LT("Opacity")<input type="number" min="0" max="1" step=".01" value="@Inv(connector.Signal.Opacity)" @onchange="ChangeSignalOpacity" /></label>
                         <label class="check-row"><input type="checkbox" checked="@connector.Signal.RestoreMotionAfterRun" @onchange="ToggleSignalRestoreMotion" /> @LT("Restore afterwards")</label>
                     </div>
-                </section>
+                </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
 
-                <section class="property-section signal-completion-properties">
+                <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext024">
+        <div class="property-section signal-completion-properties">
                     <h3>@LT("At destination")</h3>
                     <label>@LT("Action target")
                         <select value="@GuidText(connector.Signal.CompletionTargetElementId)" @onchange="ChangeSignalCompletionTarget">
@@ -931,17 +1070,26 @@
                         </select>
                     </label>
                     <p class="property-note">@LT("Selectors are evaluated locally inside the exported file. No server or network request is needed. Use one chained signal per cell/chart part when a sequence must highlight several targets in order.")</p>
-                </section>
+                </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
             }
             else if (element is ShapeElement shape)
             {
-                <section class="property-section">
+                <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext025">
+        <div class="property-section">
                     <h3>@LT("Shape")</h3>
                     @ColorField("Fill", shape.Fill, "shapeFill")
                     @ColorField("Outline", shape.Stroke, "shapeStroke")
                     @RangeField("Outline width", shape.StrokeWidth, 0, 8, .05, "shapeStrokeWidth")
                     @RangeField("Corner radius", shape.CornerRadiusMm, 0, 30, .1, "shapeCorner")
-                </section>
+                </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
             }
         </div>
     }
@@ -992,6 +1140,11 @@
 
 <InputFile id="wordart-picture-fill-input" class="hidden-file-input" accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml" OnChange="ImportWordArtPicture" />
 <InputFile id="wordart-video-fill-input" class="hidden-file-input" accept=".mp4,.m4v,.webm,.ogv,.ogg,.mov,video/mp4,video/x-m4v,video/webm,video/ogg,video/quicktime" OnChange="ImportWordArtVideo" />
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+</div>
+
 
 @code {
 
@@ -1195,43 +1348,37 @@
     /// Gets the context layer value that forms part of the inspector panel state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The context layer value exposed by <see cref="InspectorPanel"/>.</value>
-    private PublicationElement? ContextLayer => _contextLayerId is Guid id ? State.CurrentPage.Elements.FirstOrDefault(item => item.Id == id) : null;
+    private PublicationElement? ContextLayer => GetContextLayerForRender();
     /// <summary>
     /// Gets the properties tab class value that forms part of the inspector panel state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The properties tab class value exposed by <see cref="InspectorPanel"/>.</value>
-    private string PropertiesTabClass => _tab == "properties" ? "active" : string.Empty;
+    private string PropertiesTabClass => GetPropertiesTabClassForRender();
     /// <summary>
     /// Gets the page tab class value that forms part of the inspector panel state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The page tab class value exposed by <see cref="InspectorPanel"/>.</value>
-    private string PageTabClass => _tab == "page" ? "active" : string.Empty;
+    private string PageTabClass => GetPageTabClassForRender();
     /// <summary>
     /// Gets the layers tab class value that forms part of the inspector panel state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The layers tab class value exposed by <see cref="InspectorPanel"/>.</value>
-    private string LayersTabClass => _tab == "layers" ? "active" : string.Empty;
+    private string LayersTabClass => GetLayersTabClassForRender();
     /// <summary>
     /// Gets the animations tab class value that forms part of the inspector panel state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The animations tab class value exposed by <see cref="InspectorPanel"/>.</value>
-    private string AnimationsTabClass => _tab == "animations" ? "active" : string.Empty;
+    private string AnimationsTabClass => GetAnimationsTabClassForRender();
     /// <summary>
     /// Gets the stable current preset key used to identify or correlate this inspector panel instance with related application state.
     /// </summary>
     /// <value>The current preset key value exposed by <see cref="InspectorPanel"/>.</value>
-    private string CurrentPresetKey => PagePresets.GetAll().FirstOrDefault(preset => Nearly(preset.WidthMm, State.CurrentPage.WidthMm) && Nearly(preset.HeightMm, State.CurrentPage.HeightMm))?.Key ?? "custom";
+    private string CurrentPresetKey => GetCurrentPresetKeyForRender();
     /// <summary>
     /// Gets the page timeline content end value that forms part of the inspector panel state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The page timeline content end value exposed by <see cref="InspectorPanel"/>.</value>
-    private double PageTimelineContentEnd => Math.Max(
-        State.CurrentPage.Elements.SelectMany(item => item.Animations)
-            .Select(item => State.EffectiveAnimationStart(item) + Math.Max(.05, item.DurationSeconds) * Math.Max(1, item.RepeatCount) * (item.AutoReverse ? 2 : 1))
-            .DefaultIfEmpty(0).Max(),
-        State.CurrentPage.Elements.OfType<PublicationMediaElement>()
-            .Select(item => item.TimelineStartSeconds + item.TimelineLengthSeconds)
-            .DefaultIfEmpty(0).Max());
+    private double PageTimelineContentEnd => GetPageTimelineContentEndForRender();
 
     /// <summary>
     /// Performs request edit story for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
@@ -5596,7 +5743,7 @@
             var poster = string.Empty;
             try
             {
-                _mediaModule ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=3.7.6").ConfigureAwait(true);
+                _mediaModule ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=3.9.1").ConfigureAwait(true);
                 var localUrl = MediaAssets.RegisterBytes(inspectionId, bytes, mimeType);
                 try
                 {
@@ -6026,14 +6173,12 @@
     /// Gets the application culture value that forms part of the inspector panel state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The application culture value exposed by <see cref="InspectorPanel"/>.</value>
-    private string ApplicationCulture => CultureInfo.CurrentUICulture.Name;
+    private string ApplicationCulture => GetApplicationCultureForRender();
     /// <summary>
     /// Gets the publication culture value that forms part of the inspector panel state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The publication culture value exposed by <see cref="InspectorPanel"/>.</value>
-    private string PublicationCulture => string.IsNullOrWhiteSpace(State.Document.ProjectSettings.Culture)
-        ? ApplicationCulture
-        : State.Document.ProjectSettings.Culture;
+    private string PublicationCulture => GetPublicationCultureForRender();
 
     /// <summary>
     /// Performs change application culture for <see cref="InspectorPanel"/>, keeping the operation consistent with the state and invariants of the surrounding inspector panel workflow.
@@ -6278,4 +6423,148 @@
         }
     }
 
+
+
+    /// <summary>Computes ContextLayer for the render path with component-local diagnostics.</summary>
+    /// <returns>The publication element produced by the operation.</returns>
+    private PublicationElement? GetContextLayerForRender()
+    {
+        try
+        {
+            return _contextLayerId is Guid id ? State.CurrentPage.Elements.FirstOrDefault(item => item.Id == id) : null;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property InspectorPanel.ContextLayer failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes PropertiesTabClass for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetPropertiesTabClassForRender()
+    {
+        try
+        {
+            return _tab == "properties" ? "active" : string.Empty;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property InspectorPanel.PropertiesTabClass failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes PageTabClass for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetPageTabClassForRender()
+    {
+        try
+        {
+            return _tab == "page" ? "active" : string.Empty;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property InspectorPanel.PageTabClass failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes LayersTabClass for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetLayersTabClassForRender()
+    {
+        try
+        {
+            return _tab == "layers" ? "active" : string.Empty;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property InspectorPanel.LayersTabClass failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes AnimationsTabClass for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetAnimationsTabClassForRender()
+    {
+        try
+        {
+            return _tab == "animations" ? "active" : string.Empty;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property InspectorPanel.AnimationsTabClass failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes CurrentPresetKey for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetCurrentPresetKeyForRender()
+    {
+        try
+        {
+            return PagePresets.GetAll().FirstOrDefault(preset => Nearly(preset.WidthMm, State.CurrentPage.WidthMm) && Nearly(preset.HeightMm, State.CurrentPage.HeightMm))?.Key ?? "custom";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property InspectorPanel.CurrentPresetKey failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes PageTimelineContentEnd for the render path with component-local diagnostics.</summary>
+    /// <returns>The double produced by the operation.</returns>
+    private double GetPageTimelineContentEndForRender()
+    {
+        try
+        {
+            return Math.Max(
+        State.CurrentPage.Elements.SelectMany(item => item.Animations)
+            .Select(item => State.EffectiveAnimationStart(item) + Math.Max(.05, item.DurationSeconds) * Math.Max(1, item.RepeatCount) * (item.AutoReverse ? 2 : 1))
+            .DefaultIfEmpty(0).Max(),
+        State.CurrentPage.Elements.OfType<PublicationMediaElement>()
+            .Select(item => item.TimelineStartSeconds + item.TimelineLengthSeconds)
+            .DefaultIfEmpty(0).Max());
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property InspectorPanel.PageTimelineContentEnd failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes ApplicationCulture for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetApplicationCultureForRender()
+    {
+        try
+        {
+            return CultureInfo.CurrentUICulture.Name;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property InspectorPanel.ApplicationCulture failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes PublicationCulture for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetPublicationCultureForRender()
+    {
+        try
+        {
+            return string.IsNullOrWhiteSpace(State.Document.ProjectSettings.Culture)
+        ? ApplicationCulture
+        : State.Document.ProjectSettings.Culture;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property InspectorPanel.PublicationCulture failed.");
+            throw;
+        }
+    }
 }

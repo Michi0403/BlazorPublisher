@@ -1,11 +1,20 @@
 @page "/error"
 @inject IUserNotificationService Notifications
 @inject ILogger<Error> Logger
+<div class="razor-component-boundary">
+<DxFormLayout CssClass="razor-component-layout-owner Error">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext001">
 <PageTitle>Error</PageTitle>
 <div class="fatal-page">
     <h1>PublisherStudio could not complete the request.</h1>
     <p>Review the application log for the underlying exception.</p>
 </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+</div>
+
 
 @code {
 

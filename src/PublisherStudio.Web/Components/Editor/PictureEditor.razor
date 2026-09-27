@@ -4,10 +4,24 @@
 
 @inject ILogger<PictureEditor> Logger
 @inject ISupervisedTaskRunner TaskRunner
+<div class="razor-component-boundary">
+<DxFormLayout CssClass="razor-component-layout-owner PictureEditor">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext001">
 @if (Visible)
 {
-    <div class="modal-backdrop picture-studio-backdrop">
-        <section id="picture-studio-window" class="picture-studio-dialog" role="dialog" aria-modal="true" aria-label='@LT("Picture Studio")'>
+    <DxPopup Visible="true"
+         Width="min(1800px, 98vw)"
+         Height="min(1180px, 96vh)"
+         MaxHeight="96vh"
+         CloseOnOutsideClick="false"
+         CloseOnEscape="false"
+         ShowHeader="false">
+    <BodyContentTemplate Context="publisherPopupContext">
+        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext002">
+        <div id="picture-studio-window" class="picture-studio-dialog" aria-label='@LT("Picture Studio")'>
             <header class="picture-studio-titlebar">
                 <div>
                     <strong>@LT("Picture Studio")</strong>
@@ -312,7 +326,10 @@
                         </span>
                     </div>
                     <div class="picture-property-scroll">
-                        <section class="picture-property-section">
+                        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext003">
+        <div class="picture-property-section">
                             <h3>@LT("Canvas")</h3>
                             <label>@LT("Name")
                                 <input value="@State.Document.Name" @onchange="ChangeDocumentName" /> </label>
@@ -340,9 +357,15 @@
                             </div>
                             <label>@LT("Grid spacing (px)")
                                 <input type="number" min="2" max="1000" value="@State.Document.GridSpacingPx" @onchange="ChangeGridSpacing" /> </label>
-                        </section>
+                        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
 
-                        <section class="picture-property-section picture-drawing-properties">
+                        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext004">
+        <div class="picture-property-section picture-drawing-properties">
                             <h3>@LT("Drawing tools")</h3>
                             <label>@LT("Tool")
                                 <select value="@_drawTool" @onchange="ChangeDrawTool">
@@ -393,11 +416,17 @@
                                 <span class="picture-range-value">@Math.Round(_drawHardness * 100)%</span>
                             </label>
                             <DxButton Text='@LT("New paint layer")' Click="AddPaintLayer" CssClass="wide-button" />
-                        </section>
+                        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
 
                         @if (State.SelectedLayer is PictureLayer selected)
                         {
-                            <section class="picture-property-section">
+                            <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext005">
+        <div class="picture-property-section">
                                 <h3>@LT("Layer")</h3>
                                 <label>@LT("Name")
                                     <input value="@selected.Name" @onchange="ChangeLayerName" /> </label>
@@ -431,12 +460,18 @@
                                     <label><input type="checkbox" checked="@selected.Visible" @onchange="ToggleSelectedVisibility" /> @LT("Visible")</label>
                                     <label><input type="checkbox" checked="@selected.Locked" @onchange="ToggleSelectedLock" /> @LT("Locked")</label>
                                 </div>
-                            </section>
+                            </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
 
                             @switch (selected)
                             {
                                 case SvgPictureLayer svgLayer:
-                                    <section class="picture-property-section">
+                                    <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext006">
+        <div class="picture-property-section">
                                         <h3>@LT("Imported vector")</h3>
                                         <label>@LT("Source format")<input value="@svgLayer.SourceFormat" readonly /></label>
                                         @if (!string.IsNullOrWhiteSpace(svgLayer.GroupPath))
@@ -449,10 +484,16 @@
                                         }
                                         <label class="check-row"><input type="checkbox" checked="@svgLayer.PreserveAspectRatio" @onchange="ToggleSvgPreserveAspectRatio" /> @LT("Preserve aspect ratio")</label>
                                         <p class="picture-property-note">@LT("This layer keeps its sanitized SVG paths, paint servers, transforms and clipping definitions as vector markup. Position, size, rotation, opacity and layer order remain editable in Picture Studio.")</p>
-                                    </section>
+                                    </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
                                     break;
                                 case RasterPictureLayer raster:
-                                    <section class="picture-property-section">
+                                    <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext007">
+        <div class="picture-property-section">
                                         <h3>@LT("Image")</h3>
                                         <label>@LT("Fit")
                                             <select value="@raster.FitMode" @onchange="ChangeRasterFit">
@@ -500,10 +541,16 @@
                                             <input type="range" min="0" max="1" step="0.01" value="@Inv(raster.ColorizeStrength)" @oninput="ChangeRasterColorizeStrength" @onchange="EndLiveEdit" />
                                             <span class="picture-range-value">@Math.Round(raster.ColorizeStrength * 100)%</span>
                                         </label>
-                                    </section>
+                                    </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
                                     break;
                                 case TextPictureLayer textLayer:
-                                    <section class="picture-property-section">
+                                    <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext008">
+        <div class="picture-property-section">
                                         <h3>@LT("Text")</h3>
                                         <label>@LT("Content")
                                             <textarea rows="4" @onchange="ChangeTextContent">@textLayer.Text</textarea>
@@ -537,10 +584,16 @@
                                             <label>@LT("Shadow blur")
                                                 <input type="number" min="0" max="200" step="1" value="@Inv(textLayer.ShadowBlurPx)" @onchange="ChangeTextShadowBlur" /> </label>
                                         </div>
-                                    </section>
+                                    </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
                                     break;
                                 case ShapePictureLayer shapeLayer:
-                                    <section class="picture-property-section">
+                                    <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext009">
+        <div class="picture-property-section">
                                         <h3>@LT("Shape")</h3>
                                         <label>@LT("Shape")
                                             <select value="@shapeLayer.Shape" @onchange="ChangeShapeKind">
@@ -602,10 +655,16 @@
                                                 <span class="picture-range-value">@Math.Round(shapeLayer.FillAngleDegrees)°</span>
                                             </label>
                                         }
-                                    </section>
+                                    </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
                                     break;
                                 case FillPictureLayer fillLayer:
-                                    <section class="picture-property-section">
+                                    <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext010">
+        <div class="picture-property-section">
                                         <h3>@LT("Fill")</h3>
                                         <label>@LT("Type")
                                             <select value="@fillLayer.FillKind" @onchange="ChangeFillKind">
@@ -625,10 +684,16 @@
                                             <input type="range" min="0" max="360" step="1" value="@Inv(fillLayer.AngleDegrees)" @oninput="ChangeFillAngle" @onchange="EndLiveEdit" />
                                             <span class="picture-range-value">@Math.Round(fillLayer.AngleDegrees)°</span>
                                         </label>
-                                    </section>
+                                    </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
                                     break;
                                 case PaintPictureLayer paintLayer:
-                                    <section class="picture-property-section">
+                                    <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext011">
+        <div class="picture-property-section">
                                         <h3>@LT("Paint")</h3>
                                         <p class="picture-property-note">@LT("Brush, pencil, line and eraser strokes stay editable as a separate layer.")</p>
                                         <div class="picture-paint-summary">
@@ -637,10 +702,16 @@
                                         </div>
                                         <DxButton Text='@LT("Continue with brush")' Click="BrushTool" CssClass="wide-button" />
                                         <DxButton Text='@LT("Clear all strokes")' Enabled="@(paintLayer.Strokes.Count > 0 && !paintLayer.Locked)" Click="State.ClearSelectedPaint" CssClass="wide-button" />
-                                    </section>
+                                    </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
                                     break;
                                 case RenderPictureLayer renderLayer:
-                                    <section id="picture-render-properties" class="picture-property-section picture-selected-property-section">
+                                    <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext012">
+        <div id="picture-render-properties" class="picture-property-section picture-selected-property-section">
                                         <h3><span class="pub-icon pub-icon-render"></span> @LT("Procedural render") · @renderLayer.Name</h3>
                                         <label>@LT("Renderer")
                                             <select value="@renderLayer.RenderKind" @onchange="ChangeRenderKind">
@@ -673,11 +744,17 @@
                                             <span class="picture-range-value">@Math.Round(renderLayer.AngleDegrees)°</span>
                                         </label>
                                         <DxButton Text='@LT("New random seed")' Click="RandomizeRender" CssClass="wide-button" />
-                                    </section>
+                                    </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
                                     break;
                             }
 
-                            <section class="picture-property-section">
+                            <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext013">
+        <div class="picture-property-section">
                                 <h3>@LT("Area cut")</h3>
                                 <p class="property-note">@LT("Selections use document coordinates, so rectangular, elliptical, freehand, magnetic, and arbitrary polygon cuts stay aligned at every layer angle and canvas size.")</p>
                                 <div class="property-action-row">
@@ -693,9 +770,15 @@
                                 {
                                     <p class="property-note"><b>@(selected.ClipInverted ? "Cut-out" : "Keep") polygon:</b> @selected.ClipPolygon.Count vertices.</p>
                                 }
-                            </section>
+                            </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
 
-                            <section class="picture-property-section">
+                            <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext014">
+        <div class="picture-property-section">
                                 <h3>@LT("Adjustments")</h3>
                                 <label>@LT("Brightness")
                                     <input type="range" min="0" max="2" step="0.01" value="@Inv(selected.Brightness)" @oninput="ChangeBrightness" @onchange="EndLiveEdit" />
@@ -726,7 +809,10 @@
                                         <input type="range" min="0" max="1" step="0.01" value="@Inv(selected.Invert)" @oninput="ChangeInvert" @onchange="EndLiveEdit" /> </label>
                                 </div>
                                 <DxButton Text='@LT("Reset adjustments")' Click="ResetAdjustments" CssClass="wide-button" />
-                            </section>
+                            </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
                         }
                     </div>
                 </aside>
@@ -734,7 +820,10 @@
 
             @if (!string.IsNullOrWhiteSpace(_ocrStatus) || HasOcrText)
             {
-                <section class="picture-ocr-review" aria-live="polite">
+                <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext015">
+        <div class="picture-ocr-review" aria-live="polite">
                     <header><strong>@LT("LocalGPT OCR")</strong><span>@_ocrStatus</span></header>
                     @if (HasOcrText)
                     {
@@ -744,7 +833,10 @@
                             <button type="button" @onclick="ClearOcrText">@LT("Clear")</button>
                         </div>
                     }
-                </section>
+                </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
             }
 
             <footer class="picture-studio-footer">
@@ -761,8 +853,12 @@
                     <DxButton Text="@(EditingExisting ? LT("Apply merged") : LT("Insert merged"))" Enabled="@(!IsPictureExporting)" Click="ApplyMerged" />
                 </div>
             </footer>
-        </section>
-    </div>
+        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+        </BodyContentTemplate>
+</DxPopup>
 
     <DxContextMenu @ref="_pictureContextMenu">
         <Items>
@@ -1146,3 +1242,8 @@
     <InputFile id="picture-studio-layered-input" class="hidden-file-input" accept=".svg,.svgz,.ora,image/svg+xml,application/gzip,application/x-gzip,application/x-openraster" OnChange="ImportLayeredDocument" />
     <InputFile id="picture-studio-layer-drop-input" class="hidden-file-input" accept=".svg,.svgz,.ora,image/svg+xml,application/gzip,application/x-gzip,application/x-openraster" OnChange="ImportDroppedLayeredDocument" />
 }
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+</div>
+

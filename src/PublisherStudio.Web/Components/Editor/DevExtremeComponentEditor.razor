@@ -7,10 +7,24 @@
 @inject ILogger<DevExtremeComponentEditor> Logger
 @inject PublicationEditorTextService EditorText
 @inject ISupervisedTaskRunner TaskRunner
+<div class="razor-component-boundary">
+<DxFormLayout CssClass="razor-component-layout-owner DevExtremeComponentEditor">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext001">
 @if (Visible && _draft is not null)
 {
-    <div class="modal-backdrop component-modal-backdrop">
-        <section class="component-editor-dialog" role="dialog" aria-modal="true" aria-label="Component Studio">
+    <DxPopup Visible="true"
+         Width="min(1800px, 98vw)"
+         Height="min(1180px, 96vh)"
+         MaxHeight="96vh"
+         CloseOnOutsideClick="false"
+         CloseOnEscape="false"
+         ShowHeader="false">
+    <BodyContentTemplate Context="publisherPopupContext">
+        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext002">
+        <div class="component-editor-dialog" aria-label="Component Studio">
             <header>
                 <div>
                     <strong>Component Studio · @_draft.Title</strong>
@@ -56,7 +70,10 @@
                 <main class="component-settings">
                     @if (_section == "general")
                     {
-                        <section class="component-section">
+                        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext003">
+        <div class="component-section">
                             <h3>Identity and scope</h3>
                             <div class="component-form-grid">
                                 <label>Object name<input @bind="_draft.Name" /></label>
@@ -86,11 +103,17 @@
                             {
                                 <p class="component-info">Content, data bindings, fields, actions, and styling stay synchronized on every publication page. Position and size remain page-specific so portrait and landscape pages can use different layouts.</p>
                             }
-                        </section>
+                        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
                     }
                     else if (_section == "data")
                     {
-                        <section class="component-section">
+                        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext004">
+        <div class="component-section">
                             <div class="component-section-heading">
                                 <h3>Smart data connection</h3>
                                 @if (_draft.ComponentKind is PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu)
@@ -240,11 +263,17 @@
                                 </div>
                             }
                             }
-                        </section>
+                        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
                     }
                     else if (_section == "menu")
                     {
-                        <section class="component-section">
+                        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext005">
+        <div class="component-section">
                             <div class="component-section-heading">
                                 <h3>Menu items</h3>
                                 <div>
@@ -328,11 +357,17 @@
                                     <div class="empty-panel">No menu items yet. Add an external link, a page link, or a non-navigating item.</div>
                                 }
                             }
-                        </section>
+                        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
                     }
                     else if (_section == "fields")
                     {
-                        <section class="component-section">
+                        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext006">
+        <div class="component-section">
                             <div class="component-section-heading">
                                 <h3>Fields and editors</h3>
                                 @if (!IsManualMenu)
@@ -444,11 +479,17 @@
                                 </div>
                             }
                             }
-                        </section>
+                        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
                     }
                     else if (_section == "behavior")
                     {
-                        <section class="component-section">
+                        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext007">
+        <div class="component-section">
                             <h3>@Components.ComponentName(_draft.ComponentKind) behavior</h3>
                             <p class="component-info">Only options supported by the selected component are shown here.</p>
                             <div class="component-form-grid">
@@ -557,11 +598,17 @@
                                     }
                                 </div>
                             }
-                        </section>
+                        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
                     }
                     else if (_section == "map")
                     {
-                        <section class="component-section vector-map-editor">
+                        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext008">
+        <div class="component-section vector-map-editor">
                             <h3>@(_draft.ComponentKind == PublicationComponentKind.VectorMap ? "Vector map designer" : "Interactive map")</h3>
                             <div class="component-form-grid wide">
                                 <label>Latitude field<select @bind="_draft.LatitudeField"><option value="">Not used</option>@foreach (var field in _draft.Fields) { <option value="@field.DataField">@field.Caption (@field.DataField)</option> }</select></label>
@@ -646,11 +693,17 @@
                                 <label>Import GeoJSON FeatureCollection<textarea class="component-code-editor" @bind="_geoJson" spellcheck="false" placeholder="Paste Point, LineString, Polygon, MultiLineString, or MultiPolygon GeoJSON"></textarea></label>
                                 <div class="component-section-heading"><span>@_geoJsonStatus</span><button type="button" @onclick="ImportGeoJson">Import GeoJSON</button></div>
                             }
-                        </section>
+                        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
                     }
                     else if (_section == "layout")
                     {
-                        <section class="component-section">
+                        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext009">
+        <div class="component-section">
                             <div class="component-section-heading"><h3>Dynamic layout panels</h3><button type="button" @onclick="AddPanel">Add panel</button></div>
                             <p class="component-info">Splitter, Tab Panel, Multi View, and Scroll View host browser-native child controls. Each panel can use another publication dataset without a Blazor adapter.</p>
                             <div class="component-panel-list">
@@ -671,11 +724,17 @@
                                     </article>
                                 }
                             </div>
-                        </section>
+                        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
                     }
                     else if (_section == "actions")
                     {
-                        <section class="component-section">
+                        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext010">
+        <div class="component-section">
                             <div class="component-section-heading"><h3>Events and actions</h3><button type="button" @onclick="AddAction">Add action</button></div>
                             <p class="component-info">Actions connect buttons, menus, editors, rows, appointments, and selections to pages, URLs, REST submission, mail preparation, visibility, or other components.</p>
                             <div class="component-action-list">
@@ -732,11 +791,17 @@
                                     </article>
                                 }
                             </div>
-                        </section>
+                        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
                     }
                     else
                     {
-                        <section class="component-section">
+                        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext011">
+        <div class="component-section">
                             <h3>Advanced DevExtreme options</h3>
                             <div class="component-form-grid wide"><label>Custom CSS class<input @bind="_draft.CustomCssClass" placeholder="my-component compact" /></label></div>
                             <label>Custom inline CSS declarations<textarea class="component-code-editor" @bind="_draft.CustomCss" spellcheck="false" placeholder="box-shadow: 0 10px 30px rgba(0,0,0,.18); border-radius: 12px"></textarea></label>
@@ -748,7 +813,10 @@
                             {
                                 <p class="component-warning">Scripts execute with the permissions of the exported page. Use only code you trust. PublisherStudio never enables script actions automatically.</p>
                             }
-                        </section>
+                        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
                     }
                 </main>
 
@@ -779,9 +847,18 @@
                 <span>@ValidationMessage</span>
                 <div><button type="button" @onclick="Cancel">Cancel</button><button type="button" class="primary" @onclick="Save" disabled="@(!CanSave)">Apply component</button></div>
             </footer>
-        </section>
-    </div>
+        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+        </BodyContentTemplate>
+</DxPopup>
 }
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+</div>
+
 
 @code {
 
@@ -885,99 +962,97 @@
     /// Gets the current page elements collection maintained or exposed by this dev extreme component editor instance for downstream processing.
     /// </summary>
     /// <value>The current page elements value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
-    private IEnumerable<PublicationElement> CurrentPageElements => State.CurrentPage.Elements.Where(element => element.Id != _draft?.Id);
+    private IEnumerable<PublicationElement> CurrentPageElements => GetCurrentPageElementsForRender();
     /// <summary>
     /// Gets a value indicating whether internal borders applies to the dev extreme component editor state.
     /// </summary>
     /// <value>The supports internal borders value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
-    private bool SupportsInternalBorders => _draft?.ComponentKind is PublicationComponentKind.DataGrid or PublicationComponentKind.TreeList or PublicationComponentKind.PivotGrid;
+    private bool SupportsInternalBorders => GetSupportsInternalBordersForRender();
     /// <summary>
     /// Gets a value indicating whether word wrap applies to the dev extreme component editor state.
     /// </summary>
     /// <value>The supports word wrap value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
-    private bool SupportsWordWrap => _draft?.ComponentKind is PublicationComponentKind.DataGrid or PublicationComponentKind.TreeList;
+    private bool SupportsWordWrap => GetSupportsWordWrapForRender();
     /// <summary>
     /// Gets a value indicating whether edit mode applies to the dev extreme component editor state.
     /// </summary>
     /// <value>The supports edit mode value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
-    private bool SupportsEditMode => _draft?.ComponentKind is PublicationComponentKind.DataGrid or PublicationComponentKind.TreeList or PublicationComponentKind.Scheduler;
+    private bool SupportsEditMode => GetSupportsEditModeForRender();
     /// <summary>
     /// Gets a value indicating whether selection applies to the dev extreme component editor state.
     /// </summary>
     /// <value>The supports selection value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
-    private bool SupportsSelection => _draft?.ComponentKind is PublicationComponentKind.DataGrid or PublicationComponentKind.TreeList;
+    private bool SupportsSelection => GetSupportsSelectionForRender();
     /// <summary>
     /// Gets a value indicating whether page size applies to the dev extreme component editor state.
     /// </summary>
     /// <value>The supports page size value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
-    private bool SupportsPageSize => _draft?.ComponentKind is PublicationComponentKind.DataGrid or PublicationComponentKind.TreeList;
+    private bool SupportsPageSize => GetSupportsPageSizeForRender();
     /// <summary>
     /// Gets a value indicating whether orientation applies to the dev extreme component editor state.
     /// </summary>
     /// <value>The supports orientation value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
-    private bool SupportsOrientation => _draft?.ComponentKind is PublicationComponentKind.Menu or PublicationComponentKind.TileView or PublicationComponentKind.Splitter or PublicationComponentKind.ScrollView;
+    private bool SupportsOrientation => GetSupportsOrientationForRender();
     /// <summary>
     /// Gets a value indicating whether button text applies to the dev extreme component editor state.
     /// </summary>
     /// <value>The supports button text value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
-    private bool SupportsButtonText => _draft?.ComponentKind is PublicationComponentKind.Button or PublicationComponentKind.Form or PublicationComponentKind.CheckBox;
+    private bool SupportsButtonText => GetSupportsButtonTextForRender();
     /// <summary>
     /// Gets a value indicating whether placeholder applies to the dev extreme component editor state.
     /// </summary>
     /// <value>The supports placeholder value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
-    private bool SupportsPlaceholder => _draft?.ComponentKind is PublicationComponentKind.TextBox or PublicationComponentKind.TextArea or PublicationComponentKind.NumberBox or PublicationComponentKind.DateBox or PublicationComponentKind.SelectBox or PublicationComponentKind.TagBox;
+    private bool SupportsPlaceholder => GetSupportsPlaceholderForRender();
     /// <summary>
     /// Gets a value indicating whether initial value applies to the dev extreme component editor state.
     /// </summary>
     /// <value>The supports initial value value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
-    private bool SupportsInitialValue => _draft?.ComponentKind is PublicationComponentKind.TextBox or PublicationComponentKind.TextArea or PublicationComponentKind.NumberBox or PublicationComponentKind.DateBox or PublicationComponentKind.CheckBox or PublicationComponentKind.SelectBox or PublicationComponentKind.TagBox;
+    private bool SupportsInitialValue => GetSupportsInitialValueForRender();
     /// <summary>
     /// Gets a value indicating whether grid options applies to the dev extreme component editor state.
     /// </summary>
     /// <value>The supports grid options value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
-    private bool SupportsGridOptions => _draft?.ComponentKind == PublicationComponentKind.DataGrid;
+    private bool SupportsGridOptions => GetSupportsGridOptionsForRender();
     /// <summary>
     /// Gets a value indicating whether uses key field applies to the dev extreme component editor state.
     /// </summary>
     /// <value>The uses key field value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
-    private bool UsesKeyField => _draft?.ComponentKind is PublicationComponentKind.DataGrid or PublicationComponentKind.TreeList or PublicationComponentKind.Form or PublicationComponentKind.Scheduler or PublicationComponentKind.SelectBox or PublicationComponentKind.TagBox or PublicationComponentKind.Gallery or PublicationComponentKind.TileView or PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu or PublicationComponentKind.PivotGrid or PublicationComponentKind.Chat;
+    private bool UsesKeyField => GetUsesKeyFieldForRender();
     /// <summary>
     /// Gets a value indicating whether uses parent field applies to the dev extreme component editor state.
     /// </summary>
     /// <value>The uses parent field value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
-    private bool UsesParentField => _draft?.ComponentKind is PublicationComponentKind.TreeList or PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu;
+    private bool UsesParentField => GetUsesParentFieldForRender();
     /// <summary>
     /// Gets a value indicating whether uses text field applies to the dev extreme component editor state.
     /// </summary>
     /// <value>The uses text field value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
-    private bool UsesTextField => _draft?.ComponentKind is PublicationComponentKind.TreeList or PublicationComponentKind.Scheduler or PublicationComponentKind.Gallery or PublicationComponentKind.TileView or PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu;
+    private bool UsesTextField => GetUsesTextFieldForRender();
     /// <summary>
     /// Gets a value indicating whether uses display field applies to the dev extreme component editor state.
     /// </summary>
     /// <value>The uses display field value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
-    private bool UsesDisplayField => _draft?.ComponentKind is PublicationComponentKind.SelectBox or PublicationComponentKind.TagBox or PublicationComponentKind.Gallery or PublicationComponentKind.TileView or PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu;
+    private bool UsesDisplayField => GetUsesDisplayFieldForRender();
     /// <summary>
     /// Gets a value indicating whether uses value field applies to the dev extreme component editor state.
     /// </summary>
     /// <value>The uses value field value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
-    private bool UsesValueField => _draft?.ComponentKind is PublicationComponentKind.SelectBox or PublicationComponentKind.TagBox or PublicationComponentKind.Gallery or PublicationComponentKind.TileView;
+    private bool UsesValueField => GetUsesValueFieldForRender();
     /// <summary>
     /// Gets a value indicating whether uses image field applies to the dev extreme component editor state.
     /// </summary>
     /// <value>The uses image field value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
-    private bool UsesImageField => _draft?.ComponentKind is PublicationComponentKind.Gallery or PublicationComponentKind.TileView;
+    private bool UsesImageField => GetUsesImageFieldForRender();
     /// <summary>
     /// Gets a value indicating whether manual menu applies to the dev extreme component editor state.
     /// </summary>
     /// <value>The is manual menu value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
-    private bool IsManualMenu => _draft is not null
-        && (_draft.ComponentKind is PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu)
-        && _draft.MenuSourceMode == PublicationMenuSourceMode.ManualItems;
+    private bool IsManualMenu => GetIsManualMenuForRender();
     /// <summary>
     /// Gets a value indicating whether uses data connection applies to the dev extreme component editor state.
     /// </summary>
     /// <value>The uses data connection value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
-    private bool UsesDataConnection => !IsManualMenu;
+    private bool UsesDataConnection => GetUsesDataConnectionForRender();
     /// <summary>
     /// Stores the in-memory supported map providers collection maintained internally by <see cref="DevExtremeComponentEditor"/> for its current workflow state.
     /// </summary>
@@ -986,27 +1061,22 @@
     /// Gets a value indicating whether uses google map provider applies to the dev extreme component editor state.
     /// </summary>
     /// <value>The uses google map provider value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
-    private bool UsesGoogleMapProvider => _draft?.MapProvider is "google" or "googleStatic";
+    private bool UsesGoogleMapProvider => GetUsesGoogleMapProviderForRender();
     /// <summary>
     /// Gets a value indicating whether map configuration valid applies to the dev extreme component editor state.
     /// </summary>
     /// <value>The map configuration valid value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
-    private bool MapConfigurationValid => _draft?.ComponentKind != PublicationComponentKind.Map
-        || (SupportedMapProviders.Contains(_draft.MapProvider ?? string.Empty) && !string.IsNullOrWhiteSpace(_draft.MapApiKey));
+    private bool MapConfigurationValid => GetMapConfigurationValidForRender();
     /// <summary>
     /// Gets a value indicating whether save applies to the dev extreme component editor state.
     /// </summary>
     /// <value>The can save value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
-    private bool CanSave => _draft is not null && !string.IsNullOrWhiteSpace(_draft.Title)
-        && MapConfigurationValid
-        && (!UsesDataConnection || _draft.Connection.Mode is not (PublicationComponentDataMode.Rest or PublicationComponentDataMode.OData) || !string.IsNullOrWhiteSpace(_draft.Connection.Url));
+    private bool CanSave => GetCanSaveForRender();
     /// <summary>
     /// Gets the validation message value that forms part of the dev extreme component editor state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The validation message value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
-    private string ValidationMessage => _draft?.ComponentKind == PublicationComponentKind.Map && !MapConfigurationValid
-        ? "Select a supported provider and enter its API key. No provider preview request is made before both are present."
-        : CanSave ? "Ready. Existing charts remain standalone and unchanged." : "Enter a title and, when a data-driven component uses direct REST/OData, an endpoint URL.";
+    private string ValidationMessage => GetValidationMessageForRender();
 
     /// <summary>
     /// Handles the parameters set lifecycle or event notification for <see cref="DevExtremeComponentEditor"/>, updating the state required by the surrounding workflow.
@@ -1040,14 +1110,7 @@
     /// Gets the component preview style value that forms part of the dev extreme component editor state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The component preview style value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
-    private string ComponentPreviewStyle => _previewSizeKey switch
-    {
-        "phone" => "--component-preview-aspect:0.462085;",
-        "tablet" => "--component-preview-aspect:0.75;",
-        "laptop" => "--component-preview-aspect:1.777778;",
-        "wide" => "--component-preview-aspect:1.6;",
-        _ => "--component-preview-aspect:auto;"
-    };
+    private string ComponentPreviewStyle => GetComponentPreviewStyleForRender();
 
     /// <summary>
     /// Performs change preview size for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
@@ -1318,17 +1381,17 @@
     /// Gets the draw class marker value that forms part of the dev extreme component editor state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The draw class marker value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
-    private string DrawClassMarker => _drawMode == "marker" ? "active" : string.Empty;
+    private string DrawClassMarker => GetDrawClassMarkerForRender();
     /// <summary>
     /// Gets the draw class line value that forms part of the dev extreme component editor state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The draw class line value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
-    private string DrawClassLine => _drawMode == "line" ? "active" : string.Empty;
+    private string DrawClassLine => GetDrawClassLineForRender();
     /// <summary>
     /// Gets the draw class polygon value that forms part of the dev extreme component editor state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The draw class polygon value exposed by <see cref="DevExtremeComponentEditor"/>.</value>
-    private string DrawClassPolygon => _drawMode == "polygon" ? "active" : string.Empty;
+    private string DrawClassPolygon => GetDrawClassPolygonForRender();
     /// <summary>
     /// Sets draw mode for <see cref="DevExtremeComponentEditor"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component editor workflow.
     /// </summary>
@@ -2294,4 +2357,424 @@
         }
     }
 
+
+
+    /// <summary>Computes CurrentPageElements for the render path with component-local diagnostics.</summary>
+    /// <returns>The collection produced by the operation.</returns>
+    private IEnumerable<PublicationElement> GetCurrentPageElementsForRender()
+    {
+        try
+        {
+            return State.CurrentPage.Elements.Where(element => element.Id != _draft?.Id);
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property DevExtremeComponentEditor.CurrentPageElements failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SupportsInternalBorders for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetSupportsInternalBordersForRender()
+    {
+        try
+        {
+            return _draft?.ComponentKind is PublicationComponentKind.DataGrid or PublicationComponentKind.TreeList or PublicationComponentKind.PivotGrid;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property DevExtremeComponentEditor.SupportsInternalBorders failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SupportsWordWrap for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetSupportsWordWrapForRender()
+    {
+        try
+        {
+            return _draft?.ComponentKind is PublicationComponentKind.DataGrid or PublicationComponentKind.TreeList;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property DevExtremeComponentEditor.SupportsWordWrap failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SupportsEditMode for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetSupportsEditModeForRender()
+    {
+        try
+        {
+            return _draft?.ComponentKind is PublicationComponentKind.DataGrid or PublicationComponentKind.TreeList or PublicationComponentKind.Scheduler;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property DevExtremeComponentEditor.SupportsEditMode failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SupportsSelection for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetSupportsSelectionForRender()
+    {
+        try
+        {
+            return _draft?.ComponentKind is PublicationComponentKind.DataGrid or PublicationComponentKind.TreeList;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property DevExtremeComponentEditor.SupportsSelection failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SupportsPageSize for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetSupportsPageSizeForRender()
+    {
+        try
+        {
+            return _draft?.ComponentKind is PublicationComponentKind.DataGrid or PublicationComponentKind.TreeList;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property DevExtremeComponentEditor.SupportsPageSize failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SupportsOrientation for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetSupportsOrientationForRender()
+    {
+        try
+        {
+            return _draft?.ComponentKind is PublicationComponentKind.Menu or PublicationComponentKind.TileView or PublicationComponentKind.Splitter or PublicationComponentKind.ScrollView;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property DevExtremeComponentEditor.SupportsOrientation failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SupportsButtonText for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetSupportsButtonTextForRender()
+    {
+        try
+        {
+            return _draft?.ComponentKind is PublicationComponentKind.Button or PublicationComponentKind.Form or PublicationComponentKind.CheckBox;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property DevExtremeComponentEditor.SupportsButtonText failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SupportsPlaceholder for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetSupportsPlaceholderForRender()
+    {
+        try
+        {
+            return _draft?.ComponentKind is PublicationComponentKind.TextBox or PublicationComponentKind.TextArea or PublicationComponentKind.NumberBox or PublicationComponentKind.DateBox or PublicationComponentKind.SelectBox or PublicationComponentKind.TagBox;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property DevExtremeComponentEditor.SupportsPlaceholder failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SupportsInitialValue for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetSupportsInitialValueForRender()
+    {
+        try
+        {
+            return _draft?.ComponentKind is PublicationComponentKind.TextBox or PublicationComponentKind.TextArea or PublicationComponentKind.NumberBox or PublicationComponentKind.DateBox or PublicationComponentKind.CheckBox or PublicationComponentKind.SelectBox or PublicationComponentKind.TagBox;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property DevExtremeComponentEditor.SupportsInitialValue failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SupportsGridOptions for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetSupportsGridOptionsForRender()
+    {
+        try
+        {
+            return _draft?.ComponentKind == PublicationComponentKind.DataGrid;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property DevExtremeComponentEditor.SupportsGridOptions failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes UsesKeyField for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetUsesKeyFieldForRender()
+    {
+        try
+        {
+            return _draft?.ComponentKind is PublicationComponentKind.DataGrid or PublicationComponentKind.TreeList or PublicationComponentKind.Form or PublicationComponentKind.Scheduler or PublicationComponentKind.SelectBox or PublicationComponentKind.TagBox or PublicationComponentKind.Gallery or PublicationComponentKind.TileView or PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu or PublicationComponentKind.PivotGrid or PublicationComponentKind.Chat;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property DevExtremeComponentEditor.UsesKeyField failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes UsesParentField for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetUsesParentFieldForRender()
+    {
+        try
+        {
+            return _draft?.ComponentKind is PublicationComponentKind.TreeList or PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property DevExtremeComponentEditor.UsesParentField failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes UsesTextField for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetUsesTextFieldForRender()
+    {
+        try
+        {
+            return _draft?.ComponentKind is PublicationComponentKind.TreeList or PublicationComponentKind.Scheduler or PublicationComponentKind.Gallery or PublicationComponentKind.TileView or PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property DevExtremeComponentEditor.UsesTextField failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes UsesDisplayField for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetUsesDisplayFieldForRender()
+    {
+        try
+        {
+            return _draft?.ComponentKind is PublicationComponentKind.SelectBox or PublicationComponentKind.TagBox or PublicationComponentKind.Gallery or PublicationComponentKind.TileView or PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property DevExtremeComponentEditor.UsesDisplayField failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes UsesValueField for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetUsesValueFieldForRender()
+    {
+        try
+        {
+            return _draft?.ComponentKind is PublicationComponentKind.SelectBox or PublicationComponentKind.TagBox or PublicationComponentKind.Gallery or PublicationComponentKind.TileView;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property DevExtremeComponentEditor.UsesValueField failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes UsesImageField for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetUsesImageFieldForRender()
+    {
+        try
+        {
+            return _draft?.ComponentKind is PublicationComponentKind.Gallery or PublicationComponentKind.TileView;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property DevExtremeComponentEditor.UsesImageField failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes IsManualMenu for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetIsManualMenuForRender()
+    {
+        try
+        {
+            return _draft is not null
+        && (_draft.ComponentKind is PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu)
+        && _draft.MenuSourceMode == PublicationMenuSourceMode.ManualItems;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property DevExtremeComponentEditor.IsManualMenu failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes UsesDataConnection for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetUsesDataConnectionForRender()
+    {
+        try
+        {
+            return !IsManualMenu;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property DevExtremeComponentEditor.UsesDataConnection failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes UsesGoogleMapProvider for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetUsesGoogleMapProviderForRender()
+    {
+        try
+        {
+            return _draft?.MapProvider is "google" or "googleStatic";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property DevExtremeComponentEditor.UsesGoogleMapProvider failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes MapConfigurationValid for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetMapConfigurationValidForRender()
+    {
+        try
+        {
+            return _draft?.ComponentKind != PublicationComponentKind.Map
+        || (SupportedMapProviders.Contains(_draft.MapProvider ?? string.Empty) && !string.IsNullOrWhiteSpace(_draft.MapApiKey));
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property DevExtremeComponentEditor.MapConfigurationValid failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes CanSave for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetCanSaveForRender()
+    {
+        try
+        {
+            return _draft is not null && !string.IsNullOrWhiteSpace(_draft.Title)
+        && MapConfigurationValid
+        && (!UsesDataConnection || _draft.Connection.Mode is not (PublicationComponentDataMode.Rest or PublicationComponentDataMode.OData) || !string.IsNullOrWhiteSpace(_draft.Connection.Url));
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property DevExtremeComponentEditor.CanSave failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes ValidationMessage for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetValidationMessageForRender()
+    {
+        try
+        {
+            return _draft?.ComponentKind == PublicationComponentKind.Map && !MapConfigurationValid
+        ? "Select a supported provider and enter its API key. No provider preview request is made before both are present."
+        : CanSave ? "Ready. Existing charts remain standalone and unchanged." : "Enter a title and, when a data-driven component uses direct REST/OData, an endpoint URL.";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property DevExtremeComponentEditor.ValidationMessage failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes ComponentPreviewStyle for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetComponentPreviewStyleForRender()
+    {
+        try
+        {
+            return _previewSizeKey switch
+    {
+        "phone" => "--component-preview-aspect:0.462085;",
+        "tablet" => "--component-preview-aspect:0.75;",
+        "laptop" => "--component-preview-aspect:1.777778;",
+        "wide" => "--component-preview-aspect:1.6;",
+        _ => "--component-preview-aspect:auto;"
+    };
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property DevExtremeComponentEditor.ComponentPreviewStyle failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes DrawClassMarker for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetDrawClassMarkerForRender()
+    {
+        try
+        {
+            return _drawMode == "marker" ? "active" : string.Empty;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property DevExtremeComponentEditor.DrawClassMarker failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes DrawClassLine for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetDrawClassLineForRender()
+    {
+        try
+        {
+            return _drawMode == "line" ? "active" : string.Empty;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property DevExtremeComponentEditor.DrawClassLine failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes DrawClassPolygon for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetDrawClassPolygonForRender()
+    {
+        try
+        {
+            return _drawMode == "polygon" ? "active" : string.Empty;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property DevExtremeComponentEditor.DrawClassPolygon failed.");
+            throw;
+        }
+    }
 }

@@ -11,10 +11,24 @@
 @inject ISupervisedTaskRunner TaskRunner
 @inject PublicationFileService Files
 
+<div class="razor-component-boundary">
+<DxFormLayout CssClass="razor-component-layout-owner StoryEditor">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext001">
 @if (Visible && TextFrame is not null)
 {
-    <div class="modal-backdrop" role="presentation">
-        <section id="story-editor-shell" class="story-editor-dialog" role="dialog" aria-modal="true" aria-label="Edit text story">
+    <DxPopup Visible="true"
+         Width="min(1800px, 98vw)"
+         Height="min(1180px, 96vh)"
+         MaxHeight="96vh"
+         CloseOnOutsideClick="false"
+         CloseOnEscape="false"
+         ShowHeader="false">
+    <BodyContentTemplate Context="publisherPopupContext">
+        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext002">
+        <div id="story-editor-shell" class="story-editor-dialog" aria-label="Edit text story">
             <header>
                 <div><strong>Edit story</strong><span>@TextFrame.Name</span></div>
                 <button class="window-close" @onclick="Cancel" aria-label="Close">×</button>
@@ -82,7 +96,10 @@
             </DxRibbon>
             @if (_aiStoryPanelVisible && CanUseAiCouncil)
             {
-                <section class="story-ai-workspace" aria-label="LocalGPT AI story assistance">
+                <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext003">
+        <div class="story-ai-workspace" aria-label="LocalGPT AI story assistance">
                     <header>
                         <div>
                             <strong>LocalGPT AI text generation</strong>
@@ -132,11 +149,17 @@
                             }
                         }
                     </div>
-                </section>
+                </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
             }
             @if (_codeWorkspaceVisible)
             {
-                <section class="story-code-workspace" aria-label="Programming language workspace">
+                <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext004">
+        <div class="story-code-workspace" aria-label="Programming language workspace">
                     <header>
                         <strong>Code workspace</strong>
                         <span>Language profiles, formatting, comments and token analysis are also available through <code>/api/code</code>.</span>
@@ -163,7 +186,10 @@
                         <pre class="story-code-preview" aria-label="Syntax analysis preview">@_codeWorkspaceText</pre>
                     </div>
                     <footer><span>@CodeWorkspaceSummary</span></footer>
-                </section>
+                </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
             }
 
             <details class="story-field-help story-field-help-strip">
@@ -211,9 +237,18 @@
                     <DxButton Text="Apply to frame" RenderStyle="ButtonRenderStyle.Primary" Click="Apply" />
                 </div>
             </footer>
-        </section>
-    </div>
+        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+        </BodyContentTemplate>
+</DxPopup>
 }
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+</div>
+
 
 @code {
 
@@ -389,22 +424,22 @@
     /// Gets the code workspace summary value that forms part of the story editor state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The code workspace summary value exposed by <see cref="StoryEditor"/>.</value>
-    private string CodeWorkspaceSummary => $"{CodeLanguages.Get(_codeLanguageId).DisplayName} · {_codeTokens.Count} recognized token(s) · {_codeWorkspaceText.Length} character(s)";
+    private string CodeWorkspaceSummary => GetCodeWorkspaceSummaryForRender();
     /// <summary>
     /// Gets a value indicating whether use AI council applies to the story editor state.
     /// </summary>
     /// <value>The can use AI council value exposed by <see cref="StoryEditor"/>.</value>
-    private bool CanUseAiCouncil => LocalGptConnection.State.IsLinked && LocalGptConnection.State.HasCapability("council.run");
+    private bool CanUseAiCouncil => GetCanUseAiCouncilForRender();
     /// <summary>
     /// Gets a value indicating whether send AI story request applies to the story editor state.
     /// </summary>
     /// <value>The can send AI story request value exposed by <see cref="StoryEditor"/>.</value>
-    private bool CanSendAiStoryRequest => CanUseAiCouncil && !string.IsNullOrWhiteSpace(_aiStoryPrompt) && TextFrame is not null;
+    private bool CanSendAiStoryRequest => GetCanSendAiStoryRequestForRender();
     /// <summary>
     /// Gets a value indicating whether selected story text applies to the story editor state.
     /// </summary>
     /// <value>The has selected story text value exposed by <see cref="StoryEditor"/>.</value>
-    private bool HasSelectedStoryText => _selection?.Intervals is { Count: > 0 } && _selection.Intervals[0].Length > 0;
+    private bool HasSelectedStoryText => GetHasSelectedStoryTextForRender();
     /// <summary>
     /// Gets the AI council teams collection maintained or exposed by this story editor instance for downstream processing.
     /// </summary>
@@ -434,17 +469,12 @@
     /// Gets the matching AI proposals collection maintained or exposed by this story editor instance for downstream processing.
     /// </summary>
     /// <value>The matching AI proposals value exposed by <see cref="StoryEditor"/>.</value>
-    private IReadOnlyList<OrganicTextInsertionProposal> MatchingAiProposals => _aiProposals
-        .Where(proposal => TextFrame is not null &&
-            (string.Equals(proposal.Target, TextFrame.Name, StringComparison.OrdinalIgnoreCase)
-             || string.Equals(proposal.Target, AiProposalTarget, StringComparison.OrdinalIgnoreCase)))
-        .OrderByDescending(proposal => proposal.CreatedUtc)
-        .ToList();
+    private IReadOnlyList<OrganicTextInsertionProposal> MatchingAiProposals => GetMatchingAiProposalsForRender();
     /// <summary>
     /// Gets the AI proposal target value that forms part of the story editor state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The AI proposal target value exposed by <see cref="StoryEditor"/>.</value>
-    private string AiProposalTarget => TextFrame is null ? "PublisherStudio story" : $"StoryEditor:{TextFrame.Id}:{TextFrame.Name}";
+    private string AiProposalTarget => GetAiProposalTargetForRender();
 
     /// <summary>
     /// Performs customize rich edit ribbon for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
@@ -2313,4 +2343,100 @@
         public string Background { get; set; } = "transparent";
     }
 
+
+
+    /// <summary>Computes CodeWorkspaceSummary for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetCodeWorkspaceSummaryForRender()
+    {
+        try
+        {
+            return $"{CodeLanguages.Get(_codeLanguageId).DisplayName} · {_codeTokens.Count} recognized token(s) · {_codeWorkspaceText.Length} character(s)";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property StoryEditor.CodeWorkspaceSummary failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes CanUseAiCouncil for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetCanUseAiCouncilForRender()
+    {
+        try
+        {
+            return LocalGptConnection.State.IsLinked && LocalGptConnection.State.HasCapability("council.run");
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property StoryEditor.CanUseAiCouncil failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes CanSendAiStoryRequest for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetCanSendAiStoryRequestForRender()
+    {
+        try
+        {
+            return CanUseAiCouncil && !string.IsNullOrWhiteSpace(_aiStoryPrompt) && TextFrame is not null;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property StoryEditor.CanSendAiStoryRequest failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes HasSelectedStoryText for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetHasSelectedStoryTextForRender()
+    {
+        try
+        {
+            return _selection?.Intervals is { Count: > 0 } && _selection.Intervals[0].Length > 0;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property StoryEditor.HasSelectedStoryText failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes MatchingAiProposals for the render path with component-local diagnostics.</summary>
+    /// <returns>The collection produced by the operation.</returns>
+    private IReadOnlyList<OrganicTextInsertionProposal> GetMatchingAiProposalsForRender()
+    {
+        try
+        {
+            return _aiProposals
+        .Where(proposal => TextFrame is not null &&
+            (string.Equals(proposal.Target, TextFrame.Name, StringComparison.OrdinalIgnoreCase)
+             || string.Equals(proposal.Target, AiProposalTarget, StringComparison.OrdinalIgnoreCase)))
+        .OrderByDescending(proposal => proposal.CreatedUtc)
+        .ToList();
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property StoryEditor.MatchingAiProposals failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes AiProposalTarget for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetAiProposalTargetForRender()
+    {
+        try
+        {
+            return TextFrame is null ? "PublisherStudio story" : $"StoryEditor:{TextFrame.Id}:{TextFrame.Name}";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property StoryEditor.AiProposalTarget failed.");
+            throw;
+        }
+    }
 }

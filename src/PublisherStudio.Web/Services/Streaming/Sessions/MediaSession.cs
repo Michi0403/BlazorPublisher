@@ -574,7 +574,7 @@ public sealed class MediaSession
 
             foreach (var output in outputs.EnumerateArray())
             {
-                if (!output.TryGetProperty("outputId", out var id) || !id.TryGetGuid(out var outputId))
+                if (!output.TryGetProperty("outputId", out var id) || id.ValueKind != JsonValueKind.String || !id.TryGetGuid(out var outputId))
                 {
                     continue;
                 }
@@ -634,7 +634,7 @@ public sealed class MediaSession
             {
                 foreach (var value in selected.EnumerateArray())
                 {
-                    if (value.TryGetGuid(out var selectedId))
+                    if (value.ValueKind == JsonValueKind.String && value.TryGetGuid(out var selectedId))
                     {
                         RecordingDefinition.SelectedOutputIds.Add(selectedId);
                     }
@@ -708,8 +708,8 @@ public sealed class MediaSession
             }
             foreach (var item in hotkeys.EnumerateArray())
             {
-                var hotkeyId = item.TryGetProperty("id", out var idProperty) && idProperty.TryGetGuid(out var parsedId) ? parsedId : Guid.NewGuid();
-                var targetId = item.TryGetProperty("targetId", out var targetProperty) && targetProperty.TryGetGuid(out var parsedTarget) ? parsedTarget : (Guid?)null;
+                var hotkeyId = item.TryGetProperty("id", out var idProperty) && idProperty.ValueKind == JsonValueKind.String && idProperty.TryGetGuid(out var parsedId) ? parsedId : Guid.NewGuid();
+                var targetId = item.TryGetProperty("targetId", out var targetProperty) && targetProperty.ValueKind == JsonValueKind.String && targetProperty.TryGetGuid(out var parsedTarget) ? parsedTarget : (Guid?)null;
                 Hotkeys.Add(new MediaHotkey(
                     hotkeyId,
                     ReadString(item, "gesture") ?? string.Empty,

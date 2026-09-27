@@ -4,13 +4,28 @@
 @inject IJSRuntime JS
 @inject PublicationMediaAssetStore MediaAssets
 @inject IPublisherRuntimePolicyDataService RuntimePolicy
+@inject PublicationEditorTextService EditorText
 
 @inject ILogger<MediaConverterStudio> Logger
 @inject ISupervisedTaskRunner TaskRunner
+<div class="razor-component-boundary">
+<DxFormLayout CssClass="razor-component-layout-owner MediaConverterStudio">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext001">
 @if (Visible)
 {
-    <div class="modal-backdrop data-modal-backdrop media-converter-backdrop">
-        <section class="data-visual-editor-dialog media-converter-dialog" role="dialog" aria-modal="true" aria-label="Media Converter Studio"
+    <DxPopup Visible="true"
+         Width="min(1800px, 98vw)"
+         Height="min(1180px, 96vh)"
+         MaxHeight="96vh"
+         CloseOnOutsideClick="false"
+         CloseOnEscape="false"
+         ShowHeader="false">
+    <BodyContentTemplate Context="publisherPopupContext">
+        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext002">
+        <div class="data-visual-editor-dialog media-converter-dialog" aria-label="Media Converter Studio"
                  @oncontextmenu="ShowConverterContextMenu" @oncontextmenu:preventDefault>
             <header>
                 <div>
@@ -102,7 +117,10 @@
                         <div class="inline-success"><strong>@_capabilities.Version</strong><small>@_capabilities.Executable</small></div>
                     }
 
-                    <section class="converter-source-card" @ref="_sourceDropZone" @ondblclick="OpenSourcePicker"
+                    <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext003">
+        <div class="converter-source-card" @ref="_sourceDropZone" @ondblclick="OpenSourcePicker"
                              @oncontextmenu="ShowConverterContextMenu" @oncontextmenu:preventDefault @oncontextmenu:stopPropagation>
                         <span class="pub-icon pub-icon-media"></span>
                         @if (HasSource)
@@ -120,7 +138,10 @@
                                 <button type="button" title="@SourceStudioTooltip" @onclick="OpenSourceInStudio">@SourceStudioButtonText</button>
                             }
                         </div>
-                    </section>
+                    </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
 
                     <label>Saved profile
                         <select value="@_selectedProfileId" @onchange="SelectProfile">
@@ -241,7 +262,10 @@
                         @foreach (var format in PixelFormatSuggestions) { <option value="@format"></option> }
                     </datalist>
 
-                    <section class="media-converter-jobs">
+                    <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext004">
+        <div class="media-converter-jobs">
                         <header><div><strong>Conversion jobs</strong><span>Click to select; right-click for job actions; double-click completed image, audio, or video output to open its Studio.</span></div></header>
                         @if (_jobs.Count == 0)
                         {
@@ -277,7 +301,10 @@
                                 @if (job.OutputSize > 0) { <small>@job.OutputFileName · @FormatBytes(job.OutputSize)</small> }
                             </article>
                         }
-                    </section>
+                    </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
                 </main>
             </div>
             <footer>
@@ -285,7 +312,10 @@
                 <button type="button" title="Close Media Converter Studio" @onclick="Close">Close</button>
                 <button type="button" class="primary" title="Start conversion with the current preset and options" @onclick="Start" disabled="@(!CanStart)">Convert</button>
             </footer>
-        </section>
+        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
         <DxContextMenu @ref="_contextMenu">
             <Items>
                 <DxContextMenuItem Text="Open media…" IconCssClass="pub-icon pub-icon-open" Click="OpenSourcePicker" />
@@ -299,8 +329,14 @@
                 <DxContextMenuItem Text="Remove selected job" IconCssClass="pub-icon pub-icon-delete" Enabled="@(SelectedJob is not null && !SelectedJobRunning)" Click="RemoveSelected" />
             </Items>
         </DxContextMenu>
-    </div>
+        </BodyContentTemplate>
+</DxPopup>
 }
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+</div>
+
 
 @code {
 
@@ -358,12 +394,12 @@
     /// Gets the encoder preset suggestions collection maintained or exposed by this media converter studio instance for downstream processing.
     /// </summary>
     /// <value>The encoder preset suggestions value exposed by <see cref="MediaConverterStudio"/>.</value>
-    private IReadOnlyList<string> EncoderPresetSuggestions => RuntimePolicy.GetCollection(PublisherRuntimeCollection.FfmpegEncoderPresetSuggestions);
+    private IReadOnlyList<string> EncoderPresetSuggestions => GetEncoderPresetSuggestionsForRender();
     /// <summary>
     /// Gets the pixel format suggestions collection maintained or exposed by this media converter studio instance for downstream processing.
     /// </summary>
     /// <value>The pixel format suggestions value exposed by <see cref="MediaConverterStudio"/>.</value>
-    private IReadOnlyList<string> PixelFormatSuggestions => RuntimePolicy.GetCollection(PublisherRuntimeCollection.FfmpegPixelFormatSuggestions);
+    private IReadOnlyList<string> PixelFormatSuggestions => GetPixelFormatSuggestionsForRender();
     /// <summary>
     /// Stores the in-memory jobs collection maintained internally by <see cref="MediaConverterStudio"/> for its current workflow state.
     /// </summary>
@@ -438,20 +474,17 @@
     /// Gets the source kind value that forms part of the media converter studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The source kind value exposed by <see cref="MediaConverterStudio"/>.</value>
-    private string SourceKind => EffectiveSourceMimeType.StartsWith("image/", StringComparison.OrdinalIgnoreCase) ? "image"
-        : EffectiveSourceMimeType.StartsWith("audio/", StringComparison.OrdinalIgnoreCase) ? "audio"
-        : EffectiveSourceMimeType.StartsWith("video/", StringComparison.OrdinalIgnoreCase) ? "video"
-        : string.Empty;
+    private string SourceKind => GetSourceKindForRender();
     /// <summary>
     /// Gets the source name value that forms part of the media converter studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The source name value exposed by <see cref="MediaConverterStudio"/>.</value>
-    private string SourceName => _file?.Name ?? _memorySource?.FileName ?? string.Empty;
+    private string SourceName => GetSourceNameForRender();
     /// <summary>
     /// Gets the source MIME type value that forms part of the media converter studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The source MIME type value exposed by <see cref="MediaConverterStudio"/>.</value>
-    private string SourceMimeType => _file?.ContentType ?? _memorySource?.MimeType ?? string.Empty;
+    private string SourceMimeType => GetSourceMimeTypeForRender();
     /// <summary>
     /// Gets the effective source MIME type value that forms part of the media converter studio state consumed or produced by the surrounding workflow.
     /// </summary>
@@ -461,92 +494,92 @@
     /// Gets the source size that quantifies the associated media converter studio data.
     /// </summary>
     /// <value>The source size value exposed by <see cref="MediaConverterStudio"/>.</value>
-    private long SourceSize => _file?.Size ?? _memorySource?.Content.LongLength ?? 0;
+    private long SourceSize => GetSourceSizeForRender();
     /// <summary>
     /// Gets the source origin value that forms part of the media converter studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The source origin value exposed by <see cref="MediaConverterStudio"/>.</value>
-    private string SourceOrigin => _file is not null ? "Local file" : _memorySource?.Origin ?? string.Empty;
+    private string SourceOrigin => GetSourceOriginForRender();
     /// <summary>
     /// Gets a value indicating whether source applies to the media converter studio state.
     /// </summary>
     /// <value>The has source value exposed by <see cref="MediaConverterStudio"/>.</value>
-    private bool HasSource => _file is not null || _memorySource is not null;
+    private bool HasSource => GetHasSourceForRender();
     /// <summary>
     /// Gets the selected preset value that forms part of the media converter studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The selected preset value exposed by <see cref="MediaConverterStudio"/>.</value>
-    private MediaConversionPreset? SelectedPreset => _capabilities?.Presets.FirstOrDefault(preset => preset.Id == _presetId);
+    private MediaConversionPreset? SelectedPreset => GetSelectedPresetForRender();
     /// <summary>
     /// Gets the selected job value that forms part of the media converter studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The selected job value exposed by <see cref="MediaConverterStudio"/>.</value>
-    private MediaConversionJobInfo? SelectedJob => _selectedJobId is { } id ? _jobs.FirstOrDefault(job => job.Id == id) : null;
+    private MediaConversionJobInfo? SelectedJob => GetSelectedJobForRender();
     /// <summary>
     /// Gets a value indicating whether selected job completed applies to the media converter studio state.
     /// </summary>
     /// <value>The selected job completed value exposed by <see cref="MediaConverterStudio"/>.</value>
-    private bool SelectedJobCompleted => SelectedJob?.Status == MediaConversionJobStatus.Completed;
+    private bool SelectedJobCompleted => GetSelectedJobCompletedForRender();
     /// <summary>
     /// Gets a value indicating whether open source in studio applies to the media converter studio state.
     /// </summary>
     /// <value>The can open source in studio value exposed by <see cref="MediaConverterStudio"/>.</value>
-    private bool CanOpenSourceInStudio => HasSource && CanOpenInStudio(EffectiveSourceMimeType);
+    private bool CanOpenSourceInStudio => GetCanOpenSourceInStudioForRender();
     /// <summary>
     /// Gets a value indicating whether selected job running applies to the media converter studio state.
     /// </summary>
     /// <value>The selected job running value exposed by <see cref="MediaConverterStudio"/>.</value>
-    private bool SelectedJobRunning => SelectedJob?.Status is MediaConversionJobStatus.Queued or MediaConversionJobStatus.Running;
+    private bool SelectedJobRunning => GetSelectedJobRunningForRender();
     /// <summary>
     /// Gets a value indicating whether open selected in studio applies to the media converter studio state.
     /// </summary>
     /// <value>The can open selected in studio value exposed by <see cref="MediaConverterStudio"/>.</value>
-    private bool CanOpenSelectedInStudio => SelectedJobCompleted && CanOpenInStudio(SelectedJob?.OutputMimeType);
+    private bool CanOpenSelectedInStudio => GetCanOpenSelectedInStudioForRender();
     /// <summary>
     /// Gets a value indicating whether delete profile applies to the media converter studio state.
     /// </summary>
     /// <value>The can delete profile value exposed by <see cref="MediaConverterStudio"/>.</value>
-    private bool CanDeleteProfile => _selectedProfileId != Guid.Empty && _profiles.FirstOrDefault(profile => profile.Id == _selectedProfileId)?.BuiltIn == false;
+    private bool CanDeleteProfile => GetCanDeleteProfileForRender();
     /// <summary>
     /// Gets a value indicating whether start applies to the media converter studio state.
     /// </summary>
     /// <value>The can start value exposed by <see cref="MediaConverterStudio"/>.</value>
-    private bool CanStart => HasSource && _capabilities?.Available == true && SelectedPreset?.Available == true;
+    private bool CanStart => GetCanStartForRender();
     /// <summary>
     /// Gets the source studio command value that forms part of the media converter studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The source studio command value exposed by <see cref="MediaConverterStudio"/>.</value>
-    private string SourceStudioCommand => HasSource ? $"Edit source in {StudioName(EffectiveSourceMimeType)}" : "Edit source in Studio";
+    private string SourceStudioCommand => GetSourceStudioCommandForRender();
     /// <summary>
     /// Gets the source studio context command value that forms part of the media converter studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The source studio context command value exposed by <see cref="MediaConverterStudio"/>.</value>
-    private string SourceStudioContextCommand => HasSource ? $"Edit source in {StudioName(EffectiveSourceMimeType)}" : "Edit source in Studio";
+    private string SourceStudioContextCommand => GetSourceStudioContextCommandForRender();
     /// <summary>
     /// Gets the source studio button text value that forms part of the media converter studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The source studio button text value exposed by <see cref="MediaConverterStudio"/>.</value>
-    private string SourceStudioButtonText => HasSource ? $"Edit in {StudioName(EffectiveSourceMimeType)}" : "Edit in Studio";
+    private string SourceStudioButtonText => GetSourceStudioButtonTextForRender();
     /// <summary>
     /// Gets the source studio tooltip value that forms part of the media converter studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The source studio tooltip value exposed by <see cref="MediaConverterStudio"/>.</value>
-    private string SourceStudioTooltip => HasSource ? $"Open the current source in {StudioName(EffectiveSourceMimeType)}" : "Open the current source in its Studio";
+    private string SourceStudioTooltip => GetSourceStudioTooltipForRender();
     /// <summary>
     /// Gets the selected studio command value that forms part of the media converter studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The selected studio command value exposed by <see cref="MediaConverterStudio"/>.</value>
-    private string SelectedStudioCommand => SelectedJob is { } job ? $"Open in {StudioName(job.OutputMimeType)}" : "Open in Studio";
+    private string SelectedStudioCommand => GetSelectedStudioCommandForRender();
     /// <summary>
     /// Gets the selected studio context command value that forms part of the media converter studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The selected studio context command value exposed by <see cref="MediaConverterStudio"/>.</value>
-    private string SelectedStudioContextCommand => SelectedJob is { } job ? $"Open selected result in {StudioName(job.OutputMimeType)}" : "Open selected result in Studio";
+    private string SelectedStudioContextCommand => GetSelectedStudioContextCommandForRender();
     /// <summary>
     /// Gets the metadata text value that forms part of the media converter studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The metadata text value exposed by <see cref="MediaConverterStudio"/>.</value>
-    private string MetadataText => string.Join(Environment.NewLine, _options.Metadata.Select(pair => $"{pair.Key}={pair.Value}"));
+    private string MetadataText => GetMetadataTextForRender();
 
     /// <summary>
     /// Handles the parameters set async lifecycle or event notification for <see cref="MediaConverterStudio"/>, updating the state required by the surrounding workflow.
@@ -2108,4 +2141,353 @@
         }
     }
 
+
+
+    /// <summary>Computes EncoderPresetSuggestions for the render path with component-local diagnostics.</summary>
+    /// <returns>The collection produced by the operation.</returns>
+    private IReadOnlyList<string> GetEncoderPresetSuggestionsForRender()
+    {
+        try
+        {
+            return RuntimePolicy.GetCollection(PublisherRuntimeCollection.FfmpegEncoderPresetSuggestions);
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaConverterStudio.EncoderPresetSuggestions failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes PixelFormatSuggestions for the render path with component-local diagnostics.</summary>
+    /// <returns>The collection produced by the operation.</returns>
+    private IReadOnlyList<string> GetPixelFormatSuggestionsForRender()
+    {
+        try
+        {
+            return RuntimePolicy.GetCollection(PublisherRuntimeCollection.FfmpegPixelFormatSuggestions);
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaConverterStudio.PixelFormatSuggestions failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SourceKind for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetSourceKindForRender()
+    {
+        try
+        {
+            return EffectiveSourceMimeType.StartsWith("image/", StringComparison.OrdinalIgnoreCase) ? "image"
+        : EffectiveSourceMimeType.StartsWith("audio/", StringComparison.OrdinalIgnoreCase) ? "audio"
+        : EffectiveSourceMimeType.StartsWith("video/", StringComparison.OrdinalIgnoreCase) ? "video"
+        : string.Empty;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaConverterStudio.SourceKind failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SourceName for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetSourceNameForRender()
+    {
+        try
+        {
+            return _file?.Name ?? _memorySource?.FileName ?? string.Empty;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaConverterStudio.SourceName failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SourceMimeType for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetSourceMimeTypeForRender()
+    {
+        try
+        {
+            return _file?.ContentType ?? _memorySource?.MimeType ?? string.Empty;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaConverterStudio.SourceMimeType failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SourceSize for the render path with component-local diagnostics.</summary>
+    /// <returns>The long produced by the operation.</returns>
+    private long GetSourceSizeForRender()
+    {
+        try
+        {
+            return _file?.Size ?? _memorySource?.Content.LongLength ?? 0;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaConverterStudio.SourceSize failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SourceOrigin for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetSourceOriginForRender()
+    {
+        try
+        {
+            return _file is not null ? "Local file" : _memorySource?.Origin ?? string.Empty;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaConverterStudio.SourceOrigin failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes HasSource for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetHasSourceForRender()
+    {
+        try
+        {
+            return _file is not null || _memorySource is not null;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaConverterStudio.HasSource failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SelectedPreset for the render path with component-local diagnostics.</summary>
+    /// <returns>The media conversion preset produced by the operation.</returns>
+    private MediaConversionPreset? GetSelectedPresetForRender()
+    {
+        try
+        {
+            return _capabilities?.Presets.FirstOrDefault(preset => preset.Id == _presetId);
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaConverterStudio.SelectedPreset failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SelectedJob for the render path with component-local diagnostics.</summary>
+    /// <returns>The media conversion job info produced by the operation.</returns>
+    private MediaConversionJobInfo? GetSelectedJobForRender()
+    {
+        try
+        {
+            return _selectedJobId is { } id ? _jobs.FirstOrDefault(job => job.Id == id) : null;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaConverterStudio.SelectedJob failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SelectedJobCompleted for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetSelectedJobCompletedForRender()
+    {
+        try
+        {
+            return SelectedJob?.Status == MediaConversionJobStatus.Completed;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaConverterStudio.SelectedJobCompleted failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes CanOpenSourceInStudio for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetCanOpenSourceInStudioForRender()
+    {
+        try
+        {
+            return HasSource && CanOpenInStudio(EffectiveSourceMimeType);
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaConverterStudio.CanOpenSourceInStudio failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SelectedJobRunning for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetSelectedJobRunningForRender()
+    {
+        try
+        {
+            return SelectedJob?.Status is MediaConversionJobStatus.Queued or MediaConversionJobStatus.Running;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaConverterStudio.SelectedJobRunning failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes CanOpenSelectedInStudio for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetCanOpenSelectedInStudioForRender()
+    {
+        try
+        {
+            return SelectedJobCompleted && CanOpenInStudio(SelectedJob?.OutputMimeType);
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaConverterStudio.CanOpenSelectedInStudio failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes CanDeleteProfile for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetCanDeleteProfileForRender()
+    {
+        try
+        {
+            return _selectedProfileId != Guid.Empty && _profiles.FirstOrDefault(profile => profile.Id == _selectedProfileId)?.BuiltIn == false;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaConverterStudio.CanDeleteProfile failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes CanStart for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetCanStartForRender()
+    {
+        try
+        {
+            return HasSource && _capabilities?.Available == true && SelectedPreset?.Available == true;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaConverterStudio.CanStart failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SourceStudioCommand for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetSourceStudioCommandForRender()
+    {
+        try
+        {
+            return HasSource ? $"Edit source in {StudioName(EffectiveSourceMimeType)}" : "Edit source in Studio";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaConverterStudio.SourceStudioCommand failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SourceStudioContextCommand for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetSourceStudioContextCommandForRender()
+    {
+        try
+        {
+            return HasSource ? $"Edit source in {StudioName(EffectiveSourceMimeType)}" : "Edit source in Studio";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaConverterStudio.SourceStudioContextCommand failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SourceStudioButtonText for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetSourceStudioButtonTextForRender()
+    {
+        try
+        {
+            return HasSource ? $"Edit in {StudioName(EffectiveSourceMimeType)}" : "Edit in Studio";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaConverterStudio.SourceStudioButtonText failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SourceStudioTooltip for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetSourceStudioTooltipForRender()
+    {
+        try
+        {
+            return HasSource ? $"Open the current source in {StudioName(EffectiveSourceMimeType)}" : "Open the current source in its Studio";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaConverterStudio.SourceStudioTooltip failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SelectedStudioCommand for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetSelectedStudioCommandForRender()
+    {
+        try
+        {
+            return SelectedJob is { } job ? $"Open in {StudioName(job.OutputMimeType)}" : "Open in Studio";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaConverterStudio.SelectedStudioCommand failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SelectedStudioContextCommand for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetSelectedStudioContextCommandForRender()
+    {
+        try
+        {
+            return SelectedJob is { } job ? $"Open selected result in {StudioName(job.OutputMimeType)}" : "Open selected result in Studio";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaConverterStudio.SelectedStudioContextCommand failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes MetadataText for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetMetadataTextForRender()
+    {
+        try
+        {
+            return EditorText.FormatMediaConversionMetadata(_options.Metadata);
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaConverterStudio.MetadataText failed.");
+            throw;
+        }
+    }
 }

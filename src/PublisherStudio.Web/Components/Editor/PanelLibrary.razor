@@ -5,7 +5,14 @@
 @inject IUserNotificationService Notifications
 @inject ILogger<PanelLibrary> Logger
 
-<section class="panel-library-dock" aria-label='@LT("Panel and dashboard library")'>
+<div class="razor-component-boundary">
+<DxFormLayout CssClass="razor-component-layout-owner PanelLibrary">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext001">
+<DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext002">
+        <div class="panel-library-dock" aria-label='@LT("Panel and dashboard library")'>
     <header>
         <div><strong>@LT("Panel library")</strong><small>@LT("Reusable live views built from PublisherStudio components.")</small></div>
         <button type="button" class="window-close" aria-label='@LT("Close Panel library")' @onclick="Close">×</button>
@@ -56,7 +63,15 @@
             }
         </div>
     }
-</section>
+</div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+</div>
+
 
 @code {
     /// <summary>Stores valid LocalApplicationData Div-template descriptors displayed beside built-in panel presets.</summary>

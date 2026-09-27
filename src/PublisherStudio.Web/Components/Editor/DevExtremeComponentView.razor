@@ -4,6 +4,10 @@
 @inject IJSRuntime JS
 
 @inject ILogger<DevExtremeComponentView> Logger
+<div class="razor-component-boundary">
+<DxFormLayout CssClass="razor-component-layout-owner DevExtremeComponentView">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext001">
 <div class="devextreme-publication-component @(Item.ShowTitle ? "has-component-title" : null) @Item.CustomCssClass" style="@ContainerStyle">
     @if (Item.ShowTitle)
     {
@@ -27,6 +31,11 @@
         </div>
     }
 </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+</div>
+
 
 @code {
 
@@ -82,44 +91,33 @@
     /// Gets the stable element identifier used to identify or correlate this dev extreme component view instance with related application state.
     /// </summary>
     /// <value>The element identifier value exposed by <see cref="DevExtremeComponentView"/>.</value>
-    private string ElementId => string.IsNullOrWhiteSpace(ElementIdOverride) ? $"ps-component-{IdPrefix}-{Item.Id:N}-{_instanceId}" : ElementIdOverride;
+    private string ElementId => GetElementIdForRender();
     /// <summary>
     /// Gets the normalized designer interaction mode value that forms part of the dev extreme component view state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The normalized designer interaction mode value exposed by <see cref="DevExtremeComponentView"/>.</value>
-    private string NormalizedDesignerInteractionMode => string.Equals(DesignerInteractionMode, "object", StringComparison.OrdinalIgnoreCase) ? "object" : "content";
+    private string NormalizedDesignerInteractionMode => GetNormalizedDesignerInteractionModeForRender();
     /// <summary>
     /// Gets the client config base64 value that forms part of the dev extreme component view state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The client config base64 value exposed by <see cref="DevExtremeComponentView"/>.</value>
-    private string ClientConfigBase64 => Components.BuildClientConfigurationBase64(Document, Item, CurrentPageId, DesignerMode, NormalizedDesignerInteractionMode);
+    private string ClientConfigBase64 => GetClientConfigBase64ForRender();
     /// <summary>
     /// Gets a value indicating whether missing data applies to the dev extreme component view state.
     /// </summary>
     /// <value>The missing data value exposed by <see cref="DevExtremeComponentView"/>.</value>
-    private bool MissingData => RequiresDataObject
-        && (Item.Connection.Mode == PublicationComponentDataMode.PublicationDataObject
-            || Item.Connection.Mode == PublicationComponentDataMode.StaticSnapshot)
-        && Document.DataObjects.All(data => data.Id != Item.Connection.DataObjectId);
+    private bool MissingData => GetMissingDataForRender();
 
     /// <summary>
     /// Gets a value indicating whether requires data object applies to the dev extreme component view state.
     /// </summary>
     /// <value>The requires data object value exposed by <see cref="DevExtremeComponentView"/>.</value>
-    private bool RequiresDataObject => Item.ComponentKind switch
-    {
-        PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu =>
-            Item.MenuSourceMode == PublicationMenuSourceMode.DataConnection,
-        PublicationComponentKind.DataGrid or PublicationComponentKind.TreeList or PublicationComponentKind.Scheduler or
-        PublicationComponentKind.Form or PublicationComponentKind.SelectBox or PublicationComponentKind.TagBox or
-        PublicationComponentKind.Gallery or PublicationComponentKind.TileView or PublicationComponentKind.PivotGrid => true,
-        _ => false
-    };
+    private bool RequiresDataObject => GetRequiresDataObjectForRender();
     /// <summary>
     /// Gets the container style value that forms part of the dev extreme component view state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The container style value exposed by <see cref="DevExtremeComponentView"/>.</value>
-    private string ContainerStyle => $"background:{Item.Background};border:{Item.BorderWidthMm.ToString("0.###", CultureInfo.InvariantCulture)}mm solid {Item.BorderColor};{Item.CustomCss}";
+    private string ContainerStyle => GetContainerStyleForRender();
     /// <summary>
     /// Performs inv for <see cref="DevExtremeComponentView"/>, keeping the operation consistent with the state and invariants of the surrounding dev extreme component view workflow.
     /// </summary>
@@ -193,4 +191,106 @@
         }
     }
 
+
+
+    /// <summary>Computes ElementId for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetElementIdForRender()
+    {
+        try
+        {
+            return string.IsNullOrWhiteSpace(ElementIdOverride) ? $"ps-component-{IdPrefix}-{Item.Id:N}-{_instanceId}" : ElementIdOverride;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property DevExtremeComponentView.ElementId failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes NormalizedDesignerInteractionMode for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetNormalizedDesignerInteractionModeForRender()
+    {
+        try
+        {
+            return string.Equals(DesignerInteractionMode, "object", StringComparison.OrdinalIgnoreCase) ? "object" : "content";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property DevExtremeComponentView.NormalizedDesignerInteractionMode failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes ClientConfigBase64 for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetClientConfigBase64ForRender()
+    {
+        try
+        {
+            return Components.BuildClientConfigurationBase64(Document, Item, CurrentPageId, DesignerMode, NormalizedDesignerInteractionMode);
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property DevExtremeComponentView.ClientConfigBase64 failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes MissingData for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetMissingDataForRender()
+    {
+        try
+        {
+            return RequiresDataObject
+        && (Item.Connection.Mode == PublicationComponentDataMode.PublicationDataObject
+            || Item.Connection.Mode == PublicationComponentDataMode.StaticSnapshot)
+        && Document.DataObjects.All(data => data.Id != Item.Connection.DataObjectId);
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property DevExtremeComponentView.MissingData failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes RequiresDataObject for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetRequiresDataObjectForRender()
+    {
+        try
+        {
+            return Item.ComponentKind switch
+    {
+        PublicationComponentKind.Menu or PublicationComponentKind.ContextMenu =>
+            Item.MenuSourceMode == PublicationMenuSourceMode.DataConnection,
+        PublicationComponentKind.DataGrid or PublicationComponentKind.TreeList or PublicationComponentKind.Scheduler or
+        PublicationComponentKind.Form or PublicationComponentKind.SelectBox or PublicationComponentKind.TagBox or
+        PublicationComponentKind.Gallery or PublicationComponentKind.TileView or PublicationComponentKind.PivotGrid => true,
+        _ => false
+    };
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property DevExtremeComponentView.RequiresDataObject failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes ContainerStyle for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetContainerStyleForRender()
+    {
+        try
+        {
+            return $"background:{Item.Background};border:{Item.BorderWidthMm.ToString("0.###", CultureInfo.InvariantCulture)}mm solid {Item.BorderColor};{Item.CustomCss}";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property DevExtremeComponentView.ContainerStyle failed.");
+            throw;
+        }
+    }
 }

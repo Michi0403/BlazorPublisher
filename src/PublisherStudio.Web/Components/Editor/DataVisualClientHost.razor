@@ -4,7 +4,16 @@
 @inject IJSRuntime JS
 
 @inject ILogger<DataVisualClientHost> Logger
+<div class="razor-component-boundary">
+<DxFormLayout CssClass="razor-component-layout-owner DataVisualClientHost">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext001">
 <div id="@ElementId" class="data-visual-client-host"></div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+</div>
+
 
 @code {
 
@@ -32,12 +41,12 @@
     /// Gets the stable element identifier used to identify or correlate this data visual client host instance with related application state.
     /// </summary>
     /// <value>The element identifier value exposed by <see cref="DataVisualClientHost"/>.</value>
-    private string ElementId => $"ps-data-visual-{Item.Id:N}-{_instanceId}";
+    private string ElementId => GetElementIdForRender();
     /// <summary>
     /// Gets the client config value that forms part of the data visual client host state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The client config value exposed by <see cref="DataVisualClientHost"/>.</value>
-    private object ClientConfig => DataService.BuildClientVisualConfiguration(Document, Item, CurrentPageId);
+    private object ClientConfig => GetClientConfigForRender();
     /// <summary>
     /// Stores the internal last client config JSON state used by <see cref="DataVisualClientHost"/> while executing its surrounding workflow.
     /// </summary>
@@ -105,4 +114,35 @@
         }
     }
 
+
+
+    /// <summary>Computes ElementId for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetElementIdForRender()
+    {
+        try
+        {
+            return $"ps-data-visual-{Item.Id:N}-{_instanceId}";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property DataVisualClientHost.ElementId failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes ClientConfig for the render path with component-local diagnostics.</summary>
+    /// <returns>The object produced by the operation.</returns>
+    private object GetClientConfigForRender()
+    {
+        try
+        {
+            return DataService.BuildClientVisualConfiguration(Document, Item, CurrentPageId);
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property DataVisualClientHost.ClientConfig failed.");
+            throw;
+        }
+    }
 }

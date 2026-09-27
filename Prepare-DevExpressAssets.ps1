@@ -171,34 +171,43 @@ Write-Host "npm: $npm" -ForegroundColor DarkGray
 Write-Host "npx: $npx" -ForegroundColor DarkGray
 Write-Host "DevExtreme: $devExtremeVersion" -ForegroundColor DarkGray
 
-Write-Host "Clearing generated DevExpress browser asset folders before preparation..." -ForegroundColor Cyan
-$generatedVendorPaths = @(
-    (Join-Path $vendorDirectory "devextreme-dist"),
-    (Join-Path $vendorDirectory "devexpress-aspnetcore-spreadsheet"),
-    (Join-Path $vendorDirectory "jquery"),
-    (Join-Path $vendorDirectory "devextreme-assets.meta.json"),
-    $runtimeLicenseMetadataPath,
-    $runtimeLicenseVersionPath
-)
-foreach ($generatedPath in $generatedVendorPaths) {
-    Remove-GeneratedPathWithRetry -Path $generatedPath
-}
-
-if (-not $SkipPackageRestore) {
-    # Clear only the generated package folders involved in this preparation.
-    # This also avoids npm tar extraction reusing a stale, partially locked package tree.
-    $nodeModulesDirectory = Join-Path $webDirectory "node_modules"
-    foreach ($packageName in @("devextreme-dist", "devexpress-aspnetcore-spreadsheet", "devextreme")) {
-        Remove-GeneratedPathWithRetry -Path (Join-Path $nodeModulesDirectory $packageName)
-    }
-}
-
+# Keep the currently published browser assets intact until a complete replacement has
+# been prepared successfully. This prevents a failed restore/license step from leaving
+# PublisherStudio without dx.all.js while an older runtime key still exists.
 Push-Location $webDirectory
 try {
     if (-not $SkipPackageRestore) {
         Write-Host "Restoring local DevExpress browser packages..." -ForegroundColor Cyan
         $lockFile = Join-Path $webDirectory "package-lock.json"
         if (Test-Path $lockFile) {
+            # Windows PowerShell 5.1 ConvertFrom-Json rejects npm v3 lockfiles because
+            # packages contains the legal empty-string root key. A checked-in Node helper
+            # parses the lock from disk instead of sending JavaScript through `node -e`;
+            # that avoids Windows PowerShell/native-command quote rewriting as well.
+            $lockProbeModule = Join-Path $PSScriptRoot 'build/read-devexpress-lock-metadata.cjs'
+            if (-not (Test-Path -LiteralPath $lockProbeModule -PathType Leaf)) {
+                throw "DevExpress package-lock probe is missing: $lockProbeModule"
+            }
+            $lockProbeOutput = @(& $node $lockProbeModule $lockFile)
+            if ($LASTEXITCODE -ne 0) {
+                throw "Node.js could not parse package-lock.json while validating the DevExpress package pins."
+            }
+            $lockMetadata = (($lockProbeOutput -join [Environment]::NewLine) | ConvertFrom-Json)
+            $lockedDevExtreme = $lockMetadata.devExtreme
+            $lockedSpreadsheet = $lockMetadata.spreadsheet
+            $lockNeedsRefresh = (
+                $lockedDevExtreme.version -ne $devExtremeVersion -or
+                $lockedSpreadsheet.version -ne $devExtremeVersion -or
+                ([string]::IsNullOrWhiteSpace([string]$lockedDevExtreme.integrity) -and
+                 [string]::IsNullOrWhiteSpace([string]$lockedDevExtreme.resolved)) -or
+                ([string]::IsNullOrWhiteSpace([string]$lockedSpreadsheet.integrity) -and
+                 [string]::IsNullOrWhiteSpace([string]$lockedSpreadsheet.resolved))
+            )
+            if ($lockNeedsRefresh) {
+                Write-Host "Refreshing stale/incomplete npm lock metadata to exact DevExtreme $devExtremeVersion pins..." -ForegroundColor Cyan
+                & $npm install --package-lock-only --legacy-peer-deps --no-audit --no-fund --ignore-scripts
+                if ($LASTEXITCODE -ne 0) { throw "npm failed while refreshing the DevExpress package lock." }
+            }
             & $npm ci --legacy-peer-deps --no-audit --no-fund
             $restoreCommand = "npm ci"
         }
@@ -333,7 +342,7 @@ if ($metadata.sha256 -ne $actualLicenseHash) {
 
 $assetMetadataPath = Join-Path $vendorDirectory "devextreme-assets.meta.json"
 $assetMetadata = Get-Content $assetMetadataPath -Raw | ConvertFrom-Json
-if (($assetMetadata.schemaVersion -lt 1 -or $assetMetadata.schemaVersion -gt 4) -or $assetMetadata.devExtremeVersion -ne $devExtremeVersion) {
+if (($assetMetadata.schemaVersion -lt 1 -or $assetMetadata.schemaVersion -gt 5) -or $assetMetadata.devExtremeVersion -ne $devExtremeVersion) {
     throw "The DevExtreme client-asset metadata does not match DevExtreme $devExtremeVersion."
 }
 
@@ -346,7 +355,10 @@ if ($assetMetadata.schemaVersion -ge 3) {
         throw "The DevExtreme package-lock version recorded in client-asset metadata does not match DevExtreme $devExtremeVersion."
     }
     if ([string]::IsNullOrWhiteSpace([string]$assetMetadata.lockedPackageIntegrity)) {
-        throw "The DevExtreme client-asset metadata is missing the npm lock integrity hash."
+        if ($assetMetadata.schemaVersion -lt 5 -or $assetMetadata.lockVerification -ne "exact-version-resolved-url-plus-prepared-sha256") {
+            throw "The DevExtreme client-asset metadata is missing both npm SRI and the exact-version/prepared-asset verification fallback."
+        }
+        Write-Host "The npm lock omits DevExtreme SRI; exact package versions, resolved package URLs and prepared asset SHA-256 values are authoritative." -ForegroundColor DarkGray
     }
 }
 

@@ -2,6 +2,10 @@
 @inject IFileLocalizationService Localization
 
 @inject ILogger<PageNavigator> Logger
+<div class="razor-component-boundary">
+<DxFormLayout CssClass="razor-component-layout-owner PageNavigator">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext001">
 <aside class="page-navigator">
     <div class="pane-heading" @oncontextmenu="ShowNavigatorMenu" @oncontextmenu:preventDefault>
         <strong>@LT("Pages")</strong>
@@ -77,6 +81,11 @@
         }
     </Items>
 </DxContextMenu>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+</div>
+
 
 @code {
 
@@ -117,7 +126,7 @@
     /// Gets the timeline command text value that forms part of the page navigator state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The timeline command text value exposed by <see cref="PageNavigator"/>.</value>
-    private string TimelineCommandText => TimelineVisible ? $"✓ {LT("Timeline pane")}" : LT("Timeline pane");
+    private string TimelineCommandText => GetTimelineCommandTextForRender();
 
     /// <summary>
     /// Stores the internal page context menu state used by <see cref="PageNavigator"/> while executing its surrounding workflow.
@@ -131,7 +140,7 @@
     /// Gets the context page value that forms part of the page navigator state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The context page value exposed by <see cref="PageNavigator"/>.</value>
-    private PublicationPage? ContextPage => _contextPageId is { } id ? State.Document.Pages.FirstOrDefault(page => page.Id == id) : null;
+    private PublicationPage? ContextPage => GetContextPageForRender();
 
     /// <summary>
     /// Performs show page menu for <see cref="PageNavigator"/>, keeping the operation consistent with the state and invariants of the surrounding page navigator workflow.
@@ -419,13 +428,7 @@
     /// Gets the timeline content end value that forms part of the page navigator state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The timeline content end value exposed by <see cref="PageNavigator"/>.</value>
-    private double TimelineContentEnd => Math.Max(
-        State.CurrentPage.Elements.SelectMany(item => item.Animations)
-            .Select(item => State.EffectiveAnimationStart(item) + Math.Max(.05, item.DurationSeconds) * Math.Max(1, item.RepeatCount) * (item.AutoReverse ? 2 : 1))
-            .DefaultIfEmpty(0).Max(),
-        State.CurrentPage.Elements.OfType<PublicationMediaElement>()
-            .Select(item => item.TimelineStartSeconds + item.TimelineLengthSeconds)
-            .DefaultIfEmpty(0).Max());
+    private double TimelineContentEnd => GetTimelineContentEndForRender();
 
     /// <summary>
     /// Performs transition text for <see cref="PageNavigator"/>, keeping the operation consistent with the state and invariants of the surrounding page navigator workflow.
@@ -520,4 +523,56 @@
         }
     }
 
+
+
+    /// <summary>Computes TimelineCommandText for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetTimelineCommandTextForRender()
+    {
+        try
+        {
+            return TimelineVisible ? $"✓ {LT("Timeline pane")}" : LT("Timeline pane");
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PageNavigator.TimelineCommandText failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes ContextPage for the render path with component-local diagnostics.</summary>
+    /// <returns>The publication page produced by the operation.</returns>
+    private PublicationPage? GetContextPageForRender()
+    {
+        try
+        {
+            return _contextPageId is { } id ? State.Document.Pages.FirstOrDefault(page => page.Id == id) : null;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PageNavigator.ContextPage failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes TimelineContentEnd for the render path with component-local diagnostics.</summary>
+    /// <returns>The double produced by the operation.</returns>
+    private double GetTimelineContentEndForRender()
+    {
+        try
+        {
+            return Math.Max(
+        State.CurrentPage.Elements.SelectMany(item => item.Animations)
+            .Select(item => State.EffectiveAnimationStart(item) + Math.Max(.05, item.DurationSeconds) * Math.Max(1, item.RepeatCount) * (item.AutoReverse ? 2 : 1))
+            .DefaultIfEmpty(0).Max(),
+        State.CurrentPage.Elements.OfType<PublicationMediaElement>()
+            .Select(item => item.TimelineStartSeconds + item.TimelineLengthSeconds)
+            .DefaultIfEmpty(0).Max());
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PageNavigator.TimelineContentEnd failed.");
+            throw;
+        }
+    }
 }

@@ -15,10 +15,24 @@
 @inject IPanelStudioPreviewPresetService PreviewPresets
 @inject ILogger<PanelStudio> Logger
 
+<div class="razor-component-boundary">
+<DxFormLayout CssClass="razor-component-layout-owner PanelStudio">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext001">
 @if (Visible && _draft is not null)
 {
-    <div class="modal-backdrop data-modal-backdrop panel-studio-backdrop">
-        <section class="data-visual-editor-dialog panel-studio-dialog" role="dialog" aria-modal="true" aria-label="Panel Studio">
+    <DxPopup Visible="true"
+         Width="min(1800px, 98vw)"
+         Height="min(1180px, 96vh)"
+         MaxHeight="96vh"
+         CloseOnOutsideClick="false"
+         CloseOnEscape="false"
+         ShowHeader="false">
+    <BodyContentTemplate Context="publisherPopupContext">
+        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext002">
+        <div class="data-visual-editor-dialog panel-studio-dialog" aria-label="Panel Studio">
             <header>
                 <div>
                     <strong>Panel Studio</strong>
@@ -68,7 +82,7 @@
                     <DxRibbonGroup Text="Data">
                         <DxRibbonItem Text="KPI" IconCssClass="pub-icon pub-icon-chart" Click="AddKpi" />
                         <DxRibbonItem Text="Chart" IconCssClass="pub-icon pub-icon-chart" Click="AddChart" />
-                        <DxRibbonItem Text="Data table" IconCssClass="pub-icon pub-icon-data" Click="AddTable" />
+                        <DxRibbonItem Text="Data Table" IconCssClass="pub-icon pub-icon-data" Click="AddTable" />
                         <DxRibbonItem Text="Data Grid" IconCssClass="pub-icon pub-icon-data" Click="AddDataGrid" />
                     </DxRibbonGroup>
                     <DxRibbonGroup Text="Interactive">
@@ -89,7 +103,10 @@
             <div class="panel-component-ribbon" aria-label="Draggable panel components">
                 @foreach (var category in PaletteTools.GroupBy(tool => tool.Category))
                 {
-                    <section class="panel-component-ribbon-group">
+                    <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext003">
+        <div class="panel-component-ribbon-group">
                         <strong>@category.Key</strong>
                         <div>
                             @foreach (var tool in category)
@@ -107,7 +124,10 @@
                                 </button>
                             }
                         </div>
-                    </section>
+                    </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
                 }
             </div>
 
@@ -285,7 +305,10 @@
                     <div class="panel-studio-inspector-scroll">
                     @if (SelectedElement is { } selected)
                     {
-                        <section class="panel-inspector-section">
+                        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext004">
+        <div class="panel-inspector-section">
                             <strong>Layout and identity</strong>
                             <div class="data-form-grid" style="grid-template-columns:1fr 1fr">
                                 <label style="grid-column:1/-1">Name<input value="@selected.Name" @onchange="ChangeElementName" /></label>
@@ -296,9 +319,15 @@
                                 <label>Rotation<input type="number" step="1" value="@Inv(selected.Rotation)" @onchange="args => ChangeNumber(args, value => selected.Rotation = value)" /></label>
                                 <label class="check-row"><input type="checkbox" checked="@selected.Visible" @onchange="args => selected.Visible = AsBool(args)" /> Visible</label>
                             </div>
-                        </section>
+                        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
 
-                        <section class="panel-inspector-section panel-behavior-editor">
+                        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext005">
+        <div class="panel-inspector-section panel-behavior-editor">
                             <div class="panel-behavior-heading">
                                 <strong>Behavior &amp; object interface</strong>
                                 <span>@selected.Behaviors.Count rule(s)</span>
@@ -435,11 +464,17 @@
                                 </details>
                             }
                             <small class="field-help">The same object interface is available to exported publication JavaScript. Declarative actions stay allow-listed and require no script.</small>
-                        </section>
+                        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
 
                         @if (selected is DataVisualElement visual)
                         {
-                            <section class="panel-inspector-section">
+                            <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext006">
+        <div class="panel-inspector-section">
                                 <strong>Data visual</strong>
                                 <label>Visual type
                                     <select value="@visual.VisualKind" @onchange="ChangeVisualKind">
@@ -464,12 +499,18 @@
                                 <label>Rows<input type="number" min="1" max="10000" value="@visual.RowLimit" @onchange="args => ChangeInt(args, value => visual.RowLimit = value)" /></label>
                                 <label class="check-row"><input type="checkbox" checked="@visual.ShowLegend" @onchange="args => visual.ShowLegend = AsBool(args)" /> Legend</label>
                                 <label class="check-row"><input type="checkbox" checked="@visual.ShowLabels" @onchange="args => visual.ShowLabels = AsBool(args)" /> Labels</label>
-                            </section>
+                            </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
                         }
 
                         @if (selected is DevExtremeComponentElement component)
                         {
-                            <section class="panel-inspector-section">
+                            <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext007">
+        <div class="panel-inspector-section">
                                 <strong>Interactive component</strong>
                                 <label>Component
                                     <select value="@component.ComponentKind" @onchange="ChangeComponentKind">
@@ -513,12 +554,18 @@
                                     </label>
                                     <label class="check-row"><input type="checkbox" checked="@component.ChatAllowSending" @onchange="args => component.ChatAllowSending = AsBool(args)" /> Allow operator sending</label>
                                 }
-                            </section>
+                            </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
                         }
 
                         @if (selected is LiveSourceElement live)
                         {
-                            <section class="panel-inspector-section">
+                            <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext008">
+        <div class="panel-inspector-section">
                                 <strong>Live source</strong>
                                 <label>Source
                                     <select value="@live.SourceKind" @onchange="ChangeLiveSourceKind">
@@ -532,21 +579,33 @@
                                 <label>Capture height<input type="number" min="1" value="@live.CaptureHeight" @onchange="args => ChangeInt(args, value => live.CaptureHeight = value)" /></label>
                                 <label>Frame rate<input type="number" min="1" max="240" value="@live.CaptureFrameRate" @onchange="args => ChangeInt(args, value => live.CaptureFrameRate = value)" /></label>
                                 <label class="check-row"><input type="checkbox" checked="@live.Muted" @onchange="args => live.Muted = AsBool(args)" /> Muted</label>
-                            </section>
+                            </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
                         }
 
                         @if (selected is ImageFrameElement or PublicationMediaElement)
                         {
-                            <section class="panel-inspector-section">
+                            <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext009">
+        <div class="panel-inspector-section">
                                 <strong>Media source</strong>
                                 <InputFile OnChange="ReplaceSelectedMedia" accept="image/*,video/*,audio/*,.mkv,.mov,.avi,.mxf,.heic,.heif,.tif,.tiff,.flac,.wav" />
                                 <p class="field-help">PublisherStudio imposes no application file-size ceiling. Very large embedded media remains the user's memory and disk responsibility.</p>
-                            </section>
+                            </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
                         }
 
                         @if (selected is HtmlEmbedElement html)
                         {
-                            <section class="panel-inspector-section">
+                            <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext010">
+        <div class="panel-inspector-section">
                                 <strong>HTML experience</strong>
                                 <label>HTML<textarea rows="7" value="@html.Html" @onchange="args => html.Html = Text(args)"></textarea></label>
                                 <label>CSS<textarea rows="5" value="@html.Css" @onchange="args => html.Css = Text(args)"></textarea></label>
@@ -565,12 +624,18 @@
                                 <label class="check-row"><input type="checkbox" checked="@html.AllowForms" @onchange="args => html.AllowForms = AsBool(args)" /> Allow forms</label>
                                 <label class="check-row"><input type="checkbox" checked="@html.AllowPopups" @onchange="args => html.AllowPopups = AsBool(args)" /> Allow popups</label>
                                 <p class="field-help">Imported scripts stay disabled until explicitly enabled. Each experience remains isolated in its own iframe sandbox.</p>
-                            </section>
+                            </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
                         }
 
                         @if (selected is PanelElement nested)
                         {
-                            <section class="panel-inspector-section">
+                            <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext011">
+        <div class="panel-inspector-section">
                                 <strong>Nested panel</strong>
                                 <label>Nested navigation
                                     <select value="@nested.NavigationMode" @onchange="ChangeNestedNavigation">
@@ -580,7 +645,10 @@
                                         }
                                     </select>
                                 </label>
-                            </section>
+                            </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
                         }
 
                         <details class="panel-inspector-section panel-advanced-json">
@@ -593,7 +661,10 @@
                             </div>
                         </details>
 
-                        <section class="panel-inspector-section">
+                        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext012">
+        <div class="panel-inspector-section">
                             <strong>Save for reuse</strong>
                             <label>Module name<input @bind="_templateName" /></label>
                             <label>Category<input @bind="_templateCategory" /></label>
@@ -602,7 +673,10 @@
                                 <button type="button" class="primary" @onclick="SaveSelectedAsTemplate">@(_selectedTemplateId is null ? "Save configured module" : "Update saved module")</button>
                                 <button type="button" @onclick="SaveSelectedAsNewTemplate">Save as new</button>
                             </div>
-                        </section>
+                        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
                     }
                     </div>
                 </aside>
@@ -611,8 +685,12 @@
                 <DxButton Text="Cancel" RenderStyle="ButtonRenderStyle.Secondary" RenderStyleMode="ButtonRenderStyleMode.Outline" Click="Cancel" />
                 <DxButton Text="Save panel" RenderStyle="ButtonRenderStyle.Primary" RenderStyleMode="ButtonRenderStyleMode.Contained" Click="Save" />
             </footer>
-        </section>
-    </div>
+        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+        </BodyContentTemplate>
+</DxPopup>
 
     <PictureEditor Visible="@_pictureEditorVisible"
                    SessionId="@_pictureEditorSessionId"
@@ -653,6 +731,11 @@
         </Items>
     </DxContextMenu>
 }
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+</div>
+
 
 @code {
 
@@ -843,55 +926,40 @@
     /// Gets the current view value that forms part of the panel studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The current view value exposed by <see cref="PanelStudio"/>.</value>
-    private PublicationPanelView? CurrentView => _draft?.Views.FirstOrDefault(view => view.Id == _selectedViewId) ?? _draft?.ActiveView;
+    private PublicationPanelView? CurrentView => GetCurrentViewForRender();
     /// <summary>
     /// Gets the selected element value that forms part of the panel studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The selected element value exposed by <see cref="PanelStudio"/>.</value>
-    private PublicationElement? SelectedElement => CurrentView?.Elements.FirstOrDefault(element => element.Id == _selectedElementId);
+    private PublicationElement? SelectedElement => GetSelectedElementForRender();
     /// <summary>Gets the stable root object address for the publication being edited.</summary>
     /// <value>The publication object address value exposed by <see cref="PanelStudio"/>.</value>
-    private string PublicationObjectAddress => Behaviors.Address(Document);
+    private string PublicationObjectAddress => GetPublicationObjectAddressForRender();
     /// <summary>Gets the stable object address for the currently selected Panel Studio element.</summary>
     /// <value>The selected object address value exposed by <see cref="PanelStudio"/>.</value>
-    private string SelectedObjectAddress => SelectedElement is { } selected ? Behaviors.Address(Document, selected) : PublicationObjectAddress;
+    private string SelectedObjectAddress => GetSelectedObjectAddressForRender();
     /// <summary>Gets the addressable publication objects available as behavior and script targets.</summary>
     /// <value>The behavior targets value exposed by <see cref="PanelStudio"/>.</value>
-    private IReadOnlyList<PublicationObjectAddressOption> BehaviorTargets => _draft is not null && CurrentView is not null ? Behaviors.Targets(Document, _draft, CurrentView) : [];
+    private IReadOnlyList<PublicationObjectAddressOption> BehaviorTargets => GetBehaviorTargetsForRender();
     /// <summary>Gets the common methods appropriate for the currently selected behavior target.</summary>
     /// <value>The selected common methods value exposed by <see cref="PanelStudio"/>.</value>
-    private IReadOnlyList<string> SelectedCommonMethods => SelectedElement is { } selected && _draft is not null
-        ? Behaviors.CommonMethods(Document, _draft, selected, ParseGuid(_behaviorTargetId))
-        : [];
+    private IReadOnlyList<string> SelectedCommonMethods => GetSelectedCommonMethodsForRender();
     /// <summary>Gets the common methods appropriate for the target selected by the JavaScript helper.</summary>
     /// <value>The script common methods value exposed by <see cref="PanelStudio"/>.</value>
-    private IReadOnlyList<string> ScriptCommonMethods => SelectedElement is { } selected && _draft is not null
-        ? Behaviors.CommonMethods(Document, _draft, selected, ParseGuid(_scriptTargetId))
-        : [];
+    private IReadOnlyList<string> ScriptCommonMethods => GetScriptCommonMethodsForRender();
     /// <summary>
     /// Gets the script helpers collection maintained or exposed by this panel studio instance for downstream processing.
     /// </summary>
     /// <value>The script helpers value exposed by <see cref="PanelStudio"/>.</value>
-    private IReadOnlyList<PublicationScriptHelperOption> ScriptHelpers => Behaviors.ScriptHelpers();
+    private IReadOnlyList<PublicationScriptHelperOption> ScriptHelpers => GetScriptHelpersForRender();
     /// <summary>Gets the isolated HTML-script helper examples offered by Panel Studio.</summary>
     /// <value>The HTML script helpers value exposed by <see cref="PanelStudio"/>.</value>
-    private IReadOnlyList<PublicationScriptHelperOption> HtmlScriptHelpers => Behaviors.HtmlScriptHelpers();
+    private IReadOnlyList<PublicationScriptHelperOption> HtmlScriptHelpers => GetHtmlScriptHelpersForRender();
     /// <summary>
     /// Gets a value indicating whether behavior needs target applies to the panel studio state.
     /// </summary>
     /// <value>The behavior needs target value exposed by <see cref="PanelStudio"/>.</value>
-    private bool BehaviorNeedsTarget => _behaviorAction is PublicationBehaviorAction.Click
-        or PublicationBehaviorAction.Focus
-        or PublicationBehaviorAction.Blur
-        or PublicationBehaviorAction.RefreshData
-        or PublicationBehaviorAction.Show
-        or PublicationBehaviorAction.Hide
-        or PublicationBehaviorAction.ToggleVisibility
-        or PublicationBehaviorAction.Enable
-        or PublicationBehaviorAction.Disable
-        or PublicationBehaviorAction.SetText
-        or PublicationBehaviorAction.SetValue
-        or PublicationBehaviorAction.CallMethod;
+    private bool BehaviorNeedsTarget => GetBehaviorNeedsTargetForRender();
     /// <summary>
     /// Gets the palette tools collection maintained or exposed by this panel studio instance for downstream processing.
     /// </summary>
@@ -903,24 +971,22 @@
     /// Gets the panel picture target value that forms part of the panel studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The panel picture target value exposed by <see cref="PanelStudio"/>.</value>
-    private ImageFrameElement? PanelPictureTarget => _pictureEditorTargetId is { } id
-        ? _draft?.Views.SelectMany(view => view.Elements).OfType<ImageFrameElement>().FirstOrDefault(image => image.Id == id)
-        : null;
+    private ImageFrameElement? PanelPictureTarget => GetPanelPictureTargetForRender();
     /// <summary>
     /// Gets the panel picture document value that forms part of the panel studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The panel picture document value exposed by <see cref="PanelStudio"/>.</value>
-    private PictureDocument? PanelPictureDocument => PanelPictureTarget?.PictureSource;
+    private PictureDocument? PanelPictureDocument => GetPanelPictureDocumentForRender();
     /// <summary>
     /// Gets the panel picture raster value that forms part of the panel studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The panel picture raster value exposed by <see cref="PanelStudio"/>.</value>
-    private string? PanelPictureRaster => PanelPictureTarget?.DataUrl;
+    private string? PanelPictureRaster => GetPanelPictureRasterForRender();
     /// <summary>
     /// Gets the panel picture name value that forms part of the panel studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The panel picture name value exposed by <see cref="PanelStudio"/>.</value>
-    private string PanelPictureName => PanelPictureTarget?.Name ?? "Picture";
+    private string PanelPictureName => GetPanelPictureNameForRender();
 
     /// <summary>
     /// Handles the parameters set lifecycle or event notification for <see cref="PanelStudio"/>, updating the state required by the surrounding workflow.
@@ -1876,7 +1942,7 @@
     /// </summary>
     /// <value>The selected preview preset value exposed by <see cref="PanelStudio"/>.</value>
     private PanelStudioPreviewPreset? SelectedPreviewPreset =>
-        _previewPresets.FirstOrDefault(item => string.Equals(item.Key, _previewSizeKey, StringComparison.OrdinalIgnoreCase));
+        GetSelectedPreviewPresetForRender();
 
     /// <summary>
     /// Gets the preview viewport px value that forms part of the panel studio state consumed or produced by the surrounding workflow.
@@ -1896,12 +1962,12 @@
     /// Gets the panel design width px value value that forms part of the panel studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The panel design width px value value exposed by <see cref="PanelStudio"/>.</value>
-    private double PanelDesignWidthPxValue => PreviewViewportPx.Width;
+    private double PanelDesignWidthPxValue => GetPanelDesignWidthPxValueForRender();
     /// <summary>
     /// Gets the panel design height px value value that forms part of the panel studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The panel design height px value value exposed by <see cref="PanelStudio"/>.</value>
-    private double PanelDesignHeightPxValue => PreviewViewportPx.Height;
+    private double PanelDesignHeightPxValue => GetPanelDesignHeightPxValueForRender();
     /// <summary>
     /// Gets the panel design width px value that forms part of the panel studio state consumed or produced by the surrounding workflow.
     /// </summary>
@@ -1916,12 +1982,12 @@
     /// Gets the panel design width CSS value that forms part of the panel studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The panel design width CSS value exposed by <see cref="PanelStudio"/>.</value>
-    private string PanelDesignWidthCss => $"{PanelDesignWidthPx}px";
+    private string PanelDesignWidthCss => GetPanelDesignWidthCssForRender();
     /// <summary>
     /// Gets the panel design height CSS value that forms part of the panel studio state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The panel design height CSS value exposed by <see cref="PanelStudio"/>.</value>
-    private string PanelDesignHeightCss => $"{PanelDesignHeightPx}px";
+    private string PanelDesignHeightCss => GetPanelDesignHeightCssForRender();
 
     /// <summary>
     /// Refreshes preview presets for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
@@ -3978,4 +4044,307 @@
         public double Y { get; set; }
     }
 
+
+
+    /// <summary>Computes CurrentView for the render path with component-local diagnostics.</summary>
+    /// <returns>The publication panel view produced by the operation.</returns>
+    private PublicationPanelView? GetCurrentViewForRender()
+    {
+        try
+        {
+            return _draft?.Views.FirstOrDefault(view => view.Id == _selectedViewId) ?? _draft?.ActiveView;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PanelStudio.CurrentView failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SelectedElement for the render path with component-local diagnostics.</summary>
+    /// <returns>The publication element produced by the operation.</returns>
+    private PublicationElement? GetSelectedElementForRender()
+    {
+        try
+        {
+            return CurrentView?.Elements.FirstOrDefault(element => element.Id == _selectedElementId);
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PanelStudio.SelectedElement failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes PublicationObjectAddress for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetPublicationObjectAddressForRender()
+    {
+        try
+        {
+            return Behaviors.Address(Document);
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PanelStudio.PublicationObjectAddress failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SelectedObjectAddress for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetSelectedObjectAddressForRender()
+    {
+        try
+        {
+            return SelectedElement is { } selected ? Behaviors.Address(Document, selected) : PublicationObjectAddress;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PanelStudio.SelectedObjectAddress failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes BehaviorTargets for the render path with component-local diagnostics.</summary>
+    /// <returns>The collection produced by the operation.</returns>
+    private IReadOnlyList<PublicationObjectAddressOption> GetBehaviorTargetsForRender()
+    {
+        try
+        {
+            return _draft is not null && CurrentView is not null ? Behaviors.Targets(Document, _draft, CurrentView) : [];
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PanelStudio.BehaviorTargets failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SelectedCommonMethods for the render path with component-local diagnostics.</summary>
+    /// <returns>The collection produced by the operation.</returns>
+    private IReadOnlyList<string> GetSelectedCommonMethodsForRender()
+    {
+        try
+        {
+            return SelectedElement is { } selected && _draft is not null
+        ? Behaviors.CommonMethods(Document, _draft, selected, ParseGuid(_behaviorTargetId))
+        : [];
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PanelStudio.SelectedCommonMethods failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes ScriptCommonMethods for the render path with component-local diagnostics.</summary>
+    /// <returns>The collection produced by the operation.</returns>
+    private IReadOnlyList<string> GetScriptCommonMethodsForRender()
+    {
+        try
+        {
+            return SelectedElement is { } selected && _draft is not null
+        ? Behaviors.CommonMethods(Document, _draft, selected, ParseGuid(_scriptTargetId))
+        : [];
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PanelStudio.ScriptCommonMethods failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes ScriptHelpers for the render path with component-local diagnostics.</summary>
+    /// <returns>The collection produced by the operation.</returns>
+    private IReadOnlyList<PublicationScriptHelperOption> GetScriptHelpersForRender()
+    {
+        try
+        {
+            return Behaviors.ScriptHelpers();
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PanelStudio.ScriptHelpers failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes HtmlScriptHelpers for the render path with component-local diagnostics.</summary>
+    /// <returns>The collection produced by the operation.</returns>
+    private IReadOnlyList<PublicationScriptHelperOption> GetHtmlScriptHelpersForRender()
+    {
+        try
+        {
+            return Behaviors.HtmlScriptHelpers();
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PanelStudio.HtmlScriptHelpers failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes BehaviorNeedsTarget for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetBehaviorNeedsTargetForRender()
+    {
+        try
+        {
+            return _behaviorAction is PublicationBehaviorAction.Click
+        or PublicationBehaviorAction.Focus
+        or PublicationBehaviorAction.Blur
+        or PublicationBehaviorAction.RefreshData
+        or PublicationBehaviorAction.Show
+        or PublicationBehaviorAction.Hide
+        or PublicationBehaviorAction.ToggleVisibility
+        or PublicationBehaviorAction.Enable
+        or PublicationBehaviorAction.Disable
+        or PublicationBehaviorAction.SetText
+        or PublicationBehaviorAction.SetValue
+        or PublicationBehaviorAction.CallMethod;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PanelStudio.BehaviorNeedsTarget failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes PanelPictureTarget for the render path with component-local diagnostics.</summary>
+    /// <returns>The image frame element produced by the operation.</returns>
+    private ImageFrameElement? GetPanelPictureTargetForRender()
+    {
+        try
+        {
+            return _pictureEditorTargetId is { } id
+        ? _draft?.Views.SelectMany(view => view.Elements).OfType<ImageFrameElement>().FirstOrDefault(image => image.Id == id)
+        : null;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PanelStudio.PanelPictureTarget failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes PanelPictureDocument for the render path with component-local diagnostics.</summary>
+    /// <returns>The picture document produced by the operation.</returns>
+    private PictureDocument? GetPanelPictureDocumentForRender()
+    {
+        try
+        {
+            return PanelPictureTarget?.PictureSource;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PanelStudio.PanelPictureDocument failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes PanelPictureRaster for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string? GetPanelPictureRasterForRender()
+    {
+        try
+        {
+            return PanelPictureTarget?.DataUrl;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PanelStudio.PanelPictureRaster failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes PanelPictureName for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetPanelPictureNameForRender()
+    {
+        try
+        {
+            return PanelPictureTarget?.Name ?? "Picture";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PanelStudio.PanelPictureName failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SelectedPreviewPreset for the render path with component-local diagnostics.</summary>
+    /// <returns>The panel studio preview preset produced by the operation.</returns>
+    private PanelStudioPreviewPreset? GetSelectedPreviewPresetForRender()
+    {
+        try
+        {
+            return _previewPresets.FirstOrDefault(item => string.Equals(item.Key, _previewSizeKey, StringComparison.OrdinalIgnoreCase));
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PanelStudio.SelectedPreviewPreset failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes PanelDesignWidthPxValue for the render path with component-local diagnostics.</summary>
+    /// <returns>The double produced by the operation.</returns>
+    private double GetPanelDesignWidthPxValueForRender()
+    {
+        try
+        {
+            return PreviewViewportPx.Width;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PanelStudio.PanelDesignWidthPxValue failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes PanelDesignHeightPxValue for the render path with component-local diagnostics.</summary>
+    /// <returns>The double produced by the operation.</returns>
+    private double GetPanelDesignHeightPxValueForRender()
+    {
+        try
+        {
+            return PreviewViewportPx.Height;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PanelStudio.PanelDesignHeightPxValue failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes PanelDesignWidthCss for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetPanelDesignWidthCssForRender()
+    {
+        try
+        {
+            return $"{PanelDesignWidthPx}px";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PanelStudio.PanelDesignWidthCss failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes PanelDesignHeightCss for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetPanelDesignHeightCssForRender()
+    {
+        try
+        {
+            return $"{PanelDesignHeightPx}px";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property PanelStudio.PanelDesignHeightCss failed.");
+            throw;
+        }
+    }
 }

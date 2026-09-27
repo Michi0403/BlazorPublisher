@@ -3,6 +3,10 @@
 
 @inject ILogger<AnimationPanel> Logger
 @inject PublicationEditorTextService EditorText
+<div class="razor-component-boundary">
+<DxFormLayout CssClass="razor-component-layout-owner AnimationPanel">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext001">
 <div class="animation-panel">
     <div class="animation-preview-bar">
         <button type="button" title="Preview the complete current page" @onclick="PreviewPage">▶ Page</button>
@@ -11,7 +15,10 @@
     </div>
 
     <div class="animation-scroll">
-        <section class="property-section animation-transition-section">
+        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext002">
+        <div class="property-section animation-transition-section">
             <h3>Between pages</h3>
             <p class="property-note">The transition belongs to this page and is used when the page becomes active.</p>
             <label>Transition
@@ -52,9 +59,15 @@
                     <input type="range" min="0.5" max="30" step="0.25" value="@Inv(State.CurrentPage.Transition.AutoAdvanceSeconds)" @oninput="ChangeAutoAdvanceSeconds" @onchange="EndLiveEdit" />
                 </label>
             }
-        </section>
+        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
 
-        <section class="property-section animation-add-section">
+        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext003">
+        <div class="property-section animation-add-section">
             <h3>In-page animation</h3>
             @if (State.SelectedElement is null)
             {
@@ -80,9 +93,15 @@
                     }
                 </div>
             }
-        </section>
+        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
 
-        <section class="property-section animation-timeline-section">
+        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext004">
+        <div class="property-section animation-timeline-section">
             <div class="animation-section-title">
                 <h3>Page timeline</h3>
                 <span>@Timeline.Count @(Timeline.Count == 1 ? "step" : "steps")</span>
@@ -109,11 +128,17 @@
                     <div class="animation-empty">No animation steps on this page.</div>
                 }
             </div>
-        </section>
+        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
 
         @if (SelectedAnimation is { } animation)
         {
-            <section class="property-section animation-editor-section">
+            <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext005">
+        <div class="property-section animation-editor-section">
                 <h3>Selected step</h3>
                 <label>Name<input value="@animation.Name" @onchange="ChangeAnimationName" /></label>
                 <div class="property-grid two">
@@ -193,12 +218,18 @@
                     <input type="range" min="0" max="8" step="0.05" value="@Inv(animation.DelaySeconds)" @oninput="ChangeAnimationDelay" @onchange="EndLiveEdit" />
                 </label>
                 <DxButton Text="Preview this step" Click="PreviewSelectedStep" CssClass="wide-button" />
-            </section>
+            </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
         }
 
         @if (State.SelectedElement is { } selected)
         {
-            <section class="property-section animation-interaction-section">
+            <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext006">
+        <div class="property-section animation-interaction-section">
                 <h3>Interaction</h3>
                 <p class="property-note">Runs when this object is clicked in the exported animated website or presentation preview.</p>
                 <label class="check-row"><input type="checkbox" checked="@selected.HiddenAtPresentationStart" @onchange="ToggleHiddenAtPresentationStart" /> Hidden when the page starts</label>
@@ -239,18 +270,32 @@
                     <label>Web address<input type="url" placeholder="https://example.com" value="@selected.Interaction.Url" @onchange="ChangeInteractionUrl" /></label>
                     <label class="check-row"><input type="checkbox" checked="@selected.Interaction.OpenInNewWindow" @onchange="ToggleInteractionNewWindow" /> Open in a new window</label>
                 }
-            </section>
+            </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
         }
 
-        <section class="property-section animation-playback-section">
+        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext007">
+        <div class="property-section animation-playback-section">
             <h3>Presentation playback</h3>
             <label class="check-row"><input type="checkbox" checked="@State.Document.Playback.StartAutomatically" @onchange="ToggleStartAutomatically" /> Start page animations automatically</label>
             <label class="check-row"><input type="checkbox" checked="@State.Document.Playback.LoopPresentation" @onchange="ToggleLoopPresentation" /> Loop after the last page</label>
             <label class="check-row"><input type="checkbox" checked="@State.Document.Playback.ShowControls" @onchange="ToggleShowControls" /> Show website playback controls</label>
             <p class="property-note">Click-triggered steps consume page clicks first. The page transition runs only after no click step remains.</p>
-        </section>
+        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
     </div>
 </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+</div>
+
 
 @code {
 
@@ -287,10 +332,7 @@
     /// Gets the selected animation value that forms part of the animation panel state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The selected animation value exposed by <see cref="AnimationPanel"/>.</value>
-    private PublicationAnimation? SelectedAnimation => Timeline
-        .Where(item => item.Animation.Id == _selectedAnimationId)
-        .Select(item => item.Animation)
-        .FirstOrDefault();
+    private PublicationAnimation? SelectedAnimation => GetSelectedAnimationForRender();
 
     /// <summary>
     /// Handles the parameters set lifecycle or event notification for <see cref="AnimationPanel"/>, updating the state required by the surrounding workflow.
@@ -1518,4 +1560,23 @@
         }
     }
 
+
+
+    /// <summary>Computes SelectedAnimation for the render path with component-local diagnostics.</summary>
+    /// <returns>The publication animation produced by the operation.</returns>
+    private PublicationAnimation? GetSelectedAnimationForRender()
+    {
+        try
+        {
+            return Timeline
+        .Where(item => item.Animation.Id == _selectedAnimationId)
+        .Select(item => item.Animation)
+        .FirstOrDefault();
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property AnimationPanel.SelectedAnimation failed.");
+            throw;
+        }
+    }
 }

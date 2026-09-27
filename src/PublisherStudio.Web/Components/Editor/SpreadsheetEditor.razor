@@ -5,10 +5,24 @@
 @inject PublicationDataService DataService
 @inject ILogger<SpreadsheetEditor> Logger
 
+<div class="razor-component-boundary">
+<DxFormLayout CssClass="razor-component-layout-owner SpreadsheetEditor">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext001">
 @if (Visible && SessionId != Guid.Empty)
 {
-    <div class="modal-backdrop spreadsheet-modal-backdrop" role="presentation">
-        <section class="spreadsheet-editor-dialog" role="dialog" aria-modal="true" aria-label="Edit spreadsheet">
+    <DxPopup Visible="true"
+         Width="min(1800px, 98vw)"
+         Height="min(1180px, 96vh)"
+         MaxHeight="96vh"
+         CloseOnOutsideClick="false"
+         CloseOnEscape="false"
+         ShowHeader="false">
+    <BodyContentTemplate Context="publisherPopupContext">
+        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext002">
+        <div class="spreadsheet-editor-dialog" aria-label="Edit spreadsheet">
             <header>
                 <div><strong>Edit spreadsheet</strong><span>@FileName</span></div>
                 <button class="window-close" @onclick="Cancel" aria-label="Close">×</button>
@@ -37,12 +51,18 @@
                     <DxButton Text="@(_saving ? "Saving…" : "Apply to frame")" Enabled="@(_ready && !_saving && !_opening)" RenderStyle="ButtonRenderStyle.Primary" Click="Apply" />
                 </div>
             </footer>
-        </section>
+        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
 
         @if (_dataSelection is not null)
         {
             <div class="spreadsheet-data-object-backdrop" role="presentation">
-                <section class="spreadsheet-data-object-dialog" role="dialog" aria-modal="true" aria-label="Create publication data object from spreadsheet selection">
+                <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext003">
+        <div class="spreadsheet-data-object-dialog" aria-label="Create publication data object from spreadsheet selection">
                     <header>
                         <div>
                             <strong>Create publication data object</strong>
@@ -60,7 +80,10 @@
                         </label>
                         <p class="spreadsheet-data-object-help">Review the column names before creating the object. When the selection has no header row, define the names here; blank or duplicate names are not accepted.</p>
 
-                        <section class="spreadsheet-column-name-editor spreadsheet-column-schema-editor">
+                        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext004">
+        <div class="spreadsheet-column-name-editor spreadsheet-column-schema-editor">
                             <strong>Column names and data types</strong>
                             <div>
                                 @for (var index = 0; index < _selectionColumnNames.Count; index++)
@@ -80,7 +103,10 @@
                                 }
                             </div>
                             <small>Auto detects the stored values. Choose Number, Boolean, DateTime, or Text to explicitly control how charts and components receive the field.</small>
-                        </section>
+                        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
 
                         @{ var selectionValidation = SelectionValidation; }
                         <div class="data-validation-status @ValidationCss(selectionValidation.Severity)" role="status">
@@ -91,7 +117,10 @@
                             }
                         </div>
 
-                        <section class="spreadsheet-selection-preview">
+                        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext005">
+        <div class="spreadsheet-selection-preview">
                             <div><strong>Preview</strong><span>@SelectionDataRowCount data rows</span></div>
                             <div class="spreadsheet-selection-preview-scroll">
                                 <table>
@@ -109,7 +138,10 @@
                                     </tbody>
                                 </table>
                             </div>
-                        </section>
+                        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
                         @if (!string.IsNullOrWhiteSpace(_selectionError))
                         {
                             <div class="inline-error">@_selectionError</div>
@@ -119,11 +151,20 @@
                         <span>The selected cells are embedded as a snapshot and immediately become available to charts and data tables.</span>
                         <div><DxButton Text="Cancel" Click="CancelDataObject" /><DxButton Text="Create data object" Click="CreateDataObject" RenderStyle="ButtonRenderStyle.Primary" /></div>
                     </footer>
-                </section>
+                </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
             </div>
         }
-    </div>
+        </BodyContentTemplate>
+</DxPopup>
 }
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+</div>
+
 
 @code {
 
@@ -222,29 +263,27 @@
     /// Gets the stable frame identifier used to identify or correlate this spreadsheet editor instance with related application state.
     /// </summary>
     /// <value>The frame identifier value exposed by <see cref="SpreadsheetEditor"/>.</value>
-    private string FrameId => $"spreadsheet-frame-{SessionId:N}";
+    private string FrameId => GetFrameIdForRender();
     /// <summary>
     /// Gets the editor URL that identifies the network or application endpoint associated with this spreadsheet editor state.
     /// </summary>
     /// <value>The editor URL value exposed by <see cref="SpreadsheetEditor"/>.</value>
-    private string EditorUrl => $"/spreadsheet/editor/{SessionId:D}";
+    private string EditorUrl => GetEditorUrlForRender();
     /// <summary>
     /// Gets the selection column count that quantifies the associated spreadsheet editor data.
     /// </summary>
     /// <value>The selection column count value exposed by <see cref="SpreadsheetEditor"/>.</value>
-    private int SelectionColumnCount => _dataSelection?.Rows.Count > 0 ? _dataSelection.Rows.Max(row => row.Count) : 0;
+    private int SelectionColumnCount => GetSelectionColumnCountForRender();
     /// <summary>
     /// Gets the selection data row count that quantifies the associated spreadsheet editor data.
     /// </summary>
     /// <value>The selection data row count value exposed by <see cref="SpreadsheetEditor"/>.</value>
-    private int SelectionDataRowCount => Math.Max(0, (_dataSelection?.Rows.Count ?? 0) - (_selectionFirstRowHeaders ? 1 : 0));
+    private int SelectionDataRowCount => GetSelectionDataRowCountForRender();
     /// <summary>
     /// Gets the selection preview rows collection maintained or exposed by this spreadsheet editor instance for downstream processing.
     /// </summary>
     /// <value>The selection preview rows value exposed by <see cref="SpreadsheetEditor"/>.</value>
-    private IEnumerable<List<string>> SelectionPreviewRows => (_dataSelection?.Rows ?? new List<List<string>>())
-        .Skip(_selectionFirstRowHeaders ? 1 : 0)
-        .Take(8);
+    private IEnumerable<List<string>> SelectionPreviewRows => GetSelectionPreviewRowsForRender();
 
     /// <summary>
     /// Handles the parameters set lifecycle or event notification for <see cref="SpreadsheetEditor"/>, updating the state required by the surrounding workflow.
@@ -956,5 +995,83 @@
         }
     }
 
+
+
+    /// <summary>Computes FrameId for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetFrameIdForRender()
+    {
+        try
+        {
+            return $"spreadsheet-frame-{SessionId:N}";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property SpreadsheetEditor.FrameId failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes EditorUrl for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetEditorUrlForRender()
+    {
+        try
+        {
+            return $"/spreadsheet/editor/{SessionId:D}";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property SpreadsheetEditor.EditorUrl failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SelectionColumnCount for the render path with component-local diagnostics.</summary>
+    /// <returns>The int produced by the operation.</returns>
+    private int GetSelectionColumnCountForRender()
+    {
+        try
+        {
+            return _dataSelection?.Rows.Count > 0 ? _dataSelection.Rows.Max(row => row.Count) : 0;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property SpreadsheetEditor.SelectionColumnCount failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SelectionDataRowCount for the render path with component-local diagnostics.</summary>
+    /// <returns>The int produced by the operation.</returns>
+    private int GetSelectionDataRowCountForRender()
+    {
+        try
+        {
+            return Math.Max(0, (_dataSelection?.Rows.Count ?? 0) - (_selectionFirstRowHeaders ? 1 : 0));
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property SpreadsheetEditor.SelectionDataRowCount failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SelectionPreviewRows for the render path with component-local diagnostics.</summary>
+    /// <returns>The collection produced by the operation.</returns>
+    private IEnumerable<List<string>> GetSelectionPreviewRowsForRender()
+    {
+        try
+        {
+            return (_dataSelection?.Rows ?? new List<List<string>>())
+        .Skip(_selectionFirstRowHeaders ? 1 : 0)
+        .Take(8);
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property SpreadsheetEditor.SelectionPreviewRows failed.");
+            throw;
+        }
+    }
 }
 

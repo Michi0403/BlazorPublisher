@@ -4,10 +4,24 @@
 @inject PublicationWebhookStore Webhooks
 
 @inject ILogger<DataManager> Logger
+<div class="razor-component-boundary">
+<DxFormLayout CssClass="razor-component-layout-owner DataManager">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext001">
 @if (Visible)
 {
-    <div class="modal-backdrop data-modal-backdrop">
-        <section class="data-manager-dialog" role="dialog" aria-modal="true" aria-label="Publication data manager">
+    <DxPopup Visible="true"
+         Width="min(1800px, 98vw)"
+         Height="min(1180px, 96vh)"
+         MaxHeight="96vh"
+         CloseOnOutsideClick="false"
+         CloseOnEscape="false"
+         ShowHeader="false">
+    <BodyContentTemplate Context="publisherPopupContext">
+        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext002">
+        <div class="data-manager-dialog" aria-label="Publication data manager">
             <header>
                 <div>
                     <strong>Publication data</strong>
@@ -73,16 +87,25 @@
 
                     @if (!string.IsNullOrWhiteSpace(_draft.SourceReference))
                     {
-                        <section class="data-source-help spreadsheet-data-reference">
+                        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext003">
+        <div class="data-source-help spreadsheet-data-reference">
                             <strong>Spreadsheet selection snapshot</strong>
                             <p>@_draft.SourceReference</p>
                             <small>The selected cells were copied into this publication data object. Create the selection again from Spreadsheet Studio to replace it with newer workbook values.</small>
-                        </section>
+                        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
                     }
 
                     @if (_draft.SourceKind is PublicationDataSourceKind.PublicationPages or PublicationDataSourceKind.PublicationDocument or PublicationDataSourceKind.DocumentObjects or PublicationDataSourceKind.PublicationMedia)
                     {
-                        <section class="data-source-help">
+                        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext004">
+        <div class="data-source-help">
                             @if (_draft.SourceKind == PublicationDataSourceKind.PublicationPages)
                             {
                                 <strong>Self-updating publication pages</strong>
@@ -116,11 +139,17 @@
                                 </label>
                             }
                             <small>This is a built-in live object. Its rows are generated at render/export time and do not need a manual refresh or copied snapshot.</small>
-                        </section>
+                        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
                     }
                     else if (_draft.SourceKind == PublicationDataSourceKind.Web)
                     {
-                        <section class="web-data-editor">
+                        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext005">
+        <div class="web-data-editor">
                             <div class="data-form-grid">
                                 <label>Transport
                                     <select value="@_draft.Web.Transport" @onchange="ChangeWebTransport">
@@ -224,7 +253,10 @@
                             <label class="data-source-input">Embedded response snapshot
                                 <textarea value="@_draft.RawSource" @oninput="ChangeRawSource" @onblur="ParsePreview" spellcheck="false"></textarea>
                             </label>
-                        </section>
+                        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
                     }
                     else
                     {
@@ -266,16 +298,25 @@
 
                     @if (!IsBuiltInDraft && _draft.SourceKind != PublicationDataSourceKind.Json && PreviewColumns.Count > 0)
                     {
-                        <section class="data-source-help data-maintenance-help">
+                        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext006">
+        <div class="data-source-help data-maintenance-help">
                             <strong>Editable table snapshot</strong>
                             <p>Source-backed data stays read-only until you explicitly detach the current parsed rows. Detaching converts this object to embedded JSON while preserving the source reference for traceability.</p>
                             <DxButton Text="Detach current rows for editing" Click="DetachSnapshot" />
-                        </section>
+                        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
                     }
 
                     @if (!IsBuiltInDraft && _draft.SourceKind == PublicationDataSourceKind.Json && PreviewColumns.Count > 0)
                     {
-                        <section class="data-schema-editor">
+                        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext007">
+        <div class="data-schema-editor">
                             <div class="pane-heading">
                                 <strong>Schema &amp; row maintenance</strong>
                                 <div><DxButton Text="Add column" Click="AddColumn" /><DxButton Text="Add row" Click="AddRow" /></div>
@@ -302,10 +343,16 @@
                                     </tbody>
                                 </table>
                             </div>
-                        </section>
+                        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
                     }
 
-                    <section class="data-preview">
+                    <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext008">
+        <div class="data-preview">
                         <div class="pane-heading">
                             <strong>@(_draft.SourceKind == PublicationDataSourceKind.Json && !IsBuiltInDraft ? "Editable rows" : "Preview")</strong>
                             <span>@PreviewRows.Count rows · @PreviewColumns.Count columns</span>
@@ -349,7 +396,10 @@
                                 </table>
                             </div>
                         }
-                    </section>
+                    </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
                 </main>
             </div>
 
@@ -357,9 +407,18 @@
                 <span>Data snapshots and binding configuration are stored in the publication. Polling runs in the local ASP.NET Core monolith.</span>
                 <DxButton Text="Close" Click="Close" RenderStyle="ButtonRenderStyle.Primary" />
             </footer>
-        </section>
-    </div>
+        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+        </BodyContentTemplate>
+</DxPopup>
 }
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+</div>
+
 
 @code {
 
@@ -404,7 +463,7 @@
     /// Gets a value indicating whether existing draft applies to the data state.
     /// </summary>
     /// <value>The existing draft value exposed by <see cref="DataManager"/>.</value>
-    private bool ExistingDraft => State.Document.DataObjects.Any(data => data.Id == _draft.Id);
+    private bool ExistingDraft => GetExistingDraftForRender();
     /// <summary>
     /// Gets a value indicating whether built in draft applies to the data state.
     /// </summary>
@@ -414,27 +473,27 @@
     /// Gets the stable delimiter key used to identify or correlate this data instance with related application state.
     /// </summary>
     /// <value>The delimiter key value exposed by <see cref="DataManager"/>.</value>
-    private string DelimiterKey => _draft.Delimiter == "\t" ? "tab" : _draft.Delimiter;
+    private string DelimiterKey => GetDelimiterKeyForRender();
     /// <summary>
     /// Gets the stable web delimiter key used to identify or correlate this data instance with related application state.
     /// </summary>
     /// <value>The web delimiter key value exposed by <see cref="DataManager"/>.</value>
-    private string WebDelimiterKey => _draft.Web.Delimiter == "\t" ? "tab" : _draft.Web.Delimiter;
+    private string WebDelimiterKey => GetWebDelimiterKeyForRender();
     /// <summary>
     /// Gets the webhook route value that forms part of the data state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The webhook route value exposed by <see cref="DataManager"/>.</value>
-    private string WebhookRoute => $"/api/publisher/webhooks/{_draft.Web.Id}/{_draft.Web.WebhookToken}";
+    private string WebhookRoute => GetWebhookRouteForRender();
     /// <summary>
     /// Gets the current publication route value that forms part of the data state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The current publication route value exposed by <see cref="DataManager"/>.</value>
-    private string CurrentPublicationRoute => $"/api/publisher/publications/{State.Document.Id}";
+    private string CurrentPublicationRoute => GetCurrentPublicationRouteForRender();
     /// <summary>
     /// Gets the current pages route value that forms part of the data state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The current pages route value exposed by <see cref="DataManager"/>.</value>
-    private string CurrentPagesRoute => $"/api/publisher/publications/{State.Document.Id}/pages";
+    private string CurrentPagesRoute => GetCurrentPagesRouteForRender();
     /// <summary>
     /// Performs data rows route for <see cref="DataManager"/>, keeping the operation consistent with the state and invariants of the surrounding data workflow.
     /// </summary>
@@ -455,22 +514,17 @@
     /// Gets the source input label value that forms part of the data state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The source input label value exposed by <see cref="DataManager"/>.</value>
-    private string SourceInputLabel => _draft.SourceKind switch
-    {
-        PublicationDataSourceKind.Json => "JSON",
-        PublicationDataSourceKind.Xml => "XML",
-        _ => "CSV / TSV / delimited text"
-    };
+    private string SourceInputLabel => GetSourceInputLabelForRender();
     /// <summary>
     /// Gets the preview columns collection maintained or exposed by this data instance for downstream processing.
     /// </summary>
     /// <value>The preview columns value exposed by <see cref="DataManager"/>.</value>
-    private IReadOnlyList<PublicationDataColumn> PreviewColumns => DataService.ResolveColumns(_draft);
+    private IReadOnlyList<PublicationDataColumn> PreviewColumns => GetPreviewColumnsForRender();
     /// <summary>
     /// Gets the preview rows collection maintained or exposed by this data instance for downstream processing.
     /// </summary>
     /// <value>The preview rows value exposed by <see cref="DataManager"/>.</value>
-    private IReadOnlyList<PublicationDataRow> PreviewRows => DataService.ResolveRows(State.Document, _draft, State.SelectedPageId);
+    private IReadOnlyList<PublicationDataRow> PreviewRows => GetPreviewRowsForRender();
     /// <summary>
     /// Gets the current validation value that forms part of the data state consumed or produced by the surrounding workflow.
     /// </summary>
@@ -1482,4 +1536,145 @@
         }
     }
 
+
+
+    /// <summary>Computes ExistingDraft for the render path with component-local diagnostics.</summary>
+    /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
+    private bool GetExistingDraftForRender()
+    {
+        try
+        {
+            return State.Document.DataObjects.Any(data => data.Id == _draft.Id);
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property DataManager.ExistingDraft failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes DelimiterKey for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetDelimiterKeyForRender()
+    {
+        try
+        {
+            return _draft.Delimiter == "\t" ? "tab" : _draft.Delimiter;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property DataManager.DelimiterKey failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes WebDelimiterKey for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetWebDelimiterKeyForRender()
+    {
+        try
+        {
+            return _draft.Web.Delimiter == "\t" ? "tab" : _draft.Web.Delimiter;
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property DataManager.WebDelimiterKey failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes WebhookRoute for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetWebhookRouteForRender()
+    {
+        try
+        {
+            return $"/api/publisher/webhooks/{_draft.Web.Id}/{_draft.Web.WebhookToken}";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property DataManager.WebhookRoute failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes CurrentPublicationRoute for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetCurrentPublicationRouteForRender()
+    {
+        try
+        {
+            return $"/api/publisher/publications/{State.Document.Id}";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property DataManager.CurrentPublicationRoute failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes CurrentPagesRoute for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetCurrentPagesRouteForRender()
+    {
+        try
+        {
+            return $"/api/publisher/publications/{State.Document.Id}/pages";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property DataManager.CurrentPagesRoute failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SourceInputLabel for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetSourceInputLabelForRender()
+    {
+        try
+        {
+            return _draft.SourceKind switch
+    {
+        PublicationDataSourceKind.Json => "JSON",
+        PublicationDataSourceKind.Xml => "XML",
+        _ => "CSV / TSV / delimited text"
+    };
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property DataManager.SourceInputLabel failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes PreviewColumns for the render path with component-local diagnostics.</summary>
+    /// <returns>The collection produced by the operation.</returns>
+    private IReadOnlyList<PublicationDataColumn> GetPreviewColumnsForRender()
+    {
+        try
+        {
+            return DataService.ResolveColumns(_draft);
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property DataManager.PreviewColumns failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes PreviewRows for the render path with component-local diagnostics.</summary>
+    /// <returns>The collection produced by the operation.</returns>
+    private IReadOnlyList<PublicationDataRow> GetPreviewRowsForRender()
+    {
+        try
+        {
+            return DataService.ResolveRows(State.Document, _draft, State.SelectedPageId);
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property DataManager.PreviewRows failed.");
+            throw;
+        }
+    }
 }

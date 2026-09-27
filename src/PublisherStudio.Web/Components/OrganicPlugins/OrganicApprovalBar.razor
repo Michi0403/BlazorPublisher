@@ -7,6 +7,10 @@
 
 @inject ILogger<OrganicApprovalBar> Logger
 @inject ISupervisedTaskRunner TaskRunner
+<div class="razor-component-boundary">
+<DxFormLayout CssClass="razor-component-layout-owner OrganicApprovalBar">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext001">
 @if (_visible && _pending.Count > 0)
 {
     <aside class="organic-approval-bar" role="region" aria-label="Organic plugin approvals">
@@ -49,6 +53,11 @@ else if (!_visible && _pending.Count > 0)
         Review AI actions <span>@_pending.Count</span>
     </button>
 }
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+</div>
+
 
 @code {
 

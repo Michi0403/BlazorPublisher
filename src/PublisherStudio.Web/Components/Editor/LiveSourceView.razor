@@ -4,6 +4,10 @@
 @inject StreamingProfileStore ProfileStore
 
 @inject ILogger<LiveSourceView> Logger
+<div class="razor-component-boundary">
+<DxFormLayout CssClass="razor-component-layout-owner LiveSourceView">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext001">
 <div class="live-source-frame source-@Item.SourceKind.ToString().ToLowerInvariant() @(Item.IsVisual ? "visual" : "audio-only")"
      style="@FrameStyle" data-live-source-id="@Item.Id">
     @if (Item.SourceKind == PublicationLiveSourceKind.NowPlaying)
@@ -37,6 +41,11 @@
         <span class="live-source-active-badge">● LIVE SOURCE</span>
     }
 </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+</div>
+
 
 @code {
 
@@ -63,90 +72,57 @@
     /// Gets the stable runtime source identifier used to identify or correlate this live source view instance with related application state.
     /// </summary>
     /// <value>The runtime source identifier value exposed by <see cref="LiveSourceView"/>.</value>
-    private string RuntimeSourceId => $"{Item.Id:N}-{_runtimeInstanceId}";
+    private string RuntimeSourceId => GetRuntimeSourceIdForRender();
     /// <summary>
     /// Gets the stable activate button identifier used to identify or correlate this live source view instance with related application state.
     /// </summary>
     /// <value>The activate button identifier value exposed by <see cref="LiveSourceView"/>.</value>
-    private string ActivateButtonId => $"live-source-activate-{Item.Id:N}";
+    private string ActivateButtonId => GetActivateButtonIdForRender();
     /// <summary>
     /// Gets the stable video identifier used to identify or correlate this live source view instance with related application state.
     /// </summary>
     /// <value>The video identifier value exposed by <see cref="LiveSourceView"/>.</value>
-    private string VideoId => $"live-source-video-{RuntimeSourceId}";
+    private string VideoId => GetVideoIdForRender();
     /// <summary>
     /// Gets the stable canvas identifier used to identify or correlate this live source view instance with related application state.
     /// </summary>
     /// <value>The canvas identifier value exposed by <see cref="LiveSourceView"/>.</value>
-    private string CanvasId => $"live-source-canvas-{RuntimeSourceId}";
+    private string CanvasId => GetCanvasIdForRender();
     /// <summary>
     /// Gets the stable meter identifier used to identify or correlate this live source view instance with related application state.
     /// </summary>
     /// <value>The meter identifier value exposed by <see cref="LiveSourceView"/>.</value>
-    private string MeterId => $"live-source-meter-{RuntimeSourceId}";
+    private string MeterId => GetMeterIdForRender();
     /// <summary>
     /// Gets the stable metadata identifier used to identify or correlate this live source view instance with related application state.
     /// </summary>
     /// <value>The metadata identifier value exposed by <see cref="LiveSourceView"/>.</value>
-    private string MetadataId => $"live-source-metadata-{RuntimeSourceId}";
+    private string MetadataId => GetMetadataIdForRender();
     /// <summary>
     /// Gets the source label value that forms part of the live source view state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The source label value exposed by <see cref="LiveSourceView"/>.</value>
-    private string SourceLabel => Item.SourceKind switch
-    {
-        PublicationLiveSourceKind.BrowserTab => "browser tab",
-        PublicationLiveSourceKind.CaptureDevice => "capture device",
-        PublicationLiveSourceKind.ApplicationAudio => "application audio",
-        PublicationLiveSourceKind.SystemAudio => "system audio",
-        PublicationLiveSourceKind.NetworkMedia => "network media",
-        PublicationLiveSourceKind.NowPlaying => "Now Playing",
-        _ => Item.SourceKind.ToString().ToLowerInvariant()
-    };
+    private string SourceLabel => GetSourceLabelForRender();
     /// <summary>
     /// Gets the source icon value that forms part of the live source view state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The source icon value exposed by <see cref="LiveSourceView"/>.</value>
-    private string SourceIcon => Item.SourceKind switch
-    {
-        PublicationLiveSourceKind.Camera => "📷",
-        PublicationLiveSourceKind.Screen => "▣",
-        PublicationLiveSourceKind.Window => "▤",
-        PublicationLiveSourceKind.BrowserTab => "▱",
-        PublicationLiveSourceKind.CaptureDevice => "◉",
-        PublicationLiveSourceKind.Microphone => "🎙",
-        PublicationLiveSourceKind.SystemAudio => "🔊",
-        PublicationLiveSourceKind.ApplicationAudio => "♫",
-        PublicationLiveSourceKind.NetworkMedia => "⌁",
-        PublicationLiveSourceKind.NowPlaying => "♪",
-        _ => "●"
-    };
+    private string SourceIcon => GetSourceIconForRender();
     /// <summary>
     /// Gets the source description value that forms part of the live source view state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The source description value exposed by <see cref="LiveSourceView"/>.</value>
-    private string SourceDescription => Item.SourceKind switch
-    {
-        PublicationLiveSourceKind.ApplicationAudio when !string.IsNullOrWhiteSpace(Item.ApplicationId) => Item.ApplicationId,
-        PublicationLiveSourceKind.NetworkMedia when !string.IsNullOrWhiteSpace(Item.NetworkUrl) => Item.NetworkUrl,
-        PublicationLiveSourceKind.NowPlaying when !string.IsNullOrWhiteSpace(Item.NowPlayingDirectory) => Item.NowPlayingDirectory,
-        _ => Item.UseDeviceTimestamp ? "Device timestamps enabled" : "Session timestamps"
-    };
+    private string SourceDescription => GetSourceDescriptionForRender();
     /// <summary>
     /// Gets the activation hint value that forms part of the live source view state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The activation hint value exposed by <see cref="LiveSourceView"/>.</value>
-    private string ActivationHint => Item.SourceKind switch
-    {
-        PublicationLiveSourceKind.ApplicationAudio or PublicationLiveSourceKind.SystemAudio => "Uses the browser audio picker when available; native isolated capture remains the fallback",
-        PublicationLiveSourceKind.NowPlaying => "Reads current MP3 tags through PublisherStudio's integrated streaming runtime",
-        _ => "Browser permission may be requested"
-    };
+    private string ActivationHint => GetActivationHintForRender();
     /// <summary>
     /// Gets the frame style value that forms part of the live source view state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The frame style value exposed by <see cref="LiveSourceView"/>.</value>
-    private string FrameStyle => $"background:{Item.Background};--live-brightness:{Inv(Item.Brightness)};--live-contrast:{Inv(Item.Contrast)};--live-saturation:{Inv(Item.Saturation)};--live-hue:{Inv(Item.HueRotation)}deg;--live-blur:{Inv(Item.Blur)}px";
+    private string FrameStyle => GetFrameStyleForRender();
 
     /// <summary>
     /// Performs activate for <see cref="LiveSourceView"/>, keeping the operation consistent with the state and invariants of the surrounding live source view workflow.
@@ -349,4 +325,203 @@
         }
     }
 
+
+
+    /// <summary>Computes RuntimeSourceId for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetRuntimeSourceIdForRender()
+    {
+        try
+        {
+            return $"{Item.Id:N}-{_runtimeInstanceId}";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property LiveSourceView.RuntimeSourceId failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes ActivateButtonId for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetActivateButtonIdForRender()
+    {
+        try
+        {
+            return $"live-source-activate-{Item.Id:N}";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property LiveSourceView.ActivateButtonId failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes VideoId for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetVideoIdForRender()
+    {
+        try
+        {
+            return $"live-source-video-{RuntimeSourceId}";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property LiveSourceView.VideoId failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes CanvasId for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetCanvasIdForRender()
+    {
+        try
+        {
+            return $"live-source-canvas-{RuntimeSourceId}";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property LiveSourceView.CanvasId failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes MeterId for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetMeterIdForRender()
+    {
+        try
+        {
+            return $"live-source-meter-{RuntimeSourceId}";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property LiveSourceView.MeterId failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes MetadataId for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetMetadataIdForRender()
+    {
+        try
+        {
+            return $"live-source-metadata-{RuntimeSourceId}";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property LiveSourceView.MetadataId failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SourceLabel for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetSourceLabelForRender()
+    {
+        try
+        {
+            return Item.SourceKind switch
+    {
+        PublicationLiveSourceKind.BrowserTab => "browser tab",
+        PublicationLiveSourceKind.CaptureDevice => "capture device",
+        PublicationLiveSourceKind.ApplicationAudio => "application audio",
+        PublicationLiveSourceKind.SystemAudio => "system audio",
+        PublicationLiveSourceKind.NetworkMedia => "network media",
+        PublicationLiveSourceKind.NowPlaying => "Now Playing",
+        _ => Item.SourceKind.ToString().ToLowerInvariant()
+    };
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property LiveSourceView.SourceLabel failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SourceIcon for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetSourceIconForRender()
+    {
+        try
+        {
+            return Item.SourceKind switch
+    {
+        PublicationLiveSourceKind.Camera => "📷",
+        PublicationLiveSourceKind.Screen => "▣",
+        PublicationLiveSourceKind.Window => "▤",
+        PublicationLiveSourceKind.BrowserTab => "▱",
+        PublicationLiveSourceKind.CaptureDevice => "◉",
+        PublicationLiveSourceKind.Microphone => "🎙",
+        PublicationLiveSourceKind.SystemAudio => "🔊",
+        PublicationLiveSourceKind.ApplicationAudio => "♫",
+        PublicationLiveSourceKind.NetworkMedia => "⌁",
+        PublicationLiveSourceKind.NowPlaying => "♪",
+        _ => "●"
+    };
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property LiveSourceView.SourceIcon failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes SourceDescription for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetSourceDescriptionForRender()
+    {
+        try
+        {
+            return Item.SourceKind switch
+    {
+        PublicationLiveSourceKind.ApplicationAudio when !string.IsNullOrWhiteSpace(Item.ApplicationId) => Item.ApplicationId,
+        PublicationLiveSourceKind.NetworkMedia when !string.IsNullOrWhiteSpace(Item.NetworkUrl) => Item.NetworkUrl,
+        PublicationLiveSourceKind.NowPlaying when !string.IsNullOrWhiteSpace(Item.NowPlayingDirectory) => Item.NowPlayingDirectory,
+        _ => Item.UseDeviceTimestamp ? "Device timestamps enabled" : "Session timestamps"
+    };
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property LiveSourceView.SourceDescription failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes ActivationHint for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetActivationHintForRender()
+    {
+        try
+        {
+            return Item.SourceKind switch
+    {
+        PublicationLiveSourceKind.ApplicationAudio or PublicationLiveSourceKind.SystemAudio => "Uses the browser audio picker when available; native isolated capture remains the fallback",
+        PublicationLiveSourceKind.NowPlaying => "Reads current MP3 tags through PublisherStudio's integrated streaming runtime",
+        _ => "Browser permission may be requested"
+    };
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property LiveSourceView.ActivationHint failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes FrameStyle for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetFrameStyleForRender()
+    {
+        try
+        {
+            return $"background:{Item.Background};--live-brightness:{Inv(Item.Brightness)};--live-contrast:{Inv(Item.Contrast)};--live-saturation:{Inv(Item.Saturation)};--live-hue:{Inv(Item.HueRotation)}deg;--live-blur:{Inv(Item.Blur)}px";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property LiveSourceView.FrameStyle failed.");
+            throw;
+        }
+    }
 }

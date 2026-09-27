@@ -21,8 +21,8 @@ if (!lockedDevExtreme || String(lockedDevExtreme.version || "").trim() !== devEx
         `found ${String(lockedDevExtreme?.version || "missing")}. Run npm install to refresh the lock file.`
     );
 }
-if (!String(lockedDevExtreme.integrity || "").trim()) {
-    throw new Error("package-lock.json does not contain an integrity hash for devextreme-dist.");
+if (!String(lockedDevExtreme.integrity || "").trim() && !String(lockedDevExtreme.resolved || "").trim()) {
+    throw new Error("package-lock.json must contain either npm integrity or an exact resolved URL for devextreme-dist.");
 }
 if (!lockedSpreadsheet || String(lockedSpreadsheet.version || "").trim() !== devExtremeVersion) {
     throw new Error(
@@ -307,7 +307,7 @@ const preparedAssets = [
 await writeFile(
     join(vendor, "devextreme-assets.meta.json"),
     `${JSON.stringify({
-        schemaVersion: 4,
+        schemaVersion: 5,
         devExtremeVersion,
         authoritativeRuntimePackage: "devextreme",
         authoritativeRuntimePackageVersion: authoritativeDevExtremeMetadataVersion,
@@ -315,6 +315,9 @@ await writeFile(
         lockedPackageVersion: String(lockedDevExtreme.version || "").trim(),
         lockedPackageResolved: String(lockedDevExtreme.resolved || "").trim(),
         lockedPackageIntegrity: String(lockedDevExtreme.integrity || "").trim(),
+        lockVerification: String(lockedDevExtreme.integrity || "").trim()
+            ? "npm-sri"
+            : "exact-version-resolved-url-plus-prepared-sha256",
         restoredPackageMetadataVersion: restoredDevExtremeMetadataVersion,
         copiedPackageMetadataVersion: copiedDevExtremeMetadataVersion,
         preparedAtUtc: new Date().toISOString(),

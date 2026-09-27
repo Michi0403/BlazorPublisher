@@ -7,6 +7,10 @@
 @inject IPublisherDocumentationViewerService Viewer
 @inject PublisherStudio.Services.Configuration.IApplicationPathService ApplicationPaths
 
+<div class="razor-component-boundary">
+<DxFormLayout CssClass="razor-component-layout-owner Help">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext001">
 <PageTitle>PublisherStudio Documentation</PageTitle>
 <UserNotificationHost />
 
@@ -34,7 +38,10 @@
         </div>
     </header>
 
-    <section class="publisher-help-grid" aria-label="Documentation chapters">
+    <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext002">
+        <div class="publisher-help-grid" aria-label="Documentation chapters">
         <button class="publisher-help-card" type="button" @onclick="OpenGettingStarted">
             <span aria-hidden="true">🌸</span><strong>Getting started</strong><small>Create a publication and learn the main flow.</small>
         </button>
@@ -59,11 +66,17 @@
         <button class="publisher-help-card" type="button" @onclick="OpenTroubleshooting">
             <span aria-hidden="true">🛟</span><strong>Troubleshooting</strong><small>Build assets, ports, circuits, recording previews, and docs.</small>
         </button>
-    </section>
+    </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
 
     @if (PathLayout is not null)
     {
-        <section class="publisher-help-grid" aria-label="Runtime storage paths">
+        <DxFormLayout CssClass="razor-section-layout-owner">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext003">
+        <div class="publisher-help-grid" aria-label="Runtime storage paths">
             <article class="publisher-help-card">
                 <span aria-hidden="true">📁</span><strong>Per-user application data</strong><small>@PathLayout.UserDataRoot</small>
             </article>
@@ -73,7 +86,10 @@
             <article class="publisher-help-card">
                 <span aria-hidden="true">🧭</span><strong>Detected path report</strong><small>@PathLayout.LayoutReportFile</small>
             </article>
-        </section>
+        </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
     }
 
     <footer class="publisher-help-footer">
@@ -83,6 +99,11 @@
 </main>
 
 <DocumentationViewerHost />
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+</div>
+
 
 @code {
 

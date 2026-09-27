@@ -3,6 +3,10 @@
 @inject IJSRuntime JS
 
 @inject ILogger<WordArtPathEditor> Logger
+<div class="razor-component-boundary">
+<DxFormLayout CssClass="razor-component-layout-owner WordArtPathEditor">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="formItemContext001">
 <div class="wordart-path-editor">
     <div class="wordart-path-heading">
         <strong>Custom text path</strong>
@@ -45,6 +49,11 @@
     </div>
     <p class="property-note">Draw from left to right for normal reading direction. A new stroke replaces the previous path; Undo restores it.</p>
 </div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+</div>
+
 
 @code {
 
@@ -79,27 +88,27 @@
     /// Gets the stable editor identifier used to identify or correlate this word art path editor instance with related application state.
     /// </summary>
     /// <value>The editor identifier value exposed by <see cref="WordArtPathEditor"/>.</value>
-    private string EditorId => $"wordart-path-editor-{Item.Id:N}";
+    private string EditorId => GetEditorIdForRender();
     /// <summary>
     /// Gets the stable grid identifier used to identify or correlate this word art path editor instance with related application state.
     /// </summary>
     /// <value>The grid identifier value exposed by <see cref="WordArtPathEditor"/>.</value>
-    private string GridId => $"wordart-path-grid-{Item.Id:N}";
+    private string GridId => GetGridIdForRender();
     /// <summary>
     /// Gets the grid fill value that forms part of the word art path editor state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The grid fill value exposed by <see cref="WordArtPathEditor"/>.</value>
-    private string GridFill => $"url(#{GridId})";
+    private string GridFill => GetGridFillForRender();
     /// <summary>
     /// Gets the path data used by this word art path editor instance to locate the associated file-system resource.
     /// </summary>
     /// <value>The path data value exposed by <see cref="WordArtPathEditor"/>.</value>
-    private string PathData => WordArtGeometry.Build(Item.CustomPathPoints);
+    private string PathData => GetPathDataForRender();
     /// <summary>
     /// Gets the editor aspect ratio value that forms part of the word art path editor state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The editor aspect ratio value exposed by <see cref="WordArtPathEditor"/>.</value>
-    private string EditorAspectRatio => Math.Clamp(Item.Width / Math.Max(Item.Height, 1), .35, 6).ToString("0.###", CultureInfo.InvariantCulture);
+    private string EditorAspectRatio => GetEditorAspectRatioForRender();
 
     /// <summary>
     /// Handles the after render async lifecycle or event notification for <see cref="WordArtPathEditor"/>, updating the state required by the surrounding workflow.
@@ -110,7 +119,7 @@
     {
         try
         {
-            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js?v=3.7.6").ConfigureAwait(true);
+            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js?v=3.9.1").ConfigureAwait(true);
             _self ??= DotNetObjectReference.Create(this);
 
             if (!_initialized)
@@ -404,4 +413,80 @@
         }
     }
 
+
+
+    /// <summary>Computes EditorId for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetEditorIdForRender()
+    {
+        try
+        {
+            return $"wordart-path-editor-{Item.Id:N}";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property WordArtPathEditor.EditorId failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes GridId for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetGridIdForRender()
+    {
+        try
+        {
+            return $"wordart-path-grid-{Item.Id:N}";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property WordArtPathEditor.GridId failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes GridFill for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetGridFillForRender()
+    {
+        try
+        {
+            return $"url(#{GridId})";
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property WordArtPathEditor.GridFill failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes PathData for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetPathDataForRender()
+    {
+        try
+        {
+            return WordArtGeometry.Build(Item.CustomPathPoints);
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property WordArtPathEditor.PathData failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes EditorAspectRatio for the render path with component-local diagnostics.</summary>
+    /// <returns>The string produced by the operation.</returns>
+    private string GetEditorAspectRatioForRender()
+    {
+        try
+        {
+            return Math.Clamp(Item.Width / Math.Max(Item.Height, 1), .35, 6).ToString("0.###", CultureInfo.InvariantCulture);
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property WordArtPathEditor.EditorAspectRatio failed.");
+            throw;
+        }
+    }
 }

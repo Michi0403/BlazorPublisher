@@ -7,6 +7,8 @@
 @using System.Text.Json
 
 @inject ILogger<StreamingStudio> Logger
+@if (Visible)
+{
 <div class="razor-component-boundary">
 <DxFormLayout CssClass="razor-component-layout-owner StreamingStudio">
     <DxFormLayoutItem ColSpanMd="12">
@@ -14,16 +16,13 @@
 @if (Visible)
 {
     <DxPopup Visible="true"
-         Width="min(1800px, 98vw)"
-         Height="min(1180px, 96vh)"
-         MaxHeight="96vh"
+         Width="min(1540px, calc(100vw - 2rem))"
+         Height="min(940px, calc(100dvh - 2rem))"
+         MaxHeight="calc(100dvh - 2rem)"
          CloseOnOutsideClick="false"
          CloseOnEscape="false"
          ShowHeader="false">
     <BodyContentTemplate Context="publisherPopupContext">
-        <DxFormLayout CssClass="razor-section-layout-owner">
-    <DxFormLayoutItem ColSpanMd="12">
-        <Template Context="formItemContext002">
         <div class="streaming-studio-window" aria-label="Streaming Studio">
             <header class="subapp-titlebar streaming-studio-titlebar">
                 <div>
@@ -701,9 +700,6 @@
                 </div>
             </footer>
         </div>
-    </Template>
-    </DxFormLayoutItem>
-</DxFormLayout>
         </BodyContentTemplate>
 </DxPopup>
 }
@@ -762,6 +758,7 @@
     </DxFormLayoutItem>
 </DxFormLayout>
 </div>
+}
 
 
 @code {

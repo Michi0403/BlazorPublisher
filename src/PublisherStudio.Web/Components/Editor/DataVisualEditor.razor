@@ -3,6 +3,8 @@
 @inject IFileLocalizationService Localization
 
 @inject ILogger<DataVisualEditor> Logger
+@if (Visible && _draft is not null)
+{
 <div class="razor-component-boundary">
 <DxFormLayout CssClass="razor-component-layout-owner DataVisualEditor">
     <DxFormLayoutItem ColSpanMd="12">
@@ -10,16 +12,13 @@
 @if (Visible && _draft is not null)
 {
     <DxPopup Visible="true"
-         Width="min(1800px, 98vw)"
-         Height="min(1180px, 96vh)"
-         MaxHeight="96vh"
+         Width="min(1380px, calc(100vw - 2rem))"
+         Height="min(900px, calc(100dvh - 2rem))"
+         MaxHeight="calc(100dvh - 2rem)"
          CloseOnOutsideClick="false"
          CloseOnEscape="false"
          ShowHeader="false">
     <BodyContentTemplate Context="publisherPopupContext">
-        <DxFormLayout CssClass="razor-section-layout-owner">
-    <DxFormLayoutItem ColSpanMd="12">
-        <Template Context="formItemContext002">
         <div class="data-visual-editor-dialog" aria-label='@LT("Data visual editor")'>
             <header>
                 <div>
@@ -280,9 +279,6 @@
                 <div><DxButton Text='@LT("Cancel")' Click="Cancel" /><DxButton Text='@LT("Apply to object")' Click="Save" RenderStyle="ButtonRenderStyle.Primary" Enabled="@CanSave" /></div>
             </footer>
         </div>
-    </Template>
-    </DxFormLayoutItem>
-</DxFormLayout>
         </BodyContentTemplate>
 </DxPopup>
 
@@ -330,6 +326,7 @@
     </DxFormLayoutItem>
 </DxFormLayout>
 </div>
+}
 
 
 @code {

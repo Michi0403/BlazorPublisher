@@ -5,6 +5,8 @@
 @inject PublicationDataService DataService
 @inject ILogger<SpreadsheetEditor> Logger
 
+@if (Visible && SessionId != Guid.Empty)
+{
 <div class="razor-component-boundary">
 <DxFormLayout CssClass="razor-component-layout-owner SpreadsheetEditor">
     <DxFormLayoutItem ColSpanMd="12">
@@ -12,16 +14,13 @@
 @if (Visible && SessionId != Guid.Empty)
 {
     <DxPopup Visible="true"
-         Width="min(1800px, 98vw)"
-         Height="min(1180px, 96vh)"
-         MaxHeight="96vh"
+         Width="min(1380px, calc(100vw - 2rem))"
+         Height="min(920px, calc(100dvh - 2rem))"
+         MaxHeight="calc(100dvh - 2rem)"
          CloseOnOutsideClick="false"
          CloseOnEscape="false"
          ShowHeader="false">
     <BodyContentTemplate Context="publisherPopupContext">
-        <DxFormLayout CssClass="razor-section-layout-owner">
-    <DxFormLayoutItem ColSpanMd="12">
-        <Template Context="formItemContext002">
         <div class="spreadsheet-editor-dialog" aria-label="Edit spreadsheet">
             <header>
                 <div><strong>Edit spreadsheet</strong><span>@FileName</span></div>
@@ -52,9 +51,6 @@
                 </div>
             </footer>
         </div>
-    </Template>
-    </DxFormLayoutItem>
-</DxFormLayout>
 
         @if (_dataSelection is not null)
         {
@@ -164,6 +160,7 @@
     </DxFormLayoutItem>
 </DxFormLayout>
 </div>
+}
 
 
 @code {

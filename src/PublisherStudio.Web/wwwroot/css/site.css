@@ -5263,8 +5263,8 @@ body.publisher-printing [role="menu"], body.publisher-printing [class*="ribbon"]
   .publication-page-effect.page-effect-animated .page-effect-to{animation:none!important}
 }
 
-.page-effect-studio{width:min(1180px,calc(100vw - 40px));max-height:calc(100vh - 40px);display:flex;flex-direction:column}
-.page-effect-studio-body{overflow:auto;padding:16px;display:grid;gap:18px}
+.page-effect-studio{width:100%;height:100%;min-width:0;min-height:0;max-width:none;max-height:none;box-sizing:border-box;display:grid;grid-template-rows:auto minmax(0,1fr) auto;overflow:hidden}
+.page-effect-studio-body{min-width:0;min-height:0;overflow:auto;overscroll-behavior:contain;padding:16px;display:grid;align-content:start;gap:18px}
 .page-effect-base-color,.page-effect-card{border:1px solid var(--bs-border-color,#cbd5e1);border-radius:8px;padding:14px;background:var(--bs-body-bg,#fff)}
 .page-effect-base-color h3,.page-effect-card h3,.page-effect-section-heading h3{margin:0 0 8px}
 .page-effect-row{display:flex;align-items:end;gap:12px;flex-wrap:wrap}
@@ -5434,8 +5434,9 @@ dxbl-popup-root > dxbl-popup-cell > dxbl-modal dxbl-modal-dialog.dxbl-popup .dxb
     box-sizing: border-box;
 }
 
-/* Studio windows that historically filled a manual backdrop now fill the explicit DxPopup body.
-   Width/height percentage rules therefore resolve against a real popup size and stay inside it. */
+/* Studio windows that historically filled a manual backdrop now sit directly in the explicit DxPopup body.
+   Do not insert a maintenance FormLayout between the modal body and these roots: direct ownership is required
+   for percentage sizing, scroll containment and stable DevExpress popup lifecycle. */
 dxbl-popup-root > dxbl-popup-cell > dxbl-modal .dxbl-modal-body > :is(
     .story-editor-dialog,
     .spreadsheet-editor-dialog,
@@ -5448,10 +5449,23 @@ dxbl-popup-root > dxbl-popup-cell > dxbl-modal .dxbl-modal-body > :is(
     .streaming-studio-window,
     .panel-studio-dialog,
     .media-converter-dialog,
-    .page-effect-studio-dialog,
-    .new-publication-dialog) {
+    .page-effect-studio,
+    .website-export-dialog,
+    .publisher-documentation-dialog) {
+    width: 100% !important;
+    height: 100% !important;
     min-width: 0 !important;
     min-height: 0 !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    box-sizing: border-box;
+    overflow: hidden !important;
+}
+
+/* Content-sized chooser dialogs may grow naturally, but any overflow remains inside the DevExpress body. */
+dxbl-popup-root > dxbl-popup-cell > dxbl-modal .dxbl-modal-body > .new-publication-dialog {
+    width: 100% !important;
+    min-width: 0 !important;
     max-width: 100% !important;
     max-height: 100% !important;
     box-sizing: border-box;

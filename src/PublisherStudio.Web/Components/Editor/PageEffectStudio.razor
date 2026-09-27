@@ -2,6 +2,8 @@
 @inject ILogger<PageEffectStudio> Logger
 @inject IUserNotificationService Notifications
 
+@if (Visible)
+{
 <div class="razor-component-boundary">
 <DxFormLayout CssClass="razor-component-layout-owner PageEffectStudio">
     <DxFormLayoutItem ColSpanMd="12">
@@ -9,16 +11,13 @@
 @if (Visible)
 {
     <DxPopup Visible="true"
-         Width="min(1800px, 98vw)"
-         Height="min(1180px, 96vh)"
-         MaxHeight="96vh"
+         Width="min(1180px, calc(100vw - 2rem))"
+         Height="min(820px, calc(100dvh - 2rem))"
+         MaxHeight="calc(100dvh - 2rem)"
          CloseOnOutsideClick="false"
          CloseOnEscape="false"
          ShowHeader="false">
     <BodyContentTemplate Context="publisherPopupContext">
-        <DxFormLayout CssClass="razor-section-layout-owner">
-    <DxFormLayoutItem ColSpanMd="12">
-        <Template Context="formItemContext002">
         <div class="publisher-dialog page-effect-studio" aria-labelledby="page-effect-studio-title" @onclick:stopPropagation>
             <header>
                 <div>
@@ -29,10 +28,7 @@
             </header>
 
             <div class="page-effect-studio-body">
-                <DxFormLayout CssClass="razor-section-layout-owner">
-    <DxFormLayoutItem ColSpanMd="12">
-        <Template Context="formItemContext003">
-        <div class="page-effect-base-color">
+                <div class="page-effect-base-color">
                     <h3>Page color</h3>
                     <div class="page-effect-row">
                         <label>Custom page color
@@ -42,14 +38,8 @@
                         <span class="page-effect-color-value">@State.CurrentPage.Background</span>
                     </div>
                 </div>
-    </Template>
-    </DxFormLayoutItem>
-</DxFormLayout>
 
-                <DxFormLayout CssClass="razor-section-layout-owner">
-    <DxFormLayoutItem ColSpanMd="12">
-        <Template Context="formItemContext004">
-        <div>
+                <div>
                     <div class="page-effect-section-heading">
                         <div>
                             <h3>Effect layers</h3>
@@ -152,9 +142,6 @@
                         </div>
                     }
                 </div>
-    </Template>
-    </DxFormLayoutItem>
-</DxFormLayout>
             </div>
 
             <footer>
@@ -162,9 +149,6 @@
                 <button type="button" class="primary" @onclick="Close">Done</button>
             </footer>
         </div>
-    </Template>
-    </DxFormLayoutItem>
-</DxFormLayout>
         </BodyContentTemplate>
 </DxPopup>
 }
@@ -172,6 +156,7 @@
     </DxFormLayoutItem>
 </DxFormLayout>
 </div>
+}
 
 
 @code {

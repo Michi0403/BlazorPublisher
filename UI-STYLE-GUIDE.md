@@ -21,7 +21,9 @@ PublisherStudio keeps DevExpress/DevExtreme components as behavioral owners whil
 - The DevExpress modal dialog stays inside the current viewport. Its modal body is the fallback overflow owner (`min-width/min-height: 0`, bounded size, internal scrolling), so oversized controls remain reachable without painting beyond the popup border.
 - Dropdown/listbox popup portals keep their own DevExpress overlay and scrolling behavior; do not apply modal-body overflow rules to those cells.
 - The dialog surface fills or fits the popup body. Long content scrolls inside the popup/content region while header/actions remain reachable.
-- Avoid nested geometry owners that fight DevExpress popup measurement.
+- Avoid nested geometry owners that fight DevExpress popup measurement. `BodyContentTemplate` exposes the real dialog/studio surface directly; a maintenance `DxFormLayout` must not sit between the DevExpress modal body and that surface.
+- Inactive popup/studio components do not leave empty DevExpress FormLayout item trees in the editor DOM. Gate their complete rendered boundary on the same visibility/readiness condition as the popup.
+- Page appearance/effects is a responsive configuration window, not a full-screen workbench; its body owns scrolling while its header and footer remain reachable.
 
 ## Publication geometry and export parity
 
@@ -32,3 +34,8 @@ PublisherStudio keeps DevExpress/DevExtreme components as behavioral owners whil
 
 - Required `DxFormLayout` maintenance shells remain box-neutral (`display: contents`) where they do not own visual geometry. Mainframe, rulers, panes, editors and dialogs retain their established geometry owners.
 - Do not remove InteractiveServer render-mode boundaries to solve a styling problem.
+
+## Browser lifecycle diagnostics
+
+- Browser diagnostics observe failures through `window.error`, `unhandledrejection`, the .NET diagnostics bridge and explicit PublisherStudio guard helpers.
+- Diagnostics must not replace `EventTarget` listener methods, timers, animation-frame scheduling, microtasks or observer constructors. DevExpress owns those browser lifecycle primitives; changing callback identity or slot timing is itself a frontend regression risk.

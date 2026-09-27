@@ -4,6 +4,8 @@
 @inject ISupervisedTaskRunner TaskRunner
 @inject IUserNotificationService Notifications
 
+@if (Viewer.State.IsOpen)
+{
 <div class="razor-component-boundary">
 <DxFormLayout CssClass="razor-component-layout-owner DocumentationViewerHost">
     <DxFormLayoutItem ColSpanMd="12">
@@ -13,13 +15,11 @@
     <DxPopup Visible="true"
              VisibleChanged="OnDocumentationPopupVisibilityChanged"
              HeaderText="@Viewer.State.Title"
-             Width="min(1280px, 96vw)"
-             MaxHeight="94vh"
+             Width="96vw"
+             Height="94dvh"
+             MaxHeight="94dvh"
              CloseOnOutsideClick="true">
         <BodyContentTemplate Context="documentationPopupContext">
-        <DxFormLayout CssClass="razor-section-layout-owner">
-    <DxFormLayoutItem ColSpanMd="12">
-        <Template Context="formItemContext002">
         <div class="publisher-documentation-dialog" @onclick:stopPropagation="true">
             <header>
                 <h2 id="publisher-documentation-viewer-title">@Viewer.State.Title</h2>
@@ -30,9 +30,6 @@
             </header>
             <iframe @key="Viewer.State.Revision" src="@Viewer.State.Url" title="@Viewer.State.Title" loading="eager"></iframe>
         </div>
-    </Template>
-    </DxFormLayoutItem>
-</DxFormLayout>
         </BodyContentTemplate>
     </DxPopup>
 }
@@ -40,6 +37,7 @@
     </DxFormLayoutItem>
 </DxFormLayout>
 </div>
+}
 
 
 @code {

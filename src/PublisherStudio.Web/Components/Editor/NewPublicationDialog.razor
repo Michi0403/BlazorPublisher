@@ -4,6 +4,8 @@
 @inject IUserNotificationService Notifications
 @inject ILogger<NewPublicationDialog> Logger
 
+@if (Visible)
+{
 <div class="razor-component-boundary">
 <DxFormLayout CssClass="razor-component-layout-owner NewPublicationDialog">
     <DxFormLayoutItem ColSpanMd="12">
@@ -11,16 +13,12 @@
 @if (Visible)
 {
     <DxPopup Visible="true"
-         Width="min(1800px, 98vw)"
-         Height="min(1180px, 96vh)"
-         MaxHeight="96vh"
+         Width="min(980px, calc(100vw - 2rem))"
+         MaxHeight="calc(100dvh - 2rem)"
          CloseOnOutsideClick="false"
          CloseOnEscape="false"
          ShowHeader="false">
     <BodyContentTemplate Context="publisherPopupContext">
-        <DxFormLayout CssClass="razor-section-layout-owner">
-    <DxFormLayoutItem ColSpanMd="12">
-        <Template Context="formItemContext002">
         <div class="new-publication-dialog" aria-label='@LT("New from template")'>
             <header class="new-publication-dialog-header">
                 <div>
@@ -70,9 +68,6 @@
                 <button type="button" class="publisher-dialog-button" @onclick="Cancel">@LT("Cancel")</button>
             </footer>
         </div>
-    </Template>
-    </DxFormLayoutItem>
-</DxFormLayout>
         </BodyContentTemplate>
 </DxPopup>
 }
@@ -80,6 +75,7 @@
     </DxFormLayoutItem>
 </DxFormLayout>
 </div>
+}
 
 
 @code {

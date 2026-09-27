@@ -13,6 +13,8 @@
 @inject PublicationEditorTextService EditorText
 
 @inject ISupervisedTaskRunner TaskRunner
+@if (Visible)
+{
 <div class="razor-component-boundary">
 <DxFormLayout CssClass="razor-component-layout-owner MediaStudio">
     <DxFormLayoutItem ColSpanMd="12">
@@ -20,16 +22,13 @@
 @if (Visible)
 {
     <DxPopup Visible="true"
-         Width="min(1800px, 98vw)"
-         Height="min(1180px, 96vh)"
-         MaxHeight="96vh"
+         Width="min(1180px, calc(100vw - 2rem))"
+         Height="min(760px, calc(100dvh - 2rem))"
+         MaxHeight="calc(100dvh - 2rem)"
          CloseOnOutsideClick="false"
          CloseOnEscape="false"
          ShowHeader="false">
     <BodyContentTemplate Context="publisherPopupContext">
-        <DxFormLayout CssClass="razor-section-layout-owner">
-    <DxFormLayoutItem ColSpanMd="12">
-        <Template Context="formItemContext002">
         <div id="media-studio-window" class="media-studio-window" tabindex="0" aria-label="@(IsVideo ? LT("Video Studio") : LT("Audio Studio"))">
             <header class="media-studio-titlebar">
                 <div>
@@ -1002,9 +1001,6 @@
                 </div>
             </footer>
         </div>
-    </Template>
-    </DxFormLayoutItem>
-</DxFormLayout>
         </BodyContentTemplate>
 </DxPopup>
 }
@@ -1089,6 +1085,7 @@
     </DxFormLayoutItem>
 </DxFormLayout>
 </div>
+}
 
 
 @code {
@@ -2423,7 +2420,7 @@
         try
         {
             if (_disposed) throw new ObjectDisposedException(nameof(MediaStudio));
-            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=3.9.1").ConfigureAwait(true);
+            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=3.9.3").ConfigureAwait(true);
             _self ??= DotNetObjectReference.Create(this);
             if (SessionId != Guid.Empty)
             {

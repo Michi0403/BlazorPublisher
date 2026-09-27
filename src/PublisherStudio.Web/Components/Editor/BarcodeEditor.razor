@@ -5,6 +5,8 @@
 @inject IJSRuntime JS
 
 @inject ILogger<BarcodeEditor> Logger
+@if (Visible && Item is not null)
+{
 <div class="razor-component-boundary">
 <DxFormLayout CssClass="razor-component-layout-owner BarcodeEditor">
     <DxFormLayoutItem ColSpanMd="12">
@@ -12,16 +14,13 @@
 @if (Visible && Item is not null)
 {
     <DxPopup Visible="true"
-         Width="min(1800px, 98vw)"
-         Height="min(1180px, 96vh)"
-         MaxHeight="96vh"
+         Width="min(920px, calc(100vw - 2rem))"
+         Height="min(680px, calc(100dvh - 2rem))"
+         MaxHeight="calc(100dvh - 2rem)"
          CloseOnOutsideClick="false"
          CloseOnEscape="false"
          ShowHeader="false">
     <BodyContentTemplate Context="publisherPopupContext">
-        <DxFormLayout CssClass="razor-section-layout-owner">
-    <DxFormLayoutItem ColSpanMd="12">
-        <Template Context="formItemContext002">
         <div class="barcode-editor-dialog" aria-label="Barcode editor">
             <header><div><strong>Barcode Studio</strong><span>@FormatSummary</span></div><button type="button" class="window-close" @onclick="Cancel">×</button></header>
             <DxRibbon CssClass="barcode-editor-ribbon categorized-ribbon" SizeMode="SizeMode.Small" AdaptivityAutoCollapseItemsToGroups="false">
@@ -88,9 +87,6 @@
             </div>
             <footer><DxButton Text="Cancel" Click="Cancel" /><DxButton Text="Insert / Apply" RenderStyle="ButtonRenderStyle.Primary" Enabled="@string.IsNullOrWhiteSpace(_error)" Click="Save" /></footer>
         </div>
-    </Template>
-    </DxFormLayoutItem>
-</DxFormLayout>
         </BodyContentTemplate>
 </DxPopup>
 
@@ -111,6 +107,7 @@
     </DxFormLayoutItem>
 </DxFormLayout>
 </div>
+}
 
 
 @code {
@@ -225,7 +222,7 @@
             var request = _generationRequest;
             try
             {
-                _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js?v=3.9.1").ConfigureAwait(true);
+                _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js?v=3.9.3").ConfigureAwait(true);
                 var svg = await _module.InvokeAsync<string>("generateBarcodeSvg", _draft).ConfigureAwait(true);
                 if (request != _generationRequest) return;
                 _svg = svg;

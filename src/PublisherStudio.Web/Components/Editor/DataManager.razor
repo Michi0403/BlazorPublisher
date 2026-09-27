@@ -4,6 +4,8 @@
 @inject PublicationWebhookStore Webhooks
 
 @inject ILogger<DataManager> Logger
+@if (Visible)
+{
 <div class="razor-component-boundary">
 <DxFormLayout CssClass="razor-component-layout-owner DataManager">
     <DxFormLayoutItem ColSpanMd="12">
@@ -11,16 +13,13 @@
 @if (Visible)
 {
     <DxPopup Visible="true"
-         Width="min(1800px, 98vw)"
-         Height="min(1180px, 96vh)"
-         MaxHeight="96vh"
+         Width="min(1380px, calc(100vw - 2rem))"
+         Height="min(900px, calc(100dvh - 2rem))"
+         MaxHeight="calc(100dvh - 2rem)"
          CloseOnOutsideClick="false"
          CloseOnEscape="false"
          ShowHeader="false">
     <BodyContentTemplate Context="publisherPopupContext">
-        <DxFormLayout CssClass="razor-section-layout-owner">
-    <DxFormLayoutItem ColSpanMd="12">
-        <Template Context="formItemContext002">
         <div class="data-manager-dialog" aria-label="Publication data manager">
             <header>
                 <div>
@@ -408,9 +407,6 @@
                 <DxButton Text="Close" Click="Close" RenderStyle="ButtonRenderStyle.Primary" />
             </footer>
         </div>
-    </Template>
-    </DxFormLayoutItem>
-</DxFormLayout>
         </BodyContentTemplate>
 </DxPopup>
 }
@@ -418,6 +414,7 @@
     </DxFormLayoutItem>
 </DxFormLayout>
 </div>
+}
 
 
 @code {

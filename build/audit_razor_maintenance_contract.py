@@ -41,6 +41,7 @@ POPUP_VIEWPORT_REQUIRED_TOKENS = (
     'max-height: calc(100dvh - 1rem) !important',
     'overflow: auto !important',
     'overscroll-behavior: contain',
+    '.page-effect-studio',
 )
 PRIMARY_LAYOUT_MARKER_RE = re.compile(r'@\*\s*razor-primary-layout:\s*(?P<layout>Dx(?:GridLayout|Carousel|Drawer|FormLayout|Splitter|StackLayout|Tabs))\s*\|\s*reason:\s*(?P<reason>.*?)\s*\*@', re.I | re.S)
 STACK_CHILD_INTENT_RE = re.compile(r'@\*\s*razor-layout-intent:\s*stack-child\s*\|\s*reason:\s*(?P<reason>.*?)\s*\*@', re.I | re.S)
@@ -364,6 +365,22 @@ def main() -> int:
                     'Use DxPopup or another reviewed DevExpress window/prompt as the actual modal owner. Native elements may remain only as body content inside the DevExpress popup and must not own role=dialog, modal backdrops, focus trapping, or overlay positioning. Preserve the close/cancel workflow and diagnostics instead of deleting the feature.'
                 ))
 
+        # DxPopup portals size and scroll their immediate body child.  A maintenance-only
+        # FormLayout inserted between BodyContentTemplate and the real studio surface defeats
+        # that contract and previously caused large dialogs to bleed, clip, or leave huge blank
+        # regions.  The dialog/studio root must therefore be the direct popup body child.
+        popup_body_owner_re = re.compile(
+            r'<\s*BodyContentTemplate\b[^>]*>\s*<\s*DxFormLayout\b[^>]*class\s*=\s*["\'][^"\']*razor-section-layout-owner[^"\']*["\']',
+            re.I | re.S
+        )
+        for popup_body_owner in popup_body_owner_re.finditer(markup):
+            line, col = line_col(markup, popup_body_owner.start())
+            findings.append(Finding(
+                relative, line, col, 'RAZORUI0014',
+                'DxPopup BodyContentTemplate is intercepted by a maintenance-only FormLayout wrapper.',
+                'Keep DxPopup as the modal owner, but place the actual dialog/studio surface directly inside BodyContentTemplate. The direct body child must own width/height shrinking and internal overflow; do not insert razor-section-layout-owner between the DevExpress modal body and that surface.'
+            ))
+
         for match in FORBIDDEN_TAG_RE.finditer(markup):
             tag = match.group('tag').lower()
             line, col = line_col(markup, match.start())
@@ -519,7 +536,7 @@ def main() -> int:
         'containment-only root divs protect component boundaries, DxFormLayout is the default semantic owner for forms/editors, '
         'generic StackLayout wrappers and unexplained Grid-to-Stack nesting are rejected, FormLayout template contexts are explicit and unique, <section>/<dialog> are absent, '
         'maintenance-only DevExpress wrapper shells remain box-neutral, typed component loggers are present, manual/native modal owners are absent, computed properties delegate to named methods, '
-        'and component methods own diagnostics.'
+        'popup bodies expose their real studio roots directly, and component methods own diagnostics.'
     )
     return 0
 

@@ -291,9 +291,6 @@
          CloseOnEscape="false"
          ShowHeader="false">
     <BodyContentTemplate Context="publisherPopupContext">
-        <DxFormLayout CssClass="razor-section-layout-owner">
-    <DxFormLayoutItem ColSpanMd="12">
-        <Template Context="formItemContext002">
         <div class="publisher-dialog selected-picture-export-dialog" aria-labelledby="selected-picture-export-title" @onclick:stopPropagation>
             <header>
                 <div>
@@ -309,9 +306,6 @@
             </div>
             <footer class="publisher-dialog-actions"><button type="button" class="publisher-dialog-button" @onclick="CloseSelectedPictureExport">Cancel</button></footer>
         </div>
-    </Template>
-    </DxFormLayoutItem>
-</DxFormLayout>
         </BodyContentTemplate>
 </DxPopup>
 }
@@ -326,9 +320,6 @@
          CloseOnEscape="false"
          ShowHeader="false">
     <BodyContentTemplate Context="publisherPopupContext">
-        <DxFormLayout CssClass="razor-section-layout-owner">
-    <DxFormLayoutItem ColSpanMd="12">
-        <Template Context="formItemContext003">
         <div class="publisher-dialog website-export-dialog" aria-labelledby="single-website-export-title" @onclick:stopPropagation>
             <header>
                 <div>
@@ -383,9 +374,6 @@
                 </button>
             </footer>
         </div>
-    </Template>
-    </DxFormLayoutItem>
-</DxFormLayout>
         </BodyContentTemplate>
 </DxPopup>
 }
@@ -400,9 +388,6 @@
          CloseOnEscape="false"
          ShowHeader="false">
     <BodyContentTemplate Context="publisherPopupContext">
-        <DxFormLayout CssClass="razor-section-layout-owner">
-    <DxFormLayoutItem ColSpanMd="12">
-        <Template Context="formItemContext004">
         <div class="publisher-dialog website-export-dialog" aria-labelledby="structured-export-title" @onclick:stopPropagation>
             <header>
                 <div>
@@ -480,9 +465,6 @@
                 </button>
             </footer>
         </div>
-    </Template>
-    </DxFormLayoutItem>
-</DxFormLayout>
         </BodyContentTemplate>
 </DxPopup>
 }
@@ -1985,7 +1967,7 @@
             }
             catch (JSException)
             {
-                var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js?v=3.9.1").ConfigureAwait(true);
+                var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js?v=3.9.3").ConfigureAwait(true);
                 await using var configuredModuleAsyncDisposal = module.ConfigureAwait(true);
                 await module.InvokeVoidAsync("clickElementById", id).ConfigureAwait(true);
             }
@@ -3479,7 +3461,7 @@
                 var bytes = buffer.ToArray();
                 if (bytes.Length == 0) throw new InvalidDataException("The selected media file is empty.");
 
-                module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=3.9.1").ConfigureAwait(true);
+                module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=3.9.3").ConfigureAwait(true);
                 temporaryAssetId = Guid.NewGuid();
                 var inspectionUrl = MediaAssets.RegisterBytes(temporaryAssetId, bytes, mimeType);
                 MediaSourceInfo info;

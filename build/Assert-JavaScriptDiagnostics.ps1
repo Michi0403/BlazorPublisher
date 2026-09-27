@@ -50,6 +50,9 @@ foreach ($relative in $relativeFiles) {
         foreach ($required in @('console.error', 'window.addEventListener("error"', 'unhandledrejection', 'ReportJavaScriptErrorAsync', 'pendingReports', 'guardObject', 'guardClass')) {
             if (-not $text.Contains($required)) { $errors.Add("JavaScript diagnostics runtime is missing '$required': $relative") }
         }
+        foreach ($forbidden in @('EventTarget.prototype.addEventListener =', 'EventTarget.prototype.removeEventListener =', 'window.setTimeout =', 'window.setInterval =', 'window.requestAnimationFrame =', 'window.queueMicrotask =', 'window[observerName] = class GuardedObserver')) {
+            if ($text.Contains($forbidden)) { $errors.Add("JavaScript diagnostics runtime must remain observational and may not replace browser/vendor lifecycle primitive '$forbidden': $relative") }
+        }
     }
     elseif ($text -notmatch '(?:publisherStudioJavaScriptDiagnostics|publisherStudioDiagnostics|\bpublisherDiagnostics)\.report\s*\(') {
         $errors.Add("Maintained JavaScript file does not report failures through PublisherStudio diagnostics: $relative")

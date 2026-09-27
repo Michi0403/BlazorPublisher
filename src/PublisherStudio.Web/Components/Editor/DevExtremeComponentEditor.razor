@@ -7,6 +7,8 @@
 @inject ILogger<DevExtremeComponentEditor> Logger
 @inject PublicationEditorTextService EditorText
 @inject ISupervisedTaskRunner TaskRunner
+@if (Visible && _draft is not null)
+{
 <div class="razor-component-boundary">
 <DxFormLayout CssClass="razor-component-layout-owner DevExtremeComponentEditor">
     <DxFormLayoutItem ColSpanMd="12">
@@ -14,16 +16,13 @@
 @if (Visible && _draft is not null)
 {
     <DxPopup Visible="true"
-         Width="min(1800px, 98vw)"
-         Height="min(1180px, 96vh)"
-         MaxHeight="96vh"
+         Width="min(1540px, calc(100vw - 2rem))"
+         Height="min(930px, calc(100dvh - 2rem))"
+         MaxHeight="calc(100dvh - 2rem)"
          CloseOnOutsideClick="false"
          CloseOnEscape="false"
          ShowHeader="false">
     <BodyContentTemplate Context="publisherPopupContext">
-        <DxFormLayout CssClass="razor-section-layout-owner">
-    <DxFormLayoutItem ColSpanMd="12">
-        <Template Context="formItemContext002">
         <div class="component-editor-dialog" aria-label="Component Studio">
             <header>
                 <div>
@@ -848,9 +847,6 @@
                 <div><button type="button" @onclick="Cancel">Cancel</button><button type="button" class="primary" @onclick="Save" disabled="@(!CanSave)">Apply component</button></div>
             </footer>
         </div>
-    </Template>
-    </DxFormLayoutItem>
-</DxFormLayout>
         </BodyContentTemplate>
 </DxPopup>
 }
@@ -858,6 +854,7 @@
     </DxFormLayoutItem>
 </DxFormLayout>
 </div>
+}
 
 
 @code {

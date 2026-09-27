@@ -8,6 +8,8 @@
 
 @inject ILogger<MediaConverterStudio> Logger
 @inject ISupervisedTaskRunner TaskRunner
+@if (Visible)
+{
 <div class="razor-component-boundary">
 <DxFormLayout CssClass="razor-component-layout-owner MediaConverterStudio">
     <DxFormLayoutItem ColSpanMd="12">
@@ -15,16 +17,13 @@
 @if (Visible)
 {
     <DxPopup Visible="true"
-         Width="min(1800px, 98vw)"
-         Height="min(1180px, 96vh)"
-         MaxHeight="96vh"
+         Width="min(1580px, calc(100vw - 2rem))"
+         Height="min(960px, calc(100dvh - 2rem))"
+         MaxHeight="calc(100dvh - 2rem)"
          CloseOnOutsideClick="false"
          CloseOnEscape="false"
          ShowHeader="false">
     <BodyContentTemplate Context="publisherPopupContext">
-        <DxFormLayout CssClass="razor-section-layout-owner">
-    <DxFormLayoutItem ColSpanMd="12">
-        <Template Context="formItemContext002">
         <div class="data-visual-editor-dialog media-converter-dialog" aria-label="Media Converter Studio"
                  @oncontextmenu="ShowConverterContextMenu" @oncontextmenu:preventDefault>
             <header>
@@ -313,9 +312,6 @@
                 <button type="button" class="primary" title="Start conversion with the current preset and options" @onclick="Start" disabled="@(!CanStart)">Convert</button>
             </footer>
         </div>
-    </Template>
-    </DxFormLayoutItem>
-</DxFormLayout>
         <DxContextMenu @ref="_contextMenu">
             <Items>
                 <DxContextMenuItem Text="Open media…" IconCssClass="pub-icon pub-icon-open" Click="OpenSourcePicker" />
@@ -336,6 +332,7 @@
     </DxFormLayoutItem>
 </DxFormLayout>
 </div>
+}
 
 
 @code {

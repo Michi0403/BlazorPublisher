@@ -15,6 +15,8 @@
 @inject IPanelStudioPreviewPresetService PreviewPresets
 @inject ILogger<PanelStudio> Logger
 
+@if (Visible && _draft is not null)
+{
 <div class="razor-component-boundary">
 <DxFormLayout CssClass="razor-component-layout-owner PanelStudio">
     <DxFormLayoutItem ColSpanMd="12">
@@ -22,16 +24,13 @@
 @if (Visible && _draft is not null)
 {
     <DxPopup Visible="true"
-         Width="min(1800px, 98vw)"
-         Height="min(1180px, 96vh)"
-         MaxHeight="96vh"
+         Width="min(1500px, calc(100vw - 2rem))"
+         Height="min(920px, calc(100dvh - 2rem))"
+         MaxHeight="calc(100dvh - 2rem)"
          CloseOnOutsideClick="false"
          CloseOnEscape="false"
          ShowHeader="false">
     <BodyContentTemplate Context="publisherPopupContext">
-        <DxFormLayout CssClass="razor-section-layout-owner">
-    <DxFormLayoutItem ColSpanMd="12">
-        <Template Context="formItemContext002">
         <div class="data-visual-editor-dialog panel-studio-dialog" aria-label="Panel Studio">
             <header>
                 <div>
@@ -686,9 +685,6 @@
                 <DxButton Text="Save panel" RenderStyle="ButtonRenderStyle.Primary" RenderStyleMode="ButtonRenderStyleMode.Contained" Click="Save" />
             </footer>
         </div>
-    </Template>
-    </DxFormLayoutItem>
-</DxFormLayout>
         </BodyContentTemplate>
 </DxPopup>
 
@@ -735,6 +731,7 @@
     </DxFormLayoutItem>
 </DxFormLayout>
 </div>
+}
 
 
 @code {
@@ -850,6 +847,14 @@
     /// Stores the internal drop surface binding key state used by <see cref="PanelStudio"/> while executing its surrounding workflow.
     /// </summary>
     private string? _dropSurfaceBindingKey;
+    /// <summary>
+    /// Stores the number of deferred browser-surface binding attempts used while the DxPopup portal is materializing.
+    /// </summary>
+    private int _dropSurfaceBindAttempt;
+    /// <summary>
+    /// Limits transient DxPopup portal retries before a binding failure is treated as persistent.
+    /// </summary>
+    private const int MaxDropSurfaceBindAttempts = 4;
     /// <summary>
     /// Stores the internal design surface layout key state used by <see cref="PanelStudio"/> while executing its surrounding workflow.
     /// </summary>
@@ -1000,6 +1005,7 @@
                 _loadedId = null;
                 _dropSurfaceBound = false;
                 _dropSurfaceBindingKey = null;
+                _dropSurfaceBindAttempt = 0;
                 _designSurfaceLayoutKey = null;
                 _lastInteractionSurfaceNotification = string.Empty;
                 _pictureEditorVisible = false;
@@ -1016,6 +1022,7 @@
             _loadedId = id;
             _error = string.Empty;
             _lastInteractionSurfaceNotification = string.Empty;
+            _dropSurfaceBindAttempt = 0;
             _interactionPreview = false;
             _previewSizeKey = "design";
             RefreshPreviewPresets();
@@ -1051,7 +1058,18 @@
                 _dropSurfaceBound = await JS.InvokeAsync<bool>("publisherStudio.bindPanelStudioDropSurface", _canvasElement, _self, _interactionBindingId).ConfigureAwait(true);
                 _dropSurfaceBindingKey = _dropSurfaceBound ? bindingKey : null;
                 if (!_dropSurfaceBound)
-                    throw new InvalidOperationException("The Panel Studio browser interaction surface rejected its binding.");
+                {
+                    _dropSurfaceBindAttempt++;
+                    if (_dropSurfaceBindAttempt < MaxDropSurfaceBindAttempts)
+                    {
+                        Logger.LogDebug($"Panel Studio browser interaction surface is not materialized yet; deferring bind attempt {_dropSurfaceBindAttempt}/{MaxDropSurfaceBindAttempts - 1}. Binding:{_interactionBindingId} View:{_selectedViewId}.");
+                        await Task.Delay(16).ConfigureAwait(true);
+                        if (Visible && !_disposed) await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+                        return;
+                    }
+                    throw new InvalidOperationException("The Panel Studio browser interaction surface rejected its binding after the DxPopup portal materialization window.");
+                }
+                _dropSurfaceBindAttempt = 0;
                 _lastInteractionSurfaceNotification = string.Empty;
                 Logger.LogInformation($"Panel Studio pointer, keyboard, context-menu, and gamepad interaction binding is active. Binding:{_interactionBindingId} View:{_selectedViewId} Mode:{(_interactionPreview ? "Interact" : "Arrange")} PreviewRevision:{_previewRevision}.");
             }

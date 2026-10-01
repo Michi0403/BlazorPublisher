@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <InvariantGlobalization>true</InvariantGlobalization>
     <AssemblyName>PublisherStudio.Setup</AssemblyName>
-    <Version>4.0.0</Version>
+    <Version>4.0.1</Version>
     <Product>PublisherStudio Setup</Product>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);1591</NoWarn>

@@ -1,13 +1,9 @@
-# PublisherStudio 4.0.0
+# PublisherStudio 4.0.1
 
-PublisherStudio 4.0.0 repairs the remaining Story/Text Studio caret and formatting-toolbar race isolated by the Mainframe text-component lifecycle reproduction.
+PublisherStudio 4.0.1 turns the confirmed 4.0.0 RichEdit race fix into a repository-wide InteractiveServer transient-state ownership contract.
 
-The RichEdit document and caret are no longer two-way controlled by Interactive Server component state. PublisherStudio provides the initial document for a keyed editor generation, DevExpress owns the live edit/selection/formatting state in the browser, and **Apply** exports that live document back to the Mainframe model as the explicit commit boundary. Selection notifications remain available to selection-dependent Story Editor commands but no longer cause StoryEditor to rerender, preventing delayed server-side selection snapshots from perturbing the live caret or toolbar. Stale selections are discarded when an editor generation changes or closes.
+The audit found one additional vendor control with the same feedback-loop shape: Media Studio's audio `DxRangeSelector` sent every handle movement to the server while its selected range was also supplied from component state. It now commits on handle release, so DevExpress owns the live drag and PublisherStudio receives the durable range at the interaction boundary. The already-correct Publication Timeline range selector remains unchanged.
 
-The toolbar jumping through arbitrary values is treated as part of the same stale-selection race; this release does not change new-text font defaults merely to mask that symptom.
+Story/Text Studio keeps the 4.0.0 one-way document/selection ownership repair. A new build-breaking guard now rejects future two-way complex-editor live state and server-round-tripped range-handle movement, while also protecting PublisherStudio's reviewed browser coalescer for the native live-preview sliders that intentionally remain continuous.
 
-The 3.9.9 RichEdit localization/input ownership repair and the Panel Studio/inspector repairs remain in place. LocalGPT is unchanged.
-
-The 3.9.9 → 4.0.0 change is the repository's required single-digit minor/patch rollover, not an intentional breaking-release declaration.
-
-No .NET build was attempted in this environment. See `CHANGELOG-v4.0.0-STORY-RICHEDIT-LIVE-STATE-OWNERSHIP.md` and `VALIDATION-v4.0.0-source.md`.
+No .NET build was attempted in this environment. See `CHANGELOG-v4.0.1-TRANSIENT-UI-STATE-OWNERSHIP.md` and `VALIDATION-v4.0.1-source.md`.

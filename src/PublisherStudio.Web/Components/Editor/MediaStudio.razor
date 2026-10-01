@@ -22,9 +22,9 @@
 @if (Visible)
 {
     <DxPopup Visible="true"
-         Width="min(1180px, calc(100vw - 2rem))"
-         Height="min(760px, calc(100dvh - 2rem))"
-         MaxHeight="calc(100dvh - 2rem)"
+         Width="92vw"
+         Height="90dvh"
+         MaxHeight="90dvh"
          CloseOnOutsideClick="false"
          CloseOnEscape="false"
          ShowHeader="false">
@@ -2420,7 +2420,7 @@
         try
         {
             if (_disposed) throw new ObjectDisposedException(nameof(MediaStudio));
-            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=3.9.3").ConfigureAwait(true);
+            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=3.9.6").ConfigureAwait(true);
             _self ??= DotNetObjectReference.Create(this);
             if (SessionId != Guid.Empty)
             {

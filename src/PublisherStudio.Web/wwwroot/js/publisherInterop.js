@@ -3634,7 +3634,7 @@ function canonicalizePageClone(clone, metrics) { try {
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:canonicalizePageClone@3091', __javascriptError); throw __javascriptError; }}
 
 function normalizePublicationPageSizes(publication) { try {
-    for (const page of publication.querySelectorAll(':scope > .print-page')) {
+    for (const page of publication.querySelectorAll('.print-page[data-page-id]')) {
         const widthMm = number(page.dataset.pageWidthMm, 0);
         const heightMm = number(page.dataset.pageHeightMm, 0);
         let width = widthMm > 0 ? widthMm * PX_PER_MM_AT_96_DPI : 0;
@@ -5707,7 +5707,7 @@ function signalConnectorRuntime(root = document, options = {}) { try {
 function websitePresentationRuntime() { try {
     const publication = document.querySelector('.website-publication');
     if (!publication) return;
-    const pages = [...publication.querySelectorAll(':scope > .print-page')];
+    const pages = [...publication.querySelectorAll('.print-page[data-page-id]')];
     if (!pages.length) return;
     const lower = value => { try { return (String(value || '').replace(/[^a-z0-9]/gi, '').toLowerCase()); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:lower@5077', __javascriptError); throw __javascriptError; } };
     const num = (value, fallback) => { try { const parsed = Number(value); return Number.isFinite(parsed) ? parsed : fallback;  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:num@5078', __javascriptError); throw __javascriptError; }};
@@ -6314,7 +6314,7 @@ function websitePresentationRuntime() { try {
 function websiteSiteRuntime() { try {
     const publication = document.querySelector('.website-publication');
     if (!publication) return;
-    const pages = [...publication.querySelectorAll(':scope > .print-page')];
+    const pages = [...publication.querySelectorAll('.print-page[data-page-id]')];
     if (!pages.length) return;
     const numberValue = (value, fallback = 0) => { try { const parsed = Number(value); return Number.isFinite(parsed) ? parsed : fallback;  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:numberValue@5676', __javascriptError); throw __javascriptError; }};
     const lower = value => { try { return (String(value ?? '').replace(/[^a-z0-9]/gi, '').toLowerCase()); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:lower@5677', __javascriptError); throw __javascriptError; } };
@@ -6978,7 +6978,7 @@ async function exportPresentationVideo(containerSelector, fileName, title) { try
         throw new Error('This browser cannot record the page-sized compositor canvas.');
     const source = document.querySelector(containerSelector);
     if (!source) throw new Error('The publication export surface is not available.');
-    const sourcePages = [...source.querySelectorAll(':scope > .print-page')];
+    const sourcePages = [...source.querySelectorAll('.print-page[data-page-id]')];
     if (!sourcePages.length) throw new Error('The publication does not contain any pages.');
     if (window.PublisherStudioLiveDataRuntime) {
         await window.PublisherStudioLiveDataRuntime.refreshAll(source, { polling: false });
@@ -6995,7 +6995,7 @@ async function exportPresentationVideo(containerSelector, fileName, title) { try
     const publication = source.cloneNode(true);
     publication.removeAttribute('aria-hidden');
     publication.className = 'publisher-video-export-publication';
-    const pages = [...publication.querySelectorAll(':scope > .print-page')];
+    const pages = [...publication.querySelectorAll('.print-page[data-page-id]')];
     pages.forEach((page, index) => { try {
         page.id = `publisher-video-export-page-${index}-${Date.now()}`;
         page.querySelectorAll('video,audio').forEach(media => { try { media.controls = false; media.preload = 'auto';  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:page.querySelectorAll(\'video,audio\').forEach@6353', __javascriptError); throw __javascriptError; }});
@@ -8187,8 +8187,13 @@ async function buildPublisherSingleHtml(mode, title, exportOptions = {}) { try {
     publication.removeAttribute('style');
     publication.className = 'website-publication';
     publication.dataset.publicationTitle = String(title || 'Publication');
+    const standalonePages = [...publication.querySelectorAll('.print-page[data-page-id]')];
+    for (const page of standalonePages) publication.appendChild(page);
+    for (const child of [...publication.children]) {
+        if (!child.matches('.print-page[data-page-id]')) child.remove();
+    }
     normalizePublicationPageSizes(publication);
-    const websitePages = [...publication.querySelectorAll(':scope > .print-page')];
+    const websitePages = [...publication.querySelectorAll('.print-page[data-page-id]')];
     const websiteFrame = publicationFrameDefinition(websitePages, false);
     publication.dataset.frameWidthPx = String(websiteFrame.width);
     publication.dataset.frameHeightPx = String(websiteFrame.height);
@@ -8885,7 +8890,7 @@ window.publisherStudio = {
     async exportPublicationPages(containerSelector, baseName, format, dpi, compressArchive = true, jpegQuality = .92) { try {
         const container = document.querySelector(containerSelector);
         if (!container) throw new Error('The publication export surface is not available.');
-        const pages = [...container.querySelectorAll(':scope > .print-page')];
+        const pages = [...container.querySelectorAll('.print-page[data-page-id]')];
         if (!pages.length) throw new Error('The publication does not contain any pages.');
         refreshContentFit(container);
         await new Promise(resolve => { try { return (requestAnimationFrame(resolve)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:ArrowFunction@8008', __javascriptError); throw __javascriptError; } });

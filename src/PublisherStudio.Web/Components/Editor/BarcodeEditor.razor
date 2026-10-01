@@ -14,9 +14,9 @@
 @if (Visible && Item is not null)
 {
     <DxPopup Visible="true"
-         Width="min(920px, calc(100vw - 2rem))"
-         Height="min(680px, calc(100dvh - 2rem))"
-         MaxHeight="calc(100dvh - 2rem)"
+         Width="92vw"
+         Height="90dvh"
+         MaxHeight="90dvh"
          CloseOnOutsideClick="false"
          CloseOnEscape="false"
          ShowHeader="false">
@@ -222,7 +222,7 @@
             var request = _generationRequest;
             try
             {
-                _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js?v=3.9.3").ConfigureAwait(true);
+                _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js?v=3.9.6").ConfigureAwait(true);
                 var svg = await _module.InvokeAsync<string>("generateBarcodeSvg", _draft).ConfigureAwait(true);
                 if (request != _generationRequest) return;
                 _svg = svg;

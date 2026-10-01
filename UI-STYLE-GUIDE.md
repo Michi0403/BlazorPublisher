@@ -39,3 +39,12 @@ PublisherStudio keeps DevExpress/DevExtreme components as behavioral owners whil
 
 - Browser diagnostics observe failures through `window.error`, `unhandledrejection`, the .NET diagnostics bridge and explicit PublisherStudio guard helpers.
 - Diagnostics must not replace `EventTarget` listener methods, timers, animation-frame scheduling, microtasks or observer constructors. DevExpress owns those browser lifecycle primitives; changing callback identity or slot timing is itself a frontend regression risk.
+
+## Viewport-sized studio windows
+
+Large authoring surfaces (Spreadsheet, Media, Picture, Data, Component, Streaming, Panel, Story, Barcode and Media Converter) are applications inside a DevExpress `DxPopup`, not small confirmation dialogs. They should normally consume about 90% of the available viewport (`92vw` × `90dvh` in the maintained desktop layout), while the shared popup contract keeps them bounded and scroll-safe on smaller windows. Page Effects remains a bounded configuration window (`min(1180px, 92vw)` × `min(820px, 90dvh)`) so its comparatively compact content does not float inside a mostly empty full-screen shell. Do not reintroduce fixed caps for the true workbench studios.
+
+## Standalone publication export structure
+
+Standalone HTML exports must expose publication pages directly beneath `.website-publication` after snapshotting. Maintenance-only DevExpress/FormLayout wrappers from the live editor are not part of the exported document contract. Presentation/site runtimes and page/video/raster export code must discover `.print-page[data-page-id]` descendants defensively, so a future editor wrapper cannot silently disable navigation, replay, transitions, or page export.
+

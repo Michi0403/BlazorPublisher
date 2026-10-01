@@ -1,9 +1,11 @@
-# PublisherStudio 3.9.3
+# PublisherStudio 3.9.6
 
-PublisherStudio 3.9.3 is a narrow maintenance correction on top of the 3.9.2 frontend recovery. The bounded Panel Studio DxPopup portal-materialization retry remains in place, but its renderer-affine `InvokeAsync(StateHasChanged)` continuation now explicitly uses `ConfigureAwait(true)`, satisfying the repository's strict async-continuation policy.
+PublisherStudio 3.9.6 repairs the async-only maintenance architecture introduced in 3.9.5.
 
-The popup sizing/scrolling recovery, Page Effects repair, Mainframe/rulers, Data Visual presentation fixes, corner-radius rendering, presentation website controls, DevExpress ownership and InteractiveServer boundaries are otherwise unchanged.
+The 3.9.5 scanner overreached by declaring every synchronous component/service method invalid, requiring asynchronous disposal even when no asynchronous resource existed, rejecting short atomic/lock state protection, and lexically misclassifying domain `.Result` values and async lambdas. Converting those findings mechanically would have damaged framework, DevExpress, process/native, and synchronous adapter contracts.
 
-No `dotnet`, MSBuild, NuGet restore/publish, GitHub or online repository access was used for this source-only handoff.
+The corrected build gate validates asynchronous boundaries instead: `Async` naming must match an awaitable contract, `async void` is rejected, getters may not initiate async work, renderer/awaitable paths may not block on Tasks, prohibited blocking coordination remains rejected, and direct discarded asynchronous work remains forbidden. Pure synchronous helpers and required synchronous framework/native contracts remain valid.
 
-See `CHANGELOG-v3.9.3-ASYNC-MAINTENANCE-GUARD-REPAIR.md` and `VALIDATION-v3.9.3-source.md`.
+The corrected gate passes all 228 reviewed PublisherStudio source files. The application-architecture, async-continuation, and Razor-maintenance source audits also pass. No PublisherStudio runtime behavior was intentionally rewritten and no .NET build was attempted in this environment.
+
+See `CHANGELOG-v3.9.6-ASYNC-BOUNDARY-ARCHITECTURE-REPAIR.md` and `VALIDATION-v3.9.6-source.md`.

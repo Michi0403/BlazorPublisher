@@ -16,6 +16,7 @@
     <OperationalDiagnosticsScript>$(MSBuildThisFileDirectory)build/Assert-OperationalDiagnostics.ps1</OperationalDiagnosticsScript>
     <InteractiveServerRenderModeScript>$(MSBuildThisFileDirectory)build/Assert-InteractiveServerRenderModes.ps1</InteractiveServerRenderModeScript>
     <AsyncContinuationScript>$(MSBuildThisFileDirectory)build/Assert-AsyncContinuationPolicy.ps1</AsyncContinuationScript>
+    <AsyncOnlyArchitectureScript>$(MSBuildThisFileDirectory)build/Assert-AsyncOnlyArchitecture.ps1</AsyncOnlyArchitectureScript>
     <ComponentDiagnosticsScript>$(MSBuildThisFileDirectory)build/Assert-ComponentDiagnostics.ps1</ComponentDiagnosticsScript>
     <ComponentSafetyScript>$(MSBuildThisFileDirectory)build/Assert-ComponentSafety.ps1</ComponentSafetyScript>
     <MethodDiagnosticsPolicyScript>$(MSBuildThisFileDirectory)build/Assert-MethodDiagnostics.ps1</MethodDiagnosticsPolicyScript>
@@ -108,8 +109,15 @@
     <Exec Command="&quot;$(RepositoryPowerShell)&quot; $(RepositoryPowerShellArguments) -File &quot;$(AsyncContinuationScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
   </Target>
 
-  <Target Name="AssertPublisherComponentDiagnostics"
+  <Target Name="AssertPublisherAsyncOnlyArchitecture"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherAsyncContinuationPolicy"
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web'">
+    <Error Condition="!Exists('$(AsyncOnlyArchitectureScript)')" Text="Async-boundary architecture guard script is missing: $(AsyncOnlyArchitectureScript)" />
+    <Exec Command="&quot;$(RepositoryPowerShell)&quot; $(RepositoryPowerShellArguments) -File &quot;$(AsyncOnlyArchitectureScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
+  </Target>
+
+  <Target Name="AssertPublisherComponentDiagnostics"
+          BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherAsyncOnlyArchitecture"
           Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipComponentDiagnosticsGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web'">
     <Error Condition="!Exists('$(ComponentDiagnosticsScript)')" Text="Component diagnostics guard script is missing: $(ComponentDiagnosticsScript)" />
     <Exec Command="&quot;$(RepositoryPowerShell)&quot; $(RepositoryPowerShellArguments) -File &quot;$(ComponentDiagnosticsScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />

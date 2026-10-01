@@ -17,7 +17,8 @@ $dataVisualHostPath = Join-Path $root 'src\PublisherStudio.Web\Components\Editor
 $sitePath = Join-Path $root 'src\PublisherStudio.Web\wwwroot\css\site.css'
 $interopPath = Join-Path $root 'src\PublisherStudio.Web\wwwroot\js\publisherInterop.js'
 $liveDataPath = Join-Path $root 'src\PublisherStudio.Web\wwwroot\js\liveDataInterop.js'
-foreach ($path in @($panelStudioPath, $editorPath, $panelViewPath, $dataVisualHostPath, $sitePath, $interopPath, $liveDataPath)) {
+$layoutPath = Join-Path $root 'src\PublisherStudio.Web\Services\Publication\PublicationElementLayoutService.cs'
+foreach ($path in @($panelStudioPath, $editorPath, $panelViewPath, $dataVisualHostPath, $sitePath, $interopPath, $liveDataPath, $layoutPath)) {
     if (-not (Test-Path -LiteralPath $path -PathType Leaf)) { Fail "Required source is missing: $path" }
 }
 
@@ -28,6 +29,7 @@ $dataVisualHost = [IO.File]::ReadAllText($dataVisualHostPath)
 $site = [IO.File]::ReadAllText($sitePath)
 $interop = [IO.File]::ReadAllText($interopPath)
 $liveData = [IO.File]::ReadAllText($liveDataPath)
+$layout = [IO.File]::ReadAllText($layoutPath)
 
 Require $panelView 'panel-force-canvas' 'ForceCanvasLayout must create an explicit CSS escape hatch from responsive layout rules.'
 Require $panelView 'data-panel-authoring-viewport=' 'PanelView must identify the viewport that owns authoring coordinates.'
@@ -45,6 +47,10 @@ Require $site 'panel-layout-responsive:not\(\.panel-force-canvas\)' 'Responsive 
 Reject $site '\.panel-layout-responsive\s+\.publication-panel-element' 'Responsive element rules must explicitly exclude panel-force-canvas authoring mode.'
 Require $site 'publication-panel-viewport\[data-panel-authoring-viewport="true"\]>\[data-panel-canvas-region\]>.panel-studio-hit-layer' 'Hitbox positioning must be anchored to the authored canvas region inside the publication-panel viewport.'
 Require $site 'panel-studio-design-frame>.publication-panel' 'The authoring frame must own the selected panel size independently from generic Mainframe panel sizing.'
+Require $site 'publication-panel-element > \.razor-component-boundary > \.razor-component-layout-owner > \.dxbl-row > dxbl-form-layout-item > \.dxbl-fl-ctrl > :first-child' 'Panel child render roots must inherit authored element geometry through maintenance-only DevExpress wrapper shells.'
+Require $site 'publication-panel-element > \.razor-component-boundary :is\(' 'Panel child renderer sizing must survive additional Razor/DevExpress wrapper depth instead of relying only on the pre-maintenance direct-child DOM shape.'
+Require $panelStudio 'Layout\.FindAvailablePlacement\(' 'Click insertion must use shared layout placement instead of stacking every component at the panel center.'
+Require $layout 'PublicationCanvasBounds FindAvailablePlacement\(' 'The shared publication layout service must own overlap-aware insertion placement.'
 Require $interop 'function panelStudioCoordinateSurface\(element\)' 'Browser coordinate conversion must resolve the panel authoring canvas region.'
 Require $interop 'panelStudioCoordinateSurface\(element\) \|\| element' 'Drop-point conversion must use the authoring viewport when available.'
 Require $interop 'syncPanelStudioDesignSurface\(element\)' 'Panel Studio must uniformly fit the 96-DPI design surface into the editor workspace.'
@@ -59,4 +65,4 @@ Require $editor 'Math\.Abs\(html\.Width - draft\.CanvasWidth\)' 'Standalone HTML
 Require $editor 'Math\.Abs\(html\.Height - draft\.CanvasHeight\)' 'Standalone HTML height must be compared with the panel-local canvas before lightweight apply.'
 Require $editor 'State\.PromoteSelectedHtmlEmbedToPanel\(draft\)' 'Authored local HTML geometry must promote to a panel instead of being discarded.'
 
-Write-Host 'Panel Studio authoring geometry validation passed. The selected panel owns a centered fitted design frame; live content, hitboxes and drop coordinates share one aspect-preserving canvas region; preview viewport simulation is isolated; responsive authoring is explicit; DataVisuals resize from their actual host.'
+Write-Host 'Panel Studio authoring geometry validation passed. The selected panel owns a centered fitted design frame; DevExpress maintenance wrappers preserve child geometry; click insertion avoids center stacking; live content, hitboxes and drop coordinates share one aspect-preserving canvas region; preview viewport simulation is isolated; responsive authoring is explicit; DataVisuals resize from their actual host.'

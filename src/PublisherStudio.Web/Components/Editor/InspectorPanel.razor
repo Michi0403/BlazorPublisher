@@ -109,7 +109,7 @@
                     </select>
                 </label>
                 <div class="property-button-row">
-                    <button type="button" @onclick="OpenTranslationEditor">@LT("Edit all application strings")</button>
+                    <DxButton Text='@LT("Edit all application strings")' Click="OpenTranslationEditor" CssClass="wide-button localization-action-button" />
                 </div>
                 <p class="property-note">@LT("The application choice is stored for this browser. The publication choice controls standalone HTML language metadata and remains editable per document.")</p>
             </div>
@@ -5743,7 +5743,7 @@
             var poster = string.Empty;
             try
             {
-                _mediaModule ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=3.9.6").ConfigureAwait(true);
+                _mediaModule ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=4.0.0").ConfigureAwait(true);
                 var localUrl = MediaAssets.RegisterBytes(inspectionId, bytes, mimeType);
                 try
                 {

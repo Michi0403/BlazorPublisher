@@ -19,6 +19,7 @@ if ($componentRoots.Count -eq 0) {
 $violations = New-Object System.Collections.Generic.List[object]
 $genericPattern = [regex]'(?<attribute>\b[A-Z][A-Za-z0-9_]*)\s*=\s*"@(?<expression>[A-Za-z_][A-Za-z0-9_\.]*\s*<[^"\r\n>]+>\s*\([^"\r\n]*\))"'
 $mixedPattern = [regex]'(?<attribute>\b[A-Z][A-Za-z0-9_]*)\s*=\s*"@(?<member>[A-Za-z_][A-Za-z0-9_\.]*)\s+(?<literal>[^"\r\n]+)"'
+$reservedDirectivePattern = [regex]'(?<attribute>\b[A-Z][A-Za-z0-9_]*)\s*=\s*"@(?<directive>page|helper|functions|code|section|using|inject|inherits|implements|namespace|attribute|typeparam|layout|rendermode|preservewhitespace)\b'
 
 foreach ($componentsRoot in $componentRoots) {
     foreach ($file in @(Get-ChildItem -LiteralPath $componentsRoot -Recurse -File -Filter '*.razor' | Sort-Object FullName)) {
@@ -27,7 +28,8 @@ foreach ($componentsRoot in $componentRoots) {
             $lineNumber++
             foreach ($rule in @(
                 [pscustomobject]@{ Regex = $genericPattern; Code = 'RZARCH0001'; Reason = 'Generic C# invocation/expression is embedded directly in a component attribute.' },
-                [pscustomobject]@{ Regex = $mixedPattern; Code = 'RZARCH0002'; Reason = 'Component attribute mixes a C# member expression with literal markup text.' }
+                [pscustomobject]@{ Regex = $mixedPattern; Code = 'RZARCH0002'; Reason = 'Component attribute mixes a C# member expression with literal markup text.' },
+                [pscustomobject]@{ Regex = $reservedDirectivePattern; Code = 'RZARCH0003'; Reason = 'Component attribute starts a direct Razor expression with a reserved directive token. Use an explicit @(...) expression or a non-reserved local name.' }
             )) {
                 $match = $rule.Regex.Match($line)
                 if (-not $match.Success) { continue }

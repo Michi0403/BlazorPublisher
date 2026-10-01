@@ -333,12 +333,12 @@
                             </div>
                             <label class="panel-object-address">Object address<input readonly value="@SelectedObjectAddress" title="Stable address available to publication scripts" /></label>
                             <div class="panel-behavior-quick-actions" aria-label="Quick click behaviors">
-                                <button type="button" @onclick="() => AddQuickBehavior(PublicationBehaviorAction.Click)">Click target</button>
-                                <button type="button" @onclick="() => AddQuickBehavior(PublicationBehaviorAction.Focus)">Focus</button>
-                                <button type="button" @onclick="() => AddQuickBehavior(PublicationBehaviorAction.RefreshData)">Refresh</button>
-                                <button type="button" @onclick="() => AddQuickBehavior(PublicationBehaviorAction.ToggleVisibility)">Toggle visible</button>
-                                <button type="button" @onclick="() => AddQuickBehavior(PublicationBehaviorAction.Enable)">Enable</button>
-                                <button type="button" @onclick="() => AddQuickBehavior(PublicationBehaviorAction.Disable)">Disable</button>
+                                <DxButton Text="Click target" SizeMode="SizeMode.Small" RenderStyleMode="ButtonRenderStyleMode.Outline" CssClass="panel-behavior-quick-action" Click="() => AddQuickBehavior(PublicationBehaviorAction.Click)" />
+                                <DxButton Text="Focus" SizeMode="SizeMode.Small" RenderStyleMode="ButtonRenderStyleMode.Outline" CssClass="panel-behavior-quick-action" Click="() => AddQuickBehavior(PublicationBehaviorAction.Focus)" />
+                                <DxButton Text="Refresh" SizeMode="SizeMode.Small" RenderStyleMode="ButtonRenderStyleMode.Outline" CssClass="panel-behavior-quick-action" Click="() => AddQuickBehavior(PublicationBehaviorAction.RefreshData)" />
+                                <DxButton Text="Toggle visible" SizeMode="SizeMode.Small" RenderStyleMode="ButtonRenderStyleMode.Outline" CssClass="panel-behavior-quick-action" Click="() => AddQuickBehavior(PublicationBehaviorAction.ToggleVisibility)" />
+                                <DxButton Text="Enable" SizeMode="SizeMode.Small" RenderStyleMode="ButtonRenderStyleMode.Outline" CssClass="panel-behavior-quick-action" Click="() => AddQuickBehavior(PublicationBehaviorAction.Enable)" />
+                                <DxButton Text="Disable" SizeMode="SizeMode.Small" RenderStyleMode="ButtonRenderStyleMode.Outline" CssClass="panel-behavior-quick-action" Click="() => AddQuickBehavior(PublicationBehaviorAction.Disable)" />
                             </div>
                             <div class="data-form-grid panel-behavior-grid" style="grid-template-columns:1fr 1fr">
                                 <label>When
@@ -401,7 +401,7 @@
                                     <label style="grid-column:1/-1">Address<input type="url" value="@_behaviorUrl" @onchange="args => _behaviorUrl = Text(args)" /></label>
                                 }
                             </div>
-                            <button type="button" class="panel-behavior-add" @onclick="AddBehavior">Add behavior</button>
+                            <DxButton Text="Add behavior" SizeMode="SizeMode.Small" RenderStyle="ButtonRenderStyle.Primary" CssClass="panel-behavior-add" Click="AddBehavior" />
                             @if (selected.Behaviors.Count > 0)
                             {
                                 <div class="panel-behavior-list">
@@ -410,7 +410,7 @@
                                         <div @key="behavior.Id" class="panel-behavior-row">
                                             <span><strong>@behavior.Trigger</strong> → @behavior.Action</span>
                                             <small>@BehaviorTargetAddress(behavior)</small>
-                                            <button type="button" title="Remove behavior" @onclick="() => RemoveBehavior(behavior.Id)">×</button>
+                                            <DxButton Text="×" SizeMode="SizeMode.Small" RenderStyle="ButtonRenderStyle.Danger" RenderStyleMode="ButtonRenderStyleMode.Outline" CssClass="panel-behavior-remove" Click="() => RemoveBehavior(behavior.Id)" />
                                         </div>
                                     }
                                 </div>
@@ -453,10 +453,10 @@
                                         </label>
                                     </div>
                                     <div class="panel-inline-actions">
-                                        <button type="button" @onclick="() => AddGeneratedComponentScript(scriptableComponent)">Add click script</button>
-                                        @foreach (var helper in ScriptHelpers)
+                                        <DxButton Text="Add click script" SizeMode="SizeMode.Small" RenderStyleMode="ButtonRenderStyleMode.Outline" Click="() => AddGeneratedComponentScript(scriptableComponent)" />
+                                        @foreach (var scriptHelper in ScriptHelpers)
                                         {
-                                            <button type="button" title="@(helper.Description)" @onclick="() => AddScriptHelper(scriptableComponent, helper.Key)">@(helper.Label)</button>
+                                            <DxButton Text="@(scriptHelper.Label)" SizeMode="SizeMode.Small" RenderStyleMode="ButtonRenderStyleMode.Outline" CssClass="panel-script-helper-button" Click="() => AddScriptHelper(scriptableComponent, scriptHelper.Key)" />
                                         }
                                     </div>
                                     <small class="field-help">PublisherStudio creates the custom-script action and enables it explicitly. No runtime eval is used for the ordinary behavior rules above.</small>
@@ -612,9 +612,9 @@
                                 <div class="panel-script-assistant compact">
                                     <strong>JavaScript helper</strong>
                                     <div class="panel-inline-actions">
-                                        @foreach (var helper in HtmlScriptHelpers)
+                                        @foreach (var scriptHelper in HtmlScriptHelpers)
                                         {
-                                            <button type="button" title="@(helper.Description)" @onclick="() => AddHtmlScriptHelper(html, helper.Key)">@(helper.Label)</button>
+                                            <button type="button" title="@(scriptHelper.Description)" @onclick="() => AddHtmlScriptHelper(html, scriptHelper.Key)">@(scriptHelper.Label)</button>
                                         }
                                     </div>
                                     <small class="field-help">These snippets run only inside this iframe sandbox. Publication-component scripts use the object interface shown in Behavior &amp; object interface.</small>
@@ -1461,10 +1461,16 @@
         try
         {
             var element = CreateToolElement(toolId);
-            if (element is null || _draft is null) return;
-            element.X = Math.Max(0, (_draft.CanvasWidth - element.Width) / 2);
-            element.Y = Math.Max(0, (_draft.CanvasHeight - element.Height) / 2);
-            AddElement(element);
+            var view = CurrentView;
+            if (element is null || _draft is null || view is null) return;
+            var placement = Layout.FindAvailablePlacement(
+                view.Elements,
+                element.Width,
+                element.Height,
+                _draft.CanvasWidth,
+                _draft.CanvasHeight);
+            Layout.ApplyBounds(element, placement, _draft.CanvasWidth, _draft.CanvasHeight);
+            AddElement(view, element);
     
         }
         catch (Exception __componentMethodException)

@@ -313,7 +313,10 @@ button { cursor: pointer; }
 .color-field code { overflow: hidden; text-overflow: ellipsis; }
 .wide-button { width: 100%; margin-top: 5px; }
 .property-button-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; margin: 6px 0; }
+.property-button-row:has(> :only-child) { grid-template-columns: minmax(0, 1fr); }
 .property-button-row:has(> :nth-child(2):last-child) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.property-button-row > .dxbl-btn { min-width: 0; max-width: 100%; }
+.localization-action-button .dxbl-btn-caption { white-space: normal; overflow-wrap: anywhere; text-align: center; line-height: 1.25; }
 .property-note { margin: 8px 0 0; color: #667085; font-size: 11px; line-height: 1.4; }
 
 .layer-help { display: grid; gap: 3px; padding: 9px 10px; border-bottom: 1px solid #d9dde2; background: #fff; font-size: 11px; }
@@ -5471,4 +5474,131 @@ dxbl-popup-root > dxbl-popup-cell > dxbl-modal .dxbl-modal-body > .new-publicati
     box-sizing: border-box;
     overflow: auto !important;
     overscroll-behavior: contain;
+}
+
+
+/* PublisherStudio 3.9.8: Panel Studio DevExpress wrapper geometry and inspector resilience.
+   Maintenance FormLayout owners are intentionally box-neutral, so panel-local render roots must
+   inherit the authored element box through the complete wrapper chain instead of relying on the
+   pre-DevExpress direct-child DOM shape. */
+.publication-panel-element > .razor-component-boundary > .razor-component-layout-owner > .dxbl-row > dxbl-form-layout-item > .dxbl-fl-ctrl > :first-child {
+    width: 100% !important;
+    height: 100% !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    box-sizing: border-box !important;
+}
+.publication-panel-element > .razor-component-boundary > .razor-component-layout-owner > .dxbl-row > dxbl-form-layout-item > .dxbl-fl-ctrl > .razor-component-boundary {
+    display: contents !important;
+}
+.publication-panel-element > .razor-component-boundary :is(
+    .text-frame-content,
+    .image-frame,
+    .shape,
+    .barcode-view,
+    .spreadsheet-object,
+    .panel-wordart,
+    .data-visual-view,
+    .devextreme-publication-component,
+    .publication-video-renderer,
+    .live-source-view,
+    .publication-panel) {
+    width: 100% !important;
+    height: 100% !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    box-sizing: border-box !important;
+}
+.panel-studio-canvas-shell.arrange-preview .publication-panel-element > .razor-component-boundary,
+.panel-studio-canvas-shell.arrange-preview .publication-panel-element > .razor-component-boundary * {
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+.panel-studio-inspector,
+.panel-studio-inspector-scroll,
+.panel-studio-inspector-components,
+.panel-studio-inspector .panel-inspector-section,
+.panel-studio-inspector .data-form-grid,
+.panel-studio-inspector label,
+.panel-studio-inspector details,
+.panel-studio-inspector code,
+.panel-studio-inspector span,
+.panel-studio-inspector small {
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+.panel-studio-inspector-scroll {
+    padding-right: 6px;
+    scrollbar-gutter: stable;
+}
+.panel-studio-inspector .panel-inspector-section {
+    width: 100%;
+    overflow: visible;
+}
+.panel-studio-inspector .data-form-grid,
+.panel-studio-inspector .panel-behavior-grid {
+    grid-template-columns: repeat(auto-fit, minmax(118px, 1fr)) !important;
+}
+.panel-studio-inspector :is(label, small, code, .field-help, .panel-behavior-row, .panel-object-directory-list) {
+    overflow-wrap: anywhere;
+}
+.panel-studio-inspector :is(input, select, textarea) {
+    min-width: 0;
+    max-width: 100%;
+}
+.panel-behavior-quick-actions {
+    grid-template-columns: repeat(auto-fit, minmax(82px, 1fr));
+    align-items: stretch;
+}
+.panel-behavior-quick-actions > *,
+.panel-inline-actions > * {
+    min-width: 0 !important;
+    max-width: 100% !important;
+}
+.panel-behavior-quick-action,
+.panel-behavior-add,
+.panel-script-helper-button {
+    width: 100%;
+    min-width: 0 !important;
+    height: auto !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere;
+}
+.panel-behavior-quick-action .dxbl-btn-caption,
+.panel-behavior-add .dxbl-btn-caption,
+.panel-script-helper-button .dxbl-btn-caption,
+.panel-behavior-remove .dxbl-btn-caption {
+    min-width: 0;
+    white-space: normal !important;
+    overflow-wrap: anywhere;
+    text-align: center;
+}
+.panel-behavior-remove {
+    width: 30px;
+    min-width: 30px !important;
+}
+.panel-behavior-row {
+    grid-template-columns: minmax(0, 1fr) 30px;
+}
+.panel-behavior-row > span,
+.panel-behavior-row > small {
+    grid-column: 1;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+.panel-behavior-row > .panel-behavior-remove {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: center;
+}
+
+/* Native editor input owns input while focused or dragged. The browser/controller runtime mirrors
+   this rule; the data attribute is exposed only for diagnostics and styling. */
+:root[data-publisher-native-input="true"] .publisherstudio-controller-cursor {
+    display: none !important;
 }

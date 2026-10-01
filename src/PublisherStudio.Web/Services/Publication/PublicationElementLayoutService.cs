@@ -24,6 +24,16 @@ public interface IPublicationElementLayoutService
     /// <param name="canvasHeight">Canvas height value supplied to the publication element layout operation and used when producing its result.</param>
     void ApplyBounds(PublicationElement element, PublicationCanvasBounds bounds, double canvasWidth, double canvasHeight);
     /// <summary>
+    /// Finds a visible placement for a newly inserted element while minimizing overlap with existing panel content.
+    /// </summary>
+    /// <param name="elements">Existing elements that already occupy the target canvas.</param>
+    /// <param name="width">Requested width of the new element.</param>
+    /// <param name="height">Requested height of the new element.</param>
+    /// <param name="canvasWidth">Width of the target canvas.</param>
+    /// <param name="canvasHeight">Height of the target canvas.</param>
+    /// <returns>Constrained bounds that prefer the canvas center and then the nearest low-overlap position.</returns>
+    PublicationCanvasBounds FindAvailablePlacement(IEnumerable<PublicationElement> elements, double width, double height, double canvasWidth, double canvasHeight);
+    /// <summary>
     /// Performs nudge as part of the publication element layout service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     /// <param name="element">Element value supplied to the publication element layout operation and used when producing its result.</param>
@@ -129,6 +139,101 @@ public sealed class PublicationElementLayoutService(ILogger<PublicationElementLa
             logger.LogDebug(__serviceMethodException, $"Service method {nameof(PublicationElementLayoutService)}.{nameof(ApplyBounds)} was canceled.");
         else
             logger.LogError(__serviceMethodException, $"Service method {nameof(PublicationElementLayoutService)}.{nameof(ApplyBounds)} failed.");
+        throw;
+    }
+}
+
+    /// <summary>
+    /// Finds a visible placement for a newly inserted element while minimizing overlap with existing panel content.
+    /// </summary>
+    /// <param name="elements">Existing elements that already occupy the target canvas.</param>
+    /// <param name="width">Requested width of the new element.</param>
+    /// <param name="height">Requested height of the new element.</param>
+    /// <param name="canvasWidth">Width of the target canvas.</param>
+    /// <param name="canvasHeight">Height of the target canvas.</param>
+    /// <returns>Constrained bounds that prefer the canvas center and then the nearest low-overlap position.</returns>
+    public PublicationCanvasBounds FindAvailablePlacement(IEnumerable<PublicationElement> elements, double width, double height, double canvasWidth, double canvasHeight)
+    {
+    try
+    {
+            ArgumentNullException.ThrowIfNull(elements);
+            var widthLimit = Math.Max(1, canvasWidth);
+            var heightLimit = Math.Max(1, canvasHeight);
+            var requested = Constrain(new PublicationCanvasBounds
+            {
+                Width = width,
+                Height = height
+            }, widthLimit, heightLimit);
+            var maxX = Math.Max(0, widthLimit - requested.Width);
+            var maxY = Math.Max(0, heightLimit - requested.Height);
+            var centerX = maxX / 2;
+            var centerY = maxY / 2;
+            var existing = elements.Where(element => element.Visible).ToArray();
+            if (existing.Length == 0)
+            {
+                requested.X = centerX;
+                requested.Y = centerY;
+                return requested;
+            }
+
+            var stepX = Math.Max(4, Math.Min(16, requested.Width * .18));
+            var stepY = Math.Max(4, Math.Min(12, requested.Height * .22));
+            var candidates = new List<PublicationCanvasBounds>
+            {
+                new() { X = centerX, Y = centerY, Width = requested.Width, Height = requested.Height }
+            };
+            for (var y = 0d; y <= maxY + .001; y += stepY)
+            {
+                for (var x = 0d; x <= maxX + .001; x += stepX)
+                {
+                    candidates.Add(new PublicationCanvasBounds
+                    {
+                        X = Math.Min(x, maxX),
+                        Y = Math.Min(y, maxY),
+                        Width = requested.Width,
+                        Height = requested.Height
+                    });
+                }
+            }
+            candidates.Add(new PublicationCanvasBounds { X = maxX, Y = maxY, Width = requested.Width, Height = requested.Height });
+
+            PublicationCanvasBounds? best = null;
+            var bestScore = double.MaxValue;
+            foreach (var candidate in candidates
+                .OrderBy(candidate => Math.Pow(candidate.X - centerX, 2) + Math.Pow(candidate.Y - centerY, 2)))
+            {
+                var overlap = 0d;
+                foreach (var occupied in existing)
+                {
+                    var left = Math.Max(candidate.X, occupied.X);
+                    var top = Math.Max(candidate.Y, occupied.Y);
+                    var right = Math.Min(candidate.X + candidate.Width, occupied.X + occupied.Width);
+                    var bottom = Math.Min(candidate.Y + candidate.Height, occupied.Y + occupied.Height);
+                    if (right > left && bottom > top)
+                        overlap += (right - left) * (bottom - top);
+                }
+
+                if (overlap <= .001)
+                    return Constrain(candidate, widthLimit, heightLimit);
+
+                var centerDistance = Math.Pow(candidate.X - centerX, 2) + Math.Pow(candidate.Y - centerY, 2);
+                var score = overlap + centerDistance * .0005;
+                if (score < bestScore)
+                {
+                    bestScore = score;
+                    best = candidate;
+                }
+            }
+
+            return Constrain(best ?? requested, widthLimit, heightLimit);
+
+    }
+    catch (Exception __serviceMethodException)
+    {
+        if (__serviceMethodException is OperationCanceledException)
+            logger.LogDebug(__serviceMethodException, $"Service method {nameof(PublicationElementLayoutService)}.{nameof(FindAvailablePlacement)} was canceled.");
+        else
+            logger.LogError(__serviceMethodException, $"Service method {nameof(PublicationElementLayoutService)}.{nameof(FindAvailablePlacement)} failed.");
         throw;
     }
 }

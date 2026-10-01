@@ -10,7 +10,9 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
     const requestedLanguage = String(document.documentElement.lang || navigator.language || 'en-US');
     const neutral = requestedLanguage.toLowerCase().split('-')[0];
     const devExtremeCultures = new Set(['ar','bg','ca','cs','da','de','el','en','es','fa','fi','fr','hu','it','ja','ko','lt','lv','nb','nl','pl','pt','ro','ru','sk','sl','sv','tr','uk','vi','zh']);
-    const excludedSelector = 'script,style,code,pre,textarea,[contenteditable="true"],.print-publication,[data-publication-element],.publication-content-source,.text-frame-content,.spreadsheet-preview-html';
+    // RichEdit owns both its localized vendor chrome and the rendered user document. Mutating its
+    // text nodes from this application-chrome observer races the vendor model/caret repaint.
+    const excludedSelector = 'script,style,code,pre,textarea,[contenteditable="true"],.dxreRoot,.story-rich-edit,.print-publication,[data-publication-element],.publication-content-source,.text-frame-content,.spreadsheet-preview-html';
     let dictionary = {};
     let sourceDictionary = {};
     let sourceMap = new Map();

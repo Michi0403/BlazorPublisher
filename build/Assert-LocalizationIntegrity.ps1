@@ -158,10 +158,14 @@ foreach ($template in $requiredTemplates) {
 $runtimePath = Join-Path $root 'src\PublisherStudio.Web\wwwroot\js\localizationRuntime.js'
 if (-not (Test-Path -LiteralPath $runtimePath -PathType Leaf)) { Fail "Missing $runtimePath" }
 $runtime = Read-StrictUtf8 $runtimePath
-foreach ($requiredRuntimeToken in @('request(''en-US'')', 'document.createTreeWalker', 'characterData: true', 'sourceDictionary')) {
+foreach ($requiredRuntimeToken in @('request(''en-US'')', 'document.createTreeWalker', 'characterData: true', 'sourceDictionary', '.dxreRoot', '.story-rich-edit')) {
     if ($runtime.IndexOf($requiredRuntimeToken, [System.StringComparison]::Ordinal) -lt 0) {
         Fail "PublisherStudio localization runtime is missing required coverage token: $requiredRuntimeToken"
     }
+}
+
+if ($runtime -notmatch "excludedSelector\s*=\s*'[^']*\.dxreRoot[^']*'") {
+    Fail 'PublisherStudio DOM localization must exclude the DevExpress RichEdit root so user-authored document text and vendor caret/toolbar DOM remain vendor-owned.'
 }
 
 Write-Host "Localization integrity validation passed for $($englishKeys.Count) PublisherStudio UI strings."

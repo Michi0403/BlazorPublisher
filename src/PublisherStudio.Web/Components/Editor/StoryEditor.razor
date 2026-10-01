@@ -209,8 +209,8 @@
             <div id="story-editor-host" class="story-editor-host">
                 <DxRichEdit @key="_editorRevision" @ref="_richEdit"
                             DocumentFormat="@_documentFormat"
-                            @bind-DocumentContent="_content"
-                            @bind-Selection="_selection"
+                            DocumentContent="@_content"
+                            SelectionChanged="HandleSelectionChanged"
                             DocumentLoaded="HandleDocumentLoaded"
                             CustomizeRibbon="CustomizeRichEditRibbon"
                             MailMergeSettings="@_mailMergeSettingsContent"
@@ -335,6 +335,11 @@
     /// Stores the internal document load generation state used by <see cref="StoryEditor"/> while executing its surrounding workflow.
     /// </summary>
     private int _documentLoadGeneration;
+    /// <summary>
+    /// Suppresses the automatic Blazor render that normally follows a RichEdit selection notification.
+    /// RichEdit owns its live caret/formatting state; observing selection must not feed a render back into it.
+    /// </summary>
+    private bool _suppressSelectionRender;
     /// <summary>
     /// Stores the internal mail merge settings content state used by <see cref="StoryEditor"/> while executing its surrounding workflow.
     /// </summary>
@@ -526,6 +531,31 @@
     }
 
     /// <summary>
+    /// Determines whether the Story Editor should render after the current component event.
+    /// RichEdit selection notifications are observational only and must not round-trip a render
+    /// back into the live editor while the browser owns caret and formatting state.
+    /// </summary>
+    /// <returns><see langword="true"/> when the component should render; otherwise <see langword="false"/>.</returns>
+    protected override bool ShouldRender()
+    {
+        try
+        {
+            if (_suppressSelectionRender)
+            {
+                _suppressSelectionRender = false;
+                return false;
+            }
+
+            return true;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(ShouldRender)} failed.");
+            throw;
+        }
+    }
+
+    /// <summary>
     /// Handles the parameters set lifecycle or event notification for <see cref="StoryEditor"/>, updating the state required by the surrounding workflow.
     /// </summary>
     protected override void OnParametersSet()
@@ -537,6 +567,11 @@
                 _editorRevision++;
                 _documentLoadGeneration++;
                 _mailMergeSettingsContent = null;
+                // Selection belongs to one live DxRichEdit document instance. Never replay a
+                // Selection captured from the previous editor generation into a newly loaded
+                // document; InteractiveServer round-trips can otherwise overwrite a newer
+                // browser caret/format state with the older server-side selection.
+                _selection = default!;
                 var hasStoredStoryContent = TextFrame.DocumentContent is { Length: > 0 };
                 _content = hasStoredStoryContent
                     ? TextFrame.DocumentContent.ToArray()
@@ -571,6 +606,8 @@
                 _documentLoadGeneration++;
                 _mailMergeSettingsContent = null;
                 _loadedId = null;
+                _selection = default!;
+                _richEdit = null;
                 _legacyConversionPending = false;
                 _upgradingLegacyStory = false;
                 _error = null;
@@ -582,6 +619,28 @@
         catch (Exception __componentMethodException)
         {
             Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(OnParametersSet)} failed.");
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Observes the current RichEdit selection without controlling it from server-side component state.
+    /// </summary>
+    /// <param name="selection">The selection reported by the active RichEdit document.</param>
+    private void HandleSelectionChanged(Selection selection)
+    {
+        try
+        {
+            if (!Visible || TextFrame is null || _loadedId != TextFrame.Id) return;
+            _selection = selection;
+            // ComponentBase schedules a render after EventCallback handlers. That render used to
+            // feed an older InteractiveServer selection/format snapshot back through the RichEdit
+            // subtree. Keep the selection for explicit commands, but suppress this event's render.
+            _suppressSelectionRender = true;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(HandleSelectionChanged)} failed.");
             throw;
         }
     }
@@ -671,6 +730,7 @@
                 _documentFormat = DocumentFormat.OpenXml;
                 _legacyConversionPending = false;
                 _mailMergeSettingsContent = null;
+                _selection = default!;
                 _editorRevision++;
                 _documentLoadGeneration++;
                 _upgradingLegacyStory = false;

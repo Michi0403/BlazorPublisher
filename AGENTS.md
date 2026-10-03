@@ -113,6 +113,13 @@ Build guards are production code for the repository: they must run under Windows
 
 A maintenance guard must not fail with its own incidental `PropertyNotFoundStrict`, parser, encoding, or platform error before it can diagnose application source. When adding or changing a guard, review the single-result, zero-result, and multi-result paths, keep source paths cross-platform, and make the emitted repair choices preserve architecture (DevExpress ownership, render boundaries, service ownership, localization ownership) instead of recommending removal of the protected feature.
 
+
+## Repository-local release-build storage
+
+Full release builds may run from repositories located on external volumes. Heavy mutable build state must follow the repository instead of silently consuming the host system partition. `Build-Release.ps1` and standalone documentation builds initialize `build/RepositoryBuildStorage.Common.ps1`, which defaults to `artifacts/.build-storage` beneath the checkout and redirects dotnet CLI home, NuGet package/HTTP/plugin/scratch caches, npm cache, XDG cache, documentation caches, and process temp directories there. `FUTURE2_BUILD_STORAGE_ROOT` is the explicit operator override when a different build volume is desired; `-DocumentationCacheRoot` remains a narrower documentation-cache override.
+
+Do not reintroduce `LocalApplicationData`, the user home directory, or the operating-system temp directory as the preferred location for release-sized caches. Per-user locations are last-resort standalone fallbacks only. When adding a tool that can download, unpack, render, package, or cache substantial data, give it a repository/build-storage path or make it inherit the redirected environment. The repair for a full-system-disk regression is to move ownership of that transient state under repository build storage, not merely to delete the cache after failure. `build/Assert-PowerShellCompatibility.ps1` enforces the release-entrypoint/storage contract.
+
 ## Blazor render-state and Razor component-expression contract
 
 A Razor component is not one backend object that happens to render HTML. Depending on how it is reached, the same `.razor` source can participate in distinct execution environments and component instances: static SSR/prerender, an InteractiveServer circuit, an InteractiveWebAssembly client, and a child instance inheriting a parent render boundary. A routable page can also be reused as a parameterized child component. Treat those as separate entry/lifecycle paths even when they share one source file.

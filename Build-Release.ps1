@@ -50,12 +50,13 @@ function Initialize-BuildConsoleEncoding {
 Initialize-BuildConsoleEncoding
 
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
+$buildStorageScript = Join-Path $root 'build/RepositoryBuildStorage.Common.ps1'
+if (-not (Test-Path -LiteralPath $buildStorageScript -PathType Leaf)) { throw "Repository build-storage helper is missing: $buildStorageScript" }
+. $buildStorageScript
+$buildStorage = Initialize-Future2RepositoryBuildStorage -RepositoryRoot $root -DocumentationCacheRoot $DocumentationCacheRoot
 if ($CompileOnly) {
     & (Join-Path $root 'build/Invoke-ReleaseCompileValidation.ps1') -Solution 'src/PublisherStudio.sln' -Configuration $Configuration
     return
-}
-if (-not [string]::IsNullOrWhiteSpace($DocumentationCacheRoot)) {
-    $env:FUTURE2_DOCUMENTATION_CACHE_ROOT = [IO.Path]::GetFullPath($DocumentationCacheRoot)
 }
 $nodeRuntimeCommonScript = Join-Path $root 'build/NodeRuntime.Common.ps1'
 if (-not (Test-Path -LiteralPath $nodeRuntimeCommonScript -PathType Leaf)) { throw "Documentation runtime helper is missing: $nodeRuntimeCommonScript" }

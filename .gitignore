@@ -1,6 +1,8 @@
 .vs/
 **/bin/
 **/obj/
+# Repository-local release/build caches. Created automatically; no developer setup required.
+artifacts/.build-storage/
 artifacts/
 *.user
 *.suo

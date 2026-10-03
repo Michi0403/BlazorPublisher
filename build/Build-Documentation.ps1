@@ -45,6 +45,10 @@ function Set-Utf8TextFileIdempotent {
 
 
 $RepositoryRoot = [IO.Path]::GetFullPath($RepositoryRoot)
+$buildStorageScript = Join-Path $PSScriptRoot 'RepositoryBuildStorage.Common.ps1'
+if (-not (Test-Path -LiteralPath $buildStorageScript -PathType Leaf)) { throw "Repository build-storage helper is missing: $buildStorageScript" }
+. $buildStorageScript
+$buildStorage = Initialize-Future2RepositoryBuildStorage -RepositoryRoot $RepositoryRoot -DocumentationCacheRoot $DocumentationCacheRoot
 $AssemblyPath = [IO.Path]::GetFullPath($AssemblyPath)
 $XmlDocumentationPath = [IO.Path]::GetFullPath($XmlDocumentationPath)
 if (-not [string]::IsNullOrWhiteSpace($OutputWebRoot)) {
@@ -2108,7 +2112,7 @@ function Invoke-PublisherStudioBrowserPdf {
     Remove-Item -LiteralPath $PdfPath -Force -ErrorAction SilentlyContinue
     $inputUri = ConvertTo-PublisherStudioFileUri -Path $HtmlPath
     $diagnostics = [System.Collections.Generic.List[string]]::new()
-    $profileParentRoot = Join-Path ([IO.Path]::GetTempPath()) "PublisherStudio/DocumentationBrowserProfiles"
+    $profileParentRoot = Join-Path $documentationToolCacheRoot 'browser-profiles'
     New-Item -ItemType Directory -Path $profileParentRoot -Force | Out-Null
     $lastExitCode = -1
     $renderProfiles = @(

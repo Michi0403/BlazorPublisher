@@ -188,21 +188,20 @@
                                         </select>
                                     </label>
                                     <label>URL
-                                        <input value="@_draft.Web.Url" @onchange="ChangeWebUrl" placeholder="/api/publisher/system/status" list="publisher-monolith-routes" />
+                                        <DxComboBox TData="string" TValue="string" Data="@MonolithRouteOptions"
+                                                    Text="@_draft.Web.Url"
+                                                    TextChanged="@((string? value) => ChangeWebUrl(new ChangeEventArgs { Value = value ?? string.Empty }))"
+                                                    AllowUserInput="true"
+                                                    SearchMode="ListSearchMode.AutoSearch"
+                                                    SearchFilterCondition="ListSearchFilterCondition.Contains"
+                                                    SearchDelay="250"
+                                                    ListRenderMode="ListRenderMode.Virtual"
+                                                    NullText="/api/publisher/system/status"
+                                                    ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
                                     </label>
                                 </div>
                                 @if (_draft.Web.Transport == PublicationWebTransportKind.MonolithApi)
                                 {
-                                    <datalist id="publisher-monolith-routes">
-                                        <option value="/api/publisher/system/status"></option>
-                                        <option value="/api/publisher/publications"></option>
-                                        <option value="@CurrentPublicationRoute"></option>
-                                        <option value="@CurrentPagesRoute"></option>
-                                        @foreach (var dataObject in State.Document.DataObjects)
-                                        {
-                                            <option value="@DataRowsRoute(dataObject.Id)"></option>
-                                        }
-                                    </datalist>
                                     <p class="monolith-route-help">Relative routes stay inside this PublisherStudio process. Start with system status, publication pages, or the rows of another data object.</p>
                                 }
                                 <label>Request headers <small>one Name: Value pair per line</small>
@@ -486,6 +485,9 @@
     /// </summary>
     /// <value>The current publication route value exposed by <see cref="DataManager"/>.</value>
     private string CurrentPublicationRoute => GetCurrentPublicationRouteForRender();
+    /// <summary>Gets searchable PublisherStudio monolith routes offered by the DevExpress URL editor while custom URL input remains allowed.</summary>
+    /// <value>The currently available built-in monolith route suggestions.</value>
+    private IReadOnlyList<string> MonolithRouteOptions => GetMonolithRouteOptionsForRender();
     /// <summary>
     /// Gets the current pages route value that forms part of the data state consumed or produced by the surrounding workflow.
     /// </summary>
@@ -1591,6 +1593,28 @@
         catch (Exception __componentPropertyException)
         {
             Logger.LogError(__componentPropertyException, "Computed render property DataManager.WebhookRoute failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Computes the searchable route suggestions used by the DevExpress web URL editor.</summary>
+    /// <returns>Maintained relative monolith API route suggestions.</returns>
+    private IReadOnlyList<string> GetMonolithRouteOptionsForRender()
+    {
+        try
+        {
+            if (_draft?.Web.Transport != PublicationWebTransportKind.MonolithApi) return Array.Empty<string>();
+            return [
+                "/api/publisher/system/status",
+                "/api/publisher/publications",
+                CurrentPublicationRoute,
+                CurrentPagesRoute,
+                .. State.Document.DataObjects.Select(dataObject => DataRowsRoute(dataObject.Id))
+            ];
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property DataManager.MonolithRouteOptions failed.");
             throw;
         }
     }

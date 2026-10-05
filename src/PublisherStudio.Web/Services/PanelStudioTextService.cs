@@ -81,6 +81,27 @@ public sealed class PanelStudioTextService(IPanelStudioTextPatternDataService pa
     }
 
     /// <summary>
+    /// Formats list as part of the panel studio text service workflow, applying the service's runtime policy, state management, and diagnostics as required.
+    /// </summary>
+    /// <param name="values">Values supplied to the panel studio text operation and used when producing its result.</param>
+    /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
+    /// <returns>The string produced by the operation.</returns>
+    public string FormatList(IEnumerable<string>? values, ILogger logger)
+    {
+        try
+        {
+            var formatted = string.Join(", ", values ?? Array.Empty<string>());
+            logger.LogDebug($"{nameof(FormatList)} formatted a panel value list without logging its content.");
+            return formatted;
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, $"{nameof(FormatList)} failed; values were omitted from logs.");
+            return string.Empty;
+        }
+    }
+
+    /// <summary>
     /// Parses list as part of the panel studio text service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     /// <param name="value">Value value supplied to the panel studio text operation and used when producing its result.</param>

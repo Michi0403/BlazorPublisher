@@ -1,10 +1,7 @@
 @namespace PublisherStudio.Components.Editor
 
 @inject ILogger<PageEffectLayerRenderer> Logger
-<div class="razor-component-boundary">
-<DxFormLayout CssClass="razor-component-layout-owner PageEffectLayerRenderer">
-    <DxFormLayoutItem ColSpanMd="12">
-        <Template Context="formItemContext001">
+@* razor-structural-renderer | reason: PageEffectLayerRenderer is a geometry-sensitive render leaf; its rendered root must remain the authored/runtime surface rather than a maintenance layout wrapper. *@
 @foreach (var effect in Page.EffectLayers.Where(item => item.Visible && item.Placement == Placement))
 {
     <div class="publication-page-effect @(Placement == PublicationPageEffectPlacement.Overlay ? "page-effect-overlay" : "page-effect-background") @(effect.AnimationEnabled ? "page-effect-animated" : null)"
@@ -18,11 +15,6 @@
         }
     </div>
 }
-    </Template>
-    </DxFormLayoutItem>
-</DxFormLayout>
-</div>
-
 
 @code {
 

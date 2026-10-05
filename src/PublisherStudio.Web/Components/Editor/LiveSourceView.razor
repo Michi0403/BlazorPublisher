@@ -4,10 +4,7 @@
 @inject StreamingProfileStore ProfileStore
 
 @inject ILogger<LiveSourceView> Logger
-<div class="razor-component-boundary">
-<DxFormLayout CssClass="razor-component-layout-owner LiveSourceView">
-    <DxFormLayoutItem ColSpanMd="12">
-        <Template Context="formItemContext001">
+@* razor-structural-renderer | reason: LiveSourceView is a geometry-sensitive render leaf; its rendered root must remain the authored/runtime surface rather than a maintenance layout wrapper. *@
 <div class="live-source-frame source-@Item.SourceKind.ToString().ToLowerInvariant() @(Item.IsVisual ? "visual" : "audio-only")"
      style="@FrameStyle" data-live-source-id="@Item.Id">
     @if (Item.SourceKind == PublicationLiveSourceKind.NowPlaying)
@@ -41,11 +38,6 @@
         <span class="live-source-active-badge">● LIVE SOURCE</span>
     }
 </div>
-    </Template>
-    </DxFormLayoutItem>
-</DxFormLayout>
-</div>
-
 
 @code {
 

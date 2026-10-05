@@ -37,7 +37,7 @@
                     <strong>Panel Studio</strong>
                     <span>Build reusable live modules from the same components, data connections and web runtimes used by the Mainframe and exports.</span>
                 </div>
-                <button type="button" class="window-close" @onclick="Cancel">×</button>
+                <DxButton Text="×" CssClass="window-close" Click="Cancel" />
             </header>
 
             <DxRibbon CssClass="data-visual-editor-ribbon categorized-ribbon panel-studio-ribbon" SizeMode="SizeMode.Small" AdaptivityAutoCollapseItemsToGroups="true">
@@ -110,6 +110,7 @@
                         <div>
                             @foreach (var tool in category)
                             {
+                                @* Browser-owned drag source: native draggable/dragstart is the authored palette gesture boundary; DevExpress owns the surrounding command/editor UI. *@
                                 <button type="button"
                                         class="panel-component-tool @(_selectedTemplateId == tool.TemplateId ? "selected-template" : null) @(_dragToolId == tool.Id ? "dragging" : null)"
                                         draggable="true"
@@ -135,34 +136,28 @@
                     <strong>Views</strong>
                     @foreach (var view in _draft.Views)
                     {
-                        <button type="button" class="@(view.Id == _selectedViewId ? "selected" : null)" @onclick="() => SelectView(view.Id)">
-                            <strong>@view.Name</strong>
-                            <small>@view.Slug · @(view.Enabled ? "enabled" : "disabled")</small>
-                        </button>
+                        var viewButtonCssClass = view.Id == _selectedViewId ? "panel-studio-list-button selected" : "panel-studio-list-button";
+                        <DxButton Text="@($"{view.Name} · {view.Slug} · {(view.Enabled ? "enabled" : "disabled")}")"
+                                  SizeMode="SizeMode.Small"
+                                  RenderStyleMode="ButtonRenderStyleMode.Outline"
+                                  CssClass="@viewButtonCssClass"
+                                  Click="() => SelectView(view.Id)" />
                     }
                     <label class="check-row">
-                        <input type="checkbox" checked="@(CurrentView?.Enabled == true)" @onchange="ToggleViewEnabled" /> View enabled
+                        <DxCheckBox Checked="@(CurrentView?.Enabled == true)" CheckedChanged="@((bool value) => ToggleViewEnabled(new ChangeEventArgs { Value = value }))" /> View enabled
                     </label>
                     <label>Navigation
-                        <select value="@_draft.NavigationMode" @onchange="ChangeNavigation">
-                            @foreach (var mode in Enum.GetValues<PublicationPanelNavigationMode>())
-                            {
-                                <option value="@mode">@mode</option>
-                            }
-                        </select>
+                        <DxComboBox Data="@NavigationModeOptions" Value="@_draft.NavigationMode"
+                                    ValueChanged="@((PublicationPanelNavigationMode value) => ChangeNavigation(new ChangeEventArgs { Value = value }))" />
                     </label>
                     <label>Layout
-                        <select value="@_draft.LayoutMode" @onchange="ChangeLayoutMode">
-                            @foreach (var mode in Enum.GetValues<PublicationPanelLayoutMode>())
-                            {
-                                <option value="@mode">@mode</option>
-                            }
-                        </select>
+                        <DxComboBox Data="@LayoutModeOptions" Value="@_draft.LayoutMode"
+                                    ValueChanged="@((PublicationPanelLayoutMode value) => ChangeLayoutMode(new ChangeEventArgs { Value = value }))" />
                     </label>
-                    <label>Panel name<input value="@_draft.Name" @onchange="ChangePanelName" /></label>
-                    <label>View name<input value="@CurrentView?.Name" @onchange="ChangeViewName" /></label>
-                    <label>Canvas width<input type="number" min="16" step="1" value="@Inv(_draft.CanvasWidth)" @onchange="args => ChangeNumber(args, value => _draft.CanvasWidth = value)" /></label>
-                    <label>Canvas height<input type="number" min="9" step="1" value="@Inv(_draft.CanvasHeight)" @onchange="args => ChangeNumber(args, value => _draft.CanvasHeight = value)" /></label>
+                    <label>Panel name<DxTextBox Text="@_draft.Name" TextChanged="@((string? value) => ChangePanelName(new ChangeEventArgs { Value = value }))" /></label>
+                    <label>View name<DxTextBox Text="@CurrentView?.Name" TextChanged="@((string? value) => ChangeViewName(new ChangeEventArgs { Value = value }))" /></label>
+                    <label>Canvas width<DxSpinEdit T="double" MinValue="16" Increment="1d" Value="@_draft.CanvasWidth" ValueChanged="@((double value) => ChangeNumber(new ChangeEventArgs { Value = value }, number => _draft.CanvasWidth = number))" /></label>
+                    <label>Canvas height<DxSpinEdit T="double" MinValue="9" Increment="1d" Value="@_draft.CanvasHeight" ValueChanged="@((double value) => ChangeNumber(new ChangeEventArgs { Value = value }, number => _draft.CanvasHeight = number))" /></label>
                     <label class="panel-html-import">Import standalone HTML into this view
                         <InputFile accept=".html,.htm,text/html" OnChange="ImportHtml" />
                     </label>
@@ -174,10 +169,12 @@
                         <strong>Saved modules</strong>
                         @foreach (var template in Document.ComponentTemplates.OrderBy(template => template.Category).ThenBy(template => template.Name))
                         {
-                            <button type="button" class="@(_selectedTemplateId == template.Id ? "selected" : null)" @onclick="() => SelectTemplate(template.Id)">
-                                <strong>@template.Name</strong>
-                                <small>@template.Category · @template.Prototype.Kind</small>
-                            </button>
+                            var templateButtonCssClass = _selectedTemplateId == template.Id ? "panel-studio-list-button selected" : "panel-studio-list-button";
+                            <DxButton Text="@($"{template.Name} · {template.Category} · {template.Prototype.Kind}")"
+                                      SizeMode="SizeMode.Small"
+                                      RenderStyleMode="ButtonRenderStyleMode.Outline"
+                                      CssClass="@templateButtonCssClass"
+                                      Click="() => SelectTemplate(template.Id)" />
                         }
                     }
                     @if (!string.IsNullOrWhiteSpace(_error))
@@ -195,29 +192,25 @@
                             </div>
                             <div class="panel-studio-mode-actions" role="group" aria-label="Panel Studio interaction mode">
                                 <label class="panel-studio-preview-size">Preview size
-                                    <select value="@_previewSizeKey" @onchange="ChangePreviewSize">
-                                        <option value="design">Design canvas · @Math.Round((_draft?.CanvasWidth ?? 160) * 96d / 25.4d) × @Math.Round((_draft?.CanvasHeight ?? 90) * 96d / 25.4d)</option>
-                                        @foreach (var preset in _previewPresets)
-                                        {
-                                            <option value="@preset.Key">@preset.Name · @preset.Width × @preset.Height</option>
-                                        }
-                                    </select>
+                                    <DxComboBox Data="@_previewSizeOptions" Value="@_previewSizeKey"
+                                                TextFieldName="Value" ValueFieldName="Key"
+                                                ValueChanged="@((string value) => ChangePreviewSize(new ChangeEventArgs { Value = value }))" />
                                 </label>
                                 <DxButton Text="+ Preset" SizeMode="SizeMode.Small" RenderStyle="ButtonRenderStyle.Secondary" RenderStyleMode="ButtonRenderStyleMode.Outline" Click="OpenPreviewPresetEditor" />
                                 @if (SelectedPreviewPreset is { BuiltIn: false })
                                 {
                                     <DxButton Text="Delete preset" SizeMode="SizeMode.Small" RenderStyle="ButtonRenderStyle.Danger" RenderStyleMode="ButtonRenderStyleMode.Outline" Click="DeleteSelectedPreviewPreset" />
                                 }
-                                <button type="button" class="@(!_interactionPreview ? "active" : null)" @onclick="DisableInteractionPreview">Arrange</button>
-                                <button type="button" class="@(_interactionPreview ? "active" : null)" @onclick="EnableInteractionPreview">Interact</button>
+                                <DxButton Text="Arrange" CssClass="@(!_interactionPreview ? "active" : null)" Click="DisableInteractionPreview" />
+                                <DxButton Text="Interact" CssClass="@(_interactionPreview ? "active" : null)" Click="EnableInteractionPreview" />
                             </div>
                         </div>
                         @if (_previewPresetEditorVisible)
                         {
                             <div class="panel-studio-preview-preset-editor" role="group" aria-label="Custom preview viewport preset">
-                                <label>Name<input @bind="_previewPresetName" placeholder="e.g. Steam Deck landscape" /></label>
-                                <label>Width<input type="number" min="160" max="16384" @bind="_previewPresetWidth" /></label>
-                                <label>Height<input type="number" min="120" max="16384" @bind="_previewPresetHeight" /></label>
+                                <label>Name<DxTextBox @bind-Text="_previewPresetName" NullText="e.g. Steam Deck landscape" /></label>
+                                <label>Width<DxSpinEdit T="int" MinValue="160" MaxValue="16384" @bind-Value="_previewPresetWidth" /></label>
+                                <label>Height<DxSpinEdit T="int" MinValue="120" MaxValue="16384" @bind-Value="_previewPresetHeight" /></label>
                                 <DxButton Text="Save preset" SizeMode="SizeMode.Small" RenderStyle="ButtonRenderStyle.Primary" Click="SavePreviewPreset" />
                                 <DxButton Text="Cancel" SizeMode="SizeMode.Small" Click="ClosePreviewPresetEditor" />
                             </div>
@@ -242,6 +235,7 @@
                                         <div class="panel-studio-hit-layer" aria-label="Panel component arrangement surface">
                                             @foreach (var element in CurrentView.Elements.Where(element => element.Visible).OrderBy(element => element.ZIndex))
                                             {
+                                                @* Browser-owned authored hit-test surface: native pointer/context-menu geometry must map 1:1 to the panel canvas. *@
                                                 <button @key="element.Id" type="button"
                                                         class="panel-studio-hitbox @(element.Id == _selectedElementId ? "selected" : null)"
                                                         style="@HitStyle(element)"
@@ -280,7 +274,7 @@
 
                             @if (_interactionPreview)
                             {
-                                <button type="button" class="panel-studio-return-arrange" @onclick="DisableInteractionPreview" title="Return to component arrangement">Return to Arrange</button>
+                                <DxButton Text="Return to Arrange" CssClass="panel-studio-return-arrange" Click="DisableInteractionPreview" />
                             }
                         </div>
                     </div>
@@ -293,10 +287,12 @@
                     <div class="panel-studio-element-list">
                         @foreach (var element in CurrentView?.Elements.OrderByDescending(element => element.ZIndex) ?? Enumerable.Empty<PublicationElement>())
                         {
-                            <button type="button" class="@(element.Id == _selectedElementId ? "selected" : null)" @onclick="() => SelectElement(element.Id)">
-                                <strong>@element.Name</strong>
-                                <small>@element.Kind · @element.X.ToString("0.#")/@element.Y.ToString("0.#")</small>
-                            </button>
+                            var elementButtonCssClass = element.Id == _selectedElementId ? "panel-studio-list-button selected" : "panel-studio-list-button";
+                            <DxButton Text="@($"{element.Name} · {element.Kind} · {element.X:0.#}/{element.Y:0.#}")"
+                                      SizeMode="SizeMode.Small"
+                                      RenderStyleMode="ButtonRenderStyleMode.Outline"
+                                      CssClass="@elementButtonCssClass"
+                                      Click="() => SelectElement(element.Id)" />
                         }
                     </div>
                     </div>
@@ -310,13 +306,13 @@
         <div class="panel-inspector-section">
                             <strong>Layout and identity</strong>
                             <div class="data-form-grid" style="grid-template-columns:1fr 1fr">
-                                <label style="grid-column:1/-1">Name<input value="@selected.Name" @onchange="ChangeElementName" /></label>
-                                <label>X<input type="number" step="1" value="@Inv(selected.X)" @onchange="args => ChangeNumber(args, value => selected.X = value)" /></label>
-                                <label>Y<input type="number" step="1" value="@Inv(selected.Y)" @onchange="args => ChangeNumber(args, value => selected.Y = value)" /></label>
-                                <label>Width<input type="number" min="1" step="1" value="@Inv(selected.Width)" @onchange="args => ChangeNumber(args, value => selected.Width = value)" /></label>
-                                <label>Height<input type="number" min="1" step="1" value="@Inv(selected.Height)" @onchange="args => ChangeNumber(args, value => selected.Height = value)" /></label>
-                                <label>Rotation<input type="number" step="1" value="@Inv(selected.Rotation)" @onchange="args => ChangeNumber(args, value => selected.Rotation = value)" /></label>
-                                <label class="check-row"><input type="checkbox" checked="@selected.Visible" @onchange="args => selected.Visible = AsBool(args)" /> Visible</label>
+                                <label style="grid-column:1/-1">Name<DxTextBox Text="@selected.Name" TextChanged="@((string? value) => ChangeElementName(new ChangeEventArgs { Value = value }))" /></label>
+                                <label>X<DxSpinEdit T="double" Increment="1d" Value="@selected.X" ValueChanged="@((double value) => ChangeNumber(new ChangeEventArgs { Value = value }, number => selected.X = number))" /></label>
+                                <label>Y<DxSpinEdit T="double" Increment="1d" Value="@selected.Y" ValueChanged="@((double value) => ChangeNumber(new ChangeEventArgs { Value = value }, number => selected.Y = number))" /></label>
+                                <label>Width<DxSpinEdit T="double" MinValue="1" Increment="1d" Value="@selected.Width" ValueChanged="@((double value) => ChangeNumber(new ChangeEventArgs { Value = value }, number => selected.Width = number))" /></label>
+                                <label>Height<DxSpinEdit T="double" MinValue="1" Increment="1d" Value="@selected.Height" ValueChanged="@((double value) => ChangeNumber(new ChangeEventArgs { Value = value }, number => selected.Height = number))" /></label>
+                                <label>Rotation<DxSpinEdit T="double" Increment="1d" Value="@selected.Rotation" ValueChanged="@((double value) => ChangeNumber(new ChangeEventArgs { Value = value }, number => selected.Rotation = number))" /></label>
+                                <label class="check-row"><DxCheckBox Checked="@selected.Visible" CheckedChanged="@((bool value) => selected.Visible = value)" /> Visible</label>
                             </div>
                         </div>
     </Template>
@@ -331,7 +327,7 @@
                                 <strong>Behavior &amp; object interface</strong>
                                 <span>@selected.Behaviors.Count rule(s)</span>
                             </div>
-                            <label class="panel-object-address">Object address<input readonly value="@SelectedObjectAddress" title="Stable address available to publication scripts" /></label>
+                            <label class="panel-object-address">Object address<DxTextBox Text="@SelectedObjectAddress" ReadOnly="true" /></label>
                             <div class="panel-behavior-quick-actions" aria-label="Quick click behaviors">
                                 <DxButton Text="Click target" SizeMode="SizeMode.Small" RenderStyleMode="ButtonRenderStyleMode.Outline" CssClass="panel-behavior-quick-action" Click="() => AddQuickBehavior(PublicationBehaviorAction.Click)" />
                                 <DxButton Text="Focus" SizeMode="SizeMode.Small" RenderStyleMode="ButtonRenderStyleMode.Outline" CssClass="panel-behavior-quick-action" Click="() => AddQuickBehavior(PublicationBehaviorAction.Focus)" />
@@ -342,63 +338,45 @@
                             </div>
                             <div class="data-form-grid panel-behavior-grid" style="grid-template-columns:1fr 1fr">
                                 <label>When
-                                    <select value="@_behaviorTrigger" @onchange="ChangeBehaviorTrigger">
-                                        @foreach (var trigger in Enum.GetValues<PublicationBehaviorTrigger>())
-                                        {
-                                            <option value="@trigger">@trigger</option>
-                                        }
-                                    </select>
+                                    <DxComboBox Data="@BehaviorTriggerOptions" Value="@_behaviorTrigger"
+                                                ValueChanged="@((PublicationBehaviorTrigger value) => ChangeBehaviorTrigger(new ChangeEventArgs { Value = value }))" />
                                 </label>
                                 <label>Do
-                                    <select value="@_behaviorAction" @onchange="ChangeBehaviorAction">
-                                        @foreach (var action in Enum.GetValues<PublicationBehaviorAction>())
-                                        {
-                                            <option value="@action">@action</option>
-                                        }
-                                    </select>
+                                    <DxComboBox Data="@BehaviorActionOptions" Value="@_behaviorAction"
+                                                ValueChanged="@((PublicationBehaviorAction value) => ChangeBehaviorAction(new ChangeEventArgs { Value = value }))" />
                                 </label>
                                 @if (BehaviorNeedsTarget)
                                 {
                                     <label style="grid-column:1/-1">Target object
-                                        <select value="@_behaviorTargetId" @onchange="ChangeBehaviorTarget">
-                                            <option value="">This object</option>
-                                            @foreach (var target in BehaviorTargets)
-                                            {
-                                                <option value="@target.ElementId">@target.Scope · @target.Name · @target.Kind</option>
-                                            }
-                                        </select>
+                                        <DxComboBox TData="PanelStudioSelectionOption" TValue="string"
+                                                    Data="@BehaviorTargetOptions" Value="@_behaviorTargetId"
+                                                    TextFieldName="Text" ValueFieldName="Value"
+                                                    ValueChanged="@((string? value) => ChangeBehaviorTarget(new ChangeEventArgs { Value = value ?? string.Empty }))" />
                                     </label>
                                 }
                                 @if (_behaviorAction == PublicationBehaviorAction.CallMethod)
                                 {
                                     <label style="grid-column:1/-1">Common method
-                                        <select value="@_behaviorMethod" @onchange="args => _behaviorMethod = Text(args)">
-                                            @foreach (var method in SelectedCommonMethods)
-                                            {
-                                                <option value="@method">@(method + "()")</option>
-                                            }
-                                        </select>
+                                        <DxComboBox Data="@SelectedCommonMethods" Value="@_behaviorMethod"
+                                                    ValueChanged="@((string value) => _behaviorMethod = value)" />
                                     </label>
                                 }
                                 @if (_behaviorAction is PublicationBehaviorAction.SetText or PublicationBehaviorAction.SetValue)
                                 {
-                                    <label style="grid-column:1/-1">Value<input value="@_behaviorValue" @onchange="args => _behaviorValue = Text(args)" /></label>
+                                    <label style="grid-column:1/-1">Value<DxTextBox Text="@_behaviorValue" TextChanged="@((string? value) => _behaviorValue = value ?? string.Empty)" /></label>
                                 }
                                 @if (_behaviorAction == PublicationBehaviorAction.GoToPage)
                                 {
                                     <label style="grid-column:1/-1">Page
-                                        <select value="@_behaviorTargetPageId" @onchange="ChangeBehaviorPage">
-                                            <option value="">Choose page</option>
-                                            @foreach (var page in Document.Pages)
-                                            {
-                                                <option value="@(page.Id)">@(page.Name)</option>
-                                            }
-                                        </select>
+                                        <DxComboBox TData="PanelStudioSelectionOption" TValue="string"
+                                                    Data="@BehaviorPageOptions" Value="@_behaviorTargetPageId"
+                                                    TextFieldName="Text" ValueFieldName="Value"
+                                                    ValueChanged="@((string? value) => ChangeBehaviorPage(new ChangeEventArgs { Value = value ?? string.Empty }))" />
                                     </label>
                                 }
                                 @if (_behaviorAction == PublicationBehaviorAction.OpenUrl)
                                 {
-                                    <label style="grid-column:1/-1">Address<input type="url" value="@_behaviorUrl" @onchange="args => _behaviorUrl = Text(args)" /></label>
+                                    <label style="grid-column:1/-1">Address<DxTextBox Text="@_behaviorUrl" TextChanged="@((string? value) => _behaviorUrl = value ?? string.Empty)" /></label>
                                 }
                             </div>
                             <DxButton Text="Add behavior" SizeMode="SizeMode.Small" RenderStyle="ButtonRenderStyle.Primary" CssClass="panel-behavior-add" Click="AddBehavior" />
@@ -415,41 +393,41 @@
                                     }
                                 </div>
                             }
-                            <details class="panel-object-directory">
-                                <summary>Publication object addresses · @BehaviorTargets.Count</summary>
-                                <div class="panel-object-directory-list">
-                                    <code>@PublicationObjectAddress</code>
-                                    @foreach (var target in BehaviorTargets)
-                                    {
-                                        <div @key="target.ElementId">
-                                            <span>@target.Scope · @target.Name</span>
-                                            <code>@target.Address</code>
-                                        </div>
-                                    }
-                                </div>
-                            </details>
+                            <DxAccordion CssClass="panel-object-directory">
+                                <Items>
+                                    <DxAccordionItem Text="@($"Publication object addresses · {BehaviorTargets.Count}")">
+                                        <ContentTemplate Context="objectDirectoryAccordionContext">
+                                            <div class="panel-object-directory-list">
+                                                <code>@PublicationObjectAddress</code>
+                                                @foreach (var target in BehaviorTargets)
+                                                {
+                                                    <div @key="target.ElementId">
+                                                        <span>@target.Scope · @target.Name</span>
+                                                        <code>@target.Address</code>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </ContentTemplate>
+                                    </DxAccordionItem>
+                                </Items>
+                            </DxAccordion>
                             @if (selected is DevExtremeComponentElement scriptableComponent)
                             {
-                                <details class="panel-script-assistant">
-                                    <summary>JavaScript helper</summary>
+                                <DxAccordion CssClass="panel-script-assistant">
+                                    <Items>
+                                        <DxAccordionItem Text="JavaScript helper">
+                                            <ContentTemplate Context="scriptAssistantAccordionContext">
                                     <p class="field-help">Custom component scripts receive <code>context.objects</code> and <code>context.publication</code>. Pick an object and a common method instead of typing its address by hand.</p>
                                     <div class="data-form-grid" style="grid-template-columns:1fr 1fr">
                                         <label>Object
-                                            <select value="@_scriptTargetId" @onchange="ChangeScriptTarget">
-                                                <option value="">This component</option>
-                                                @foreach (var target in BehaviorTargets)
-                                                {
-                                                    <option value="@target.ElementId">@target.Scope · @target.Name</option>
-                                                }
-                                            </select>
+                                            <DxComboBox TData="PanelStudioSelectionOption" TValue="string"
+                                                        Data="@ScriptTargetOptions" Value="@_scriptTargetId"
+                                                        TextFieldName="Text" ValueFieldName="Value"
+                                                        ValueChanged="@((string? value) => ChangeScriptTarget(new ChangeEventArgs { Value = value ?? string.Empty }))" />
                                         </label>
                                         <label>Method
-                                            <select value="@_scriptMethod" @onchange="args => _scriptMethod = Text(args)">
-                                                @foreach (var method in ScriptCommonMethods)
-                                                {
-                                                    <option value="@method">@(method + "()")</option>
-                                                }
-                                            </select>
+                                            <DxComboBox Data="@ScriptCommonMethods" Value="@_scriptMethod"
+                                                        ValueChanged="@((string value) => _scriptMethod = value)" />
                                         </label>
                                     </div>
                                     <div class="panel-inline-actions">
@@ -460,7 +438,10 @@
                                         }
                                     </div>
                                     <small class="field-help">PublisherStudio creates the custom-script action and enables it explicitly. No runtime eval is used for the ordinary behavior rules above.</small>
-                                </details>
+                                            </ContentTemplate>
+                                        </DxAccordionItem>
+                                    </Items>
+                                </DxAccordion>
                             }
                             <small class="field-help">The same object interface is available to exported publication JavaScript. Declarative actions stay allow-listed and require no script.</small>
                         </div>
@@ -476,28 +457,21 @@
         <div class="panel-inspector-section">
                                 <strong>Data visual</strong>
                                 <label>Visual type
-                                    <select value="@visual.VisualKind" @onchange="ChangeVisualKind">
-                                        @foreach (var kind in Enum.GetValues<DataVisualKind>())
-                                        {
-                                            <option value="@kind">@kind</option>
-                                        }
-                                    </select>
+                                    <DxComboBox Data="@DataVisualKindOptions" Value="@visual.VisualKind"
+                                                ValueChanged="@((DataVisualKind value) => ChangeVisualKind(new ChangeEventArgs { Value = value }))" />
                                 </label>
-                                <label>Title<input value="@visual.Title" @onchange="args => visual.Title = Text(args)" /></label>
+                                <label>Title<DxTextBox Text="@visual.Title" TextChanged="@((string? value) => visual.Title = value ?? string.Empty)" /></label>
                                 <label>Data source
-                                    <select value="@visual.DataObjectId" @onchange="ChangeVisualDataObject">
-                                        @foreach (var dataObject in Document.DataObjects)
-                                        {
-                                            <option value="@dataObject.Id">@dataObject.Name</option>
-                                        }
-                                    </select>
+                                    <DxComboBox Data="@Document.DataObjects" Value="@visual.DataObjectId"
+                                                TextFieldName="Name" ValueFieldName="Id"
+                                                ValueChanged="@((Guid value) => ChangeVisualDataObject(new ChangeEventArgs { Value = value }))" />
                                 </label>
-                                <label>Argument field<input value="@visual.ArgumentField" @onchange="args => visual.ArgumentField = Text(args)" /></label>
-                                <label>Value fields<input value="@string.Join(", ", visual.ValueFields)" @onchange="ChangeVisualValueFields" /></label>
-                                <label>Target field<input value="@visual.TargetField" @onchange="args => visual.TargetField = Text(args)" /></label>
-                                <label>Rows<input type="number" min="1" max="10000" value="@visual.RowLimit" @onchange="args => ChangeInt(args, value => visual.RowLimit = value)" /></label>
-                                <label class="check-row"><input type="checkbox" checked="@visual.ShowLegend" @onchange="args => visual.ShowLegend = AsBool(args)" /> Legend</label>
-                                <label class="check-row"><input type="checkbox" checked="@visual.ShowLabels" @onchange="args => visual.ShowLabels = AsBool(args)" /> Labels</label>
+                                <label>Argument field<DxTextBox Text="@visual.ArgumentField" TextChanged="@((string? value) => visual.ArgumentField = value ?? string.Empty)" /></label>
+                                <label>Value fields<DxTextBox Text="@PanelText.FormatList(visual.ValueFields, Logger)" TextChanged="@((string? value) => ChangeVisualValueFields(new ChangeEventArgs { Value = value }))" /></label>
+                                <label>Target field<DxTextBox Text="@visual.TargetField" TextChanged="@((string? value) => visual.TargetField = value ?? string.Empty)" /></label>
+                                <label>Rows<DxSpinEdit T="int" MinValue="1" MaxValue="10000" Value="@visual.RowLimit" ValueChanged="@((int value) => visual.RowLimit = value)" /></label>
+                                <label class="check-row"><DxCheckBox Checked="@visual.ShowLegend" CheckedChanged="@((bool value) => visual.ShowLegend = value)" /> Legend</label>
+                                <label class="check-row"><DxCheckBox Checked="@visual.ShowLabels" CheckedChanged="@((bool value) => visual.ShowLabels = value)" /> Labels</label>
                             </div>
     </Template>
     </DxFormLayoutItem>
@@ -512,46 +486,31 @@
         <div class="panel-inspector-section">
                                 <strong>Interactive component</strong>
                                 <label>Component
-                                    <select value="@component.ComponentKind" @onchange="ChangeComponentKind">
-                                        @foreach (var kind in Enum.GetValues<PublicationComponentKind>())
-                                        {
-                                            <option value="@kind">@kind</option>
-                                        }
-                                    </select>
+                                    <DxComboBox Data="@ComponentKindOptions" Value="@component.ComponentKind"
+                                                ValueChanged="@((PublicationComponentKind value) => ChangeComponentKind(new ChangeEventArgs { Value = value }))" />
                                 </label>
-                                <label>Title<input value="@component.Title" @onchange="args => component.Title = Text(args)" /></label>
+                                <label>Title<DxTextBox Text="@component.Title" TextChanged="@((string? value) => component.Title = value ?? string.Empty)" /></label>
                                 <label>Data mode
-                                    <select value="@component.Connection.Mode" @onchange="ChangeComponentDataMode">
-                                        @foreach (var mode in Enum.GetValues<PublicationComponentDataMode>())
-                                        {
-                                            <option value="@mode">@mode</option>
-                                        }
-                                    </select>
+                                    <DxComboBox Data="@ComponentDataModeOptions" Value="@component.Connection.Mode"
+                                                ValueChanged="@((PublicationComponentDataMode value) => ChangeComponentDataMode(new ChangeEventArgs { Value = value }))" />
                                 </label>
                                 <label>Publication data
-                                    <select value="@component.Connection.DataObjectId" @onchange="ChangeComponentDataObject">
-                                        <option value="@Guid.Empty">None</option>
-                                        @foreach (var dataObject in Document.DataObjects)
-                                        {
-                                            <option value="@dataObject.Id">@dataObject.Name</option>
-                                        }
-                                    </select>
+                                    <DxComboBox Data="@Document.DataObjects" Value="@component.Connection.DataObjectId"
+                                                TextFieldName="Name" ValueFieldName="Id" NullText="None"
+                                                ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                                                ValueChanged="@((Guid value) => ChangeComponentDataObject(new ChangeEventArgs { Value = value }))" />
                                 </label>
-                                <label>REST/OData URL<input value="@component.Connection.Url" @onchange="args => component.Connection.Url = Text(args)" /></label>
-                                <label>JSON path<input value="@component.Connection.JsonPath" @onchange="args => component.Connection.JsonPath = Text(args)" /></label>
-                                <label>Advanced DevExtreme options<textarea rows="5" value="@component.AdvancedOptionsJson" @onchange="args => component.AdvancedOptionsJson = Text(args)"></textarea></label>
-                                <label>Custom CSS<textarea rows="4" value="@component.CustomCss" @onchange="args => component.CustomCss = Text(args)"></textarea></label>
+                                <label>REST/OData URL<DxTextBox Text="@component.Connection.Url" TextChanged="@((string? value) => component.Connection.Url = value ?? string.Empty)" /></label>
+                                <label>JSON path<DxTextBox Text="@component.Connection.JsonPath" TextChanged="@((string? value) => component.Connection.JsonPath = value ?? string.Empty)" /></label>
+                                <label>Advanced DevExtreme options<DxMemo Rows="5" Text="@component.AdvancedOptionsJson" TextChanged="@((string? value) => component.AdvancedOptionsJson = value ?? string.Empty)" /></label>
+                                <label>Custom CSS<DxMemo Rows="4" Text="@component.CustomCss" TextChanged="@((string? value) => component.CustomCss = value ?? string.Empty)" /></label>
                                 @if (component.ComponentKind == PublicationComponentKind.Chat)
                                 {
                                     <label>Chat surface
-                                        <select value="@component.ChatDisplayMode" @onchange="ChangeChatDisplayMode">
-                                            @foreach (var mode in Enum.GetValues<PublicationChatDisplayMode>())
-                                            {
-                                                <option value="@mode">@mode</option>
-                                            }
-                                        </select>
+                                        <DxComboBox Data="@ChatDisplayModeOptions" Value="@component.ChatDisplayMode"
+                                                    ValueChanged="@((PublicationChatDisplayMode value) => ChangeChatDisplayMode(new ChangeEventArgs { Value = value }))" />
                                     </label>
-                                    <label class="check-row"><input type="checkbox" checked="@component.ChatAllowSending" @onchange="args => component.ChatAllowSending = AsBool(args)" /> Allow operator sending</label>
+                                    <label class="check-row"><DxCheckBox Checked="@component.ChatAllowSending" CheckedChanged="@((bool value) => component.ChatAllowSending = value)" /> Allow operator sending</label>
                                 }
                             </div>
     </Template>
@@ -567,17 +526,13 @@
         <div class="panel-inspector-section">
                                 <strong>Live source</strong>
                                 <label>Source
-                                    <select value="@live.SourceKind" @onchange="ChangeLiveSourceKind">
-                                        @foreach (var kind in Enum.GetValues<PublicationLiveSourceKind>())
-                                        {
-                                            <option value="@kind">@kind</option>
-                                        }
-                                    </select>
+                                    <DxComboBox Data="@LiveSourceKindOptions" Value="@live.SourceKind"
+                                                ValueChanged="@((PublicationLiveSourceKind value) => ChangeLiveSourceKind(new ChangeEventArgs { Value = value }))" />
                                 </label>
-                                <label>Capture width<input type="number" min="1" value="@live.CaptureWidth" @onchange="args => ChangeInt(args, value => live.CaptureWidth = value)" /></label>
-                                <label>Capture height<input type="number" min="1" value="@live.CaptureHeight" @onchange="args => ChangeInt(args, value => live.CaptureHeight = value)" /></label>
-                                <label>Frame rate<input type="number" min="1" max="240" value="@live.CaptureFrameRate" @onchange="args => ChangeInt(args, value => live.CaptureFrameRate = value)" /></label>
-                                <label class="check-row"><input type="checkbox" checked="@live.Muted" @onchange="args => live.Muted = AsBool(args)" /> Muted</label>
+                                <label>Capture width<DxSpinEdit T="int" MinValue="1" Value="@live.CaptureWidth" ValueChanged="@((int value) => live.CaptureWidth = value)" /></label>
+                                <label>Capture height<DxSpinEdit T="int" MinValue="1" Value="@live.CaptureHeight" ValueChanged="@((int value) => live.CaptureHeight = value)" /></label>
+                                <label>Frame rate<DxSpinEdit T="int" MinValue="1" MaxValue="240" Value="@live.CaptureFrameRate" ValueChanged="@((int value) => live.CaptureFrameRate = value)" /></label>
+                                <label class="check-row"><DxCheckBox Checked="@live.Muted" CheckedChanged="@((bool value) => live.Muted = value)" /> Muted</label>
                             </div>
     </Template>
     </DxFormLayoutItem>
@@ -606,22 +561,22 @@
         <Template Context="formItemContext010">
         <div class="panel-inspector-section">
                                 <strong>HTML experience</strong>
-                                <label>HTML<textarea rows="7" value="@html.Html" @onchange="args => html.Html = Text(args)"></textarea></label>
-                                <label>CSS<textarea rows="5" value="@html.Css" @onchange="args => html.Css = Text(args)"></textarea></label>
-                                <label>JavaScript<textarea rows="5" value="@html.JavaScript" @onchange="args => html.JavaScript = Text(args)"></textarea></label>
+                                <label>HTML<DxMemo Rows="7" Text="@html.Html" TextChanged="@((string? value) => html.Html = value ?? string.Empty)" /></label>
+                                <label>CSS<DxMemo Rows="5" Text="@html.Css" TextChanged="@((string? value) => html.Css = value ?? string.Empty)" /></label>
+                                <label>JavaScript<DxMemo Rows="5" Text="@html.JavaScript" TextChanged="@((string? value) => html.JavaScript = value ?? string.Empty)" /></label>
                                 <div class="panel-script-assistant compact">
                                     <strong>JavaScript helper</strong>
                                     <div class="panel-inline-actions">
                                         @foreach (var scriptHelper in HtmlScriptHelpers)
                                         {
-                                            <button type="button" title="@(scriptHelper.Description)" @onclick="() => AddHtmlScriptHelper(html, scriptHelper.Key)">@(scriptHelper.Label)</button>
+                                            <DxButton Text="@(scriptHelper.Label)" SizeMode="SizeMode.Small" RenderStyleMode="ButtonRenderStyleMode.Outline" CssClass="panel-script-helper-button" Click="() => AddHtmlScriptHelper(html, scriptHelper.Key)" />
                                         }
                                     </div>
                                     <small class="field-help">These snippets run only inside this iframe sandbox. Publication-component scripts use the object interface shown in Behavior &amp; object interface.</small>
                                 </div>
-                                <label class="check-row"><input type="checkbox" checked="@html.AllowScripts" @onchange="args => html.AllowScripts = AsBool(args)" /> Enable JavaScript inside sandbox</label>
-                                <label class="check-row"><input type="checkbox" checked="@html.AllowForms" @onchange="args => html.AllowForms = AsBool(args)" /> Allow forms</label>
-                                <label class="check-row"><input type="checkbox" checked="@html.AllowPopups" @onchange="args => html.AllowPopups = AsBool(args)" /> Allow popups</label>
+                                <label class="check-row"><DxCheckBox Checked="@html.AllowScripts" CheckedChanged="@((bool value) => html.AllowScripts = value)" /> Enable JavaScript inside sandbox</label>
+                                <label class="check-row"><DxCheckBox Checked="@html.AllowForms" CheckedChanged="@((bool value) => html.AllowForms = value)" /> Allow forms</label>
+                                <label class="check-row"><DxCheckBox Checked="@html.AllowPopups" CheckedChanged="@((bool value) => html.AllowPopups = value)" /> Allow popups</label>
                                 <p class="field-help">Imported scripts stay disabled until explicitly enabled. Each experience remains isolated in its own iframe sandbox.</p>
                             </div>
     </Template>
@@ -637,12 +592,8 @@
         <div class="panel-inspector-section">
                                 <strong>Nested panel</strong>
                                 <label>Nested navigation
-                                    <select value="@nested.NavigationMode" @onchange="ChangeNestedNavigation">
-                                        @foreach (var mode in Enum.GetValues<PublicationPanelNavigationMode>())
-                                        {
-                                            <option value="@mode">@mode</option>
-                                        }
-                                    </select>
+                                    <DxComboBox Data="@NavigationModeOptions" Value="@nested.NavigationMode"
+                                                ValueChanged="@((PublicationPanelNavigationMode value) => ChangeNestedNavigation(new ChangeEventArgs { Value = value }))" />
                                 </label>
                             </div>
     </Template>
@@ -650,27 +601,32 @@
 </DxFormLayout>
                         }
 
-                        <details class="panel-inspector-section panel-advanced-json">
-                            <summary>Complete component configuration</summary>
-                            <p class="field-help">This is the complete persisted module state, including data/web connections, chart settings, fields, actions, filters and advanced options.</p>
-                            <textarea rows="12" @bind="_advancedElementJson"></textarea>
-                            <div class="panel-inline-actions">
-                                <button type="button" @onclick="RefreshAdvancedJson">Refresh JSON</button>
-                                <button type="button" class="primary" @onclick="ApplyAdvancedJson">Apply JSON</button>
-                            </div>
-                        </details>
+                        <DxAccordion CssClass="panel-inspector-section panel-advanced-json">
+                            <Items>
+                                <DxAccordionItem Text="Complete component configuration">
+                                    <ContentTemplate Context="advancedJsonAccordionContext">
+                                        <p class="field-help">This is the complete persisted module state, including data/web connections, chart settings, fields, actions, filters and advanced options.</p>
+                                        <DxMemo Rows="12" @bind-Text="_advancedElementJson" />
+                                        <div class="panel-inline-actions">
+                                            <DxButton Text="Refresh JSON" Click="RefreshAdvancedJson" />
+                                            <DxButton Text="Apply JSON" CssClass="primary" Click="ApplyAdvancedJson" />
+                                        </div>
+                                    </ContentTemplate>
+                                </DxAccordionItem>
+                            </Items>
+                        </DxAccordion>
 
                         <DxFormLayout CssClass="razor-section-layout-owner">
     <DxFormLayoutItem ColSpanMd="12">
         <Template Context="formItemContext012">
         <div class="panel-inspector-section">
                             <strong>Save for reuse</strong>
-                            <label>Module name<input @bind="_templateName" /></label>
-                            <label>Category<input @bind="_templateCategory" /></label>
-                            <label>Description<textarea rows="3" @bind="_templateDescription"></textarea></label>
+                            <label>Module name<DxTextBox @bind-Text="_templateName" /></label>
+                            <label>Category<DxTextBox @bind-Text="_templateCategory" /></label>
+                            <label>Description<DxMemo Rows="3" @bind-Text="_templateDescription" /></label>
                             <div class="panel-inline-actions">
-                                <button type="button" class="primary" @onclick="SaveSelectedAsTemplate">@(_selectedTemplateId is null ? "Save configured module" : "Update saved module")</button>
-                                <button type="button" @onclick="SaveSelectedAsNewTemplate">Save as new</button>
+                                <DxButton Text="@(_selectedTemplateId is null ? "Save configured module" : "Update saved module")" CssClass="primary" Click="SaveSelectedAsTemplate" />
+                                <DxButton Text="Save as new" Click="SaveSelectedAsNewTemplate" />
                             </div>
                         </div>
     </Template>
@@ -735,6 +691,34 @@
 
 
 @code {
+    /// <summary>Lists panel navigation modes for the DevExpress navigation editor.</summary>
+    /// <value>The supported panel navigation-mode values.</value>
+    private IReadOnlyList<PublicationPanelNavigationMode> NavigationModeOptions { get; } = Enum.GetValues<PublicationPanelNavigationMode>();
+    /// <summary>Lists panel layout modes for the DevExpress layout editor.</summary>
+    /// <value>The supported panel layout-mode values.</value>
+    private IReadOnlyList<PublicationPanelLayoutMode> LayoutModeOptions { get; } = Enum.GetValues<PublicationPanelLayoutMode>();
+    /// <summary>Lists behavior triggers for the DevExpress behavior editor.</summary>
+    /// <value>The supported behavior-trigger values.</value>
+    private IReadOnlyList<PublicationBehaviorTrigger> BehaviorTriggerOptions { get; } = Enum.GetValues<PublicationBehaviorTrigger>();
+    /// <summary>Lists behavior actions for the DevExpress behavior editor.</summary>
+    /// <value>The supported behavior-action values.</value>
+    private IReadOnlyList<PublicationBehaviorAction> BehaviorActionOptions { get; } = Enum.GetValues<PublicationBehaviorAction>();
+    /// <summary>Lists data-visual kinds for the DevExpress visual-kind editor.</summary>
+    /// <value>The supported data-visual kind values.</value>
+    private IReadOnlyList<DataVisualKind> DataVisualKindOptions { get; } = Enum.GetValues<DataVisualKind>();
+    /// <summary>Lists interactive component kinds for the DevExpress component editor.</summary>
+    /// <value>The supported interactive component-kind values.</value>
+    private IReadOnlyList<PublicationComponentKind> ComponentKindOptions { get; } = Enum.GetValues<PublicationComponentKind>();
+    /// <summary>Lists component data modes for the DevExpress data-mode editor.</summary>
+    /// <value>The supported component data-mode values.</value>
+    private IReadOnlyList<PublicationComponentDataMode> ComponentDataModeOptions { get; } = Enum.GetValues<PublicationComponentDataMode>();
+    /// <summary>Lists chat display modes for the DevExpress chat editor.</summary>
+    /// <value>The supported chat display-mode values.</value>
+    private IReadOnlyList<PublicationChatDisplayMode> ChatDisplayModeOptions { get; } = Enum.GetValues<PublicationChatDisplayMode>();
+    /// <summary>Lists live-source kinds for the DevExpress live-source editor.</summary>
+    /// <value>The supported live-source kind values.</value>
+    private IReadOnlyList<PublicationLiveSourceKind> LiveSourceKindOptions { get; } = Enum.GetValues<PublicationLiveSourceKind>();
+
 
     /// <summary>
     /// Gets or sets a value indicating whether the value is visible applies to the panel studio state.
@@ -803,6 +787,8 @@
     /// Stores the in-memory preview presets collection maintained internally by <see cref="PanelStudio"/> for its current workflow state.
     /// </summary>
     private IReadOnlyList<PanelStudioPreviewPreset> _previewPresets = [];
+    /// <summary>Stores the DevExpress preview-size choices, including the authored design canvas and persisted viewport presets.</summary>
+    private IReadOnlyList<KeyValuePair<string, string>> _previewSizeOptions = [new("design", "Design canvas")];
     /// <summary>
     /// Stores the internal preview preset editor visible state used by <see cref="PanelStudio"/> while executing its surrounding workflow.
     /// </summary>
@@ -2021,11 +2007,19 @@
         try
         {
             _previewPresets = PreviewPresets.GetPresets();
+            var options = new List<KeyValuePair<string, string>>
+            {
+                new("design", "Design canvas")
+            };
+            foreach (var preset in _previewPresets)
+                options.Add(new(preset.Key, $"{preset.Name} · {preset.Width} × {preset.Height}"));
+            _previewSizeOptions = options;
         }
         catch (Exception exception)
         {
             Logger.LogError(exception, "Panel Studio custom preview presets could not be refreshed.");
             _previewPresets = [];
+            _previewSizeOptions = [new("design", "Design canvas")];
             _error = "Custom preview presets could not be loaded. Built-in design size remains available.";
         }
     }
@@ -3162,6 +3156,26 @@
         }
     }
 
+
+    /// <summary>Represents one DevExpress ComboBox choice used by Panel Studio target pickers.</summary>
+    /// <param name="Value">Stable persisted identifier text, or an empty string for the local object.</param>
+    /// <param name="Text">Human-readable target caption.</param>
+    private sealed record PanelStudioSelectionOption(string Value, string Text);
+
+    /// <summary>Gets publication-object target state used by the compact DevExpress behavior editor when resolving cross-object actions.</summary>
+    /// <value>The local-object choice followed by addressable publication targets.</value>
+    private IReadOnlyList<PanelStudioSelectionOption> BehaviorTargetOptions =>
+        [new(string.Empty, "This object"), .. BehaviorTargets.Select(target => new PanelStudioSelectionOption(target.ElementId.ToString(), $"{target.Scope} · {target.Name} · {target.Kind}"))];
+
+    /// <summary>Gets publication-page target state used by the DevExpress behavior editor when configuring page navigation actions.</summary>
+    /// <value>The empty page prompt followed by pages in the current publication.</value>
+    private IReadOnlyList<PanelStudioSelectionOption> BehaviorPageOptions =>
+        [new(string.Empty, "Choose page"), .. Document.Pages.Select(page => new PanelStudioSelectionOption(page.Id.ToString(), page.Name))];
+
+    /// <summary>Gets addressable component target state used by the DevExpress JavaScript-helper editor when generating scoped helper calls.</summary>
+    /// <value>The current component choice followed by addressable publication targets.</value>
+    private IReadOnlyList<PanelStudioSelectionOption> ScriptTargetOptions =>
+        [new(string.Empty, "This component"), .. BehaviorTargets.Select(target => new PanelStudioSelectionOption(target.ElementId.ToString(), $"{target.Scope} · {target.Name}"))];
 
     /// <summary>Parses an optional publication element identifier used by the compact behavior editor.</summary>
     /// <param name="value">Value value supplied to the panel studio operation and used when producing its result.</param>

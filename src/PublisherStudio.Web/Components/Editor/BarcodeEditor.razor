@@ -70,7 +70,7 @@
                         <InputFile accept=".csv,.tsv,.txt,.json,.xml,text/csv,text/tab-separated-values,application/json,application/xml,text/xml,text/plain" OnChange="ImportValueFile" />
                     </label>
                     @if (!string.IsNullOrWhiteSpace(_importInfo)) { <small class="barcode-import-info">@_importInfo</small> }
-                    <div class="picture-property-grid"><label>Foreground<input type="color" value="@_draft.ForegroundColor" @oninput="ChangeForeground" /></label><label>Background<input type="color" value="@_draft.BackgroundColor" @oninput="ChangeBackground" /></label></div>
+                    <div class="picture-property-grid"><label>Foreground<DevExpressColorPicker Value="@_draft.ForegroundColor" Changed="ChangeForeground" /></label><label>Background<DevExpressColorPicker Value="@_draft.BackgroundColor" Changed="ChangeBackground" /></label></div>
                     <label><input type="checkbox" checked="@_draft.TransparentBackground" @onchange="ChangeTransparent" /> Transparent background</label>
                     @if (_draft.Format == PublicationBarcodeFormat.QrCode)
                     {
@@ -222,7 +222,7 @@
             var request = _generationRequest;
             try
             {
-                _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js?v=4.0.3").ConfigureAwait(true);
+                _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js?v=4.0.7").ConfigureAwait(true);
                 var svg = await _module.InvokeAsync<string>("generateBarcodeSvg", _draft).ConfigureAwait(true);
                 if (request != _generationRequest) return;
                 _svg = svg;

@@ -83,8 +83,8 @@
                                         <option value="@PublicationComponentScope.Document">Document-wide synchronized</option>
                                     </select>
                                 </label>
-                                <label>Background<input type="color" @bind="_draft.Background" /></label>
-                                <label>Border color<input type="color" @bind="_draft.BorderColor" /></label>
+                                <label>Background<DevExpressColorPicker Value="@_draft.Background" Changed="@(args => _draft.Background = args.Value?.ToString() ?? _draft.Background)" /></label>
+                                <label>Border color<DevExpressColorPicker Value="@_draft.BorderColor" Changed="@(args => _draft.BorderColor = args.Value?.ToString() ?? _draft.BorderColor)" /></label>
                                 <label>Border width (mm)<input type="number" min="0" max="8" step="0.05" @bind="_draft.BorderWidthMm" /></label>
                             </div>
                             <div class="component-option-grid">
@@ -671,8 +671,8 @@
                                             <div class="component-form-grid wide">
                                                 <label>Name<input @bind="feature.Name" /></label>
                                                 <label>Kind<select @bind="feature.Kind">@foreach (var kind in Enum.GetValues<PublicationVectorFeatureKind>()) { <option value="@kind">@kind</option> }</select></label>
-                                                <label>Fill / marker color<input type="color" @bind="feature.Color" /></label>
-                                                <label>Border color<input type="color" @bind="feature.BorderColor" /></label>
+                                                <label>Fill / marker color<DevExpressColorPicker Value="@feature.Color" Changed="@(args => feature.Color = args.Value?.ToString() ?? feature.Color)" /></label>
+                                                <label>Border color<DevExpressColorPicker Value="@feature.BorderColor" Changed="@(args => feature.BorderColor = args.Value?.ToString() ?? feature.BorderColor)" /></label>
                                                 <label>Opacity<input type="number" min="0" max="1" step="0.05" @bind="feature.Opacity" /></label>
                                                 <label>Line width<input type="number" min="0.25" max="40" step="0.25" @bind="feature.Width" /></label>
                                                 <label>Marker size<input type="number" min="2" max="100" step="1" @bind="feature.Size" /></label>

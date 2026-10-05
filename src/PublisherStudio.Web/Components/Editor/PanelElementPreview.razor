@@ -1,10 +1,7 @@
 @namespace PublisherStudio.Components.Editor
 
 @inject ILogger<PanelElementPreview> Logger
-<div class="razor-component-boundary">
-<DxFormLayout CssClass="razor-component-layout-owner PanelElementPreview">
-    <DxFormLayoutItem ColSpanMd="12">
-        <Template Context="formItemContext001">
+@* razor-structural-renderer | reason: PanelElementPreview is a geometry-sensitive render leaf; its rendered root must remain the authored/runtime surface rather than a maintenance layout wrapper. *@
 <div class="panel-element-preview kind-@Item.Kind.ToString().ToLowerInvariant()">
     @switch (Item)
     {
@@ -68,11 +65,6 @@
             break;
     }
 </div>
-    </Template>
-    </DxFormLayoutItem>
-</DxFormLayout>
-</div>
-
 
 @code {
 

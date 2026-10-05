@@ -1,0 +1,131 @@
+@namespace PublisherStudio.Components.Editor
+@inject ILogger<DevExpressColorPicker> Logger
+
+<div class="razor-component-boundary">
+<DxFormLayout CssClass="razor-component-layout-owner DevExpressColorPicker">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="colorPickerFormItemContext">
+            <DxDropDownBox Value="@Value"
+                           ValueChanged="HandleDropDownValueChanged"
+                           QueryDisplayText="QueryDisplayText"
+                           NullText="Select color..."
+                           CssClass="@ColorPickerCssClass">
+                <DropDownBodyTemplate Context="colorPickerDropDownContext">
+                    <DxColorPalette Value="@SafeValue"
+                                    ValueChanged="@(value => HandlePaletteChanged(value, colorPickerDropDownContext.DropDownBox))"
+                                    ShowNoColorTile="@AllowNoColor"
+                                    CssClass="publisher-color-picker-palette" />
+                </DropDownBodyTemplate>
+                <EditBoxDisplayTemplate Context="colorPickerEditBoxContext">
+                    <div class="publisher-color-picker-display">
+                        <span class="publisher-color-picker-swatch" style="background:@SwatchColor" aria-hidden="true"></span>
+                        <span class="publisher-color-picker-value">@Value</span>
+                    </div>
+                </EditBoxDisplayTemplate>
+            </DxDropDownBox>
+        </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+</div>
+
+@code {
+    /// <summary>Gets or sets the CSS color token represented by the DevExpress palette editor.</summary>
+    /// <value>The current CSS color value.</value>
+    [Parameter] public string Value { get; set; } = "#ffffff";
+
+    /// <summary>Gets or sets whether the DevExpress palette exposes its no-color tile.</summary>
+    /// <value><see langword="true"/> when no-color selection is available.</value>
+    [Parameter] public bool AllowNoColor { get; set; }
+
+    /// <summary>Gets or sets an optional CSS class appended to the DevExpress color picker root.</summary>
+    /// <value>The optional CSS class.</value>
+    [Parameter] public string? CssClass { get; set; }
+
+    /// <summary>Gets or sets the established native-compatible change callback used by existing PublisherStudio editor handlers.</summary>
+    /// <value>The color change callback.</value>
+    [Parameter] public EventCallback<ChangeEventArgs> Changed { get; set; }
+
+    /// <summary>Gets the CSS class applied to the DevExpress color picker without mixed Razor attribute content.</summary>
+    /// <value>The required picker class followed by the optional caller-provided class.</value>
+    private string ColorPickerCssClass => string.IsNullOrWhiteSpace(CssClass) ? "publisher-color-picker" : $"publisher-color-picker {CssClass}";
+
+    /// <summary>Gets a hexadecimal value accepted by the DevExpress palette while preserving no-color state outside the palette.</summary>
+    /// <value>A short or long hexadecimal color suitable for <c>DxColorPalette</c>.</value>
+    private string SafeValue => NormalizePaletteColor(Value);
+
+    /// <summary>Gets the CSS background painted in the read-only DevExpress color swatch.</summary>
+    /// <value>The current color, or transparent when the no-color state is selected.</value>
+    private string SwatchColor => string.Equals(Value, "transparent", StringComparison.OrdinalIgnoreCase) ? "transparent" : SafeValue;
+
+    /// <summary>Returns the text shown by the DevExpress drop-down edit box.</summary>
+    /// <param name="context">Drop-down display query context.</param>
+    /// <returns>The selected CSS color text.</returns>
+    private string QueryDisplayText(DropDownBoxQueryDisplayTextContext context)
+    {
+        try
+        {
+            return context.Value?.ToString() ?? Value;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Component method {Component}.{Method} failed.", nameof(DevExpressColorPicker), nameof(QueryDisplayText));
+            throw;
+        }
+    }
+
+    /// <summary>Forwards direct edit-box changes through the existing PublisherStudio change contract.</summary>
+    /// <param name="value">Drop-down value supplied by DevExpress.</param>
+    /// <returns>A task that completes when the parent accepts the change.</returns>
+    private Task HandleDropDownValueChanged(object? value)
+    {
+        try
+        {
+            return Changed.InvokeAsync(new ChangeEventArgs { Value = value?.ToString() ?? string.Empty });
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Component method {Component}.{Method} failed.", nameof(DevExpressColorPicker), nameof(HandleDropDownValueChanged));
+            OperationalNotifications.Error(ex.Message, "Color picker failed", nameof(DevExpressColorPicker));
+            throw;
+        }
+    }
+
+    /// <summary>Commits a palette color and closes the DevExpress drop-down.</summary>
+    /// <param name="value">Selected palette color.</param>
+    /// <param name="dropDownBox">Owning DevExpress drop-down box.</param>
+    private void HandlePaletteChanged(string value, IDropDownBox dropDownBox)
+    {
+        try
+        {
+            // Setting the owning DropDownBox value inside Begin/EndUpdate raises its ValueChanged
+            // exactly once. HandleDropDownValueChanged owns forwarding to the parent; invoking Changed
+            // again here would duplicate a single palette click through the Blazor circuit.
+            dropDownBox.BeginUpdate();
+            dropDownBox.Value = value;
+            dropDownBox.EndUpdate();
+            dropDownBox.HideDropDown();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Component method {Component}.{Method} failed.", nameof(DevExpressColorPicker), nameof(HandlePaletteChanged));
+            OperationalNotifications.Error(ex.Message, "Color picker failed", nameof(DevExpressColorPicker));
+            throw;
+        }
+    }
+
+    /// <summary>Normalizes arbitrary CSS state to a color accepted by the DevExpress palette.</summary>
+    /// <param name="value">Candidate CSS color.</param>
+    /// <returns>A palette-safe hexadecimal color.</returns>
+    private string NormalizePaletteColor(string? value)
+    {
+        try
+        {
+            return !string.IsNullOrWhiteSpace(value) && value.StartsWith('#') && value.Length is 4 or 7 ? value : "#ffffff";
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Component method {Component}.{Method} failed.", nameof(DevExpressColorPicker), nameof(NormalizePaletteColor));
+            throw;
+        }
+    }
+}

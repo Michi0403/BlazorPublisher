@@ -1,5 +1,5 @@
-# PublisherStudio 4.0.3
+# PublisherStudio 4.0.7
 
-PublisherStudio 4.0.3 repairs the repository-local build-storage preflight introduced in 4.0.2. Fresh clones require no cache-path configuration: heavy build state defaults to `artifacts/.build-storage`, which is ignored by Git. Optional environment/parameter values only override that default.
+PublisherStudio 4.0.7 is a focused compiler follow-up to 4.0.6. It fixes the reported DevExpress generic-inference, Razor mixed-attribute, and close-button attribute-type errors without weakening the maintenance rules or changing editor behavior.
 
-The PowerShell compatibility guard now treats source-code variable names literally when validating documentation browser-profile placement, avoiding the StrictMode `$documentationToolCacheRoot` failure seen on macOS. Application/editor runtime behavior is unchanged.
+The 4.0.6 Panel Studio text-service ownership repair remains intact.

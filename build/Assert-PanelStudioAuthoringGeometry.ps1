@@ -34,6 +34,10 @@ $layout = [IO.File]::ReadAllText($layoutPath)
 Require $panelView 'panel-force-canvas' 'ForceCanvasLayout must create an explicit CSS escape hatch from responsive layout rules.'
 Require $panelView 'data-panel-authoring-viewport=' 'PanelView must identify the viewport that owns authoring coordinates.'
 Require $panelView '@AuthoringOverlay' 'The authoring overlay must render inside PanelView rather than beside it.'
+Require $panelView 'razor-structural-renderer' 'PanelView must be explicitly protected as a direct-root structural renderer.'
+Reject $panelView 'razor-component-layout-owner|razor-section-layout-owner' 'PanelView must not regain a maintenance layout wrapper; the authored coordinate root must remain direct.'
+Require $dataVisualHost 'razor-structural-renderer' 'DataVisualClientHost must stay a direct-root geometry-sensitive renderer so the DevExtreme host receives the authored element box.'
+Reject $dataVisualHost 'razor-component-layout-owner|razor-section-layout-owner' 'DataVisualClientHost must not regain an artificial maintenance layout wrapper around its resize-observed host.'
 Require $panelStudio '<AuthoringOverlay>[\s\S]*panel-studio-hit-layer' 'Selection hitboxes must be supplied through the PanelView authoring overlay.'
 Require $panelStudio 'data-panel-studio-design-width="@PanelDesignWidthPx"' 'Panel Studio must expose the edited panel width in 96-DPI design pixels.'
 Require $panelStudio 'data-panel-studio-design-height="@PanelDesignHeightPx"' 'Panel Studio must expose the edited panel height in 96-DPI design pixels.'
@@ -65,4 +69,4 @@ Require $editor 'Math\.Abs\(html\.Width - draft\.CanvasWidth\)' 'Standalone HTML
 Require $editor 'Math\.Abs\(html\.Height - draft\.CanvasHeight\)' 'Standalone HTML height must be compared with the panel-local canvas before lightweight apply.'
 Require $editor 'State\.PromoteSelectedHtmlEmbedToPanel\(draft\)' 'Authored local HTML geometry must promote to a panel instead of being discarded.'
 
-Write-Host 'Panel Studio authoring geometry validation passed. The selected panel owns a centered fitted design frame; DevExpress maintenance wrappers preserve child geometry; click insertion avoids center stacking; live content, hitboxes and drop coordinates share one aspect-preserving canvas region; preview viewport simulation is isolated; responsive authoring is explicit; DataVisuals resize from their actual host.'
+Write-Host 'Panel Studio authoring geometry validation passed. The selected panel and geometry-sensitive render leaves stay direct-root inside a centered fitted design frame; ordinary DevExpress editor wrappers remain compatibility-safe; click insertion avoids center stacking; live content, hitboxes and drop coordinates share one aspect-preserving canvas region; preview viewport simulation is isolated; responsive authoring is explicit; DataVisuals resize from their actual host.'

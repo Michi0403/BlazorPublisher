@@ -2,10 +2,7 @@
 @inject PublicationDataService DataService
 
 @inject ILogger<DataVisualView> Logger
-<div class="razor-component-boundary">
-<DxFormLayout CssClass="razor-component-layout-owner DataVisualView">
-    <DxFormLayoutItem ColSpanMd="12">
-        <Template Context="formItemContext001">
+@* razor-structural-renderer | reason: DataVisualView is a geometry-sensitive render leaf; its rendered root must remain the authored/runtime surface rather than a maintenance layout wrapper. *@
 <div class="data-visual-view" style="@ContainerStyle" data-ps-visual-config="@ClientConfigBase64">
     @if (DataObject is null)
     {
@@ -168,11 +165,6 @@
         }
     }
 </div>
-    </Template>
-    </DxFormLayoutItem>
-</DxFormLayout>
-</div>
-
 
 @code {
 

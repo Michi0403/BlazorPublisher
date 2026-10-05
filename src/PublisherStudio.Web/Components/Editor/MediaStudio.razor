@@ -731,7 +731,7 @@
                                 <div class="media-export-compatibility @HtmlSupportCss(selectedFilter.HtmlExportSupport)"><b>@HtmlSupportLabel(selectedFilter.HtmlExportSupport)</b><span>@selectedFilter.HtmlExportNote</span></div>
                                 @if (selectedFilter.Kind == VideoEffectFilterKind.ChromaKey)
                                 {
-                                    <label>@LT("Key color")<input type="color" value="@selectedFilter.Color" @oninput="ChangeVideoFilterColor" /></label>
+                                    <label>@LT("Key color")<DevExpressColorPicker Value="@selectedFilter.Color" Changed="ChangeVideoFilterColor" /></label>
                                     <label>@LT("Similarity") <b>@Inv(selectedFilter.Amount)</b><input type="range" min="0" max="1" step="0.01" value="@Inv(selectedFilter.Amount)" @oninput="ChangeVideoFilterAmount" /></label>
                                     <label>@LT("Smoothness") <b>@Inv(selectedFilter.SecondaryAmount)</b><input type="range" min="0.001" max="1" step="0.01" value="@Inv(selectedFilter.SecondaryAmount)" @oninput="ChangeVideoFilterSecondaryAmount" /></label>
                                     <label>@LT("Spill reduction") <b>@Inv(selectedFilter.TertiaryAmount)</b><input type="range" min="0" max="1" step="0.01" value="@Inv(selectedFilter.TertiaryAmount)" @oninput="ChangeVideoFilterTertiaryAmount" /></label>
@@ -748,7 +748,7 @@
                                         <input type="range" min="@Inv(VideoFilterMinimum(selectedFilter.Kind))" max="@Inv(VideoFilterMaximum(selectedFilter.Kind))" step="@Inv(VideoFilterStep(selectedFilter.Kind))" value="@Inv(selectedFilter.Amount)" @oninput="ChangeVideoFilterAmount" /> </label>
                                     @if (selectedFilter.Kind == VideoEffectFilterKind.ColorWash)
                                     {
-                                        <label>@LT("Wash color")<input type="color" value="@selectedFilter.Color" @oninput="ChangeVideoFilterColor" /></label>
+                                        <label>@LT("Wash color")<DevExpressColorPicker Value="@selectedFilter.Color" Changed="ChangeVideoFilterColor" /></label>
                                     }
                                 }
                                 <div class="property-action-row">
@@ -2420,7 +2420,7 @@
         try
         {
             if (_disposed) throw new ObjectDisposedException(nameof(MediaStudio));
-            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=4.0.3").ConfigureAwait(true);
+            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=4.0.7").ConfigureAwait(true);
             _self ??= DotNetObjectReference.Create(this);
             if (SessionId != Guid.Empty)
             {

@@ -1,10 +1,7 @@
 @namespace PublisherStudio.Components.Editor
 
 @inject ILogger<BarcodeView> Logger
-<div class="razor-component-boundary">
-<DxFormLayout CssClass="razor-component-layout-owner BarcodeView">
-    <DxFormLayoutItem ColSpanMd="12">
-        <Template Context="formItemContext001">
+@* razor-structural-renderer | reason: BarcodeView is a geometry-sensitive render leaf; its rendered root must remain the authored/runtime surface rather than a maintenance layout wrapper. *@
 <div class="barcode-view" aria-label="@Item.Name">
     @if (string.IsNullOrWhiteSpace(Item.SvgMarkup))
     {
@@ -15,11 +12,6 @@
         @((MarkupString)Item.SvgMarkup)
     }
 </div>
-    </Template>
-    </DxFormLayoutItem>
-</DxFormLayout>
-</div>
-
 
 @code {
 

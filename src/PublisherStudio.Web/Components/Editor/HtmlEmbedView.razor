@@ -1,11 +1,8 @@
 @namespace PublisherStudio.Components.Editor
 
 @inject ILogger<HtmlEmbedView> Logger
+@* razor-structural-renderer | reason: HtmlEmbedView is a geometry-sensitive render leaf; its rendered root must remain the authored/runtime surface rather than a maintenance layout wrapper. *@
 @inject PublicationEditorTextService EditorText
-<div class="razor-component-boundary">
-<DxFormLayout CssClass="razor-component-layout-owner HtmlEmbedView">
-    <DxFormLayoutItem ColSpanMd="12">
-        <Template Context="formItemContext001">
 <div class="publication-html-embed-shell @(DesignerMode ? "designer-object-mode" : "interaction-mode")">
     <iframe class="publication-html-embed"
             title="@Item.Name"
@@ -22,11 +19,6 @@
              aria-label="Arrange @Item.Name"></div>
     }
 </div>
-    </Template>
-    </DxFormLayoutItem>
-</DxFormLayout>
-</div>
-
 
 @code {
 

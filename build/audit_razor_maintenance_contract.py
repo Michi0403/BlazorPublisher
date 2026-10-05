@@ -45,6 +45,7 @@ POPUP_VIEWPORT_REQUIRED_TOKENS = (
 )
 PRIMARY_LAYOUT_MARKER_RE = re.compile(r'@\*\s*razor-primary-layout:\s*(?P<layout>Dx(?:GridLayout|Carousel|Drawer|FormLayout|Splitter|StackLayout|Tabs))\s*\|\s*reason:\s*(?P<reason>.*?)\s*\*@', re.I | re.S)
 STACK_CHILD_INTENT_RE = re.compile(r'@\*\s*razor-layout-intent:\s*stack-child\s*\|\s*reason:\s*(?P<reason>.*?)\s*\*@', re.I | re.S)
+STRUCTURAL_RENDERER_MARKER_RE = re.compile(r'@\*\s*razor-structural-renderer\s*\|\s*reason:\s*(?P<reason>.*?)\s*\*@', re.I | re.S)
 FORM_EDITOR_RE = re.compile(r'<\s*(?:DxTextBox|DxMemo|DxSpinEdit|DxComboBox|DxTagBox|DxCheckBox|DxDateEdit|DxDateRangePicker|DxTimeEdit|DxMaskedInput|DxRadioGroup)\b', re.I)
 
 METHOD_RE = re.compile(
@@ -382,8 +383,19 @@ def main() -> int:
 
         tags = list(TAG_RE.finditer(markup))
         tag_names = [m.group('tag') for m in tags]
+        structural_marker = STRUCTURAL_RENDERER_MARKER_RE.search(text[:2400])
+        structural_renderer = bool(structural_marker and len(structural_marker.group('reason').strip()) >= 12)
         has_layout = any(name in ALLOWED_LAYOUTS for name in tag_names)
-        if tags and path.name not in HOST_LAYOUT_EXEMPT:
+        if structural_renderer:
+            maintenance_wrapper = re.search(r'razor-(?:component|section)-layout-owner', markup, re.I)
+            if maintenance_wrapper:
+                line, col = line_col(markup, maintenance_wrapper.start())
+                findings.append(Finding(
+                    relative, line, col, 'RAZORUI0015',
+                    'Geometry-sensitive structural renderer contains a maintenance DevExpress layout wrapper.',
+                    'Keep the structural renderer direct-root so authored coordinates, CSS child selectors, hit-testing, resize ownership and exported/runtime DOM stay aligned. Meaningful DevExpress controls inside the renderer are allowed; remove only the artificial razor-component-layout-owner/razor-section-layout-owner wrapper. If this is actually form/editor UI, remove the structural-renderer marker and use normal DevExpress layout ownership instead.'
+                ))
+        if tags and path.name not in HOST_LAYOUT_EXEMPT and not structural_renderer:
             if not has_layout:
                 first = tags[0]
                 line, col = line_col(markup, first.start())
@@ -518,12 +530,12 @@ def main() -> int:
         for finding in findings:
             print(f'{finding.file}({finding.line},{finding.column}): error {finding.code}: {finding.message}')
             print(f'  Architectural choices: {finding.choices}')
-        print(f'Razor maintenance architecture audit found {len(findings)} violation(s) across {len(razor_files)} Razor component(s). No legacy exemption list is permitted; App.razor is the sole document-host layout exception.')
+        print(f'Razor maintenance architecture audit found {len(findings)} violation(s) across {len(razor_files)} Razor component(s). No broad exemption list is permitted; App.razor is the document-host exception and explicitly reasoned razor-structural-renderer components are direct-root geometry renderers.')
         return 1
 
     print(
         f'Razor maintenance architecture validation passed for {len(razor_files)} Razor component(s): '
-        'containment-only root divs protect component boundaries, DxFormLayout is the default semantic owner for forms/editors, '
+        'containment-only root divs protect ordinary component boundaries, DxFormLayout is the default semantic owner for forms/editors, explicitly reasoned structural renderers stay direct-root, '
         'generic StackLayout wrappers and unexplained Grid-to-Stack nesting are rejected, FormLayout template contexts are explicit and unique, <section>/<dialog> are absent, '
         'maintenance-only DevExpress wrapper shells remain box-neutral, typed component loggers are present, manual/native modal owners are absent, '
         'popup bodies expose their real studio roots directly, and component methods own diagnostics.'

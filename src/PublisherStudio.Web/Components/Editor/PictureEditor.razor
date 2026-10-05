@@ -347,7 +347,7 @@
                                 </select>
                             </label>
                             <label>@LT("Custom background")
-                                <input type="color" value="@CanvasColor" @onchange="ChangeCanvasColor" /> </label>
+                                <DevExpressColorPicker Value="@CanvasColor" Changed="ChangeCanvasColor" /> </label>
                             <div class="picture-preset-buttons">
                                 <button type="button" @onclick="PresetSquare">@LT("Square")</button>
                                 <button type="button" @onclick="PresetLandscape">@LT("Landscape")</button>
@@ -376,9 +376,9 @@
                             </label>
                             <div class="picture-property-grid">
                                 <label>@LT("Primary color")
-                                    <input type="color" value="@SafeColor(_drawColor)" @onchange="ChangeDrawColorInput" /> </label>
+                                    <DevExpressColorPicker Value="@SafeColor(_drawColor)" Changed="ChangeDrawColorInput" /> </label>
                                 <label>@LT("Secondary color")
-                                    <input type="color" value="@SafeColor(_drawSecondaryColor)" @onchange="ChangeDrawSecondaryColorInput" /> </label>
+                                    <DevExpressColorPicker Value="@SafeColor(_drawSecondaryColor)" Changed="ChangeDrawSecondaryColorInput" /> </label>
                                 <label>@LT("Exact width (px)")
                                     <input type="number" min="0.25" max="512" step="0.25" value="@Inv(_drawWidth)" @onchange="ChangeDrawWidth" /> </label>
                             </div>
@@ -507,7 +507,7 @@
                                             <label><input type="checkbox" checked="@raster.FlipVertical" @onchange="ToggleRasterFlipVertical" /> @LT("Flip vertical")</label>
                                         </div>
                                         <label>@LT("Tint color")
-                                            <input type="color" value="@SafeColor(raster.TintColor)" @onchange="ChangeRasterTintColor" /> </label>
+                                            <DevExpressColorPicker Value="@SafeColor(raster.TintColor)" Changed="ChangeRasterTintColor" /> </label>
                                         <label>@LT("Tint strength")
                                             <input type="range" min="0" max="1" step="0.01" value="@Inv(raster.TintOpacity)" @oninput="ChangeRasterTintOpacity" @onchange="EndLiveEdit" />
                                             <span class="picture-range-value">@Math.Round(raster.TintOpacity * 100)%</span>
@@ -524,8 +524,8 @@
                                         @if (raster.ColorizeMode == PictureRasterColorizeMode.ReplaceColor)
                                         {
                                             <div class="picture-property-grid">
-                                                <label>@LT("Replace color")<input type="color" value="@SafeColor(raster.ColorizeSourceColor)" @onchange="ChangeRasterColorizeSource" /></label>
-                                                <label>@LT("With color")<input type="color" value="@SafeColor(raster.ColorizeTargetColor)" @onchange="ChangeRasterColorizeTarget" /></label>
+                                                <label>@LT("Replace color")<DevExpressColorPicker Value="@SafeColor(raster.ColorizeSourceColor)" Changed="ChangeRasterColorizeSource" /></label>
+                                                <label>@LT("With color")<DevExpressColorPicker Value="@SafeColor(raster.ColorizeTargetColor)" Changed="ChangeRasterColorizeTarget" /></label>
                                             </div>
                                             <label>@LT("Match tolerance")
                                                 <input type="range" min="0" max="255" step="1" value="@raster.ColorizeTolerance" @oninput="ChangeRasterColorizeTolerance" @onchange="EndLiveEdit" />
@@ -534,7 +534,7 @@
                                         }
                                         else if (raster.ColorizeMode == PictureRasterColorizeMode.Luminosity)
                                         {
-                                            <label>@LT("Colorize with")<input type="color" value="@SafeColor(raster.ColorizeTargetColor)" @onchange="ChangeRasterColorizeTarget" /></label>
+                                            <label>@LT("Colorize with")<DevExpressColorPicker Value="@SafeColor(raster.ColorizeTargetColor)" Changed="ChangeRasterColorizeTarget" /></label>
                                         }
                                         <label>@LT("Color-change strength")
                                             <input type="range" min="0" max="1" step="0.01" value="@Inv(raster.ColorizeStrength)" @oninput="ChangeRasterColorizeStrength" @onchange="EndLiveEdit" />
@@ -575,9 +575,9 @@
                                         </div>
                                         <div class="picture-property-grid">
                                             <label>@LT("Fill")
-                                                <input type="color" value="@SafeColor(textLayer.FillColor)" @onchange="ChangeTextFill" /> </label>
+                                                <DevExpressColorPicker Value="@SafeColor(textLayer.FillColor)" Changed="ChangeTextFill" /> </label>
                                             <label>@LT("Outline")
-                                                <input type="color" value="@SafeColor(textLayer.OutlineColor)" @onchange="ChangeTextOutline" /> </label>
+                                                <DevExpressColorPicker Value="@SafeColor(textLayer.OutlineColor)" Changed="ChangeTextOutline" /> </label>
                                             <label>@LT("Outline width")
                                                 <input type="number" min="0" max="64" step="1" value="@Inv(textLayer.OutlineWidthPx)" @onchange="ChangeTextOutlineWidth" /> </label>
                                             <label>@LT("Shadow blur")
@@ -612,11 +612,11 @@
                                         </label>
                                         <div class="picture-property-grid">
                                             <label>@LT("Fill 1")
-                                                <input type="color" value="@SafeColor(shapeLayer.FillColor)" @onchange="ChangeShapeFill" /> </label>
+                                                <DevExpressColorPicker Value="@SafeColor(shapeLayer.FillColor)" Changed="ChangeShapeFill" /> </label>
                                             <label>@LT("Fill 2")
-                                                <input type="color" value="@SafeColor(shapeLayer.SecondaryFillColor)" @onchange="ChangeShapeSecondaryFill" /> </label>
+                                                <DevExpressColorPicker Value="@SafeColor(shapeLayer.SecondaryFillColor)" Changed="ChangeShapeSecondaryFill" /> </label>
                                             <label>@LT("Stroke")
-                                                <input type="color" value="@SafeColor(shapeLayer.StrokeColor)" @onchange="ChangeShapeStroke" /> </label>
+                                                <DevExpressColorPicker Value="@SafeColor(shapeLayer.StrokeColor)" Changed="ChangeShapeStroke" /> </label>
                                             <label>@LT("Stroke width")
                                                 <input type="number" min="0" max="200" value="@Inv(shapeLayer.StrokeWidthPx)" @onchange="ChangeShapeStrokeWidth" /> </label>
                                             <label>@LT("Corner radius")
@@ -675,9 +675,9 @@
                                         </label>
                                         <div class="picture-property-grid">
                                             <label>@LT("Color 1")
-                                                <input type="color" value="@SafeColor(fillLayer.PrimaryColor)" @onchange="ChangeFillPrimary" /> </label>
+                                                <DevExpressColorPicker Value="@SafeColor(fillLayer.PrimaryColor)" Changed="ChangeFillPrimary" /> </label>
                                             <label>@LT("Color 2")
-                                                <input type="color" value="@SafeColor(fillLayer.SecondaryColor)" @onchange="ChangeFillSecondary" /> </label>
+                                                <DevExpressColorPicker Value="@SafeColor(fillLayer.SecondaryColor)" Changed="ChangeFillSecondary" /> </label>
                                         </div>
                                         <label>@LT("Angle")
                                             <input type="range" min="0" max="360" step="1" value="@Inv(fillLayer.AngleDegrees)" @oninput="ChangeFillAngle" @onchange="EndLiveEdit" />
@@ -722,9 +722,9 @@
                                         </label>
                                         <div class="picture-property-grid">
                                             <label>@LT("Color 1")
-                                                <input type="color" value="@SafeColor(renderLayer.PrimaryColor)" @onchange="ChangeRenderPrimary" /> </label>
+                                                <DevExpressColorPicker Value="@SafeColor(renderLayer.PrimaryColor)" Changed="ChangeRenderPrimary" /> </label>
                                             <label>@LT("Color 2")
-                                                <input type="color" value="@SafeColor(renderLayer.SecondaryColor)" @onchange="ChangeRenderSecondary" /> </label>
+                                                <DevExpressColorPicker Value="@SafeColor(renderLayer.SecondaryColor)" Changed="ChangeRenderSecondary" /> </label>
                                             <label>@LT("Seed")
                                                 <input type="number" value="@renderLayer.Seed" @onchange="ChangeRenderSeed" /> </label>
                                             <label>@LT("Scale")

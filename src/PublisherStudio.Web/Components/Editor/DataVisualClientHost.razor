@@ -4,16 +4,8 @@
 @inject IJSRuntime JS
 
 @inject ILogger<DataVisualClientHost> Logger
-<div class="razor-component-boundary">
-<DxFormLayout CssClass="razor-component-layout-owner DataVisualClientHost">
-    <DxFormLayoutItem ColSpanMd="12">
-        <Template Context="formItemContext001">
+@* razor-structural-renderer | reason: DataVisualClientHost is a geometry-sensitive render leaf; its rendered root must remain the authored/runtime surface rather than a maintenance layout wrapper. *@
 <div id="@ElementId" class="data-visual-client-host"></div>
-    </Template>
-    </DxFormLayoutItem>
-</DxFormLayout>
-</div>
-
 
 @code {
 

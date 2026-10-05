@@ -7,159 +7,195 @@
 <div class="razor-component-boundary">
 <DxFormLayout CssClass="razor-component-layout-owner PageEffectStudio">
     <DxFormLayoutItem ColSpanMd="12">
-        <Template Context="formItemContext001">
-@if (Visible)
-{
-    <DxPopup Visible="true"
-         Width="min(1180px, 92vw)"
-         Height="min(820px, 90dvh)"
-         MaxHeight="90dvh"
-         CloseOnOutsideClick="false"
-         CloseOnEscape="false"
-         ShowHeader="false">
-    <BodyContentTemplate Context="publisherPopupContext">
-        <div class="publisher-dialog page-effect-studio" aria-labelledby="page-effect-studio-title" @onclick:stopPropagation>
-            <header>
-                <div>
-                    <h2 id="page-effect-studio-title">Page appearance & effects</h2>
-                    <p>Page-wide color and effect layers are separate from ordinary object Z-order, so existing component layering stays intact.</p>
-                </div>
-                <button type="button" class="publisher-dialog-close" title="Close" @onclick="Close">×</button>
-            </header>
+        <Template Context="pageEffectFormItemContext">
+            <DxPopup Visible="true"
+                     Width="min(1180px, 92vw)"
+                     Height="min(820px, 90dvh)"
+                     MaxHeight="90dvh"
+                     CloseOnOutsideClick="false"
+                     CloseOnEscape="false"
+                     ShowHeader="false">
+                <BodyContentTemplate Context="pageEffectPopupContext">
+                    <div class="publisher-dialog page-effect-studio" aria-labelledby="page-effect-studio-title" @onclick:stopPropagation>
+                        <header>
+                            <div>
+                                <h2 id="page-effect-studio-title">Page appearance &amp; effects</h2>
+                                <p>Page-wide color and effect layers are separate from ordinary object Z-order, so existing component layering stays intact.</p>
+                            </div>
+                            <DxButton Text="×" CssClass="publisher-dialog-close" Click="Close" Attributes="@CloseButtonAttributes" />
+                        </header>
 
-            <div class="page-effect-studio-body">
-                <div class="page-effect-base-color">
-                    <h3>Page color</h3>
-                    <div class="page-effect-row">
-                        <label>Custom page color
-                            <input type="color" value="@SafeColor(State.CurrentPage.Background)" @onchange="ChangePageColor" />
-                        </label>
-                        <button type="button" @onclick="SetTransparent">Transparent</button>
-                        <span class="page-effect-color-value">@State.CurrentPage.Background</span>
-                    </div>
-                </div>
+                        <div class="page-effect-studio-body">
+                            <div class="page-effect-base-color">
+                                <h3>Page color</h3>
+                                <div class="page-effect-row page-effect-devexpress-row">
+                                    <label>Custom page color
+                                        <DevExpressColorPicker Value="@SafeColor(State.CurrentPage.Background)" Changed="ChangePageColor" CssClass="page-effect-color-editor" />
+                                    </label>
+                                    <DxButton Text="Transparent" Click="SetTransparent" />
+                                    <span class="page-effect-color-value">@State.CurrentPage.Background</span>
+                                </div>
+                            </div>
 
-                <div>
-                    <div class="page-effect-section-heading">
-                        <div>
-                            <h3>Effect layers</h3>
-                            <p>Background layers sit below objects; overlay layers sit above objects but never capture the mouse.</p>
-                        </div>
-                        <div>
-                            <button type="button" @onclick="() => AddEffect(PublicationPageEffectKind.SolidColor)">+ Color</button>
-                            <button type="button" @onclick="() => AddEffect(PublicationPageEffectKind.LinearGradient)">+ Linear gradient</button>
-                            <button type="button" @onclick="() => AddEffect(PublicationPageEffectKind.RadialGradient)">+ Radial gradient</button>
-                        </div>
-                    </div>
-
-                    @if (State.CurrentPage.EffectLayers.Count == 0)
-                    {
-                        <div class="page-effect-empty">No page effect layers yet. The ordinary page color remains active.</div>
-                    }
-                    else
-                    {
-                        <div class="page-effect-layer-list">
-                            @foreach (var effect in State.CurrentPage.EffectLayers)
-                            {
-                                <article class="page-effect-card" @key="effect.Id">
-                                    <header>
-                                        <label class="page-effect-name">Name
-                                            <input value="@effect.Name" @onchange="args => UpdateText(effect.Id, args, (item, value) => item.Name = value)" />
-                                        </label>
-                                        <label><input type="checkbox" checked="@effect.Visible" @onchange="args => UpdateBool(effect.Id, args, (item, value) => item.Visible = value)" /> Visible</label>
-                                        <button type="button" class="danger" @onclick="() => RemoveEffect(effect.Id)">Delete</button>
-                                    </header>
-
-                                    <div class="page-effect-grid">
-                                        <label>Placement
-                                            <select value="@effect.Placement" @onchange="args => UpdatePlacement(effect.Id, args)">
-                                                @foreach (var value in Enum.GetValues<PublicationPageEffectPlacement>()) { <option value="@value">@value</option> }
-                                            </select>
-                                        </label>
-                                        <label>Effect
-                                            <select value="@effect.Kind" @onchange="args => UpdateKind(effect.Id, args)">
-                                                @foreach (var value in Enum.GetValues<PublicationPageEffectKind>()) { <option value="@value">@value</option> }
-                                            </select>
-                                        </label>
-                                        <label>Blend
-                                            <select value="@effect.BlendMode" @onchange="args => UpdateBlendMode(effect.Id, args)">
-                                                @foreach (var value in Enum.GetValues<PublicationPageEffectBlendMode>()) { <option value="@value">@value</option> }
-                                            </select>
-                                        </label>
-                                        <label>Start color
-                                            <input type="color" value="@SafeColor(effect.Color)" @onchange="args => UpdateText(effect.Id, args, (item, value) => item.Color = SafeColor(value))" />
-                                        </label>
-                                        @if (effect.Kind != PublicationPageEffectKind.SolidColor)
-                                        {
-                                            <label>Start color 2
-                                                <input type="color" value="@SafeColor(effect.SecondaryColor)" @onchange="args => UpdateText(effect.Id, args, (item, value) => item.SecondaryColor = SafeColor(value))" />
-                                            </label>
-                                            <label>Gradient angle
-                                                <input type="number" min="-360" max="360" step="1" value="@Inv(effect.AngleDegrees)" @onchange="args => UpdateDouble(effect.Id, args, -360, 360, (item, value) => item.AngleDegrees = value)" />
-                                            </label>
-                                        }
-                                        <label>Opacity
-                                            <input type="range" min="0" max="1" step="0.01" value="@Inv(effect.Opacity)" @onchange="args => UpdateDouble(effect.Id, args, 0, 1, (item, value) => item.Opacity = value)" />
-                                            <span>@Math.Round(effect.Opacity * 100)%</span>
-                                        </label>
+                            <div>
+                                <div class="page-effect-section-heading">
+                                    <div>
+                                        <h3>Effect layers</h3>
+                                        <p>Background layers sit below objects; overlay layers sit above objects but never capture the mouse.</p>
                                     </div>
+                                    <div class="page-effect-action-row">
+                                        <DxButton Text="+ Color" Click="@(() => AddEffect(PublicationPageEffectKind.SolidColor))" />
+                                        <DxButton Text="+ Linear gradient" Click="@(() => AddEffect(PublicationPageEffectKind.LinearGradient))" />
+                                        <DxButton Text="+ Radial gradient" Click="@(() => AddEffect(PublicationPageEffectKind.RadialGradient))" />
+                                    </div>
+                                </div>
 
-                                    <details open="@effect.AnimationEnabled">
-                                        <summary>Animation / transition</summary>
-                                        <div class="page-effect-grid">
-                                            <label><input type="checkbox" checked="@effect.AnimationEnabled" @onchange="args => UpdateBool(effect.Id, args, (item, value) => item.AnimationEnabled = value)" /> Animate from → to</label>
-                                            <label>End color
-                                                <input type="color" value="@SafeColor(effect.ToColor)" @onchange="args => UpdateText(effect.Id, args, (item, value) => item.ToColor = SafeColor(value))" />
-                                            </label>
-                                            @if (effect.Kind != PublicationPageEffectKind.SolidColor)
-                                            {
-                                                <label>End color 2
-                                                    <input type="color" value="@SafeColor(effect.ToSecondaryColor)" @onchange="args => UpdateText(effect.Id, args, (item, value) => item.ToSecondaryColor = SafeColor(value))" />
-                                                </label>
-                                            }
-                                            <label>End opacity
-                                                <input type="range" min="0" max="1" step="0.01" value="@Inv(effect.ToOpacity)" @onchange="args => UpdateDouble(effect.Id, args, 0, 1, (item, value) => item.ToOpacity = value)" />
-                                            </label>
-                                            <label>Duration (s)
-                                                <input type="number" min="0.05" max="3600" step="0.05" value="@Inv(effect.DurationSeconds)" @onchange="args => UpdateDouble(effect.Id, args, .05, 3600, (item, value) => item.DurationSeconds = value)" />
-                                            </label>
-                                            <label>Delay (s)
-                                                <input type="number" min="0" max="3600" step="0.05" value="@Inv(effect.DelaySeconds)" @onchange="args => UpdateDouble(effect.Id, args, 0, 3600, (item, value) => item.DelaySeconds = value)" />
-                                            </label>
-                                            <label>Repeats
-                                                <input type="number" min="1" max="1000" step="1" value="@effect.RepeatCount" @onchange="args => UpdateInt(effect.Id, args, 1, 1000, (item, value) => item.RepeatCount = value)" />
-                                            </label>
-                                            <label><input type="checkbox" checked="@effect.AutoReverse" @onchange="args => UpdateBool(effect.Id, args, (item, value) => item.AutoReverse = value)" /> Reverse back to start</label>
-                                            <label>Easing
-                                                <select value="@effect.Easing" @onchange="args => UpdateEasing(effect.Id, args)">
-                                                    @foreach (var value in Enum.GetValues<PublicationAnimationEasing>()) { <option value="@value">@value</option> }
-                                                </select>
-                                            </label>
-                                        </div>
-                                    </details>
-                                </article>
-                            }
+                                @if (State.CurrentPage.EffectLayers.Count == 0)
+                                {
+                                    <div class="page-effect-empty">No page effect layers yet. The ordinary page color remains active.</div>
+                                }
+                                else
+                                {
+                                    <div class="page-effect-layer-list">
+                                        @foreach (var effect in State.CurrentPage.EffectLayers)
+                                        {
+                                            <article class="page-effect-card" @key="effect.Id">
+                                                <header>
+                                                    <label class="page-effect-name">Name
+                                                        <DxTextBox Text="@effect.Name"
+                                                                   TextChanged="@((string? value) => UpdateText(effect.Id, new ChangeEventArgs { Value = value }, (item, text) => item.Name = text))" />
+                                                    </label>
+                                                    <label class="check-row">
+                                                        <DxCheckBox Checked="@effect.Visible"
+                                                                    CheckedChanged="@((bool value) => UpdateBool(effect.Id, new ChangeEventArgs { Value = value }, (item, state) => item.Visible = state))" />
+                                                        Visible
+                                                    </label>
+                                                    <DxButton Text="Delete" CssClass="danger" Click="@(() => RemoveEffect(effect.Id))" />
+                                                </header>
+
+                                                <div class="page-effect-grid">
+                                                    <label>Placement
+                                                        <DxComboBox Data="@PlacementOptions" Value="@effect.Placement"
+                                                                    ValueChanged="@((PublicationPageEffectPlacement value) => UpdatePlacement(effect.Id, new ChangeEventArgs { Value = value }))" />
+                                                    </label>
+                                                    <label>Effect
+                                                        <DxComboBox Data="@KindOptions" Value="@effect.Kind"
+                                                                    ValueChanged="@((PublicationPageEffectKind value) => UpdateKind(effect.Id, new ChangeEventArgs { Value = value }))" />
+                                                    </label>
+                                                    <label>Blend
+                                                        <DxComboBox Data="@BlendOptions" Value="@effect.BlendMode"
+                                                                    ValueChanged="@((PublicationPageEffectBlendMode value) => UpdateBlendMode(effect.Id, new ChangeEventArgs { Value = value }))" />
+                                                    </label>
+                                                    <label>Start color
+                                                        <DevExpressColorPicker Value="@SafeColor(effect.Color)"
+                                                                               Changed="@(args => UpdateText(effect.Id, args, (item, value) => item.Color = SafeColor(value)))" />
+                                                    </label>
+                                                    @if (effect.Kind != PublicationPageEffectKind.SolidColor)
+                                                    {
+                                                        <label>Start color 2
+                                                            <DevExpressColorPicker Value="@SafeColor(effect.SecondaryColor)"
+                                                                                   Changed="@(args => UpdateText(effect.Id, args, (item, value) => item.SecondaryColor = SafeColor(value)))" />
+                                                        </label>
+                                                        <label>Gradient angle
+                                                            <DxSpinEdit T="double" MinValue="-360" MaxValue="360" Increment="1d" Value="@effect.AngleDegrees"
+                                                                        ValueChanged="@((double value) => UpdateDouble(effect.Id, new ChangeEventArgs { Value = value }, -360, 360, (item, number) => item.AngleDegrees = number))" />
+                                                        </label>
+                                                    }
+                                                    <label>Opacity
+                                                        <DxSpinEdit T="double" MinValue="0" MaxValue="1" Increment="0.01d" DisplayFormat="P0" Value="@effect.Opacity"
+                                                                    ValueChanged="@((double value) => UpdateDouble(effect.Id, new ChangeEventArgs { Value = value }, 0, 1, (item, number) => item.Opacity = number))" />
+                                                    </label>
+                                                </div>
+
+                                                <div class="page-effect-animation-editor">
+                                                    <label class="check-row page-effect-animation-toggle">
+                                                        <DxCheckBox Checked="@effect.AnimationEnabled"
+                                                                    CheckedChanged="@((bool value) => UpdateBool(effect.Id, new ChangeEventArgs { Value = value }, (item, state) => item.AnimationEnabled = state))" />
+                                                        Animation / transition
+                                                    </label>
+                                                    @if (effect.AnimationEnabled)
+                                                    {
+                                                        <div class="page-effect-grid">
+                                                            <label>End color
+                                                                <DevExpressColorPicker Value="@SafeColor(effect.ToColor)"
+                                                                                       Changed="@(args => UpdateText(effect.Id, args, (item, value) => item.ToColor = SafeColor(value)))" />
+                                                            </label>
+                                                            @if (effect.Kind != PublicationPageEffectKind.SolidColor)
+                                                            {
+                                                                <label>End color 2
+                                                                    <DevExpressColorPicker Value="@SafeColor(effect.ToSecondaryColor)"
+                                                                                           Changed="@(args => UpdateText(effect.Id, args, (item, value) => item.ToSecondaryColor = SafeColor(value)))" />
+                                                                </label>
+                                                            }
+                                                            <label>End opacity
+                                                                <DxSpinEdit T="double" MinValue="0" MaxValue="1" Increment="0.01d" DisplayFormat="P0" Value="@effect.ToOpacity"
+                                                                            ValueChanged="@((double value) => UpdateDouble(effect.Id, new ChangeEventArgs { Value = value }, 0, 1, (item, number) => item.ToOpacity = number))" />
+                                                            </label>
+                                                            <label>Duration (s)
+                                                                <DxSpinEdit T="double" MinValue="0.05" MaxValue="3600" Increment="0.05d" Value="@effect.DurationSeconds"
+                                                                            ValueChanged="@((double value) => UpdateDouble(effect.Id, new ChangeEventArgs { Value = value }, .05, 3600, (item, number) => item.DurationSeconds = number))" />
+                                                            </label>
+                                                            <label>Delay (s)
+                                                                <DxSpinEdit T="double" MinValue="0" MaxValue="3600" Increment="0.05d" Value="@effect.DelaySeconds"
+                                                                            ValueChanged="@((double value) => UpdateDouble(effect.Id, new ChangeEventArgs { Value = value }, 0, 3600, (item, number) => item.DelaySeconds = number))" />
+                                                            </label>
+                                                            <label>Repeats
+                                                                <DxSpinEdit T="int" MinValue="1" MaxValue="1000" Increment="1" Value="@effect.RepeatCount"
+                                                                            ValueChanged="@((int value) => UpdateInt(effect.Id, new ChangeEventArgs { Value = value }, 1, 1000, (item, number) => item.RepeatCount = number))" />
+                                                            </label>
+                                                            <label class="check-row">
+                                                                <DxCheckBox Checked="@effect.AutoReverse"
+                                                                            CheckedChanged="@((bool value) => UpdateBool(effect.Id, new ChangeEventArgs { Value = value }, (item, state) => item.AutoReverse = state))" />
+                                                                Reverse back to start
+                                                            </label>
+                                                            <label>Easing
+                                                                <DxComboBox Data="@EasingOptions" Value="@effect.Easing"
+                                                                            ValueChanged="@((PublicationAnimationEasing value) => UpdateEasing(effect.Id, new ChangeEventArgs { Value = value }))" />
+                                                            </label>
+                                                        </div>
+                                                    }
+                                                </div>
+                                            </article>
+                                        }
+                                    </div>
+                                }
+                            </div>
                         </div>
-                    }
-                </div>
-            </div>
 
-            <footer>
-                <span>Changes are publication-native and participate in undo/redo, print, raster/SVG and HTML rendering.</span>
-                <button type="button" class="primary" @onclick="Close">Done</button>
-            </footer>
-        </div>
-        </BodyContentTemplate>
-</DxPopup>
-}
-    </Template>
+                        <footer>
+                            <span>Changes are publication-native and participate in undo/redo, print, raster/SVG and HTML rendering.</span>
+                            <DxButton Text="Done" CssClass="primary" Click="Close" />
+                        </footer>
+                    </div>
+                </BodyContentTemplate>
+            </DxPopup>
+        </Template>
     </DxFormLayoutItem>
 </DxFormLayout>
 </div>
 }
 
-
 @code {
+    /// <summary>Lists the supported page-effect placements for the DevExpress placement editor.</summary>
+    /// <value>The supported page-effect placement values.</value>
+    private IReadOnlyList<PublicationPageEffectPlacement> PlacementOptions { get; } = Enum.GetValues<PublicationPageEffectPlacement>();
+    /// <summary>Lists the supported page-effect kinds for the DevExpress effect editor.</summary>
+    /// <value>The supported page-effect kind values.</value>
+    private IReadOnlyList<PublicationPageEffectKind> KindOptions { get; } = Enum.GetValues<PublicationPageEffectKind>();
+    /// <summary>Lists the supported page-effect blend modes for the DevExpress blend editor.</summary>
+    /// <value>The supported page-effect blend-mode values.</value>
+    private IReadOnlyList<PublicationPageEffectBlendMode> BlendOptions { get; } = Enum.GetValues<PublicationPageEffectBlendMode>();
+    /// <summary>Lists the supported animation easing modes for the DevExpress easing editor.</summary>
+    /// <value>The supported animation easing values.</value>
+    private IReadOnlyList<PublicationAnimationEasing> EasingOptions { get; } = Enum.GetValues<PublicationAnimationEasing>();
+    /// <summary>Supplies accessible metadata for the DevExpress dialog close button.</summary>
+    /// <value>The title and ARIA label exposed by the close command.</value>
+    private Dictionary<string, object> CloseButtonAttributes { get; } = new()
+    {
+        ["title"] = "Close",
+        ["aria-label"] = "Close page appearance and effects"
+    };
+
 
     /// <summary>
     /// Gets or sets a value indicating whether the value is visible applies to the page effect studio state.

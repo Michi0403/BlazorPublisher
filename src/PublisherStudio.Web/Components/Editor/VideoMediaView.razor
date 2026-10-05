@@ -4,10 +4,7 @@
 @inject PublicationMediaAssetStore MediaAssets
 
 @inject ILogger<VideoMediaView> Logger
-<div class="razor-component-boundary">
-<DxFormLayout CssClass="razor-component-layout-owner VideoMediaView">
-    <DxFormLayoutItem ColSpanMd="12">
-        <Template Context="formItemContext001">
+@* razor-structural-renderer | reason: VideoMediaView is a geometry-sensitive render leaf; its rendered root must remain the authored/runtime surface rather than a maintenance layout wrapper. *@
 <div class="publication-video-renderer" style="background:@Item.Background">
     <video id="@VideoId"
            class="publication-video-source"
@@ -35,11 +32,6 @@
     <canvas id="@CanvasId" class="publication-video-effect-canvas" aria-hidden="true"></canvas>
     <span class="media-object-badge">▶ @Time(Item.TimelineLengthSeconds)</span>
 </div>
-    </Template>
-    </DxFormLayoutItem>
-</DxFormLayout>
-</div>
-
 
 @code {
 

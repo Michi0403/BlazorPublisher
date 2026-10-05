@@ -4,10 +4,7 @@
 @inject IJSRuntime JS
 
 @inject ILogger<DevExtremeComponentView> Logger
-<div class="razor-component-boundary">
-<DxFormLayout CssClass="razor-component-layout-owner DevExtremeComponentView">
-    <DxFormLayoutItem ColSpanMd="12">
-        <Template Context="formItemContext001">
+@* razor-structural-renderer | reason: DevExtremeComponentView is a geometry-sensitive render leaf; its rendered root must remain the authored/runtime surface rather than a maintenance layout wrapper. *@
 <div class="devextreme-publication-component @(Item.ShowTitle ? "has-component-title" : null) @Item.CustomCssClass" style="@ContainerStyle">
     @if (Item.ShowTitle)
     {
@@ -31,11 +28,6 @@
         </div>
     }
 </div>
-    </Template>
-    </DxFormLayoutItem>
-</DxFormLayout>
-</div>
-
 
 @code {
 

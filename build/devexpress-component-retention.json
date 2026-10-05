@@ -1,139 +1,257 @@
 {
-  "SchemaVersion": 1,
+  "SchemaVersion": 2,
   "Project": "PublisherStudio",
   "ComponentsRoot": "src/PublisherStudio.Web/Components",
   "Files": {
-    "src/PublisherStudio.Web/Components/Shared/UserNotificationHost.razor": {
+    "src/PublisherStudio.Web/Components/App.razor": {
       "MinimumDevExpressTags": 0,
-      "MaximumNativeInteractiveTags": 1
-    },
-    "src/PublisherStudio.Web/Components/Shared/DocumentationViewerHost.razor": {
-      "MinimumDevExpressTags": 0,
-      "MaximumNativeInteractiveTags": 1
-    },
-    "src/PublisherStudio.Web/Components/Pages/Editor.razor": {
-      "MinimumDevExpressTags": 0,
-      "MaximumNativeInteractiveTags": 57
-    },
-    "src/PublisherStudio.Web/Components/Pages/Localization.razor": {
-      "MinimumDevExpressTags": 0,
-      "MaximumNativeInteractiveTags": 7
-    },
-    "src/PublisherStudio.Web/Components/Pages/Help.razor": {
-      "MinimumDevExpressTags": 0,
-      "MaximumNativeInteractiveTags": 13
-    },
-    "src/PublisherStudio.Web/Components/Pages/OrganicPlugins.razor": {
-      "MinimumDevExpressTags": 0,
-      "MaximumNativeInteractiveTags": 50
-    },
-    "src/PublisherStudio.Web/Components/OrganicPlugins/OrganicApprovalBar.razor": {
-      "MinimumDevExpressTags": 0,
-      "MaximumNativeInteractiveTags": 6
-    },
-    "src/PublisherStudio.Web/Components/OrganicPlugins/OrganicSecurityPanel.razor": {
-      "MinimumDevExpressTags": 6,
-      "MaximumNativeInteractiveTags": 6
-    },
-    "src/PublisherStudio.Web/Components/Editor/InspectorPanel.razor": {
-      "MinimumDevExpressTags": 63,
-      "MaximumNativeInteractiveTags": 251
-    },
-    "src/PublisherStudio.Web/Components/Editor/PictureEditor.razor": {
-      "MinimumDevExpressTags": 413,
-      "MaximumNativeInteractiveTags": 125
-    },
-    "src/PublisherStudio.Web/Components/Editor/PanelStudio.razor": {
-      "MinimumDevExpressTags": 72,
-      "MaximumNativeInteractiveTags": 110
-    },
-    "src/PublisherStudio.Web/Components/Editor/MediaStudio.razor": {
-      "MinimumDevExpressTags": 175,
-      "MaximumNativeInteractiveTags": 141
-    },
-    "src/PublisherStudio.Web/Components/Editor/PanelLibrary.razor": {
-      "MinimumDevExpressTags": 0,
-      "MaximumNativeInteractiveTags": 4
-    },
-    "src/PublisherStudio.Web/Components/Editor/PageEffectStudio.razor": {
-      "MinimumDevExpressTags": 0,
-      "MaximumNativeInteractiveTags": 30
-    },
-    "src/PublisherStudio.Web/Components/Editor/LiveSourceView.razor": {
-      "MinimumDevExpressTags": 0,
-      "MaximumNativeInteractiveTags": 1
-    },
-    "src/PublisherStudio.Web/Components/Editor/StreamingStudio.razor": {
-      "MinimumDevExpressTags": 59,
-      "MaximumNativeInteractiveTags": 137
-    },
-    "src/PublisherStudio.Web/Components/Editor/SpreadsheetEditor.razor": {
-      "MinimumDevExpressTags": 6,
-      "MaximumNativeInteractiveTags": 8
-    },
-    "src/PublisherStudio.Web/Components/Editor/NewPublicationDialog.razor": {
-      "MinimumDevExpressTags": 0,
-      "MaximumNativeInteractiveTags": 4
-    },
-    "src/PublisherStudio.Web/Components/Editor/SystemFontPicker.razor": {
-      "MinimumDevExpressTags": 0,
-      "MaximumNativeInteractiveTags": 6
-    },
-    "src/PublisherStudio.Web/Components/Editor/MediaConverterStudio.razor": {
-      "MinimumDevExpressTags": 57,
-      "MaximumNativeInteractiveTags": 60
+      "MaximumNativeInteractiveTags": 0,
+      "MaximumNativeDisclosureTags": 0
     },
     "src/PublisherStudio.Web/Components/Editor/AnimationPanel.razor": {
-      "MinimumDevExpressTags": 1,
-      "MaximumNativeInteractiveTags": 60
+      "MinimumDevExpressTags": 15,
+      "MaximumNativeInteractiveTags": 60,
+      "MaximumNativeDisclosureTags": 0
     },
-    "src/PublisherStudio.Web/Components/Editor/PageSurface.razor": {
-      "MinimumDevExpressTags": 222,
-      "MaximumNativeInteractiveTags": 4
+    "src/PublisherStudio.Web/Components/Editor/BarcodeEditor.razor": {
+      "MinimumDevExpressTags": 39,
+      "MaximumNativeInteractiveTags": 17,
+      "MaximumNativeDisclosureTags": 0
     },
-    "src/PublisherStudio.Web/Components/Editor/PageNavigator.razor": {
-      "MinimumDevExpressTags": 22,
-      "MaximumNativeInteractiveTags": 1
+    "src/PublisherStudio.Web/Components/Editor/BarcodeView.razor": {
+      "MinimumDevExpressTags": 0,
+      "MaximumNativeInteractiveTags": 0,
+      "MaximumNativeDisclosureTags": 0
     },
-    "src/PublisherStudio.Web/Components/Editor/StoryEditor.razor": {
-      "MinimumDevExpressTags": 48,
-      "MaximumNativeInteractiveTags": 20
+    "src/PublisherStudio.Web/Components/Editor/DataManager.razor": {
+      "MinimumDevExpressTags": 34,
+      "MaximumNativeInteractiveTags": 57,
+      "MaximumNativeDisclosureTags": 0
+    },
+    "src/PublisherStudio.Web/Components/Editor/DataVisualClientHost.razor": {
+      "MinimumDevExpressTags": 0,
+      "MaximumNativeInteractiveTags": 0,
+      "MaximumNativeDisclosureTags": 0
     },
     "src/PublisherStudio.Web/Components/Editor/DataVisualEditor.razor": {
-      "MinimumDevExpressTags": 34,
-      "MaximumNativeInteractiveTags": 33
-    },
-    "src/PublisherStudio.Web/Components/Editor/PublicationRibbon.razor": {
-      "MinimumDevExpressTags": 454,
-      "MaximumNativeInteractiveTags": 0
+      "MinimumDevExpressTags": 70,
+      "MaximumNativeInteractiveTags": 0,
+      "MaximumNativeDisclosureTags": 0
     },
     "src/PublisherStudio.Web/Components/Editor/DataVisualView.razor": {
       "MinimumDevExpressTags": 33,
-      "MaximumNativeInteractiveTags": 0
+      "MaximumNativeInteractiveTags": 0,
+      "MaximumNativeDisclosureTags": 0
     },
-    "src/PublisherStudio.Web/Components/Editor/BarcodeEditor.razor": {
-      "MinimumDevExpressTags": 36,
-      "MaximumNativeInteractiveTags": 19
+    "src/PublisherStudio.Web/Components/Editor/DevExpressColorPicker.razor": {
+      "MinimumDevExpressTags": 4,
+      "MaximumNativeInteractiveTags": 0,
+      "MaximumNativeDisclosureTags": 0
     },
-    "src/PublisherStudio.Web/Components/Editor/DataManager.razor": {
-      "MinimumDevExpressTags": 18,
-      "MaximumNativeInteractiveTags": 64
+    "src/PublisherStudio.Web/Components/Editor/DevExtremeComponentEditor.razor": {
+      "MinimumDevExpressTags": 21,
+      "MaximumNativeInteractiveTags": 366,
+      "MaximumNativeDisclosureTags": 0
     },
-    "src/PublisherStudio.Web/Components/Editor/PublicationTimeline.razor": {
-      "MinimumDevExpressTags": 49,
-      "MaximumNativeInteractiveTags": 4
+    "src/PublisherStudio.Web/Components/Editor/DevExtremeComponentView.razor": {
+      "MinimumDevExpressTags": 0,
+      "MaximumNativeInteractiveTags": 0,
+      "MaximumNativeDisclosureTags": 0
+    },
+    "src/PublisherStudio.Web/Components/Editor/HtmlEmbedView.razor": {
+      "MinimumDevExpressTags": 0,
+      "MaximumNativeInteractiveTags": 0,
+      "MaximumNativeDisclosureTags": 0
+    },
+    "src/PublisherStudio.Web/Components/Editor/InspectorPanel.razor": {
+      "MinimumDevExpressTags": 114,
+      "MaximumNativeInteractiveTags": 247,
+      "MaximumNativeDisclosureTags": 0
+    },
+    "src/PublisherStudio.Web/Components/Editor/LiveSourceView.razor": {
+      "MinimumDevExpressTags": 0,
+      "MaximumNativeInteractiveTags": 1,
+      "MaximumNativeDisclosureTags": 0
+    },
+    "src/PublisherStudio.Web/Components/Editor/MediaConverterStudio.razor": {
+      "MinimumDevExpressTags": 68,
+      "MaximumNativeInteractiveTags": 50,
+      "MaximumNativeDisclosureTags": 10
+    },
+    "src/PublisherStudio.Web/Components/Editor/MediaStudio.razor": {
+      "MinimumDevExpressTags": 202,
+      "MaximumNativeInteractiveTags": 139,
+      "MaximumNativeDisclosureTags": 2
+    },
+    "src/PublisherStudio.Web/Components/Editor/NewPublicationDialog.razor": {
+      "MinimumDevExpressTags": 3,
+      "MaximumNativeInteractiveTags": 4,
+      "MaximumNativeDisclosureTags": 0
+    },
+    "src/PublisherStudio.Web/Components/Editor/PageEffectLayerRenderer.razor": {
+      "MinimumDevExpressTags": 0,
+      "MaximumNativeInteractiveTags": 0,
+      "MaximumNativeDisclosureTags": 0
+    },
+    "src/PublisherStudio.Web/Components/Editor/PageEffectStudio.razor": {
+      "MinimumDevExpressTags": 24,
+      "MaximumNativeInteractiveTags": 0,
+      "MaximumNativeDisclosureTags": 0
+    },
+    "src/PublisherStudio.Web/Components/Editor/PageNavigator.razor": {
+      "MinimumDevExpressTags": 24,
+      "MaximumNativeInteractiveTags": 1,
+      "MaximumNativeDisclosureTags": 0
+    },
+    "src/PublisherStudio.Web/Components/Editor/PageSurface.razor": {
+      "MinimumDevExpressTags": 224,
+      "MaximumNativeInteractiveTags": 4,
+      "MaximumNativeDisclosureTags": 0
+    },
+    "src/PublisherStudio.Web/Components/Editor/PanelElementPreview.razor": {
+      "MinimumDevExpressTags": 0,
+      "MaximumNativeInteractiveTags": 0,
+      "MaximumNativeDisclosureTags": 0
+    },
+    "src/PublisherStudio.Web/Components/Editor/PanelLibrary.razor": {
+      "MinimumDevExpressTags": 4,
+      "MaximumNativeInteractiveTags": 4,
+      "MaximumNativeDisclosureTags": 0
+    },
+    "src/PublisherStudio.Web/Components/Editor/PanelStudio.razor": {
+      "MinimumDevExpressTags": 186,
+      "MaximumNativeInteractiveTags": 2,
+      "MaximumNativeDisclosureTags": 0
     },
     "src/PublisherStudio.Web/Components/Editor/PanelView.razor": {
       "MinimumDevExpressTags": 0,
-      "MaximumNativeInteractiveTags": 1
+      "MaximumNativeInteractiveTags": 1,
+      "MaximumNativeDisclosureTags": 0
+    },
+    "src/PublisherStudio.Web/Components/Editor/PictureEditor.razor": {
+      "MinimumDevExpressTags": 442,
+      "MaximumNativeInteractiveTags": 109,
+      "MaximumNativeDisclosureTags": 0
+    },
+    "src/PublisherStudio.Web/Components/Editor/PrintPublication.razor": {
+      "MinimumDevExpressTags": 4,
+      "MaximumNativeInteractiveTags": 0,
+      "MaximumNativeDisclosureTags": 0
+    },
+    "src/PublisherStudio.Web/Components/Editor/PublicationRibbon.razor": {
+      "MinimumDevExpressTags": 456,
+      "MaximumNativeInteractiveTags": 0,
+      "MaximumNativeDisclosureTags": 0
+    },
+    "src/PublisherStudio.Web/Components/Editor/PublicationTimeline.razor": {
+      "MinimumDevExpressTags": 53,
+      "MaximumNativeInteractiveTags": 4,
+      "MaximumNativeDisclosureTags": 0
+    },
+    "src/PublisherStudio.Web/Components/Editor/SpreadsheetEditor.razor": {
+      "MinimumDevExpressTags": 15,
+      "MaximumNativeInteractiveTags": 8,
+      "MaximumNativeDisclosureTags": 0
+    },
+    "src/PublisherStudio.Web/Components/Editor/StoryEditor.razor": {
+      "MinimumDevExpressTags": 54,
+      "MaximumNativeInteractiveTags": 19,
+      "MaximumNativeDisclosureTags": 2
+    },
+    "src/PublisherStudio.Web/Components/Editor/StreamingStudio.razor": {
+      "MinimumDevExpressTags": 92,
+      "MaximumNativeInteractiveTags": 137,
+      "MaximumNativeDisclosureTags": 0
+    },
+    "src/PublisherStudio.Web/Components/Editor/SystemFontPicker.razor": {
+      "MinimumDevExpressTags": 3,
+      "MaximumNativeInteractiveTags": 0,
+      "MaximumNativeDisclosureTags": 0
+    },
+    "src/PublisherStudio.Web/Components/Editor/VideoMediaView.razor": {
+      "MinimumDevExpressTags": 0,
+      "MaximumNativeInteractiveTags": 0,
+      "MaximumNativeDisclosureTags": 0
+    },
+    "src/PublisherStudio.Web/Components/Editor/WebDataRefreshHost.razor": {
+      "MinimumDevExpressTags": 0,
+      "MaximumNativeInteractiveTags": 0,
+      "MaximumNativeDisclosureTags": 0
     },
     "src/PublisherStudio.Web/Components/Editor/WordArtPathEditor.razor": {
-      "MinimumDevExpressTags": 3,
-      "MaximumNativeInteractiveTags": 8
+      "MinimumDevExpressTags": 5,
+      "MaximumNativeInteractiveTags": 8,
+      "MaximumNativeDisclosureTags": 0
     },
-    "src/PublisherStudio.Web/Components/Editor/DevExtremeComponentEditor.razor": {
+    "src/PublisherStudio.Web/Components/Editor/WordArtView.razor": {
+      "MinimumDevExpressTags": 2,
+      "MaximumNativeInteractiveTags": 0,
+      "MaximumNativeDisclosureTags": 0
+    },
+    "src/PublisherStudio.Web/Components/Layout/JavaScriptDiagnosticsBridge.razor": {
       "MinimumDevExpressTags": 0,
-      "MaximumNativeInteractiveTags": 370
+      "MaximumNativeInteractiveTags": 0,
+      "MaximumNativeDisclosureTags": 0
+    },
+    "src/PublisherStudio.Web/Components/Layout/MainLayout.razor": {
+      "MinimumDevExpressTags": 4,
+      "MaximumNativeInteractiveTags": 0,
+      "MaximumNativeDisclosureTags": 0
+    },
+    "src/PublisherStudio.Web/Components/OrganicPlugins/OrganicApprovalBar.razor": {
+      "MinimumDevExpressTags": 2,
+      "MaximumNativeInteractiveTags": 6,
+      "MaximumNativeDisclosureTags": 0
+    },
+    "src/PublisherStudio.Web/Components/OrganicPlugins/OrganicSecurityPanel.razor": {
+      "MinimumDevExpressTags": 10,
+      "MaximumNativeInteractiveTags": 6,
+      "MaximumNativeDisclosureTags": 0
+    },
+    "src/PublisherStudio.Web/Components/Pages/Editor.razor": {
+      "MinimumDevExpressTags": 5,
+      "MaximumNativeInteractiveTags": 57,
+      "MaximumNativeDisclosureTags": 0
+    },
+    "src/PublisherStudio.Web/Components/Pages/Error.razor": {
+      "MinimumDevExpressTags": 2,
+      "MaximumNativeInteractiveTags": 0,
+      "MaximumNativeDisclosureTags": 0
+    },
+    "src/PublisherStudio.Web/Components/Pages/Help.razor": {
+      "MinimumDevExpressTags": 6,
+      "MaximumNativeInteractiveTags": 13,
+      "MaximumNativeDisclosureTags": 0
+    },
+    "src/PublisherStudio.Web/Components/Pages/Localization.razor": {
+      "MinimumDevExpressTags": 6,
+      "MaximumNativeInteractiveTags": 7,
+      "MaximumNativeDisclosureTags": 0
+    },
+    "src/PublisherStudio.Web/Components/Pages/OrganicPlugins.razor": {
+      "MinimumDevExpressTags": 26,
+      "MaximumNativeInteractiveTags": 50,
+      "MaximumNativeDisclosureTags": 16
+    },
+    "src/PublisherStudio.Web/Components/Routes.razor": {
+      "MinimumDevExpressTags": 2,
+      "MaximumNativeInteractiveTags": 0,
+      "MaximumNativeDisclosureTags": 0
+    },
+    "src/PublisherStudio.Web/Components/Shared/DocumentationViewerHost.razor": {
+      "MinimumDevExpressTags": 4,
+      "MaximumNativeInteractiveTags": 0,
+      "MaximumNativeDisclosureTags": 0
+    },
+    "src/PublisherStudio.Web/Components/Shared/UserNotificationHost.razor": {
+      "MinimumDevExpressTags": 2,
+      "MaximumNativeInteractiveTags": 1,
+      "MaximumNativeDisclosureTags": 0
+    },
+    "src/PublisherStudio.Web/Components/_Imports.razor": {
+      "MinimumDevExpressTags": 0,
+      "MaximumNativeInteractiveTags": 0,
+      "MaximumNativeDisclosureTags": 0
     }
   }
 }

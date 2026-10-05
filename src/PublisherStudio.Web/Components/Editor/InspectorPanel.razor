@@ -137,7 +137,7 @@
                 </div>
                 <DxButton Text='@LT("Swap width / height")' Click="SwapOrientation" CssClass="wide-button" />
                 <label>@LT("Background")
-                    <span class="color-field"><input type="color" value="@UsableColor(State.CurrentPage.Background)" @onchange="ChangePageBackground" /><code>@State.CurrentPage.Background</code></span>
+                    <span class="color-field"><DevExpressColorPicker Value="@UsableColor(State.CurrentPage.Background)" Changed="ChangePageBackground" /><code>@State.CurrentPage.Background</code></span>
                 </label>
                 <div class="property-button-row">
                     <DxButton Text='@LT("Transparent")' Click="SetTransparentPage" />
@@ -713,7 +713,7 @@
                                     <label>@LT("Filter name")<input value="@selectedLiveFilter.Name" @onchange="ChangeLiveEffectFilterName" /></label>
                                     @if (selectedLiveFilter.Kind == VideoEffectFilterKind.ChromaKey)
                                     {
-                                        <label>@LT("Key color")<input type="color" value="@selectedLiveFilter.Color" @onchange="ChangeLiveEffectFilterColor" /></label>
+                                        <label>@LT("Key color")<DevExpressColorPicker Value="@selectedLiveFilter.Color" Changed="ChangeLiveEffectFilterColor" /></label>
                                         <label>@LT("Similarity")<input type="range" min="0" max="1" step="0.01" value="@Inv(selectedLiveFilter.Amount)" @onchange="ChangeLiveEffectFilterAmount" /></label>
                                         <label>@LT("Smoothness")<input type="range" min="0.001" max="1" step="0.01" value="@Inv(selectedLiveFilter.SecondaryAmount)" @onchange="ChangeLiveEffectFilterSecondaryAmount" /></label>
                                         <label>@LT("Spill reduction")<input type="range" min="0" max="1" step="0.01" value="@Inv(selectedLiveFilter.TertiaryAmount)" @onchange="ChangeLiveEffectFilterTertiaryAmount" /></label>
@@ -730,7 +730,7 @@
                                         }
                                         @if (selectedLiveFilter.Kind == VideoEffectFilterKind.ColorWash)
                                         {
-                                            <label>@LT("Wash color")<input type="color" value="@selectedLiveFilter.Color" @onchange="ChangeLiveEffectFilterColor" /></label>
+                                            <label>@LT("Wash color")<DevExpressColorPicker Value="@selectedLiveFilter.Color" Changed="ChangeLiveEffectFilterColor" /></label>
                                         }
                                     }
                                     <div class="property-button-row">
@@ -5743,7 +5743,7 @@
             var poster = string.Empty;
             try
             {
-                _mediaModule ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=4.0.3").ConfigureAwait(true);
+                _mediaModule ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=4.0.7").ConfigureAwait(true);
                 var localUrl = MediaAssets.RegisterBytes(inspectionId, bytes, mimeType);
                 try
                 {

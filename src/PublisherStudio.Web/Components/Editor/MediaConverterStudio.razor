@@ -217,13 +217,13 @@
                         <details open>
                             <summary>Video encoder</summary>
                             <div class="data-form-grid">
-                                <label>Encoder<input value="@_options.VideoCodec" @onchange="args => _options.VideoCodec = Text(args)" placeholder="Preset encoder" list="ffmpeg-encoders" /></label>
-                                <label>Encoder preset<input value="@_options.VideoEncoderPreset" @onchange="args => _options.VideoEncoderPreset = Text(args)" placeholder="Preset/encoder default" list="ffmpeg-encoder-presets" /><small class="field-help">Common speed/quality presets are suggested; support remains encoder-specific and the field stays editable.</small></label>
+                                <label>Encoder<DxComboBox TData="string" TValue="string" Data="@EncoderSuggestions" Text="@_options.VideoCodec" TextChanged="@((string? value) => _options.VideoCodec = value ?? string.Empty)" AllowUserInput="true" SearchMode="ListSearchMode.AutoSearch" SearchFilterCondition="ListSearchFilterCondition.Contains" ListRenderMode="ListRenderMode.Virtual" NullText="Preset encoder" /></label>
+                                <label>Encoder preset<DxComboBox TData="string" TValue="string" Data="@EncoderPresetSuggestions" Text="@_options.VideoEncoderPreset" TextChanged="@((string? value) => _options.VideoEncoderPreset = value ?? string.Empty)" AllowUserInput="true" SearchMode="ListSearchMode.AutoSearch" SearchFilterCondition="ListSearchFilterCondition.Contains" NullText="Preset/encoder default" /><small class="field-help">Common speed/quality presets are suggested; support remains encoder-specific and the field stays editable.</small></label>
                                 <label>CRF / quality<input type="number" min="0" max="63" value="@NullableNumber(_options.Crf)" @onchange="args => _options.Crf = NullableInt(args)" /></label>
                                 <label>Bitrate kbit/s<input type="number" min="1" value="@NullableNumber(_options.VideoBitrateKbps)" @onchange="args => _options.VideoBitrateKbps = NullableInt(args)" /></label>
                                 <label>Max bitrate kbit/s<input type="number" min="1" value="@NullableNumber(_options.MaximumVideoBitrateKbps)" @onchange="args => _options.MaximumVideoBitrateKbps = NullableInt(args)" /></label>
                                 <label>Buffer kbit<input type="number" min="1" value="@NullableNumber(_options.VideoBufferKbps)" @onchange="args => _options.VideoBufferKbps = NullableInt(args)" /></label>
-                                <label>Pixel format<input value="@_options.PixelFormat" @onchange="args => _options.PixelFormat = Text(args)" placeholder="Preset/source default" list="ffmpeg-pixel-formats" /><small class="field-help">The selected preset supplies a compatibility-oriented suggestion when known. Any pixel format supported by the installed FFmpeg build can still be entered.</small></label>
+                                <label>Pixel format<DxComboBox TData="string" TValue="string" Data="@PixelFormatSuggestions" Text="@_options.PixelFormat" TextChanged="@((string? value) => _options.PixelFormat = value ?? string.Empty)" AllowUserInput="true" SearchMode="ListSearchMode.AutoSearch" SearchFilterCondition="ListSearchFilterCondition.Contains" NullText="Preset/source default" /><small class="field-help">The selected preset supplies a compatibility-oriented suggestion when known. Any pixel format supported by the installed FFmpeg build can still be entered.</small></label>
                                 <label class="check-row"><input type="checkbox" checked="@_options.DisableVideo" @onchange="args => _options.DisableVideo = Bool(args)" /> Remove video</label>
                             </div>
                         </details>
@@ -231,7 +231,7 @@
                         <details>
                             <summary>Audio encoder and loudness</summary>
                             <div class="data-form-grid">
-                                <label>Encoder<input value="@_options.AudioCodec" @onchange="args => _options.AudioCodec = Text(args)" placeholder="Preset encoder" list="ffmpeg-encoders" /></label>
+                                <label>Encoder<DxComboBox TData="string" TValue="string" Data="@EncoderSuggestions" Text="@_options.AudioCodec" TextChanged="@((string? value) => _options.AudioCodec = value ?? string.Empty)" AllowUserInput="true" SearchMode="ListSearchMode.AutoSearch" SearchFilterCondition="ListSearchFilterCondition.Contains" ListRenderMode="ListRenderMode.Virtual" NullText="Preset encoder" /></label>
                                 <label>Bitrate kbit/s<input type="number" min="1" value="@NullableNumber(_options.AudioBitrateKbps)" @onchange="args => _options.AudioBitrateKbps = NullableInt(args)" /></label>
                                 <label>Sample rate<input type="number" min="1" value="@NullableNumber(_options.AudioSampleRate)" @onchange="args => _options.AudioSampleRate = NullableInt(args)" /></label>
                                 <label>Channels<input type="number" min="1" max="32" value="@NullableNumber(_options.AudioChannels)" @onchange="args => _options.AudioChannels = NullableInt(args)" /></label>
@@ -250,16 +250,6 @@
                             <p class="field-help">Advanced arguments are passed through <code>ProcessStartInfo.ArgumentList</code>, never through a shell. PublisherStudio blocks input/output/progress arguments it must own, while codec, muxer, mapping, filter, color, hardware and quality options remain available.</p>
                         </details>
                     </div>
-
-                    <datalist id="ffmpeg-encoders">
-                        @foreach (var encoder in _capabilities?.Encoders ?? Array.Empty<string>()) { <option value="@encoder"></option> }
-                    </datalist>
-                    <datalist id="ffmpeg-encoder-presets">
-                        @foreach (var preset in EncoderPresetSuggestions) { <option value="@preset"></option> }
-                    </datalist>
-                    <datalist id="ffmpeg-pixel-formats">
-                        @foreach (var format in PixelFormatSuggestions) { <option value="@format"></option> }
-                    </datalist>
 
                     <DxFormLayout CssClass="razor-section-layout-owner">
     <DxFormLayoutItem ColSpanMd="12">
@@ -387,10 +377,11 @@
     /// Stores the internal options state used by <see cref="MediaConverterStudio"/> while executing its surrounding workflow.
     /// </summary>
     private MediaConversionOptions _options = new();
-    /// <summary>
-    /// Gets the encoder preset suggestions collection maintained or exposed by this media converter studio instance for downstream processing.
-    /// </summary>
-    /// <value>The encoder preset suggestions value exposed by <see cref="MediaConverterStudio"/>.</value>
+    /// <summary>Gets installed FFmpeg encoders offered by the searchable DevExpress codec editors.</summary>
+    /// <value>The encoder names reported by the current FFmpeg capability snapshot.</value>
+    private IReadOnlyList<string> EncoderSuggestions => GetEncoderSuggestionsForRender();
+    /// <summary>Gets encoder preset names offered by the searchable DevExpress preset editor.</summary>
+    /// <value>The maintained FFmpeg encoder preset suggestions.</value>
     private IReadOnlyList<string> EncoderPresetSuggestions => GetEncoderPresetSuggestionsForRender();
     /// <summary>
     /// Gets the pixel format suggestions collection maintained or exposed by this media converter studio instance for downstream processing.
@@ -2139,6 +2130,21 @@
     }
 
 
+
+    /// <summary>Computes installed FFmpeg encoder suggestions for the render path with component-local diagnostics.</summary>
+    /// <returns>The sorted encoder names reported by the current FFmpeg capability snapshot.</returns>
+    private IReadOnlyList<string> GetEncoderSuggestionsForRender()
+    {
+        try
+        {
+            return _capabilities?.Encoders?.OrderBy(value => value, StringComparer.OrdinalIgnoreCase).ToArray() ?? Array.Empty<string>();
+        }
+        catch (Exception __componentPropertyException)
+        {
+            Logger.LogError(__componentPropertyException, "Computed render property MediaConverterStudio.EncoderSuggestions failed.");
+            throw;
+        }
+    }
 
     /// <summary>Computes EncoderPresetSuggestions for the render path with component-local diagnostics.</summary>
     /// <returns>The collection produced by the operation.</returns>

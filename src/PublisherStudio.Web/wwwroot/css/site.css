@@ -5053,13 +5053,10 @@ body.publisher-printing [role="menu"], body.publisher-printing [class*="ribbon"]
 
 
 /* v2.0.1 final5 interaction restoration: native font chooser and stable designer shields. */
-.system-font-picker{display:grid;grid-template-columns:minmax(0,1fr) minmax(120px,.72fr);gap:5px;align-items:center;min-width:0}
-.system-font-picker-input,.system-font-picker-dropdown{box-sizing:border-box;width:100%;min-width:0;min-height:30px;border:1px solid #94a3b8;border-radius:4px;background:#fff;color:#0f172a;padding:4px 7px;font:12px/1.3 "Segoe UI",system-ui,sans-serif}
-.system-font-picker-dropdown{cursor:pointer}
+.system-font-picker{box-sizing:border-box;width:100%;min-width:0}
 .publication-panel-design-shield{position:absolute;z-index:8;inset:0;cursor:move;touch-action:none;background:transparent;pointer-events:auto}
 .pub-element.selected .publication-panel-design-shield{box-shadow:inset 0 0 0 1px #38bdf866}
 .panel-studio-canvas-shell.interaction-preview .publication-panel-design-shield{display:none}
-@media(max-width:560px){.system-font-picker{grid-template-columns:1fr}}
 
 
 /* Browser-measured primary selection frame. Complex panels and embedded runtimes can
@@ -5272,18 +5269,26 @@ body.publisher-printing [role="menu"], body.publisher-printing [class*="ribbon"]
 .page-effect-base-color h3,.page-effect-card h3,.page-effect-section-heading h3{margin:0 0 8px}
 .page-effect-row{display:flex;align-items:end;gap:12px;flex-wrap:wrap}
 .page-effect-row label,.page-effect-grid label{display:grid;gap:5px;min-width:150px}
-.page-effect-row input[type=color],.page-effect-grid input[type=color]{width:64px;height:34px;padding:2px}
 .page-effect-color-value{font-family:monospace;align-self:center}
+
+/* DevExpress-first interactive editor primitives. Color selection stays suite-owned rather than falling back to browser-native color inputs. */
+.publisher-color-picker{box-sizing:border-box;width:100%;min-width:0}
+.publisher-color-picker-display{display:flex;align-items:center;gap:6px;width:100%;min-width:0}
+.publisher-color-picker-display .dxbl-input-editor{flex:1 1 auto;min-width:0}
+.publisher-color-picker-swatch{display:inline-block;flex:0 0 18px;width:18px;height:18px;border:1px solid var(--bs-border-color,#94a3b8);border-radius:4px;background-image:linear-gradient(45deg,#e2e8f0 25%,transparent 25%),linear-gradient(-45deg,#e2e8f0 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#e2e8f0 75%),linear-gradient(-45deg,transparent 75%,#e2e8f0 75%);background-size:8px 8px;background-position:0 0,0 4px,4px -4px,-4px 0}
+.publisher-color-picker-palette{border-width:0!important;max-width:min(360px,90vw)}
+.page-effect-devexpress-row>label{flex:1 1 260px;max-width:420px}
+.page-effect-action-row{display:flex;gap:8px;flex-wrap:wrap}
+.page-effect-animation-editor{margin-top:12px;border-top:1px solid var(--bs-border-color,#cbd5e1);padding-top:10px;display:grid;gap:10px}
+.page-effect-animation-toggle{font-weight:600}
+.page-effect-card>.dxbl-btn.danger,.page-effect-card dxbl-button.danger{margin-left:auto}
 .page-effect-section-heading{display:flex;justify-content:space-between;gap:16px;align-items:end;margin-bottom:10px}
 .page-effect-section-heading>div:last-child{display:flex;gap:8px;flex-wrap:wrap}
 .page-effect-layer-list{display:grid;gap:12px}
 .page-effect-card>header{display:flex;align-items:end;gap:12px;flex-wrap:wrap;margin-bottom:12px}
 .page-effect-card .page-effect-name{display:grid;gap:4px;flex:1;min-width:220px}
 .page-effect-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px 14px;align-items:end}
-.page-effect-card details{margin-top:12px;border-top:1px solid var(--bs-border-color,#cbd5e1);padding-top:10px}
-.page-effect-card summary{cursor:pointer;font-weight:600;margin-bottom:10px}
 .page-effect-empty{padding:18px;border:1px dashed var(--bs-border-color,#cbd5e1);border-radius:8px;color:var(--bs-secondary-color,#64748b)}
-.page-effect-card button.danger{margin-left:auto}
 .selected-picture-export-dialog{width:min(680px,calc(100vw - 40px))}
 .selected-picture-export-options{padding:18px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .selected-picture-export-options small{grid-column:1/-1;line-height:1.45;color:var(--bs-secondary-color,#64748b)}
@@ -5477,10 +5482,9 @@ dxbl-popup-root > dxbl-popup-cell > dxbl-modal .dxbl-modal-body > .new-publicati
 }
 
 
-/* PublisherStudio 3.9.8: Panel Studio DevExpress wrapper geometry and inspector resilience.
-   Maintenance FormLayout owners are intentionally box-neutral, so panel-local render roots must
-   inherit the authored element box through the complete wrapper chain instead of relying on the
-   pre-DevExpress direct-child DOM shape. */
+/* PublisherStudio 4.0.4: compatibility fallback for ordinary wrapped editor content plus inspector resilience.
+   Geometry-sensitive panel/render leaves are direct-root structural renderers again; these wrapper-depth
+   rules remain only for non-structural component content that legitimately owns a maintenance FormLayout. */
 .publication-panel-element > .razor-component-boundary > .razor-component-layout-owner > .dxbl-row > dxbl-form-layout-item > .dxbl-fl-ctrl > :first-child {
     width: 100% !important;
     height: 100% !important;
@@ -5602,3 +5606,9 @@ dxbl-popup-root > dxbl-popup-cell > dxbl-modal .dxbl-modal-body > .new-publicati
 :root[data-publisher-native-input="true"] .publisherstudio-controller-cursor {
     display: none !important;
 }
+
+/* PublisherStudio 4.0.4: DevExpress-first Panel Studio list selectors keep the established compact
+   sidebar geometry while the actual action surface remains a themed DxButton. */
+.panel-studio-list-button{width:100%;min-width:0!important;height:auto!important;text-align:left!important;white-space:normal!important}
+.panel-studio-list-button .dxbl-btn-caption{display:block;min-width:0;width:100%;overflow-wrap:anywhere;text-align:left;white-space:normal!important}
+.publisher-color-picker-value{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}

@@ -1,82 +1,66 @@
 @inject SystemFontCatalog SystemFonts
-
 @inject ILogger<SystemFontPicker> Logger
 <div class="razor-component-boundary">
 <DxFormLayout CssClass="razor-component-layout-owner SystemFontPicker">
     <DxFormLayoutItem ColSpanMd="12">
         <Template Context="formItemContext001">
-<div class="system-font-picker @CssClass">
-    <input type="text"
-           class="system-font-picker-input"
-           value="@Value"
-           list="@_listId"
-           autocomplete="off"
-           spellcheck="false"
-           placeholder="Type or select a system font"
-           title="Select an installed system font or type another font family"
-           @onchange="HandleChanged" />
-    <select class="system-font-picker-dropdown"
-            value="@Value"
-            title="Installed operating-system fonts"
-            aria-label="Installed operating-system fonts"
-            @onchange="HandleChanged">
-        <option value="">Installed fonts…</option>
-        @foreach (var font in SystemFonts.FontFamilies)
-        {
-            <option value="@font">@font</option>
-        }
-    </select>
-</div>
-<datalist id="@_listId">
-    @foreach (var font in SystemFonts.FontFamilies)
-    {
-        <option value="@font"></option>
-    }
-</datalist>
-    </Template>
+            <DxComboBox TData="string" TValue="string" Data="@SystemFonts.FontFamilies"
+                        Text="@Value"
+                        TextChanged="HandleTextChanged"
+                        AllowUserInput="true"
+                        SearchMode="ListSearchMode.AutoSearch"
+                        SearchFilterCondition="ListSearchFilterCondition.Contains"
+                        SearchDelay="250"
+                        ListRenderMode="ListRenderMode.Virtual"
+                        NullText="Type or select a system font"
+                        ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                        CssClass="@FontPickerCssClass"
+                        Attributes="@FontPickerAttributes" />
+        </Template>
     </DxFormLayoutItem>
 </DxFormLayout>
 </div>
 
-
 @code {
-
-    /// <summary>
-    /// Stores the internal list identifier state used by <see cref="SystemFontPicker"/> while executing its surrounding workflow.
-    /// </summary>
-    private readonly string _listId = $"publisher-system-fonts-{Guid.NewGuid():N}";
-
-    /// <summary>
-    /// Gets or sets the value value that forms part of the system font picker state consumed or produced by the surrounding workflow.
-    /// </summary>
-    /// <value>The value value exposed by <see cref="SystemFontPicker"/>.</value>
+    /// <summary>Gets or sets the current font-family text shown by the DevExpress system-font picker.</summary>
+    /// <value>The current font family.</value>
     [Parameter] public string Value { get; set; } = string.Empty;
-    /// <summary>
-    /// Gets or sets the CSS class value that forms part of the system font picker state consumed or produced by the surrounding workflow.
-    /// </summary>
-    /// <value>The CSS class value exposed by <see cref="SystemFontPicker"/>.</value>
+
+    /// <summary>Gets or sets an optional CSS class applied to the DevExpress font picker.</summary>
+    /// <value>The optional CSS class.</value>
     [Parameter] public string? CssClass { get; set; }
-    /// <summary>
-    /// Gets or sets the changed value that forms part of the system font picker state consumed or produced by the surrounding workflow.
-    /// </summary>
-    /// <value>The changed value exposed by <see cref="SystemFontPicker"/>.</value>
+
+    /// <summary>Gets or sets the callback invoked when the selected or custom font family changes.</summary>
+    /// <value>The font change callback.</value>
     [Parameter] public EventCallback<ChangeEventArgs> Changed { get; set; }
 
-    /// <summary>
-    /// Handles changed for <see cref="SystemFontPicker"/>, keeping the operation consistent with the state and invariants of the surrounding system font picker workflow.
-    /// </summary>
-    /// <param name="args">Args value supplied to the system font picker operation and used when producing its result.</param>
-    /// <returns>A task that completes when the operation has finished.</returns>
-    private Task HandleChanged(ChangeEventArgs args) {
+    /// <summary>Gets the CSS class applied to the DevExpress font picker without mixed Razor attribute content.</summary>
+    /// <value>The required picker class followed by the optional caller-provided class.</value>
+    private string FontPickerCssClass => string.IsNullOrWhiteSpace(CssClass) ? "system-font-picker" : $"system-font-picker {CssClass}";
+
+    /// <summary>Supplies accessible metadata without falling back to native input/select/datalist controls.</summary>
+    /// <value>ARIA, title, spellcheck, and autocomplete attributes applied to the DevExpress font editor.</value>
+    private IReadOnlyDictionary<string, object> FontPickerAttributes { get; } = new Dictionary<string, object>
+    {
+        ["aria-label"] = "Installed operating-system fonts",
+        ["title"] = "Select an installed system font or type another font family",
+        ["spellcheck"] = "false",
+        ["autocomplete"] = "off"
+    };
+
+    /// <summary>Forwards the DevExpress ComboBox edit text through the component's established change contract.</summary>
+    /// <param name="text">Selected or custom font-family text.</param>
+    /// <returns>A task that completes when the parent accepted the change.</returns>
+    private Task HandleTextChanged(string? text)
+    {
         try
         {
-            return Changed.InvokeAsync(args);
+            return Changed.InvokeAsync(new ChangeEventArgs { Value = text ?? string.Empty });
         }
         catch (Exception __componentMethodException)
         {
-            Logger.LogError(__componentMethodException, $"Component method {nameof(SystemFontPicker)}.{nameof(HandleChanged)} failed.");
+            Logger.LogError(__componentMethodException, "Component method {Component}.{Method} failed.", nameof(SystemFontPicker), nameof(HandleTextChanged));
             throw;
         }
     }
-
 }

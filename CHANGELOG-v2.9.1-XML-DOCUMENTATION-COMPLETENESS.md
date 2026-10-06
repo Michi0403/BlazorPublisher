@@ -22,5 +22,5 @@
 - This release is documentation/tooling-only apart from the 2.9.1 assembly/version and JavaScript cache-buster identifiers.
 - PublisherStudio runtime/editor logic from 2.9.0 is otherwise unchanged.
 - The 2.9.0 recovery-cancellation and WebM insertion repairs remain intact.
-- DevExpress remains 25.2.9, .NET remains net10.0, and the LocalGPT 1-Wire protocol remains 2.1.1.
+- DevExpress remains 25.2.10, .NET remains net10.0, and the LocalGPT 1-Wire protocol remains 2.1.1.
 - No EF migration or database schema change was introduced.

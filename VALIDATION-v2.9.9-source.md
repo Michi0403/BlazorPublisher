@@ -50,7 +50,7 @@ The final source gate ran the repository's maintained static checks that do not 
 ## Release-contract evidence
 
 - PublisherStudio Web, InstallerConsole, npm package and package lock are **2.9.9**, with single-digit minor/patch slots.
-- DevExpress/DevExtreme remains **25.2.9**.
+- DevExpress/DevExtreme remains **25.2.10**.
 - A newly completed video recording receives a first/between/last sequence boundary and cannot be silently discarded by starting another capture while it is still uncommitted.
 - Retained recording commit state survives metadata enrichment/re-render recovery so a committed clip does not regress to an uncommitted state.
 - Recording insertion uses the existing canonical timeline projection and does not replace unrelated sequence clips or inherit a selected clip's trim/effect state.

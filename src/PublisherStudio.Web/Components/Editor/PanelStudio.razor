@@ -23,6 +23,7 @@
         <Template Context="formItemContext001">
 @if (Visible && _draft is not null)
 {
+    @* Keep the dynamic popup body free of maintenance-only nested FormLayout shells. The known-good 3.7.6 Panel Studio used the real authoring DOM directly; later nested layout owners caused DevExpress descendants to be reprocessed while popup content was changing. *@
     <DxPopup Visible="true"
          Width="92vw"
          Height="90dvh"
@@ -31,7 +32,12 @@
          CloseOnEscape="false"
          ShowHeader="false">
     <BodyContentTemplate Context="publisherPopupContext">
-        <div class="data-visual-editor-dialog panel-studio-dialog" aria-label="Panel Studio">
+        <div class="data-visual-editor-dialog panel-studio-dialog" aria-label="Panel Studio"
+             data-panel-studio-source="@_initializationSource"
+             data-panel-studio-binding-id="@_interactionBindingId"
+             data-panel-studio-view-id="@_selectedViewId"
+             data-panel-studio-authoring-revision="@_authoringRenderRevision"
+             data-panel-studio-preview-revision="@_previewRevision">
             <header>
                 <div>
                     <strong>Panel Studio</strong>
@@ -102,9 +108,6 @@
             <div class="panel-component-ribbon" aria-label="Draggable panel components">
                 @foreach (var category in PaletteTools.GroupBy(tool => tool.Category))
                 {
-                    <DxFormLayout CssClass="razor-section-layout-owner">
-    <DxFormLayoutItem ColSpanMd="12">
-        <Template Context="formItemContext003">
         <div class="panel-component-ribbon-group">
                         <strong>@category.Key</strong>
                         <div>
@@ -125,9 +128,6 @@
                             }
                         </div>
                     </div>
-    </Template>
-    </DxFormLayoutItem>
-</DxFormLayout>
                 }
             </div>
 
@@ -228,7 +228,7 @@
                              @ondragover:preventDefault
                              @ondrop="DropDraggedElement" @ondrop:preventDefault>
                             <div class="panel-studio-design-frame" data-panel-studio-design-frame>
-                            <PanelView @key="(_draft.Id, _selectedViewId, _interactionPreview, _previewRevision)" Document="Document" Item="_draft" CurrentPageId="CurrentPageId" DesignerMode="false" DesignPreviewOnly="false" ForceCanvasLayout="@(!_interactionPreview)">
+                            <PanelView @key="(_draft.Id, _selectedViewId, _interactionPreview, _previewRevision)" Document="Document" Item="_draft" CurrentPageId="CurrentPageId" DesignerMode="false" DesignPreviewOnly="false" ForceCanvasLayout="@(!_interactionPreview)" RenderRevision="@_authoringRenderRevision">
                                 <AuthoringOverlay>
                                     @if (!_interactionPreview && CurrentView is not null)
                                     {
@@ -300,9 +300,6 @@
                     <div class="panel-studio-inspector-scroll">
                     @if (SelectedElement is { } selected)
                     {
-                        <DxFormLayout CssClass="razor-section-layout-owner">
-    <DxFormLayoutItem ColSpanMd="12">
-        <Template Context="formItemContext004">
         <div class="panel-inspector-section">
                             <strong>Layout and identity</strong>
                             <div class="data-form-grid" style="grid-template-columns:1fr 1fr">
@@ -312,16 +309,10 @@
                                 <label>Width<DxSpinEdit T="double" MinValue="1" Increment="1d" Value="@selected.Width" ValueChanged="@((double value) => ChangeNumber(new ChangeEventArgs { Value = value }, number => selected.Width = number))" /></label>
                                 <label>Height<DxSpinEdit T="double" MinValue="1" Increment="1d" Value="@selected.Height" ValueChanged="@((double value) => ChangeNumber(new ChangeEventArgs { Value = value }, number => selected.Height = number))" /></label>
                                 <label>Rotation<DxSpinEdit T="double" Increment="1d" Value="@selected.Rotation" ValueChanged="@((double value) => ChangeNumber(new ChangeEventArgs { Value = value }, number => selected.Rotation = number))" /></label>
-                                <label class="check-row"><DxCheckBox Checked="@selected.Visible" CheckedChanged="@((bool value) => selected.Visible = value)" /> Visible</label>
+                                <label class="check-row">Visible <DxButton @key="selected.Id" Text="@(selected.Visible ? "Hide" : "Show")" SizeMode="SizeMode.Small" RenderStyle="@(selected.Visible ? ButtonRenderStyle.Primary : ButtonRenderStyle.Secondary)" RenderStyleMode="ButtonRenderStyleMode.Outline" CssClass="panel-element-visibility-toggle" Click="ToggleSelectedElementVisibility" /></label>
                             </div>
                         </div>
-    </Template>
-    </DxFormLayoutItem>
-</DxFormLayout>
 
-                        <DxFormLayout CssClass="razor-section-layout-owner">
-    <DxFormLayoutItem ColSpanMd="12">
-        <Template Context="formItemContext005">
         <div class="panel-inspector-section panel-behavior-editor">
                             <div class="panel-behavior-heading">
                                 <strong>Behavior &amp; object interface</strong>
@@ -445,15 +436,9 @@
                             }
                             <small class="field-help">The same object interface is available to exported publication JavaScript. Declarative actions stay allow-listed and require no script.</small>
                         </div>
-    </Template>
-    </DxFormLayoutItem>
-</DxFormLayout>
 
                         @if (selected is DataVisualElement visual)
                         {
-                            <DxFormLayout CssClass="razor-section-layout-owner">
-    <DxFormLayoutItem ColSpanMd="12">
-        <Template Context="formItemContext006">
         <div class="panel-inspector-section">
                                 <strong>Data visual</strong>
                                 <label>Visual type
@@ -473,16 +458,10 @@
                                 <label class="check-row"><DxCheckBox Checked="@visual.ShowLegend" CheckedChanged="@((bool value) => visual.ShowLegend = value)" /> Legend</label>
                                 <label class="check-row"><DxCheckBox Checked="@visual.ShowLabels" CheckedChanged="@((bool value) => visual.ShowLabels = value)" /> Labels</label>
                             </div>
-    </Template>
-    </DxFormLayoutItem>
-</DxFormLayout>
                         }
 
                         @if (selected is DevExtremeComponentElement component)
                         {
-                            <DxFormLayout CssClass="razor-section-layout-owner">
-    <DxFormLayoutItem ColSpanMd="12">
-        <Template Context="formItemContext007">
         <div class="panel-inspector-section">
                                 <strong>Interactive component</strong>
                                 <label>Component
@@ -513,16 +492,10 @@
                                     <label class="check-row"><DxCheckBox Checked="@component.ChatAllowSending" CheckedChanged="@((bool value) => component.ChatAllowSending = value)" /> Allow operator sending</label>
                                 }
                             </div>
-    </Template>
-    </DxFormLayoutItem>
-</DxFormLayout>
                         }
 
                         @if (selected is LiveSourceElement live)
                         {
-                            <DxFormLayout CssClass="razor-section-layout-owner">
-    <DxFormLayoutItem ColSpanMd="12">
-        <Template Context="formItemContext008">
         <div class="panel-inspector-section">
                                 <strong>Live source</strong>
                                 <label>Source
@@ -534,31 +507,19 @@
                                 <label>Frame rate<DxSpinEdit T="int" MinValue="1" MaxValue="240" Value="@live.CaptureFrameRate" ValueChanged="@((int value) => live.CaptureFrameRate = value)" /></label>
                                 <label class="check-row"><DxCheckBox Checked="@live.Muted" CheckedChanged="@((bool value) => live.Muted = value)" /> Muted</label>
                             </div>
-    </Template>
-    </DxFormLayoutItem>
-</DxFormLayout>
                         }
 
                         @if (selected is ImageFrameElement or PublicationMediaElement)
                         {
-                            <DxFormLayout CssClass="razor-section-layout-owner">
-    <DxFormLayoutItem ColSpanMd="12">
-        <Template Context="formItemContext009">
         <div class="panel-inspector-section">
                                 <strong>Media source</strong>
                                 <InputFile OnChange="ReplaceSelectedMedia" accept="image/*,video/*,audio/*,.mkv,.mov,.avi,.mxf,.heic,.heif,.tif,.tiff,.flac,.wav" />
                                 <p class="field-help">PublisherStudio imposes no application file-size ceiling. Very large embedded media remains the user's memory and disk responsibility.</p>
                             </div>
-    </Template>
-    </DxFormLayoutItem>
-</DxFormLayout>
                         }
 
                         @if (selected is HtmlEmbedElement html)
                         {
-                            <DxFormLayout CssClass="razor-section-layout-owner">
-    <DxFormLayoutItem ColSpanMd="12">
-        <Template Context="formItemContext010">
         <div class="panel-inspector-section">
                                 <strong>HTML experience</strong>
                                 <label>HTML<DxMemo Rows="7" Text="@html.Html" TextChanged="@((string? value) => html.Html = value ?? string.Empty)" /></label>
@@ -579,16 +540,10 @@
                                 <label class="check-row"><DxCheckBox Checked="@html.AllowPopups" CheckedChanged="@((bool value) => html.AllowPopups = value)" /> Allow popups</label>
                                 <p class="field-help">Imported scripts stay disabled until explicitly enabled. Each experience remains isolated in its own iframe sandbox.</p>
                             </div>
-    </Template>
-    </DxFormLayoutItem>
-</DxFormLayout>
                         }
 
                         @if (selected is PanelElement nested)
                         {
-                            <DxFormLayout CssClass="razor-section-layout-owner">
-    <DxFormLayoutItem ColSpanMd="12">
-        <Template Context="formItemContext011">
         <div class="panel-inspector-section">
                                 <strong>Nested panel</strong>
                                 <label>Nested navigation
@@ -596,9 +551,6 @@
                                                 ValueChanged="@((PublicationPanelNavigationMode value) => ChangeNestedNavigation(new ChangeEventArgs { Value = value }))" />
                                 </label>
                             </div>
-    </Template>
-    </DxFormLayoutItem>
-</DxFormLayout>
                         }
 
                         <DxAccordion CssClass="panel-inspector-section panel-advanced-json">
@@ -616,9 +568,6 @@
                             </Items>
                         </DxAccordion>
 
-                        <DxFormLayout CssClass="razor-section-layout-owner">
-    <DxFormLayoutItem ColSpanMd="12">
-        <Template Context="formItemContext012">
         <div class="panel-inspector-section">
                             <strong>Save for reuse</strong>
                             <label>Module name<DxTextBox @bind-Text="_templateName" /></label>
@@ -629,9 +578,6 @@
                                 <DxButton Text="Save as new" Click="SaveSelectedAsNewTemplate" />
                             </div>
                         </div>
-    </Template>
-    </DxFormLayoutItem>
-</DxFormLayout>
                     }
                     </div>
                 </aside>
@@ -683,7 +629,7 @@
         </Items>
     </DxContextMenu>
 }
-    </Template>
+        </Template>
     </DxFormLayoutItem>
 </DxFormLayout>
 </div>
@@ -834,13 +780,13 @@
     /// </summary>
     private string? _dropSurfaceBindingKey;
     /// <summary>
-    /// Stores the number of deferred browser-surface binding attempts used while the DxPopup portal is materializing.
+    /// Stores the number of browser-surface attachment polls used while the DxPopup portal is materializing.
     /// </summary>
     private int _dropSurfaceBindAttempt;
     /// <summary>
-    /// Limits transient DxPopup portal retries before a binding failure is treated as persistent.
+    /// Limits transient DxPopup portal attachment polls before a binding failure is treated as persistent.
     /// </summary>
-    private const int MaxDropSurfaceBindAttempts = 4;
+    private const int MaxDropSurfaceBindAttempts = 8;
     /// <summary>
     /// Stores the internal design surface layout key state used by <see cref="PanelStudio"/> while executing its surrounding workflow.
     /// </summary>
@@ -857,6 +803,22 @@
     /// Stores the internal preview revision state used by <see cref="PanelStudio"/> while executing its surrounding workflow.
     /// </summary>
     private int _previewRevision;
+    /// <summary>
+    /// Stores whether the current editor draft originated from the blank authoring path or an existing panel.
+    /// </summary>
+    private string _initializationSource = "unknown";
+    /// <summary>
+    /// Stores the visible-render sequence used to correlate C# lifecycle diagnostics with browser mutation traces.
+    /// </summary>
+    private int _renderSequence;
+    /// <summary>
+    /// Stores whether the initial browser lifecycle snapshot for the current panel draft has been logged.
+    /// </summary>
+    private bool _initialLifecycleSnapshotLogged;
+    /// <summary>
+    /// Stores the parent-owned authored render revision that makes in-place draft mutations explicit to <see cref="PanelView"/> without remounting existing live element instances.
+    /// </summary>
+    private int _authoringRenderRevision;
     /// <summary>
     /// Stores the internal advanced element JSON state used by <see cref="PanelStudio"/> while executing its surrounding workflow.
     /// </summary>
@@ -994,6 +956,9 @@
                 _dropSurfaceBindAttempt = 0;
                 _designSurfaceLayoutKey = null;
                 _lastInteractionSurfaceNotification = string.Empty;
+                _initialLifecycleSnapshotLogged = false;
+                _renderSequence = 0;
+                _initializationSource = "unknown";
                 _pictureEditorVisible = false;
                 _pictureEditorTargetId = null;
                 return;
@@ -1001,6 +966,7 @@
 
             var id = InitialPanel?.Id;
             if (_draft is not null && _loadedId == id) return;
+            _initializationSource = InitialPanel is null ? "blank" : "existing";
             _draft = InitialPanel is null ? Panels.CreateBlank() : (PanelElement)Files.CloneElement(InitialPanel);
             Panels.Normalize(Document, _draft);
             _selectedViewId = _draft.ActiveViewId;
@@ -1009,17 +975,57 @@
             _error = string.Empty;
             _lastInteractionSurfaceNotification = string.Empty;
             _dropSurfaceBindAttempt = 0;
+            _initialLifecycleSnapshotLogged = false;
+            _renderSequence = 0;
             _interactionPreview = false;
             _previewSizeKey = "design";
             RefreshPreviewPresets();
             RefreshLocalDivTemplates();
             RefreshAdvancedJson();
+            Logger.LogInformation(
+                "Panel Studio initialized draft. Source:{Source} Panel:{PanelId} ActiveView:{ViewId} Views:{ViewCount} Elements:{ElementCount} Binding:{BindingId} PreviewRevision:{PreviewRevision} AuthoringRevision:{AuthoringRevision}.",
+                _initializationSource,
+                _draft.Id,
+                _selectedViewId,
+                _draft.Views.Count,
+                CurrentView?.Elements.Count ?? 0,
+                _interactionBindingId,
+                _previewRevision,
+                _authoringRenderRevision);
     
         }
         catch (Exception __componentMethodException)
         {
             Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(OnParametersSet)} failed.");
             throw;
+        }
+    }
+
+    /// <summary>
+    /// Captures the current browser-side Panel Studio and DevExpress lifecycle state for diagnostics.
+    /// </summary>
+    /// <param name="phase">Lifecycle phase to include in the browser snapshot.</param>
+    /// <returns>The serialized lifecycle snapshot, or a diagnostic placeholder if capture is unavailable.</returns>
+    private async Task<string> CaptureBrowserLifecycleSnapshotAsync(string phase)
+    {
+        try
+        {
+            return await JS.InvokeAsync<string>("publisherStudio.capturePanelStudioLifecycle", _canvasElement, phase).ConfigureAwait(true);
+        }
+        catch (JSDisconnectedException exception)
+        {
+            Logger.LogDebug(exception, "Panel Studio lifecycle snapshot was unavailable because the browser circuit disconnected. Phase:{Phase} Binding:{BindingId}.", phase, _interactionBindingId);
+            return "browser-disconnected";
+        }
+        catch (OperationCanceledException exception)
+        {
+            Logger.LogDebug(exception, "Panel Studio lifecycle snapshot was cancelled. Phase:{Phase} Binding:{BindingId}.", phase, _interactionBindingId);
+            return "browser-cancelled";
+        }
+        catch (Exception exception)
+        {
+            Logger.LogWarning(exception, "Panel Studio lifecycle snapshot capture failed. Phase:{Phase} Binding:{BindingId}.", phase, _interactionBindingId);
+            return $"snapshot-failed:{exception.GetType().Name}:{exception.Message}";
         }
     }
 
@@ -1038,26 +1044,53 @@
         if (!Visible || _draft is null) return;
         try
         {
+            _renderSequence++;
+            Logger.LogDebug(
+                "Panel Studio after-render entered. Render:{RenderSequence} FirstRender:{FirstRender} Source:{Source} Binding:{BindingId} Bound:{Bound} View:{ViewId} PreviewRevision:{PreviewRevision} AuthoringRevision:{AuthoringRevision}.",
+                _renderSequence,
+                firstRender,
+                _initializationSource,
+                _interactionBindingId,
+                _dropSurfaceBound,
+                _selectedViewId,
+                _previewRevision,
+                _authoringRenderRevision);
+            if (!_initialLifecycleSnapshotLogged)
+            {
+                var initialSnapshot = await CaptureBrowserLifecycleSnapshotAsync($"before-bind-render-{_renderSequence}").ConfigureAwait(true);
+                Logger.LogInformation(
+                    "Panel Studio initial browser lifecycle snapshot. Source:{Source} Binding:{BindingId} View:{ViewId} Render:{RenderSequence} Snapshot:{Snapshot}",
+                    _initializationSource,
+                    _interactionBindingId,
+                    _selectedViewId,
+                    _renderSequence,
+                    initialSnapshot);
+                _initialLifecycleSnapshotLogged = true;
+            }
+
             _self ??= DotNetObjectReference.Create(this);
             if (!_dropSurfaceBound || !string.Equals(_dropSurfaceBindingKey, bindingKey, StringComparison.Ordinal))
             {
-                _dropSurfaceBound = await JS.InvokeAsync<bool>("publisherStudio.bindPanelStudioDropSurface", _canvasElement, _self, _interactionBindingId).ConfigureAwait(true);
-                _dropSurfaceBindingKey = _dropSurfaceBound ? bindingKey : null;
-                if (!_dropSurfaceBound)
+                _dropSurfaceBound = false;
+                _dropSurfaceBindingKey = null;
+                for (_dropSurfaceBindAttempt = 0; _dropSurfaceBindAttempt < MaxDropSurfaceBindAttempts && !_dropSurfaceBound; _dropSurfaceBindAttempt++)
                 {
-                    _dropSurfaceBindAttempt++;
-                    if (_dropSurfaceBindAttempt < MaxDropSurfaceBindAttempts)
+                    _dropSurfaceBound = await JS.InvokeAsync<bool>("publisherStudio.bindPanelStudioDropSurface", _canvasElement, _self, _interactionBindingId).ConfigureAwait(true);
+                    if (_dropSurfaceBound) break;
+                    if (_dropSurfaceBindAttempt + 1 < MaxDropSurfaceBindAttempts)
                     {
-                        Logger.LogDebug($"Panel Studio browser interaction surface is not materialized yet; deferring bind attempt {_dropSurfaceBindAttempt}/{MaxDropSurfaceBindAttempts - 1}. Binding:{_interactionBindingId} View:{_selectedViewId}.");
+                        Logger.LogDebug($"Panel Studio browser interaction surface is not materialized yet; polling attach attempt {_dropSurfaceBindAttempt + 1}/{MaxDropSurfaceBindAttempts}. Binding:{_interactionBindingId} View:{_selectedViewId}.");
                         await Task.Delay(16).ConfigureAwait(true);
-                        if (Visible && !_disposed) await InvokeAsync(StateHasChanged).ConfigureAwait(true);
-                        return;
                     }
-                    throw new InvalidOperationException("The Panel Studio browser interaction surface rejected its binding after the DxPopup portal materialization window.");
                 }
+                if (!_dropSurfaceBound)
+                    throw new InvalidOperationException("The Panel Studio browser interaction surface rejected its binding after the DxPopup portal materialization window.");
+
+                _dropSurfaceBindingKey = bindingKey;
                 _dropSurfaceBindAttempt = 0;
                 _lastInteractionSurfaceNotification = string.Empty;
-                Logger.LogInformation($"Panel Studio pointer, keyboard, context-menu, and gamepad interaction binding is active. Binding:{_interactionBindingId} View:{_selectedViewId} Mode:{(_interactionPreview ? "Interact" : "Arrange")} PreviewRevision:{_previewRevision}.");
+                var activeSnapshot = await CaptureBrowserLifecycleSnapshotAsync($"binding-active-render-{_renderSequence}").ConfigureAwait(true);
+                Logger.LogInformation($"Panel Studio pointer, keyboard, context-menu, and gamepad interaction binding is active. Binding:{_interactionBindingId} View:{_selectedViewId} Mode:{(_interactionPreview ? "Interact" : "Arrange")} PreviewRevision:{_previewRevision} AuthoringRevision:{_authoringRenderRevision}. BrowserLifecycle:{activeSnapshot}");
             }
 
             if (_dropSurfaceBound && !string.Equals(_designSurfaceLayoutKey, designSurfaceLayoutKey, StringComparison.Ordinal))
@@ -1078,7 +1111,17 @@
         }
         catch (Exception exception)
         {
-            Logger.LogError(exception, "Panel Studio interaction binding failed.");
+            var failureSnapshot = await CaptureBrowserLifecycleSnapshotAsync($"binding-failed-render-{_renderSequence}").ConfigureAwait(true);
+            Logger.LogError(
+                exception,
+                "Panel Studio interaction binding failed. Source:{Source} Binding:{BindingId} View:{ViewId} Render:{RenderSequence} PreviewRevision:{PreviewRevision} AuthoringRevision:{AuthoringRevision} BrowserLifecycle:{Snapshot}",
+                _initializationSource,
+                _interactionBindingId,
+                _selectedViewId,
+                _renderSequence,
+                _previewRevision,
+                _authoringRenderRevision,
+                failureSnapshot);
             _error = "The Panel Studio interaction surface could not be initialized.";
             var notificationKey = $"{exception.GetType().FullName}:{exception.Message}";
             if (!string.Equals(_lastInteractionSurfaceNotification, notificationKey, StringComparison.Ordinal))
@@ -1144,6 +1187,7 @@
             if (_draft is null) return;
             var view = new PublicationPanelView { Name = $"View {_draft.Views.Count + 1}", Slug = $"view-{_draft.Views.Count + 1}" };
             _draft.Views.Add(view);
+            InvalidateAuthoringSurface();
             SelectView(view.Id);
     
         }
@@ -1170,6 +1214,7 @@
                 Elements = CurrentView.Elements.Select(Files.CloneElement).ToList()
             };
             _draft.Views.Add(clone);
+            InvalidateAuthoringSurface();
             SelectView(clone.Id);
     
         }
@@ -1189,6 +1234,7 @@
         {
             if (_draft is null || CurrentView is null || _draft.Views.Count <= 1) return;
             _draft.Views.Remove(CurrentView);
+            InvalidateAuthoringSurface();
             SelectView(_draft.Views[0].Id);
     
         }
@@ -1688,6 +1734,7 @@
             }, draft.CanvasWidth, draft.CanvasHeight);
             _selectedElementId = element.Id;
             RefreshAdvancedJson();
+            InvalidateAuthoringSurface();
         });
         }
         catch (Exception __componentMethodException)
@@ -2368,6 +2415,7 @@
             // different root id and must not be replaced by OnParametersSet on rerender.
             _loadedId = InitialPanel?.Id;
             RefreshAdvancedJson();
+            InvalidateAuthoringSurface();
             Notifications.Success("The complete Panel Studio project was imported.", "Panel project imported", nameof(PanelStudio));
         }
         catch (Exception exception)
@@ -2594,6 +2642,7 @@
                     break;
             }
             RefreshAdvancedJson();
+            InvalidateAuthoringSurface();
         }
         catch (Exception exception)
         {
@@ -2630,10 +2679,19 @@
     {
         try
         {
+            var wasEmptyView = view.Elements.Count == 0;
             element.ZIndex = Layout.NextZ(view.Elements);
             view.Elements.Add(element);
             Layout.NormalizeZOrder(view.Elements);
             if (_draft is not null) Panels.Normalize(Document, _draft);
+            InvalidateAuthoringSurface();
+            Logger.LogInformation("Panel Studio added element. Panel:{PanelId} View:{ViewId} Element:{ElementId} Kind:{Kind} Visible:{Visible} X:{X} Y:{Y} Width:{Width} Height:{Height} AuthoringRevision:{AuthoringRevision}.",
+                _draft?.Id, view.Id, element.Id, element.Kind, element.Visible, element.X, element.Y, element.Width, element.Height, _authoringRenderRevision);
+            if (wasEmptyView)
+            {
+                _previewRevision++;
+                Logger.LogDebug($"Panel Studio remounted the authored surface for the first element in an empty view. Panel:{_draft?.Id} View:{view.Id} Element:{element.Id} PreviewRevision:{_previewRevision} AuthoringRevision:{_authoringRenderRevision}.");
+            }
             SelectElement(element.Id);
     
         }
@@ -2659,6 +2717,7 @@
             clone.Y += 4;
             clone.ZIndex = Layout.NextZ(CurrentView.Elements);
             CurrentView.Elements.Add(clone);
+            InvalidateAuthoringSurface();
             SelectElement(clone.Id);
     
         }
@@ -2679,6 +2738,7 @@
             if (CurrentView is null || SelectedElement is null) return;
             CurrentView.Elements.Remove(SelectedElement);
             Layout.NormalizeZOrder(CurrentView.Elements);
+            InvalidateAuthoringSurface();
             SelectElement(CurrentView.Elements.OrderByDescending(element => element.ZIndex).FirstOrDefault()?.Id);
     
         }
@@ -2773,6 +2833,7 @@
                 moved.Rotation = rotation;
             }
             SelectElement(id);
+            InvalidateAuthoringSurface();
     
         }
         catch (Exception __componentMethodException)
@@ -2794,6 +2855,7 @@
             if (_draft is null || SelectedElement is null) return;
             Layout.Nudge(SelectedElement, deltaX, deltaY, _draft.CanvasWidth, _draft.CanvasHeight);
             RefreshAdvancedJson();
+            InvalidateAuthoringSurface();
     
         }
         catch (Exception __componentMethodException)
@@ -3145,6 +3207,7 @@
             var index = CurrentView.Elements.IndexOf(SelectedElement);
             CurrentView.Elements[index] = replacement;
             if (_draft is not null) Panels.Normalize(Document, _draft);
+            InvalidateAuthoringSurface();
             SelectElement(replacement.Id);
             _error = string.Empty;
         }
@@ -3624,6 +3687,7 @@
         {
             if (_draft is not null) Panels.Normalize(Document, _draft);
             _previewRevision++;
+            InvalidateAuthoringSurface();
             Logger.LogDebug($"{nameof(RefreshPreview)} normalized the Panel Studio preview while retaining binding:{_interactionBindingId}.");
         }
         catch (Exception exception)
@@ -3640,7 +3704,7 @@
     private void ChangePanelName(ChangeEventArgs args) {
         try
         {
-     if (_draft is not null) _draft.Name = Text(args); 
+     if (_draft is not null) { _draft.Name = Text(args); InvalidateAuthoringSurface(); } 
         }
         catch (Exception __componentMethodException)
         {
@@ -3655,7 +3719,7 @@
     private void ChangeViewName(ChangeEventArgs args) {
         try
         {
-     if (CurrentView is not null) CurrentView.Name = Text(args); 
+     if (CurrentView is not null) { CurrentView.Name = Text(args); InvalidateAuthoringSurface(); } 
         }
         catch (Exception __componentMethodException)
         {
@@ -3670,7 +3734,7 @@
     private void ChangeElementName(ChangeEventArgs args) {
         try
         {
-     if (SelectedElement is not null) SelectedElement.Name = Text(args); 
+     if (SelectedElement is not null) { SelectedElement.Name = Text(args); InvalidateAuthoringSurface(); } 
         }
         catch (Exception __componentMethodException)
         {
@@ -3679,13 +3743,33 @@
         }
     }
     /// <summary>
+    /// Toggles visibility of the selected authored element without binding visibility to a browser editor's initialization lifecycle.
+    /// </summary>
+    private void ToggleSelectedElementVisibility()
+    {
+        try
+        {
+            if (SelectedElement is not { } selected) return;
+            selected.Visible = !selected.Visible;
+            InvalidateAuthoringSurface();
+            Logger.LogInformation("Panel Studio changed element visibility. Panel:{PanelId} View:{ViewId} Element:{ElementId} Kind:{Kind} Visible:{Visible} AuthoringRevision:{AuthoringRevision}.",
+                _draft?.Id, CurrentView?.Id, selected.Id, selected.Kind, selected.Visible, _authoringRenderRevision);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(ToggleSelectedElementVisibility)} failed.");
+            throw;
+        }
+    }
+
+    /// <summary>
     /// Performs change navigation for <see cref="PanelStudio"/>, keeping the operation consistent with the state and invariants of the surrounding panel studio workflow.
     /// </summary>
     /// <param name="args">Args value supplied to the panel studio operation and used when producing its result.</param>
     private void ChangeNavigation(ChangeEventArgs args) {
         try
         {
-     if (_draft is not null && Enum.TryParse<PublicationPanelNavigationMode>(Text(args), out var mode)) _draft.NavigationMode = mode; 
+     if (_draft is not null && Enum.TryParse<PublicationPanelNavigationMode>(Text(args), out var mode)) { _draft.NavigationMode = mode; InvalidateAuthoringSurface(); } 
         }
         catch (Exception __componentMethodException)
         {
@@ -3700,7 +3784,7 @@
     private void ChangeLayoutMode(ChangeEventArgs args) {
         try
         {
-     if (_draft is not null && Enum.TryParse<PublicationPanelLayoutMode>(Text(args), out var mode)) _draft.LayoutMode = mode; 
+     if (_draft is not null && Enum.TryParse<PublicationPanelLayoutMode>(Text(args), out var mode)) { _draft.LayoutMode = mode; InvalidateAuthoringSurface(); } 
         }
         catch (Exception __componentMethodException)
         {
@@ -3715,7 +3799,7 @@
     private void ChangeNestedNavigation(ChangeEventArgs args) {
         try
         {
-     if (SelectedElement is PanelElement nested && Enum.TryParse<PublicationPanelNavigationMode>(Text(args), out var mode)) nested.NavigationMode = mode; 
+     if (SelectedElement is PanelElement nested && Enum.TryParse<PublicationPanelNavigationMode>(Text(args), out var mode)) { nested.NavigationMode = mode; InvalidateAuthoringSurface(); } 
         }
         catch (Exception __componentMethodException)
         {
@@ -3730,7 +3814,7 @@
     private void ChangeVisualKind(ChangeEventArgs args) {
         try
         {
-     if (SelectedElement is DataVisualElement visual && Enum.TryParse<DataVisualKind>(Text(args), out var kind)) visual.VisualKind = kind; 
+     if (SelectedElement is DataVisualElement visual && Enum.TryParse<DataVisualKind>(Text(args), out var kind)) { visual.VisualKind = kind; InvalidateAuthoringSurface(); } 
         }
         catch (Exception __componentMethodException)
         {
@@ -3745,7 +3829,7 @@
     private void ChangeVisualDataObject(ChangeEventArgs args) {
         try
         {
-     if (SelectedElement is DataVisualElement visual && Guid.TryParse(Text(args), out var id)) visual.DataObjectId = id; 
+     if (SelectedElement is DataVisualElement visual && Guid.TryParse(Text(args), out var id)) { visual.DataObjectId = id; InvalidateAuthoringSurface(); } 
         }
         catch (Exception __componentMethodException)
         {
@@ -3762,7 +3846,10 @@
         try
         {
             if (SelectedElement is DataVisualElement visual)
+            {
                 visual.ValueFields = PanelText.ParseList(Text(args), Logger).ToList();
+                InvalidateAuthoringSurface();
+            }
             Logger.LogDebug($"{nameof(ChangeVisualValueFields)} updated the selected visual field list.");
         }
         catch (Exception exception)
@@ -3778,7 +3865,7 @@
     private void ChangeComponentKind(ChangeEventArgs args) {
         try
         {
-     if (SelectedElement is DevExtremeComponentElement component && Enum.TryParse<PublicationComponentKind>(Text(args), out var kind)) { component.ComponentKind = kind; Components.Normalize(Document, component); } 
+     if (SelectedElement is DevExtremeComponentElement component && Enum.TryParse<PublicationComponentKind>(Text(args), out var kind)) { component.ComponentKind = kind; Components.Normalize(Document, component); InvalidateAuthoringSurface(); } 
         }
         catch (Exception __componentMethodException)
         {
@@ -3793,7 +3880,7 @@
     private void ChangeComponentDataMode(ChangeEventArgs args) {
         try
         {
-     if (SelectedElement is DevExtremeComponentElement component && Enum.TryParse<PublicationComponentDataMode>(Text(args), out var mode)) component.Connection.Mode = mode; 
+     if (SelectedElement is DevExtremeComponentElement component && Enum.TryParse<PublicationComponentDataMode>(Text(args), out var mode)) { component.Connection.Mode = mode; InvalidateAuthoringSurface(); } 
         }
         catch (Exception __componentMethodException)
         {
@@ -3808,7 +3895,7 @@
     private void ChangeComponentDataObject(ChangeEventArgs args) {
         try
         {
-     if (SelectedElement is DevExtremeComponentElement component && Guid.TryParse(Text(args), out var id)) component.Connection.DataObjectId = id; 
+     if (SelectedElement is DevExtremeComponentElement component && Guid.TryParse(Text(args), out var id)) { component.Connection.DataObjectId = id; InvalidateAuthoringSurface(); } 
         }
         catch (Exception __componentMethodException)
         {
@@ -3823,7 +3910,7 @@
     private void ChangeChatDisplayMode(ChangeEventArgs args) {
         try
         {
-     if (SelectedElement is DevExtremeComponentElement component && Enum.TryParse<PublicationChatDisplayMode>(Text(args), out var mode)) component.ChatDisplayMode = mode; 
+     if (SelectedElement is DevExtremeComponentElement component && Enum.TryParse<PublicationChatDisplayMode>(Text(args), out var mode)) { component.ChatDisplayMode = mode; InvalidateAuthoringSurface(); } 
         }
         catch (Exception __componentMethodException)
         {
@@ -3838,7 +3925,7 @@
     private void ChangeLiveSourceKind(ChangeEventArgs args) {
         try
         {
-     if (SelectedElement is LiveSourceElement live && Enum.TryParse<PublicationLiveSourceKind>(Text(args), out var kind)) live.SourceKind = kind; 
+     if (SelectedElement is LiveSourceElement live && Enum.TryParse<PublicationLiveSourceKind>(Text(args), out var kind)) { live.SourceKind = kind; InvalidateAuthoringSurface(); } 
         }
         catch (Exception __componentMethodException)
         {
@@ -3853,7 +3940,7 @@
     private void ToggleViewEnabled(ChangeEventArgs args) {
         try
         {
-     if (CurrentView is not null) CurrentView.Enabled = AsBool(args); 
+     if (CurrentView is not null) { CurrentView.Enabled = AsBool(args); InvalidateAuthoringSurface(); } 
         }
         catch (Exception __componentMethodException)
         {
@@ -3940,6 +4027,7 @@
         try
         {
             PanelText.ChangeNumber(args, update, Logger);
+            InvalidateAuthoringSurface();
         }
         catch (Exception __componentMethodException)
         {
@@ -3956,10 +4044,27 @@
         try
         {
             PanelText.ChangeInt(args, update, Logger);
+            InvalidateAuthoringSurface();
         }
         catch (Exception __componentMethodException)
         {
             Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(ChangeInt)} failed.");
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Invalidates the authored PanelView after the mutable draft graph changes so scratch-created panels and library-backed panels follow the same render lifecycle.
+    /// </summary>
+    private void InvalidateAuthoringSurface()
+    {
+        try
+        {
+            _authoringRenderRevision = _authoringRenderRevision == int.MaxValue ? 0 : _authoringRenderRevision + 1;
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(InvalidateAuthoringSurface)} failed.");
             throw;
         }
     }

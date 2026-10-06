@@ -1,5 +1,7 @@
 param(
-    [switch]$SkipPackageRestore
+    [switch]$SkipPackageRestore,
+    [switch]$EnsureCurrent,
+    [string]$ExpectedVersion
 )
 
 $ErrorActionPreference = "Stop"
@@ -15,6 +17,147 @@ $runtimeLicenseVersionPath = Join-Path $vendorDirectory "devextreme-license.vers
 $licenseTempDirectory = Join-Path ([System.IO.Path]::GetTempPath()) ("PublisherStudio-DevExtreme-" + $PID + "-" + [Guid]::NewGuid().ToString("N"))
 $runtimeLicenseGeneratedPath = Join-Path $licenseTempDirectory "devextreme-license.js"
 $previousDevExtremeSourceRoot = $env:PUBLISHERSTUDIO_DEVEXTREME_SOURCE_ROOT
+
+
+function Resolve-ExpectedDevExpressVersion {
+    if (-not [string]::IsNullOrWhiteSpace($ExpectedVersion)) {
+        return $ExpectedVersion.Trim()
+    }
+
+    $projectPath = Join-Path $webDirectory "PublisherStudio.Web.csproj"
+    if (-not (Test-Path -LiteralPath $projectPath -PathType Leaf)) {
+        throw "PublisherStudio.Web.csproj was not found: $projectPath"
+    }
+
+    [xml]$projectXml = Get-Content -LiteralPath $projectPath -Raw
+    $versionNodes = @($projectXml.Project.PropertyGroup.DevExpressVersion | Where-Object { -not [string]::IsNullOrWhiteSpace([string]$_) })
+    if ($versionNodes.Count -lt 1) {
+        throw "PublisherStudio.Web.csproj does not define DevExpressVersion."
+    }
+
+    return ([string]$versionNodes[0]).Trim()
+}
+
+
+function Test-PreparedDevExpressAssetsCurrent {
+    param(
+        [Parameter(Mandatory = $true)][string]$Version
+    )
+
+    try {
+        $requiredPaths = @(
+            (Join-Path $vendorDirectory "devexpress-aspnetcore-spreadsheet\dist\dx-aspnetcore-spreadsheet.js"),
+            (Join-Path $vendorDirectory "devexpress-aspnetcore-spreadsheet\dist\dx-aspnetcore-spreadsheet.css"),
+            (Join-Path $vendorDirectory "devextreme-dist\js\dx.all.js"),
+            (Join-Path $vendorDirectory "devextreme-dist\css\dx.light.css"),
+            (Join-Path $vendorDirectory "jquery\jquery.min.js"),
+            $runtimeLicensePath,
+            $runtimeLicenseMetadataPath,
+            $runtimeLicenseVersionPath,
+            (Join-Path $vendorDirectory "devextreme-assets.meta.json"),
+            (Join-Path $vendorDirectory "devextreme-dist\package.json"),
+            (Join-Path $vendorDirectory "devexpress-aspnetcore-spreadsheet\package.json")
+        )
+        foreach ($requiredPath in $requiredPaths) {
+            if (-not (Test-Path -LiteralPath $requiredPath -PathType Leaf)) {
+                return $false
+            }
+        }
+
+        $versionMarker = (Get-Content -LiteralPath $runtimeLicenseVersionPath -Raw).Trim()
+        if ($versionMarker -ne $Version) {
+            return $false
+        }
+
+        $licenseMetadata = Get-Content -LiteralPath $runtimeLicenseMetadataPath -Raw | ConvertFrom-Json
+        if ($licenseMetadata.schemaVersion -ne 2 -or
+            $licenseMetadata.generatorPackage -ne "devextreme" -or
+            $licenseMetadata.generatorPackageVersion -ne $Version) {
+            return $false
+        }
+        $actualLicenseHash = (Get-FileHash -LiteralPath $runtimeLicensePath -Algorithm SHA256).Hash.ToLowerInvariant()
+        if (([string]$licenseMetadata.sha256) -ne $actualLicenseHash) {
+            return $false
+        }
+
+        $assetMetadataPath = Join-Path $vendorDirectory "devextreme-assets.meta.json"
+        $assetMetadata = Get-Content -LiteralPath $assetMetadataPath -Raw | ConvertFrom-Json
+        if (($assetMetadata.schemaVersion -lt 1 -or $assetMetadata.schemaVersion -gt 5) -or
+            $assetMetadata.devExtremeVersion -ne $Version) {
+            return $false
+        }
+        if ($assetMetadata.schemaVersion -ge 2 -and $assetMetadata.restoredPackageVersion -ne $Version) {
+            return $false
+        }
+        if ($assetMetadata.schemaVersion -ge 3 -and $assetMetadata.lockedPackageVersion -ne $Version) {
+            return $false
+        }
+        if ($assetMetadata.schemaVersion -ge 4 -and
+            ($assetMetadata.authoritativeRuntimePackage -ne "devextreme" -or
+             $assetMetadata.authoritativeRuntimePackageVersion -ne $Version)) {
+            return $false
+        }
+
+        $copiedDevExtremePackage = Get-Content -LiteralPath (Join-Path $vendorDirectory "devextreme-dist\package.json") -Raw | ConvertFrom-Json
+        $copiedSpreadsheetPackage = Get-Content -LiteralPath (Join-Path $vendorDirectory "devexpress-aspnetcore-spreadsheet\package.json") -Raw | ConvertFrom-Json
+        if (([string]$copiedDevExtremePackage.version) -ne $Version -or
+            ([string]$copiedSpreadsheetPackage.version) -ne $Version) {
+            return $false
+        }
+
+        $assetChecks = @(
+            @{ RelativePath = "devextreme-dist\js\dx.all.js"; ManifestPath = "devextreme-dist/js/dx.all.js" },
+            @{ RelativePath = "devextreme-dist\css\dx.light.css"; ManifestPath = "devextreme-dist/css/dx.light.css" }
+        )
+        foreach ($assetCheck in $assetChecks) {
+            $entries = @($assetMetadata.assets | Where-Object { $_.path -eq $assetCheck.ManifestPath })
+            if ($entries.Count -ne 1) {
+                return $false
+            }
+            $assetPath = Join-Path $vendorDirectory $assetCheck.RelativePath
+            $assetFile = Get-Item -LiteralPath $assetPath
+            if ([long]$entries[0].bytes -ne [long]$assetFile.Length) {
+                return $false
+            }
+            $actualHash = (Get-FileHash -LiteralPath $assetPath -Algorithm SHA256).Hash.ToLowerInvariant()
+            if (([string]$entries[0].sha256) -ne $actualHash) {
+                return $false
+            }
+        }
+
+        return $true
+    }
+    catch {
+        Write-Host "PublisherStudio DevExpress asset preflight will reprovision because current-state validation failed: $($_.Exception.Message)" -ForegroundColor DarkYellow
+        return $false
+    }
+}
+
+
+$expectedDevExpressVersion = Resolve-ExpectedDevExpressVersion
+if (-not (Test-Path -LiteralPath $packageJsonPath -PathType Leaf)) {
+    throw "PublisherStudio package.json was not found: $packageJsonPath"
+}
+$packageJson = Get-Content -LiteralPath $packageJsonPath -Raw | ConvertFrom-Json
+$devExtremeVersion = [string]$packageJson.dependencies.'devextreme-dist'
+$spreadsheetVersion = [string]$packageJson.dependencies.'devexpress-aspnetcore-spreadsheet'
+if ([string]::IsNullOrWhiteSpace($devExtremeVersion)) {
+    throw "package.json does not define dependencies.devextreme-dist."
+}
+if ([string]::IsNullOrWhiteSpace($spreadsheetVersion)) {
+    throw "package.json does not define dependencies.devexpress-aspnetcore-spreadsheet."
+}
+if ($devExtremeVersion -ne $expectedDevExpressVersion -or $spreadsheetVersion -ne $expectedDevExpressVersion) {
+    throw "PublisherStudio dependency versions are inconsistent. DevExpressVersion is $expectedDevExpressVersion, devextreme-dist is $devExtremeVersion, and devexpress-aspnetcore-spreadsheet is $spreadsheetVersion. Align all three before provisioning."
+}
+
+if ($EnsureCurrent -and (Test-PreparedDevExpressAssetsCurrent -Version $expectedDevExpressVersion)) {
+    Write-Host "PublisherStudio DevExpress browser assets are current for $expectedDevExpressVersion; provisioning is not required." -ForegroundColor DarkGreen
+    return
+}
+if ($EnsureCurrent) {
+    Write-Host "PublisherStudio DevExpress browser assets are missing, stale, or incomplete for $expectedDevExpressVersion; provisioning now." -ForegroundColor Cyan
+}
 
 
 function Remove-GeneratedPathWithRetry {
@@ -157,14 +300,6 @@ if ([int]$Matches.major -lt 20) {
     throw "Node.js 20 or newer is required. Found $nodeVersionText at '$node'."
 }
 
-if (-not (Test-Path $packageJsonPath)) {
-    throw "PublisherStudio package.json was not found: $packageJsonPath"
-}
-$packageJson = Get-Content $packageJsonPath -Raw | ConvertFrom-Json
-$devExtremeVersion = $packageJson.dependencies.'devextreme-dist'
-if ([string]::IsNullOrWhiteSpace($devExtremeVersion)) {
-    throw "package.json does not define dependencies.devextreme-dist."
-}
 
 Write-Host "Node.js: $nodeVersionText" -ForegroundColor DarkGray
 Write-Host "npm: $npm" -ForegroundColor DarkGray

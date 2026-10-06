@@ -14,12 +14,12 @@ def forbid(rel, *needles):
         if needle in source: fail.append(f'{rel}: forbidden stale/invalid token {needle}')
 for rel in ['src/PublisherStudio.Web/PublisherStudio.Web.csproj', 'src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj']:
     req(rel, '<Version>2.9.5</Version>')
-req('src/PublisherStudio.Web/package.json', '"version": "2.9.5"', '"devextreme-dist": "25.2.9"')
-req('src/PublisherStudio.Web/package-lock.json', '"version": "2.9.5"', 'devextreme-dist-25.2.9.tgz')
-req('src/PublisherStudio.Web/PublisherStudio.Web.csproj', '<TargetFramework>net10.0</TargetFramework>', '<DevExpressVersion>25.2.9</DevExpressVersion>', 'DevExtremeRuntimeKeyGeneratorVersionFile')
-req('src/PublisherStudio.Web/Components/App.razor', 'dx.all.js?v=25.2.9', 'devextreme-license.js?v=25.2.9', 'componentRuntime.js?v=2.9.5', 'publisherInterop.js?v=2.9.5', 'site.css?v=2.9.5')
+req('src/PublisherStudio.Web/package.json', '"version": "2.9.5"', '"devextreme-dist": "25.2.10"')
+req('src/PublisherStudio.Web/package-lock.json', '"version": "2.9.5"', 'devextreme-dist-25.2.10.tgz')
+req('src/PublisherStudio.Web/PublisherStudio.Web.csproj', '<TargetFramework>net10.0</TargetFramework>', '<DevExpressVersion>25.2.10</DevExpressVersion>', 'DevExtremeRuntimeKeyGeneratorVersionFile')
+req('src/PublisherStudio.Web/Components/App.razor', 'dx.all.js?v=25.2.10', 'devextreme-license.js?v=25.2.10', 'componentRuntime.js?v=2.9.5', 'publisherInterop.js?v=2.9.5', 'site.css?v=2.9.5')
 app = text('src/PublisherStudio.Web/Components/App.razor')
-if not (app.index('dx.all.js?v=25.2.9') < app.index('devextreme-license.js?v=25.2.9') < app.index('<Routes />')):
+if not (app.index('dx.all.js?v=25.2.10') < app.index('devextreme-license.js?v=25.2.10') < app.index('<Routes />')):
     fail.append('App.razor: generated non-modular runtime key must load immediately after dx.all.js and before Routes')
 req('src/PublisherStudio.Web/tools/resolve-devextreme-package-root.mjs', 'devextreme-license.js', 'expectedVersion')
 req('src/PublisherStudio.Web/tools/prepare-devexpress-assets.mjs', 'PUBLISHERSTUDIO_DEVEXTREME_SOURCE_ROOT', 'overlayAuthoritativeDevExtremeRuntime', 'authoritativeRuntimePackageVersion', 'schemaVersion: 4', 'console.warn')
@@ -41,4 +41,4 @@ if fail:
     print('PublisherStudio 2.9.5 release audit failed:')
     print('\n'.join(' - ' + item for item in fail))
     sys.exit(1)
-print('PublisherStudio 2.9.5 release audit passed: Razor parser compatibility, retained Panel Studio behaviors, DevExtreme 25.2.9 provenance repair, .NET 10 and release alignment are present.')
+print('PublisherStudio 2.9.5 release audit passed: Razor parser compatibility, retained Panel Studio behaviors, DevExtreme 25.2.10 provenance repair, .NET 10 and release alignment are present.')

@@ -5,7 +5,7 @@ This archive is **source-only and not compiled** in the preparation environment.
 Static validation completed against the modified source:
 
 - JavaScript syntax checks passed for `publisherInterop.js`, `prepare-devexpress-assets.mjs`, and `resolve-devextreme-package-root.mjs`;
-- a synthetic preparation probe reproduced the reported condition where `devextreme-dist/package.json` says 25.2.8 while the project/npm lock says 25.2.9; preparation continued, overlaid the authoritative `devextreme@25.2.9` runtime, and emitted schema-4 asset metadata rather than throwing the false 2.9.3 error;
+- a synthetic preparation probe reproduced the reported condition where `devextreme-dist/package.json` says 25.2.8 while the project/npm lock says 25.2.10; preparation continued, overlaid the authoritative `devextreme@25.2.10` runtime, and emitted schema-4 asset metadata rather than throwing the false 2.9.3 error;
 - XML documentation coverage/quality passed for 6,124 direct C# declarations and 3,352 direct Razor members;
 - architecture policy passed;
 - async continuation policy passed for 78 source files;
@@ -15,7 +15,7 @@ Static validation completed against the modified source:
 - prerender JavaScript safety passed;
 - Panel Studio persistence passed after refreshing the reviewed `publisherInterop.js` diagnostics SHA-256;
 - `App.razor` and standalone export both load the generated non-modular runtime key directly after `dx.all.js`;
-- preparation resolves the exact `devextreme@25.2.9` package once, invokes that package's own `bin/devextreme-license.js`, and exposes the same package root to the browser-asset copier;
+- preparation resolves the exact `devextreme@25.2.10` package once, invokes that package's own `bin/devextreme-license.js`, and exposes the same package root to the browser-asset copier;
 - the Node asset copier no longer owns, guesses, or validates a `wwwroot/vendor/devextreme-license.js` path;
 - `devextreme-dist` internal `package.json` version mismatches are warnings only; npm lock integrity, exact `devextreme` runtime provenance and prepared SHA-256 values are authoritative.
 

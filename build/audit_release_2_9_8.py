@@ -51,7 +51,7 @@ else:
     CHECKS.append("single-digit minor/patch release policy")
 
 project = read("src/PublisherStudio.Web/PublisherStudio.Web.csproj")
-require(project, "<DevExpressVersion>25.2.9</DevExpressVersion>", "DevExpress 25.2.9 pin")
+require(project, "<DevExpressVersion>25.2.10</DevExpressVersion>", "DevExpress 25.2.10 pin")
 
 app = read("src/PublisherStudio.Web/Components/App.razor")
 for asset in ["site.css", "localizationRuntime.js", "videoEffectRuntime.js", "componentRuntime.js", "publisherInterop.js"]:

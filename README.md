@@ -14,18 +14,16 @@ The solution is `src/PublisherStudio.sln`. Generated/licensed DevExpress browser
 
 ```powershell
 # Windows
-.\Prepare-DevExpressAssets.ps1
 .\Build-LocalDevelopment.ps1
 
 # macOS / Linux
-pwsh ./Prepare-DevExpressAssets.ps1
 pwsh ./Build-LocalDevelopment.ps1
 
 # Owner/release lane
 pwsh ./Build-Release.ps1
 ```
 
-A licensed development/build environment is required for the maintained DevExpress-based UI. Current .NET package restore uses NuGet.org plus the repository-local LocalGPT wire-protocol cache where applicable; the private DevExpress developer license is a separate build-time identity and is not included in source ZIPs or end-user installations.
+Normal non-design-time builds automatically run the maintained DevExpress asset ensure-current preflight. If the generated browser payload is missing, stale, mixed-version, or hash-invalid, the existing PowerShell provisioning flow restores and seeds the exact DevExpress/DevExtreme 25.2.10 assets and runtime key before compilation continues. A licensed development/build environment is required for the maintained DevExpress-based UI. Current .NET package restore uses NuGet.org plus the repository-local LocalGPT wire-protocol cache where applicable; the private DevExpress developer license is a separate build-time identity and is not included in source ZIPs or end-user installations.
 
 ## Documentation
 

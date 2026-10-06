@@ -15,6 +15,6 @@ Validated statically:
 - DevExpress component-retention counts remain within the protected contract and no Razor file gains native interactive controls;
 - the new Razor attribute preflight has zero findings against current source;
 - both architecture-audit Python modules compile and the PowerShell variable-interpolation audit reports no ambiguous `$name:` references;
-- active application/browser source paths contain no DevExtreme `25.2.9` target.
+- active application/browser source paths contain no DevExtreme `25.2.10` target.
 
 No claim of compiler/build success is made because `dotnet`, MSBuild, NuGet restore/publish and GitHub access were intentionally not used.

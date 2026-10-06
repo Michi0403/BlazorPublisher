@@ -2,8 +2,8 @@
 
 ## Fixed
 
-- Aligns the npm/browser DevExpress dependency lane with the already configured .NET DevExpress 25.2.10 package lane. `devextreme-dist` and `devexpress-aspnetcore-spreadsheet` now request 25.2.10 instead of 25.2.9.
-- Refreshes exact npm lock versions and adds a stale-lock repair path before `npm ci`, preventing `Prepare-DevExpressAssets.ps1` from generating a 25.2.9 runtime-key marker that later fails the `PublisherStudio.Web.csproj` publish guard.
+- Aligns the npm/browser DevExpress dependency lane with the already configured .NET DevExpress 25.2.10 package lane. `devextreme-dist` and `devexpress-aspnetcore-spreadsheet` now request 25.2.10 instead of 25.2.10.
+- Refreshes exact npm lock versions and adds a stale-lock repair path before `npm ci`, preventing `Prepare-DevExpressAssets.ps1` from generating a 25.2.10 runtime-key marker that later fails the `PublisherStudio.Web.csproj` publish guard.
 - Supports npm lock metadata that can omit SRI for these packages by retaining exact package versions/resolved URLs and validating prepared DevExtreme assets with SHA-256. No fake integrity value is written.
 - Updates active DevExtreme script, stylesheet, VectorMap, Spreadsheet and localization cache-busters to 25.2.10.
 - Updates PublisherStudio browser-module cache-busters and both application/installer version identities to 3.7.9.

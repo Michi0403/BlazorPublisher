@@ -1,28 +1,29 @@
 {
-  "schemaVersion": 4,
-  "devExtremeVersion": "25.2.9",
+  "schemaVersion": 5,
+  "devExtremeVersion": "25.2.10",
   "authoritativeRuntimePackage": "devextreme",
-  "authoritativeRuntimePackageVersion": "25.2.9",
-  "restoredPackageVersion": "25.2.9",
-  "lockedPackageVersion": "25.2.9",
-  "lockedPackageResolved": "https://registry.npmjs.org/devextreme-dist/-/devextreme-dist-25.2.9.tgz",
-  "lockedPackageIntegrity": "sha512-V5OHLlkrI0rubqW4bnK99BhbsIDEGthWDDwtrgBV0SLi0C5SEfs7lxEYVjy1OHZTjtlUwItL80uulhDB49hpRA==",
-  "restoredPackageMetadataVersion": "25.2.9",
-  "copiedPackageMetadataVersion": "25.2.9",
-  "preparedAtUtc": "2026-08-21T23:24:33.108Z",
+  "authoritativeRuntimePackageVersion": "25.2.10",
+  "restoredPackageVersion": "25.2.10",
+  "lockedPackageVersion": "25.2.10",
+  "lockedPackageResolved": "https://registry.npmjs.org/devextreme-dist/-/devextreme-dist-25.2.10.tgz",
+  "lockedPackageIntegrity": "",
+  "lockVerification": "exact-version-resolved-url-plus-prepared-sha256",
+  "restoredPackageMetadataVersion": "25.2.10",
+  "copiedPackageMetadataVersion": "25.2.10",
+  "preparedAtUtc": "2026-10-06T17:55:32.659Z",
   "package": "devextreme-dist",
   "assets": [
     {
       "path": "devextreme-dist/js/dx.all.js",
       "source": "wwwroot/vendor/devextreme-dist/js/dx.all.js",
-      "bytes": 5315710,
-      "sha256": "d06d2acdf170d52bf257a809a8cbb7a83c4ec74cef06161119c1ef4f81f7b8e0"
+      "bytes": 5291343,
+      "sha256": "104a2137dc954e035118aa8bd73db0a38563737ec1fe8c25edcadf0261f4fc63"
     },
     {
       "path": "devextreme-dist/css/dx.light.css",
       "source": "wwwroot/vendor/devextreme-dist/css/dx.light.css",
-      "bytes": 691921,
-      "sha256": "e4c55c72f636bf286bdf41cc4ced7e48c3f2ea37172973dc5a845b34b607bc37"
+      "bytes": 692621,
+      "sha256": "fbad0578e11ea73ce130d1874790c27817517acc1429bba9636b7168cd8ad6fb"
     }
   ]
 }

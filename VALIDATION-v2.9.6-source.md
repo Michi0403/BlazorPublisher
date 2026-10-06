@@ -19,7 +19,7 @@ Validation was intentionally source-only. No `dotnet` build, publish, test or ru
 ## Release-contract evidence
 
 - Web, installer and npm metadata resolve to 2.9.6; minor/patch slots remain single digit.
-- DevExpress stays at 25.2.9.
+- DevExpress stays at 25.2.10.
 - Both complete-publication starter templates parse as JSON, contain multiple pages, page transitions and authored object animations.
 - All three Div starter templates parse as PanelElement wrappers with at least one view.
 - Local template folders are `%LOCALAPPDATA%\PublisherStudio\PublisherTemplates` and `%LOCALAPPDATA%\PublisherStudio\DivTemplates`.

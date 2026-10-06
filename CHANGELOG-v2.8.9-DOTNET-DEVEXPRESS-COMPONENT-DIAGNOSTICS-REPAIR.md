@@ -4,9 +4,9 @@
 
 This release starts from the upgraded PublisherStudio source supplied after the 2.8.8 handoff and preserves those changes rather than replacing them with an older tree.
 
-- DevExpress is explicitly pinned to **25.2.9** for the Blazor, RichEdit, localization, and Spreadsheet packages through `DevExpressVersion`.
-- The local Entity Framework CLI manifest is **dotnet-ef 10.0.11**.
-- The installer console uses **Microsoft.Extensions.Logging 10.0.11**.
+- DevExpress is explicitly pinned to **25.2.10** for the Blazor, RichEdit, localization, and Spreadsheet packages through `DevExpressVersion`.
+- The local Entity Framework CLI manifest is **dotnet-ef an earlier .NET 10 patch**.
+- The installer console uses **Microsoft.Extensions.Logging an earlier .NET 10 patch**.
 - PublisherStudio still targets **`net10.0`**. Its `global.json` keeps the existing `10.0.301` minimum SDK plus `latestFeature` roll-forward, so an installed newer .NET 10 feature band can be selected without unnecessarily raising the repository's minimum SDK requirement.
 
 No downgrade of the user's upgraded package/tool versions was performed.

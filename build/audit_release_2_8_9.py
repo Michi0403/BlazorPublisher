@@ -36,10 +36,10 @@ try:
     ):
         require(rel, "<Version>2.9.0</Version>")
 
-    require("src/PublisherStudio.Web/PublisherStudio.Web.csproj", "<DevExpressVersion>25.2.9</DevExpressVersion>")
-    require("src/PublisherStudio.Web/dotnet-tools.json", '"version": "10.0.11"')
+    require("src/PublisherStudio.Web/PublisherStudio.Web.csproj", "<DevExpressVersion>25.2.10</DevExpressVersion>")
+    require("src/PublisherStudio.Web/dotnet-tools.json", '"version": "10.0.12"')
     require("src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj",
-            '<PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.11" />')
+            '<PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.12" />')
     require("global.json", '"version": "10.0.301"', '"rollForward": "latestFeature"')
 
     require("src/PublisherStudio.Web/Components/App.razor",
@@ -129,7 +129,7 @@ try:
     require("Directory.Build.props", "<LocalGptWireProtocolVersion>2.1.1</LocalGptWireProtocolVersion>")
 
     require("CHANGELOG-v2.8.9-DOTNET-DEVEXPRESS-COMPONENT-DIAGNOSTICS-REPAIR.md",
-            "DevExpress", "25.2.9", "10.0.11", "documentation-only")
+            "DevExpress", "25.2.10", "10.0.12", "documentation-only")
     require("VALIDATION-v2.8.9-source.md", "No `dotnet`", "46 documentation companions")
 
     print(f"PublisherStudio 2.9.0 upgrade/component-diagnostics source audit passed: {checks} checks.")

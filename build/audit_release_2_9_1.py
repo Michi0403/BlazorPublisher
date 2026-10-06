@@ -28,7 +28,7 @@ def tree_digest(path):
 try:
     for rel in ('src/PublisherStudio.Web/PublisherStudio.Web.csproj','src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj'):
         require(rel,'<Version>2.9.1</Version>')
-    require('src/PublisherStudio.Web/PublisherStudio.Web.csproj','<DevExpressVersion>25.2.9</DevExpressVersion>')
+    require('src/PublisherStudio.Web/PublisherStudio.Web.csproj','<DevExpressVersion>25.2.10</DevExpressVersion>')
     require('Directory.Build.props','<LocalGptWireProtocolVersion>2.1.1</LocalGptWireProtocolVersion>')
     require('build/xml_documentation.py','scan_enum_members','enum_member_summary','tag_text','empty param','empty returns','empty value')
     require('build/razor_xml_documentation.py','component_summary','validate_component_type','direct @code member declaration','empty param','empty returns','empty value')

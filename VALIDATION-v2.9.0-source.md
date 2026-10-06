@@ -5,7 +5,7 @@ This is a source-only validation record. No `dotnet`, MSBuild, NuGet restore, bu
 Validated statically and with non-.NET tooling:
 
 - PublisherStudio Web and InstallerConsole versions are 2.9.0;
-- the user's DevExpress 25.2.9 and .NET 10 / 10.0.11 upgrade changes remain present;
+- the user's DevExpress 25.2.10 and .NET 10 / an earlier .NET 10 patch upgrade changes remain present;
 - recovery debounce asynchronous work no longer accepts or dereferences a `CancellationTokenSource` after scheduling;
 - a source scan found zero async C#/Razor methods accepting `CancellationTokenSource` directly after the repair;
 - ordinary debounce replacement uses a non-throwing cancellation signal rather than cancellation-backed `Task.Delay`;

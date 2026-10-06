@@ -1,5 +1,9 @@
-# PublisherStudio 4.0.7
+# PublisherStudio 4.1.4
 
-PublisherStudio 4.0.7 is a focused compiler follow-up to 4.0.6. It fixes the reported DevExpress generic-inference, Razor mixed-attribute, and close-button attribute-type errors without weakening the maintenance rules or changing editor behavior.
+PublisherStudio 4.1.4 keeps the forward baseline at DevExpress/DevExtreme **25.2.10** and .NET **10.0.12**, and makes the existing DevExpress browser-asset provisioning path automatic for normal builds.
 
-The 4.0.6 Panel Studio text-service ownership repair remains intact.
+A clean source tree no longer compiles first and leaves Spreadsheet/HTML export assets missing. The build invokes `Prepare-DevExpressAssets.ps1 -EnsureCurrent` before compilation: already-current 25.2.10 assets return immediately, while missing/stale/mixed/hash-invalid assets are restored, licensed and seeded through the maintained PowerShell pipeline.
+
+The 4.1.1 lifecycle diagnostics and 4.1.2 visibility repair remain intact.
+
+See `CHANGELOG-v4.1.4-AUTOMATIC-DEVEXPRESS-ASSET-PROVISIONING.md` and `VALIDATION-v4.1.4-source.md`.

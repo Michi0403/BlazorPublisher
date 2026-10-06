@@ -12,7 +12,7 @@ try:
         req(rel,'<Version>2.9.2</Version>','2.9.2 package version')
     req('global.json','"version": "10.0.301"','SDK 10.0.301')
     req('src/PublisherStudio.Web/PublisherStudio.Web.csproj','<TargetFramework>net10.0</TargetFramework>','PublisherStudio net10.0')
-    req('src/PublisherStudio.Web/PublisherStudio.Web.csproj','<DevExpressVersion>25.2.9</DevExpressVersion>','DevExpress 25.2.9')
+    req('src/PublisherStudio.Web/PublisherStudio.Web.csproj','<DevExpressVersion>25.2.10</DevExpressVersion>','DevExpress 25.2.10')
     req('Directory.Build.props','<LocalGptWireProtocolVersion>2.1.1</LocalGptWireProtocolVersion>','1-Wire 2.1.1')
     page='src/PublisherStudio.Web/Components/Pages/Localization.razor'
     for n in ['IFileLocalizationService LocalizationService','Localization.Editor.PageTitle','Localization.Editor.Title','Localization.Editor.Culture','Localization.Editor.Filter','Localization.Editor.Save','Localization.Editor.SavedTitle','Localization.Editor.SaveFailed','GetCultureDisplayName(culture)','private string L(string key, string fallback)','Logger.LogError']:

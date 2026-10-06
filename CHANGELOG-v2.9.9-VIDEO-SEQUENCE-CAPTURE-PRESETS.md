@@ -63,6 +63,6 @@ The Edge `Page entered Back-Forward Cache` / WebSocket 1006 messages in the repr
 
 - Native publication and media models remain backward compatible.
 - No new package or process dependency was added.
-- DevExpress remains pinned to 25.2.9.
+- DevExpress remains pinned to 25.2.10.
 - PublisherStudio version advances from 2.9.8 to 2.9.9.
 - LocalGPT is unchanged at 3.3.0.

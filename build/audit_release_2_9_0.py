@@ -36,8 +36,8 @@ try:
         "src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj",
     ):
         require(rel, "<Version>2.9.0</Version>")
-    require("src/PublisherStudio.Web/PublisherStudio.Web.csproj", "<DevExpressVersion>25.2.9</DevExpressVersion>")
-    require("src/PublisherStudio.Web/dotnet-tools.json", '"version": "10.0.11"')
+    require("src/PublisherStudio.Web/PublisherStudio.Web.csproj", "<DevExpressVersion>25.2.10</DevExpressVersion>")
+    require("src/PublisherStudio.Web/dotnet-tools.json", '"version": "10.0.12"')
     require("Directory.Build.props", "<LocalGptWireProtocolVersion>2.1.1</LocalGptWireProtocolVersion>")
 
     require("src/PublisherStudio.Web/Components/App.razor",
@@ -155,7 +155,7 @@ try:
             raise AssertionError(f"{rel} first directive {first!r} != {directive!r}")
 
     require("CHANGELOG-v2.9.0-RECOVERY-CANCELLATION-WEBM-EMBED-REPAIR.md",
-            "CancellationTokenSource", "Duration", "3828x1962", "DevExpress 25.2.9")
+            "CancellationTokenSource", "Duration", "3828x1962", "DevExpress 25.2.10")
     require("VALIDATION-v2.9.0-source.md",
             "No `dotnet`", "zero async C#/Razor methods", "14.800-second duration")
 

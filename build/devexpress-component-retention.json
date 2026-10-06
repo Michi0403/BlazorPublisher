@@ -119,7 +119,7 @@
       "MaximumNativeDisclosureTags": 0
     },
     "src/PublisherStudio.Web/Components/Editor/PanelStudio.razor": {
-      "MinimumDevExpressTags": 186,
+      "MinimumDevExpressTags": 166,
       "MaximumNativeInteractiveTags": 2,
       "MaximumNativeDisclosureTags": 0
     },

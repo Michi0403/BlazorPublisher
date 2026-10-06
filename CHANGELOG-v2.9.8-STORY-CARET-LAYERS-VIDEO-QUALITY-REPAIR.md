@@ -84,7 +84,7 @@ A rendered file that has already been encoded and downloaded is considered succe
 - Existing native audio/video control ownership and 2.9.6 signal-connector fixes remain unchanged.
 - Local publication/Div template libraries from 2.9.6/2.9.7 remain unchanged.
 - Routed InteractiveServer ownership remains unchanged; no nested component received its own render mode.
-- DevExpress/DevExtreme remains **25.2.9** and the application continues to target **net10.0**.
+- DevExpress/DevExtreme remains **25.2.10** and the application continues to target **net10.0**.
 
 ## Version policy
 

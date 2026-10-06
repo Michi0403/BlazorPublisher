@@ -5612,3 +5612,26 @@ dxbl-popup-root > dxbl-popup-cell > dxbl-modal .dxbl-modal-body > .new-publicati
 .panel-studio-list-button{width:100%;min-width:0!important;height:auto!important;text-align:left!important;white-space:normal!important}
 .panel-studio-list-button .dxbl-btn-caption{display:block;min-width:0;width:100%;overflow-wrap:anywhere;text-align:left;white-space:normal!important}
 .publisher-color-picker-value{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* PublisherStudio 4.0.8: Panel Studio selectors retain whole-word readability after the
+   DevExpress button migration. The general Visual editor button grid reserves an icon column;
+   these text-only selectors do not, and authored names must not collapse into one character per line. */
+.panel-studio-sidebar .panel-studio-list-button,
+.panel-studio-element-list .panel-studio-list-button {
+    display: flex !important;
+    align-items: center;
+    grid-template-columns: none !important;
+    width: 100%;
+    min-width: 0 !important;
+    text-align: left !important;
+}
+.panel-studio-sidebar .panel-studio-list-button .dxbl-btn-caption,
+.panel-studio-element-list .panel-studio-list-button .dxbl-btn-caption {
+    display: block;
+    min-width: 0;
+    width: 100%;
+    overflow-wrap: break-word;
+    word-break: normal;
+    white-space: normal !important;
+    text-align: left;
+}

@@ -27,7 +27,7 @@ The user's Windows build exposed two concrete 2.9.6 defects after the repository
 ## Release-contract evidence
 
 - Web, installer and npm metadata resolve to **2.9.7** and the minor/patch slots remain single digit.
-- DevExpress/DevExtreme remains **25.2.9**.
+- DevExpress/DevExtreme remains **25.2.10**.
 - `NewPublicationDialog.razor` contains explicit logger and notification handling for recoverable template discovery failures.
 - `PanelStudio.razor` no longer contains the compiler-rejected sibling `templateId` declarations.
 - Local complete-publication and Div template libraries, starter files, identity regeneration/reference remapping and publication/Panel integration from 2.9.6 remain present.

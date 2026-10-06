@@ -5,8 +5,8 @@ This is a source-only validation record. No `dotnet`, MSBuild, NuGet restore, bu
 Validated statically:
 
 - project versions are 2.8.9;
-- DevExpress remains 25.2.9 from the user's upgraded source;
-- dotnet-ef and installer logging remain 10.0.11;
+- DevExpress remains 25.2.10 from the user's upgraded source;
+- dotnet-ef and installer logging remain an earlier .NET 10 patch;
 - the component-diagnostics gate recognizes exactly the documentation-only empty Razor partial shape and does not classify operational code as documentation-only;
 - all 46 documentation companions from the reported build failure match that strict shape, while `PictureEditor.razor.cs` does not;
 - retained release, architecture, component, service, async-continuation, prerender, XML-documentation, Panel Studio, and 1-Wire source audits were re-run where supported without invoking .NET;

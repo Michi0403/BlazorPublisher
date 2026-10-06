@@ -14,7 +14,7 @@ Static validation completed against the modified source:
 - iterator exception policy passed;
 - prerender JavaScript safety audit passed;
 - Panel Studio behavior descriptors/object addresses are persisted in the publication model and consumed by the shared browser runtime;
-- DevExtreme preparation validates exact 25.2.9 package metadata and hashes, and export no longer parses a version from minified bundle text;
+- DevExtreme preparation validates exact 25.2.10 package metadata and hashes, and export no longer parses a version from minified bundle text;
 - generated vendor directories are explicitly replaced before preparation with Windows retry handling.
 
 The user's Windows .NET 10 + licensed DevExpress build remains authoritative for compilation and generated-client-asset validation.

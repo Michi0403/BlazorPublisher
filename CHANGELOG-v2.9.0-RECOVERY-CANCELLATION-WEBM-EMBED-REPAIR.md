@@ -2,7 +2,7 @@
 
 ## Base retained
 
-This release starts from the user's locally building PublisherStudio 2.8.9 source after the .NET/DevExpress upgrade. It preserves the 2.8.9 toolchain integration, including DevExpress 25.2.9, the .NET 10 project target, the upgraded 10.0.11 tooling/package changes, InteractiveServer/prerender architecture, XML documentation rules, component/service diagnostics, ConfigureAwait policy, Kawaii documentation source, and LocalGPT 1-Wire 2.1.1.
+This release starts from the user's locally building PublisherStudio 2.8.9 source after the .NET/DevExpress upgrade. It preserves the 2.8.9 toolchain integration, including DevExpress 25.2.10, the .NET 10 project target, the upgraded an earlier .NET 10 patch tooling/package changes, InteractiveServer/prerender architecture, XML documentation rules, component/service diagnostics, ConfigureAwait policy, Kawaii documentation source, and LocalGPT 1-Wire 2.1.1.
 
 ## Recovery debounce cancellation lifetime
 

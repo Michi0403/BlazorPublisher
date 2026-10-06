@@ -6,7 +6,7 @@
     <InvariantGlobalization>false</InvariantGlobalization>
     <RootNamespace>PublisherStudio</RootNamespace>
     <AssemblyName>PublisherStudio.Web</AssemblyName>
-    <Version>4.0.7</Version>
+    <Version>4.1.4</Version>
     <Product>PublisherStudio</Product>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);1591</NoWarn>
@@ -17,7 +17,7 @@
     <PublishTrimmed>false</PublishTrimmed>
     <PublishSingleFile>false</PublishSingleFile>
     <PublishReadyToRun>false</PublishReadyToRun>
-    <PrepareSpreadsheetAssetsOnBuild Condition="'$(PrepareSpreadsheetAssetsOnBuild)' == ''">false</PrepareSpreadsheetAssetsOnBuild>
+    <PrepareSpreadsheetAssetsOnBuild Condition="'$(PrepareSpreadsheetAssetsOnBuild)' == ''">true</PrepareSpreadsheetAssetsOnBuild>
     <SpreadsheetClientAsset>$(MSBuildProjectDirectory)\wwwroot\vendor\devexpress-aspnetcore-spreadsheet\dist\dx-aspnetcore-spreadsheet.js</SpreadsheetClientAsset>
     <DevExtremeRuntimeLicenseAsset>$(MSBuildProjectDirectory)\wwwroot\vendor\devextreme-license.js</DevExtremeRuntimeLicenseAsset>
     <DevExtremeRuntimeLicenseMetadata>$(MSBuildProjectDirectory)\wwwroot\vendor\devextreme-license.meta.json</DevExtremeRuntimeLicenseMetadata>
@@ -63,17 +63,16 @@
   </ItemGroup>
 
   <!--
-    npm/npx are deliberately not invoked during an ordinary Visual Studio build. MSB3073/9009
-    otherwise hides the useful error when Node.js is not installed, Visual Studio has an old
-    PATH, or the licensed build identity is not registered. Run Prepare-DevExpressAssets.cmd
-    once after cloning the source package. The historical Prepare-SpreadsheetAssets.cmd name
-    remains as a compatibility alias.
-
-    Automated licensed build agents may opt in with:
-      dotnet build -p:PrepareSpreadsheetAssetsOnBuild=true
+    Normal non-design-time builds ensure the licensed DevExpress browser payload is present and
+    version-coherent with DevExpressVersion. Prepare-DevExpressAssets.ps1 performs a fast local
+    validation first and exits without npm/npx work when the prepared 25.2.10 payload is already
+    current. Missing, stale, mixed-version, or hash-invalid payloads trigger the maintained
+    provisioning path automatically. Set PrepareSpreadsheetAssetsOnBuild=false only for an
+    explicitly delegated build that is guaranteed to reuse already-prepared browser assets.
+    The historical Prepare-SpreadsheetAssets.cmd name remains as a compatibility alias.
   -->
-  <Target Name="PrepareSpreadsheetClientAssets" BeforeTargets="PrepareForBuild" Condition="'$(DesignTimeBuild)' != 'true' and '$(PrepareSpreadsheetAssetsOnBuild)' == 'true' and (!Exists('$(SpreadsheetClientAsset)') or !Exists('$(DevExtremeRuntimeLicenseAsset)') or !Exists('$(DevExtremeRuntimeLicenseMetadata)') or !Exists('$(DevExtremeRuntimeKeyGeneratorVersionFile)') or !Exists('$(DevExtremeClientAssetMetadata)'))">
-    <Exec Command="$(PublisherStudioPowerShellHost) -NoProfile -ExecutionPolicy Bypass -File &quot;$(PublisherStudioPrepareDevExpressAssetsScript)&quot;" WorkingDirectory="$(MSBuildProjectDirectory)" />
+  <Target Name="PrepareSpreadsheetClientAssets" BeforeTargets="PrepareForBuild" Condition="'$(DesignTimeBuild)' != 'true' and '$(PrepareSpreadsheetAssetsOnBuild)' == 'true'">
+    <Exec Command="$(PublisherStudioPowerShellHost) -NoProfile -ExecutionPolicy Bypass -File &quot;$(PublisherStudioPrepareDevExpressAssetsScript)&quot; -EnsureCurrent -ExpectedVersion &quot;$(DevExpressVersion)&quot;" WorkingDirectory="$(MSBuildProjectDirectory)" />
   </Target>
 
   <Target Name="SpreadsheetClientAssetBuildNotice" BeforeTargets="PrepareForBuild" Condition="'$(DesignTimeBuild)' != 'true' and '$(PrepareSpreadsheetAssetsOnBuild)' != 'true' and (!Exists('$(SpreadsheetClientAsset)') or !Exists('$(DevExtremeRuntimeLicenseAsset)') or !Exists('$(DevExtremeRuntimeLicenseMetadata)') or !Exists('$(DevExtremeRuntimeKeyGeneratorVersionFile)') or !Exists('$(DevExtremeClientAssetMetadata)'))">

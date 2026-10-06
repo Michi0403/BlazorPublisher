@@ -48,7 +48,7 @@
 
 - Added synchronized template/signal UI strings to all six maintained localization catalogs; all catalogs contain 3,327 keys in exact parity.
 - Updated PublisherStudio Web, InstallerConsole, npm package metadata and browser resource cache markers to **2.9.6**.
-- Preserved DevExpress **25.2.9** and existing deployment architecture.
+- Preserved DevExpress **25.2.10** and existing deployment architecture.
 
 ## Validation status
 

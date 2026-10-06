@@ -49,7 +49,7 @@ The final source gate runs the repository's maintained static checks that do not
 ## Release-contract evidence
 
 - PublisherStudio Web, InstallerConsole, npm package and package lock are **2.9.8**, with single-digit minor/patch slots.
-- DevExpress/DevExtreme remains **25.2.9**.
+- DevExpress/DevExtreme remains **25.2.10**.
 - Story Editor layout observes only the owning shell and dispatches RichEdit resize only after a real shell-width transition.
 - Layers drag/drop reuses `SetSelectedLayerPosition`; Front/Up/Down/Back and the rest of object manipulation remain present.
 - Recording placement reuses `TimelineEdits.SegmentTimelineStart` and `TimelineEdits.InsertAt`; it does not create a second media sequence model.

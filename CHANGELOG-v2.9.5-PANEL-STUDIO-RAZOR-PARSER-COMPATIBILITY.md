@@ -9,7 +9,7 @@
 ## Retained functionality
 
 - Panel Studio publication object addresses, declarative behaviors, common component methods, right-click actions and JavaScript helper UX remain intact.
-- The DevExtreme 25.2.9 preparation/runtime-license provenance repair from 2.9.4 remains intact: exact `devextreme@25.2.9` license generator resolution, generated-key staging, versioned browser resources, no-store export reads and prepared SHA-256/provenance metadata.
+- The DevExtreme 25.2.10 preparation/runtime-license provenance repair from 2.9.4 remains intact: exact `devextreme@25.2.10` license generator resolution, generated-key staging, versioned browser resources, no-store export reads and prepared SHA-256/provenance metadata.
 - The internal `devextreme-dist` / spreadsheet package metadata mismatch remains diagnostic only; the npm lock integrity and prepared asset hashes remain authoritative.
-- Target framework remains `net10.0`; DevExpress/DevExtreme remains 25.2.9.
+- Target framework remains `net10.0`; DevExpress/DevExtreme remains 25.2.10.
 - No database/schema migration was introduced.

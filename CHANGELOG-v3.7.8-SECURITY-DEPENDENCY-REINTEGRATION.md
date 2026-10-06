@@ -4,8 +4,8 @@
 
 - Uses PublisherStudio 3.7.6 as the source baseline and selectively carries forward the reviewed dependency/tooling updates from the personal 3.7.7 tree.
 - Updates the pinned .NET SDK from 10.0.301 to 10.0.401.
-- Updates DevExpress packages from 25.2.9 to 25.2.10.
-- Updates Microsoft.Extensions.DependencyModel, System.CodeDom, System.Configuration.ConfigurationManager, System.Security.Cryptography.Pkcs and installer logging packages from 10.0.11 to 10.0.12 where present in the supplied 3.7.7 tree.
+- Updates DevExpress packages from 25.2.10 to 25.2.10.
+- Updates Microsoft.Extensions.DependencyModel, System.CodeDom, System.Configuration.ConfigurationManager, System.Security.Cryptography.Pkcs and installer logging packages from an earlier .NET 10 patch to 10.0.12 where present in the supplied 3.7.7 tree.
 - Preserves the existing PublisherStudio source/documentation payload from 3.7.6 instead of carrying forward the personal ZIP's size-reduction deletions.
 - Retains the compile-only release-validation entry point from the supplied 3.7.7 tooling so maintainers can run the repository-owned compile validation intentionally.
 

@@ -23,7 +23,7 @@
 - File → New from template, Panel Library local Div templates, Panel Studio Div-template tools, fresh identity regeneration/remapping, and the Photo Blog / Business Presentation starter publications remain intact.
 - Native audio/video controls keep ownership of their own click sequence, preventing the authored wrapper and signal connector from immediately toggling playback a second time.
 - Signal connectors retain media/component triggers, nested Panel/Div target discovery and the maintained public Call Method allow-list.
-- DevExpress/DevExtreme remains **25.2.9** and the application continues to target **net10.0**.
+- DevExpress/DevExtreme remains **25.2.10** and the application continues to target **net10.0**.
 
 ## Version policy
 

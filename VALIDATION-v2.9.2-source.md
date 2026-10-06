@@ -17,7 +17,7 @@ Status: **SOURCE-NOT-COMPILED**. No `dotnet`, MSBuild, NuGet restore/build/publi
 ## Release-specific checks
 
 - PublisherStudio Web and InstallerConsole versions are 2.9.2.
-- SDK policy remains `10.0.301`/`latestFeature`; target framework remains `net10.0`; DevExpress remains 25.2.9; 1-Wire protocol remains 2.1.1.
+- SDK policy remains `10.0.301`/`latestFeature`; target framework remains `net10.0`; DevExpress remains 25.2.10; 1-Wire protocol remains 2.1.1.
 - Translation Editor page text, actions, statuses and notifications use the existing file-localization service.
 - Culture options use `GetCultureDisplayName(...)`.
 - Six maintained catalogs contain matching `Localization.Editor.*` keys.

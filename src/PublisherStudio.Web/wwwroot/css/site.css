@@ -4745,13 +4745,13 @@ body.publisher-printing [role="menu"], body.publisher-printing [class*="ribbon"]
 
 /* PublisherStudio v1.0.80: reusable Panel/Div Studio compositions. */
 .publication-panel{position:relative;width:100%;height:100%;box-sizing:border-box;display:grid;grid-template-rows:auto minmax(0,1fr);isolation:isolate;color:#0f172a}
-.publication-panel.panel-nav-hidden{grid-template-rows:minmax(0,1fr)}
 .publication-panel-navigation{position:relative;z-index:20;display:flex;gap:4px;min-height:30px;padding:4px;background:color-mix(in srgb,#0f172a 88%,transparent);overflow:auto}
 .publication-panel-navigation button{flex:0 0 auto;border:0;border-radius:5px;padding:5px 10px;background:transparent;color:#cbd5e1;font:600 11px Segoe UI,system-ui,sans-serif;cursor:pointer}
 .publication-panel-navigation button:hover,.publication-panel-navigation button.active{background:#38bdf8;color:#082f49}
 .publication-panel.panel-nav-sidemenu{grid-template-columns:minmax(84px,18%) minmax(0,1fr);grid-template-rows:minmax(0,1fr)}
 .publication-panel.panel-nav-sidemenu>.publication-panel-navigation{flex-direction:column;align-items:stretch}
 .publication-panel.panel-nav-overlaymenu>.publication-panel-navigation{position:absolute;left:10px;top:10px;right:10px;border-radius:8px;background:#020617cc;backdrop-filter:blur(10px)}
+.publication-panel.panel-nav-hidden,.publication-panel.panel-nav-suppressed{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr)}
 .publication-panel-viewport{position:relative;min-width:0;min-height:0;overflow:hidden}
 .publication-panel-canvas-region{position:relative;width:100%;height:100%;min-width:0;min-height:0}
 /* Fixed-canvas panels are authored in one coordinate system. Preserve that aspect ratio when the

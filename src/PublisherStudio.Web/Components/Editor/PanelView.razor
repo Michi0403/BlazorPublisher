@@ -4,11 +4,12 @@
 
 @inject ILogger<PanelView> Logger
 @* razor-structural-renderer | reason: PanelView is the authored coordinate surface itself; inserting layout-owner wrappers changes selector, sizing, hit-testing, and export-equivalent DOM semantics. *@
-<div class="publication-panel panel-nav-@Item.NavigationMode.ToString().ToLowerInvariant() panel-layout-@Item.LayoutMode.ToString().ToLowerInvariant() @(DesignerMode ? "panel-designer-preview" : null) @(ForceCanvasLayout ? "panel-force-canvas" : null)"
+<div class="publication-panel panel-nav-@Item.NavigationMode.ToString().ToLowerInvariant() @(Item.NavigationMode == PublicationPanelNavigationMode.Hidden || EnabledViews.Count <= 1 ? "panel-nav-suppressed" : null) panel-layout-@Item.LayoutMode.ToString().ToLowerInvariant() @(DesignerMode ? "panel-designer-preview" : null) @(ForceCanvasLayout ? "panel-force-canvas" : null)"
      data-panel-root
      data-panel-id="@Item.Id"
      data-panel-active-view="@ActiveViewId"
      data-panel-navigation="@Item.NavigationMode.ToString().ToLowerInvariant()"
+     data-panel-navigation-rendered="@(Item.NavigationMode != PublicationPanelNavigationMode.Hidden && EnabledViews.Count > 1 ? "true" : "false")"
      data-panel-render-revision="@RenderRevision"
      style="@PanelStyle">
     @if (Item.NavigationMode != PublicationPanelNavigationMode.Hidden && EnabledViews.Count > 1)

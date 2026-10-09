@@ -124,8 +124,8 @@ public sealed class PanelDocumentService(
         try
         {
             var id = (toolId ?? string.Empty).Trim().ToLowerInvariant();
-        return id switch
-        {
+            PublicationElement result = id switch
+            {
             "text" => new TextFrameElement
             {
                 Name = "Text", PreviewHtml = "<h2 style=\"margin:0\">Panel text</h2><p>Shared authored content.</p>",
@@ -151,9 +151,11 @@ public sealed class PanelDocumentService(
             "camera" => new LiveSourceElement { Name = "Live camera", SourceKind = PublicationLiveSourceKind.Camera, Width = 72, Height = 42, CaptureWidth = 1920, CaptureHeight = 1080, CaptureFrameRate = 30, Muted = true },
             "screen" => new LiveSourceElement { Name = "Screen capture", SourceKind = PublicationLiveSourceKind.Screen, Width = 80, Height = 45, CaptureWidth = 1920, CaptureHeight = 1080, CaptureFrameRate = 30, Muted = true },
             "html" => new HtmlEmbedElement { Name = "HTML experience", Width = 100, Height = 58 },
-            "panel" => CreateBlank("Nested panel"),
-            _ => throw new ArgumentOutOfRangeException(nameof(toolId), toolId, "Unknown Panel Studio component tool.")
+            "panel" => CreateBlank(document, "Nested panel"),
+                _ => throw new ArgumentOutOfRangeException(nameof(toolId), toolId, "Unknown Panel Studio component tool.")
             };
+            result.Visible = true;
+            return result;
         }
         catch (Exception exception)
         {
@@ -247,7 +249,7 @@ public sealed class PanelDocumentService(
                 "operations-board" => CreateOperationsBoard(document),
                 "creator-hub" => CreateCreatorHub(document),
                 "web-experience" => CreateWebExperience(),
-                _ => CreateBlank()
+                _ => CreateBlank(document)
             };
             Normalize(document, panel);
             logger.LogInformation("Created Panel Studio preset {PresetId} with {ViewCount} views.", id, panel.Views.Count);
@@ -262,6 +264,27 @@ public sealed class PanelDocumentService(
 
     /// <summary>
     /// Creates blank as part of the panel document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
+    /// </summary>
+    /// <param name="document">Publication document whose shared Panel Studio prerequisites are initialized before the blank panel is created.</param>
+    /// <param name="name">Name value supplied to the panel document operation and used when producing its result.</param>
+    /// <returns>The panel element produced by the operation.</returns>
+    public PanelElement CreateBlank(PublicationDocument document, string name = "Panel")
+    {
+        try
+        {
+            ArgumentNullException.ThrowIfNull(document);
+            EnsureBlankPanelPrerequisites(document);
+            return CreateBlank(name);
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Blank Panel Studio panel prerequisites could not be prepared for {PanelName}.", name);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Creates a visually empty panel shell after the owning publication document has been prepared by the document-aware overload.
     /// </summary>
     /// <param name="name">Name value supplied to the panel document operation and used when producing its result.</param>
     /// <returns>The panel element produced by the operation.</returns>
@@ -698,6 +721,25 @@ public sealed class PanelDocumentService(
 }
 
     /// <summary>
+    /// Seeds the publication-level objects that an initially empty Panel Studio document needs so later palette additions use the same data and renderer prerequisites as presets.
+    /// </summary>
+    /// <param name="document">Publication document that owns the panel and its shared runtime/data objects.</param>
+    private void EnsureBlankPanelPrerequisites(PublicationDocument document)
+    {
+        try
+        {
+            _data.EnsureBuiltInObjects(document);
+            _ = EnsureData(document);
+            logger.LogDebug("Prepared built-in publication objects and sample data for a blank Panel Studio panel.");
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Panel Studio blank-panel prerequisites could not be prepared.");
+            throw;
+        }
+    }
+
+    /// <summary>
     /// Ensures data as part of the panel document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     /// <param name="document">Document value supplied to the panel document operation and used when producing its result.</param>
@@ -706,7 +748,12 @@ public sealed class PanelDocumentService(
     {
     try
     {
-            if (document.DataObjects.Count > 0) return document.DataObjects[0];
+            _data.EnsureBuiltInObjects(document);
+            var existing = document.DataObjects.FirstOrDefault(dataObject => dataObject.SourceKind is not PublicationDataSourceKind.PublicationPages
+                and not PublicationDataSourceKind.PublicationDocument
+                and not PublicationDataSourceKind.DocumentObjects
+                and not PublicationDataSourceKind.PublicationMedia);
+            if (existing is not null) return existing;
             var created = _data.CreateSample();
             document.DataObjects.Add(created);
             return created;

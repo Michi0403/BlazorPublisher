@@ -967,7 +967,7 @@
             var id = InitialPanel?.Id;
             if (_draft is not null && _loadedId == id) return;
             _initializationSource = InitialPanel is null ? "blank" : "existing";
-            _draft = InitialPanel is null ? Panels.CreateBlank() : (PanelElement)Files.CloneElement(InitialPanel);
+            _draft = InitialPanel is null ? Panels.CreateBlank(Document) : (PanelElement)Files.CloneElement(InitialPanel);
             Panels.Normalize(Document, _draft);
             _selectedViewId = _draft.ActiveViewId;
             _selectedElementId = CurrentView?.Elements.OrderByDescending(element => element.ZIndex).FirstOrDefault()?.Id;

@@ -31,7 +31,8 @@
     /// Handles the after render lifecycle or event notification for <see cref="WebDataRefreshHost"/>, updating the state required by the surrounding workflow.
     /// </summary>
     /// <param name="firstRender">Value indicating whether first render should apply to this operation.</param>
-    protected override void OnAfterRender(bool firstRender)
+    /// <returns>A task representing completion of the component lifecycle operation.</returns>
+    protected override Task OnAfterRenderAsync(bool firstRender)
     {
         try
         {
@@ -40,9 +41,10 @@
         }
         catch (Exception __componentMethodException)
         {
-            Logger.LogError(__componentMethodException, $"Component method {nameof(WebDataRefreshHost)}.{nameof(OnAfterRender)} failed.");
+            Logger.LogError(__componentMethodException, $"Component method {nameof(WebDataRefreshHost)}.{nameof(OnAfterRenderAsync)} failed.");
             throw;
         }
+        return base.OnAfterRenderAsync(firstRender);
     }
 
     /// <summary>

@@ -94,17 +94,9 @@ if ($versionedDocumentationPdfs.Count -eq 0 -and $AllowMissingPdf) {
         throw "PublisherStudio documentation omitted '$expectedDocumentationPdf' without declaring pdfAvailable=false."
     }
 
-    $validator = Join-Path $repositoryRoot ".github/scripts/prepare-pages-artifact.py"
-    if (-not (Test-Path -LiteralPath $validator -PathType Leaf)) {
-        throw "Repository-root GitHub Pages validator was not found: $validator"
-    }
-    $python = Get-Command python -ErrorAction SilentlyContinue
-    if ($null -eq $python) { $python = Get-Command python3 -ErrorAction SilentlyContinue }
-    if ($null -eq $python) { throw "Python 3 is required to validate the GitHub Pages documentation." }
-    & $python.Source $validator --source $DocumentationRoot --html-only
-    if ($LASTEXITCODE -ne 0) {
-        throw "Generated PublisherStudio HTML documentation failed validation for version $expectedVersion."
-    }
+    $validator = Join-Path $repositoryRoot 'build/Assert-PagesArtifact.ps1'
+    if (-not (Test-Path -LiteralPath $validator -PathType Leaf)) { throw "Missing Pages validator: $validator" }
+    & $validator -Source $DocumentationRoot -HtmlOnly
     Write-Host "Validated PublisherStudio $expectedVersion HTML documentation. A PDF was not required for this build, so the tracked Pages release snapshot was left unchanged." -ForegroundColor Green
     return
 }
@@ -118,14 +110,8 @@ if ([string]::IsNullOrWhiteSpace($OutputArchive)) {
     $OutputArchive = Join-Path $repositoryRoot '.github/pages/publisherstudio-kawaii-docs.zip'
 }
 $OutputArchive = [IO.Path]::GetFullPath($OutputArchive)
-$validator = Join-Path $repositoryRoot ".github/scripts/prepare-pages-artifact.py"
-if (-not (Test-Path -LiteralPath $validator -PathType Leaf)) {
-    throw "Repository-root GitHub Pages validator was not found: $validator"
-}
-
-$python = Get-Command python -ErrorAction SilentlyContinue
-if ($null -eq $python) { $python = Get-Command python3 -ErrorAction SilentlyContinue }
-if ($null -eq $python) { throw "Python 3 is required to validate the GitHub Pages snapshot." }
+$validator = Join-Path $repositoryRoot 'build/Assert-PagesArtifact.ps1'
+if (-not (Test-Path -LiteralPath $validator -PathType Leaf)) { throw "Missing Pages validator: $validator" }
 
 $operationId = [Guid]::NewGuid().ToString("N")
 $preparedRoot = Join-Path ([IO.Path]::GetTempPath()) ("PublisherStudio-Pages-Prepared-" + $operationId)
@@ -135,10 +121,7 @@ $backupArchive = "$OutputArchive.$operationId.backup"
 $installed = $false
 
 try {
-    & $python.Source $validator --source $DocumentationRoot --output $preparedRoot --expected-version $expectedVersion
-    if ($LASTEXITCODE -ne 0) {
-        throw "Generated PublisherStudio documentation did not pass the GitHub Pages validator for version $expectedVersion."
-    }
+    & $validator -Source $DocumentationRoot -Output $preparedRoot -ExpectedVersion $expectedVersion
     Remove-Item -LiteralPath (Join-Path $preparedRoot "github-pages-deployment.json") -Force -ErrorAction SilentlyContinue
     if (-not (Test-Path -LiteralPath (Join-Path $preparedRoot ".nojekyll") -PathType Leaf)) {
         [IO.File]::WriteAllText((Join-Path $preparedRoot ".nojekyll"), [string]::Empty, [Text.UTF8Encoding]::new($false))
@@ -183,8 +166,7 @@ try {
         }
     } finally { $archive.Dispose() }
 
-    & $python.Source $validator --archive $temporaryArchive --output $verificationRoot --expected-version $expectedVersion
-    if ($LASTEXITCODE -ne 0) { throw "The new PublisherStudio Pages snapshot failed final validation for version $expectedVersion." }
+    & $validator -Archive $temporaryArchive -Output $verificationRoot -ExpectedVersion $expectedVersion
 
     $sourceApiIndex = Join-Path $DocumentationRoot 'api/index.html'
     $verifiedApiIndex = Join-Path $verificationRoot 'api/index.html'

@@ -467,7 +467,8 @@ public partial class PictureEditor
     /// <summary>
     /// Handles the initialized lifecycle or event notification for <see cref="PictureEditor"/>, updating the state required by the surrounding workflow.
     /// </summary>
-    protected override void OnInitialized()
+    /// <returns>A task representing completion of the component lifecycle operation.</returns>
+    protected override Task OnInitializedAsync()
     {
         try
         {
@@ -477,9 +478,10 @@ public partial class PictureEditor
         }
         catch (Exception __componentMethodException)
         {
-            Logger.LogError(__componentMethodException, $"Component method {nameof(PictureEditor)}.{nameof(OnInitialized)} failed.");
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PictureEditor)}.{nameof(OnInitializedAsync)} failed.");
             throw;
         }
+        return base.OnInitializedAsync();
     }
 
     /// <summary>
@@ -500,7 +502,8 @@ public partial class PictureEditor
     /// <summary>
     /// Handles the parameters set lifecycle or event notification for <see cref="PictureEditor"/>, updating the state required by the surrounding workflow.
     /// </summary>
-    protected override void OnParametersSet()
+    /// <returns>A task representing completion of the component lifecycle operation.</returns>
+    protected override Task OnParametersSetAsync()
     {
         try
         {
@@ -508,9 +511,9 @@ public partial class PictureEditor
             {
                 // The conditional Razor block removes the canvas from the DOM. Rebind the new canvas on the next open.
                 _initialized = false;
-                return;
+                return base.OnParametersSetAsync();
             }
-            if (SessionId == Guid.Empty || SessionId == _loadedSession) return;
+            if (SessionId == Guid.Empty || SessionId == _loadedSession) return base.OnParametersSetAsync();
             _loadedSession = SessionId;
             _error = null;
             _notice = null;
@@ -539,9 +542,10 @@ public partial class PictureEditor
         }
         catch (Exception __componentMethodException)
         {
-            Logger.LogError(__componentMethodException, $"Component method {nameof(PictureEditor)}.{nameof(OnParametersSet)} failed.");
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PictureEditor)}.{nameof(OnParametersSetAsync)} failed.");
             throw;
         }
+        return base.OnParametersSetAsync();
     }
 
     /// <summary>

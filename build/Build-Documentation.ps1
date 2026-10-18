@@ -54,6 +54,18 @@ $XmlDocumentationPath = [IO.Path]::GetFullPath($XmlDocumentationPath)
 if (-not [string]::IsNullOrWhiteSpace($OutputWebRoot)) {
     $OutputWebRoot = [IO.Path]::GetFullPath($OutputWebRoot)
 }
+if ($RequirePdf -and [string]::IsNullOrWhiteSpace($PackagingTool)) {
+    # MSBuild invokes documentation directly; the verified helper must be resolved by the
+    # documentation entrypoint instead of requiring a user-run preparation command.
+    $ensureHelper = Join-Path $PSScriptRoot 'Ensure-ReleasePackagingPackage.ps1'
+    if (-not (Test-Path -LiteralPath $ensureHelper -PathType Leaf)) { throw "Documentation helper resolver is missing: $ensureHelper" }
+    $resolved = @(& $ensureHelper -Version '1.1.2' -Configuration Release -PackageDirectory (Join-Path $RepositoryRoot 'packages'))
+    if ($resolved.Count -ne 1 -or [string]::IsNullOrWhiteSpace([string]$resolved[0])) {
+        throw "Documentation helper resolver returned $($resolved.Count) result(s); expected one verified DLL path."
+    }
+    $PackagingTool = [string]$resolved[0]
+    Write-Host "PublisherStudio documentation resolved the managed PDF merger automatically: $PackagingTool"
+}
 if (-not [string]::IsNullOrWhiteSpace($PackagingTool)) {
     $PackagingTool = [IO.Path]::GetFullPath($PackagingTool)
     if (-not (Test-Path -LiteralPath $PackagingTool -PathType Leaf)) { throw "Release-packaging tool was not found: $PackagingTool" }
@@ -770,21 +782,11 @@ function Get-PublisherStudioRelativePath {
 function Assert-PublisherStudioGeneratedHtmlPreflight {
     param([Parameter(Mandatory)][string]$SiteRoot)
 
-    $validator = Join-Path $RepositoryRoot ".github/scripts/prepare-pages-artifact.py"
-    if (-not (Test-Path -LiteralPath $validator -PathType Leaf)) {
-        throw "The PublisherStudio documentation HTML preflight validator was not found: $validator"
-    }
-
-    $python = Get-Command python -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
-    if ($null -eq $python) {
-        $python = Get-Command python3 -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
-    }
-    if ($null -eq $python) {
-        throw "Python 3 is required to validate generated documentation HTML before the long PDF render."
-    }
+    $validator = Join-Path $RepositoryRoot 'build/Assert-PagesArtifact.ps1'
+    if (-not (Test-Path -LiteralPath $validator -PathType Leaf)) { throw "PowerShell documentation HTML preflight is missing: $validator" }
 
     Write-Host "Validating generated DocFX HTML accessibility and local links before the long PDF render..." -ForegroundColor DarkCyan
-    & $python.Source $validator --source $SiteRoot --html-only
+    & $validator -Source $SiteRoot -HtmlOnly
     if ($LASTEXITCODE -ne 0) {
         throw "Generated DocFX HTML failed the pre-PDF accessibility/link validation. PDF rendering was skipped so the release fails fast."
     }
@@ -2399,7 +2401,7 @@ function Invoke-PublisherStudioChunkedBrowserPdf {
         $mergeArguments.Add('pdf-merge'); $mergeArguments.Add('--output'); $mergeArguments.Add($PdfPath)
         foreach ($chunkPdf in $chunkPdfs) { $mergeArguments.Add('--input'); $mergeArguments.Add($chunkPdf) }
         Write-Host "Merging $($chunkPdfs.Count) durable PDF part(s) with LocalGPT.ReleasePackaging ($reusedChunks reused, $renderedChunks rendered this run)..." -ForegroundColor DarkCyan
-        $mergeOutput = @(& $PackagingTool @($mergeArguments) 2>&1)
+        $mergeOutput = if ([IO.Path]::GetExtension($PackagingTool) -eq '.dll') { @(& dotnet $PackagingTool @($mergeArguments) 2>&1) } else { @(& $PackagingTool @($mergeArguments) 2>&1) }
         $mergeExitCode = [int]$LASTEXITCODE
         foreach ($line in $mergeOutput) { if (-not [string]::IsNullOrWhiteSpace([string]$line)) { $diagnostics.Add([string]$line) } }
         if ($mergeExitCode -ne 0 -or -not (Test-PublisherStudioCompletePdf -Path $PdfPath -MinimumBytes $MinimumBytes)) {
@@ -2569,7 +2571,7 @@ function Optimize-PublisherStudioPdf {
         $previousErrorActionPreference = $ErrorActionPreference
         try {
             $ErrorActionPreference = 'Continue'
-            $managedOutput = @(& $PackagingTool @($managedArguments) 2>&1)
+            $managedOutput = if ([IO.Path]::GetExtension($PackagingTool) -eq '.dll') { @(& dotnet $PackagingTool @($managedArguments) 2>&1) } else { @(& $PackagingTool @($managedArguments) 2>&1) }
             $managedExitCode = [int]$LASTEXITCODE
         }
         finally { $ErrorActionPreference = $previousErrorActionPreference }

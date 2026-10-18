@@ -7,7 +7,7 @@ param(
     [string]$WireProtocolVersion = "2.1.1",
     [string]$WireProtocolPackageUrl = "",
     [string]$LocalGptRepository = "",
-    [string]$ReleasePackagingVersion = "1.0.2",
+    [string]$ReleasePackagingVersion = "1.1.2",
     [string]$ReleasePackagingPackageUrl = "",
     [switch]$UseBundledWireProtocolPackage,
     [switch]$RefreshWireProtocolPackage,

@@ -128,7 +128,11 @@ function Complete-OptionalPackageFailure([string]$Kind,[string]$Message) {
 }
 
 function Invoke-PackagingTool([string[]]$Arguments) {
-    & $PackagingTool @Arguments | ForEach-Object { Write-Host $_ }
+    if ([IO.Path]::GetExtension($PackagingTool) -eq '.dll') {
+        & dotnet $PackagingTool @Arguments | ForEach-Object { Write-Host $_ }
+    } else {
+        & $PackagingTool @Arguments | ForEach-Object { Write-Host $_ }
+    }
     if ($LASTEXITCODE -ne 0) { throw "LocalGPT.ReleasePackaging failed: $($Arguments -join ' ')" }
 }
 function Add-Artifact([Collections.Generic.List[string]]$List,[string]$Path) {

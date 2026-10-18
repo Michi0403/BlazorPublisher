@@ -49,7 +49,7 @@ try {
             'BlazorPublisher/build/Assert-JavaScriptDiagnostics.ps1',
             'BlazorPublisher/build/javascript-diagnostics-files.sha256',
             'BlazorPublisher/.github/workflows/publish-shipped-docs.yml',
-            'BlazorPublisher/.github/scripts/prepare-pages-artifact.py',
+            'BlazorPublisher/build/Assert-PagesArtifact.ps1',
             'BlazorPublisher/.github/pages/publisherstudio-kawaii-docs.zip',
             'BlazorPublisher/src/PublisherStudio.sln',
             'BlazorPublisher/src/PublisherStudio.Web/PublisherStudio.Web.csproj'

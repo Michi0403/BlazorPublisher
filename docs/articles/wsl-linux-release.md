@@ -10,7 +10,7 @@ After installing an Ubuntu/Debian **WSL2** distro and completing its first-launc
 .\Setup-WslLinuxBuild.ps1 -Provision
 ```
 
-The helper verifies WSL2 first, then installs PowerShell, .NET 10 SDK, Python 3, `rpmbuild`, and `appimagetool` prerequisites. A WSL1 distro is rejected with the `wsl.exe --set-version <name> 2` conversion command instead of being provisioned into an unsupported release backend. It does not install Docker/Podman. Provisioning never happens during a normal release unless `-ProvisionWslBuildTools` is explicitly supplied. Choose a distro with `-Distribution Ubuntu` or `WSL_BUILD_DISTRO`.
+The helper verifies WSL2 first, then installs PowerShell, .NET 10 SDK, `rpmbuild`, and `appimagetool` prerequisites. A WSL1 distro is rejected with the `wsl.exe --set-version <name> 2` conversion command instead of being provisioned into an unsupported release backend. It does not install Docker/Podman. Provisioning never happens during a normal release unless `-ProvisionWslBuildTools` is explicitly supplied. Choose a distro with `-Distribution Ubuntu` or `WSL_BUILD_DISTRO`.
 
 ## DevExpress license
 
@@ -26,9 +26,9 @@ The Windows coordinator automatically bridges a valid Windows license into the W
 
 ## Release behavior
 
-`Build-Release.ps1` defaults to `-WslLinux Auto`. On Windows it builds the native Windows x64/x86/ARM64 application/setup outputs. If an initialized WSL distro has PowerShell, .NET 10, Python, and a usable DevExpress license, Linux x64/ARM64 are delegated to WSL. Source is mirrored into the WSL Linux filesystem before compilation. The Windows parent prepares DevExpress browser assets and complete documentation once; the Linux child validates and reuses those assets instead of regenerating them. Node.js is therefore not a required WSL provisioning prerequisite for the delegated PublisherStudio child.
+`Build-Release.ps1` defaults to `-WslLinux Auto`. On Windows it builds the native Windows x64/x86/ARM64 application/setup outputs. If an initialized WSL distro has PowerShell, .NET 10, and a usable DevExpress license, Linux x64/ARM64 are delegated to WSL. Source is mirrored into the WSL Linux filesystem before compilation. The Windows parent prepares DevExpress browser assets and complete documentation once; the Linux child validates and reuses those assets instead of regenerating them. Node.js is therefore not a required WSL provisioning prerequisite for the delegated PublisherStudio child.
 
-PublisherStudio's LocalGPT.ReleasePackaging dependency stays LocalGPT-owned. The Windows coordinator resolves the 1.0.1 NuGet tool package locally without installing the Unix tool on Windows, places it in the mirrored source, and the WSL child installs/uses it inside Linux.
+PublisherStudio's LocalGPT.ReleasePackaging dependency stays LocalGPT-owned. The Windows coordinator resolves the required verified LocalGPT.ReleasePackaging NuGet package locally without installing the tool on Windows, places it in the mirrored source, and the WSL child executes the managed helper directly from its verified package without `dotnet tool install`.
 
 If WSL is absent/unready, host-aware `-Runtime all` continues Windows-only. Explicit Linux RIDs retain the existing Windows cross-publish fallback. `-WslLinux Require` turns missing WSL into an error; `-WslLinux Off` disables it. `-WslShutdown IfStarted` stops only a distro that was not already running before the release. `-KeepWslBuildTree` keeps the Linux mirror for diagnostics.
 

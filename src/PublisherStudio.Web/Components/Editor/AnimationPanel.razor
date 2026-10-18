@@ -337,20 +337,22 @@
     /// <summary>
     /// Handles the parameters set lifecycle or event notification for <see cref="AnimationPanel"/>, updating the state required by the surrounding workflow.
     /// </summary>
-    protected override void OnParametersSet()
+    /// <returns>A task representing completion of the component lifecycle operation.</returns>
+    protected override Task OnParametersSetAsync()
     {
         try
         {
-            if (_lastElementId == State.SelectedElementId && _selectedAnimationId is { } selectedId && Timeline.Any(item => item.Animation.Id == selectedId)) return;
+            if (_lastElementId == State.SelectedElementId && _selectedAnimationId is { } selectedId && Timeline.Any(item => item.Animation.Id == selectedId)) return base.OnParametersSetAsync();
             _lastElementId = State.SelectedElementId;
             _selectedAnimationId = State.SelectedElement?.Animations.OrderBy(item => item.Order).FirstOrDefault()?.Id;
     
         }
         catch (Exception __componentMethodException)
         {
-            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(OnParametersSet)} failed.");
+            Logger.LogError(__componentMethodException, $"Component method {nameof(AnimationPanel)}.{nameof(OnParametersSetAsync)} failed.");
             throw;
         }
+        return base.OnParametersSetAsync();
     }
 
     /// <summary>

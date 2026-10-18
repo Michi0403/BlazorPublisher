@@ -134,6 +134,52 @@ public sealed class PublicationRecoveryService
 }
 
     /// <summary>
+    /// Reads the latest recovery snapshot without blocking an InteractiveServer
+    /// component lifecycle on synchronous filesystem I/O. Save and read share
+    /// the recovery gate so initialization never sees a partially moved manifest.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token for the asynchronous file read.</param>
+    /// <returns>The latest valid snapshot, or null when no readable recovery is available.</returns>
+    public async Task<PublicationRecoverySnapshot?> TryReadLatestAsync(CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
+            try
+            {
+                if (!File.Exists(_manifestPath)) return null;
+                var manifest = JsonSerializer.Deserialize<RecoveryManifest>(
+                    await File.ReadAllTextAsync(_manifestPath, cancellationToken).ConfigureAwait(false));
+                if (manifest is null || string.IsNullOrWhiteSpace(manifest.FileName)) return null;
+                var path = Path.Combine(_root, Path.GetFileName(manifest.FileName));
+                if (!File.Exists(path)) return null;
+                var json = await File.ReadAllTextAsync(path, cancellationToken).ConfigureAwait(false);
+                return string.IsNullOrWhiteSpace(json)
+                    ? null
+                    : new PublicationRecoverySnapshot(manifest.DocumentId, manifest.DocumentName, manifest.ModifiedUtc, manifest.SavedUtc, json);
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                throw;
+            }
+            catch (Exception exception)
+            {
+                System.Diagnostics.Trace.TraceWarning($"PublicationRecoveryService.TryReadLatestAsync skipped unreadable recovery data: {exception.GetType().Name}");
+                return null;
+            }
+            finally
+            {
+                _gate.Release();
+            }
+        }
+        catch (Exception exception)
+        {
+            System.Diagnostics.Trace.TraceError($"Service method PublicationRecoveryService.TryReadLatestAsync failed: {exception}");
+            throw;
+        }
+    }
+
+    /// <summary>
     /// Performs delete as part of the publication recovery service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     /// <param name="documentId">Identifier of the document to use for this operation.</param>

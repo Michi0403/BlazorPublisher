@@ -753,7 +753,8 @@
     /// <summary>
     /// Handles the initialized lifecycle or event notification for <see cref="Editor"/>, updating the state required by the surrounding workflow.
     /// </summary>
-    protected override void OnInitialized()
+    /// <returns>A task representing completion of the component lifecycle operation.</returns>
+    protected override async Task OnInitializedAsync()
     {
         try
         {
@@ -761,14 +762,15 @@
             StreamingSession.Changed += StateChanged;
             StreamingSession.HotkeyTriggered += HandleGlobalStreamingHotkey;
             LocalGptConnection.Changed += LocalGptConnectionChanged;
-            _recoveryCandidate = Recovery.TryReadLatest();
+            _recoveryCandidate = await Recovery.TryReadLatestAsync().ConfigureAwait(true);
     
         }
         catch (Exception __componentMethodException)
         {
-            Logger.LogError(__componentMethodException, $"Component method {nameof(Editor)}.{nameof(OnInitialized)} failed.");
+            Logger.LogError(__componentMethodException, $"Component method {nameof(Editor)}.{nameof(OnInitializedAsync)} failed.");
             throw;
         }
+        await base.OnInitializedAsync().ConfigureAwait(true);
     }
 
     /// <summary>

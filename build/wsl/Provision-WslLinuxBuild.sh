@@ -22,7 +22,7 @@ fi
 case "${ID:-}" in
   ubuntu|debian) ;;
   *)
-    printf 'Automatic provisioning currently supports Ubuntu/Debian WSL. Detected ID=%s. Install pwsh, .NET 10 SDK, python3, rpm/rpmbuild and appimagetool manually, then rerun the status helper.\n' "${ID:-unknown}" >&2
+    printf 'Automatic provisioning currently supports Ubuntu/Debian WSL. Detected ID=%s. Install pwsh, .NET 10 SDK, rpm/rpmbuild and appimagetool manually, then rerun the status helper.\n' "${ID:-unknown}" >&2
     exit 3
     ;;
 esac
@@ -35,7 +35,7 @@ printf 'Installing Linux release prerequisites in %s %s...\n' "${PRETTY_NAME:-$I
 sudo apt-get update
 sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
   ca-certificates curl wget apt-transport-https software-properties-common \
-  python3 rpm file tar gzip xz-utils coreutils findutils
+  rpm file tar gzip xz-utils coreutils findutils
 
 if ! command -v pwsh >/dev/null 2>&1; then
   tmp_dir="$(mktemp -d)"
@@ -78,7 +78,6 @@ fi
 printf '\nWSL Linux release tool status:\n'
 printf '  PowerShell:  '; command -v pwsh || true
 printf '  .NET SDKs:\n'; dotnet --list-sdks 2>/dev/null | sed 's/^/    /' || true
-printf '  Python:      '; command -v python3 || true
 printf '  rpmbuild:    '; command -v rpmbuild || true
 printf '  appimagetool:'; command -v appimagetool || printf ' optional tool not found\n'
 printf '\nProvisioning complete. The Windows release helper can now use this distro headlessly.\n'

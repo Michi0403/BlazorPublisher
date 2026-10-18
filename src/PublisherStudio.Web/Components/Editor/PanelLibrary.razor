@@ -90,7 +90,8 @@
     [Parameter] public EventCallback Close { get; set; }
 
     /// <summary>Loads local Div-template descriptors when the Panel Library is initialized.</summary>
-    protected override void OnInitialized()
+    /// <returns>A task representing completion of the component lifecycle operation.</returns>
+    protected override Task OnInitializedAsync()
     {
         try
         {
@@ -102,6 +103,7 @@
             Logger.LogError(exception, "Initializing the Panel Library local Div-template catalog failed.");
             throw;
         }
+        return base.OnInitializedAsync();
     }
 
     /// <summary>Reloads local Div-template descriptors without disturbing the open publication.</summary>

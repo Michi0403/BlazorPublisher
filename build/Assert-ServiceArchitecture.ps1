@@ -1,6 +1,11 @@
-param([string]$RepositoryRoot = (Split-Path -Parent $PSScriptRoot))
+param([string]$RepositoryRoot = '')
 
 Set-StrictMode -Version Latest
+
+if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
+    $RepositoryRoot = [IO.Path]::GetFullPath((Join-Path (Split-Path -Parent $PSCommandPath) '..'))
+}
+
 $ErrorActionPreference = 'Stop'
 $sourceRoot = Join-Path $RepositoryRoot 'src\PublisherStudio.Web'
 $servicesRoot = Join-Path $sourceRoot 'Services'
@@ -56,16 +61,14 @@ if ($registrationText.IndexOf('AddSingleton<ISupervisedTaskRunner, SupervisedTas
 }
 
 $methodGuard = Join-Path $PSScriptRoot 'Assert-MethodDiagnostics.ps1'
-$methodGuardText = Get-Content -LiteralPath $methodGuard -Raw
-foreach ($token in @('audit_service_resilience.py', '--product', 'publisherstudio')) {
-    if ($methodGuardText.IndexOf($token, [StringComparison]::Ordinal) -lt 0) {
-        $errors.Add("Broad service-method try/catch enforcement must remain wired through Assert-MethodDiagnostics.ps1: missing '$token'.")
-    }
+if (-not (Test-Path -LiteralPath $methodGuard -PathType Leaf)) {
+    $errors.Add('Native PowerShell service-method diagnostics guard is missing.')
 }
-
-$serviceAudit = Join-Path $PSScriptRoot 'audit_service_resilience.py'
-if (-not (Test-Path -LiteralPath $serviceAudit -PathType Leaf)) {
-    $errors.Add('Broad service resilience audit is missing.')
+else {
+    $guardContent = [IO.File]::ReadAllText($methodGuard)
+    if ($guardContent.IndexOf('Invoke-ArchitectureAudit.ps1', [StringComparison]::Ordinal) -lt 0) {
+        $errors.Add('Service method-level diagnostics must remain bound to the native PowerShell architecture scanner.')
+    }
 }
 
 if ($errors.Count -gt 0) {
@@ -73,4 +76,5 @@ if ($errors.Count -gt 0) {
     throw "Service architecture validation failed with $($errors.Count) problem(s)."
 }
 
+& (Join-Path $PSScriptRoot 'Assert-ServiceMethodResilience.ps1') -RepositoryRoot $RepositoryRoot
 Write-Host 'Service architecture validation passed: DI/static-state rules, ISupervisedTaskRunner ownership, and zero-exemption service resilience enforcement remain intact.' -ForegroundColor Green

@@ -4,7 +4,6 @@
 
 - .NET 10 SDK
 - Windows PowerShell 5.1 or newer for the maintained scripts
-- Python 3 for version-matched GitHub Pages snapshot validation and seeding
 - Node.js for preparing licensed DevExpress browser assets and documentation PDF generation
 - A licensed DevExpress build identity for preparing runtime assets
 
@@ -34,7 +33,7 @@ The Windows parent prepares DevExpress assets and documentation once. The WSL ch
 
 ## Quality gates
 
-The maintained build checks architecture, diagnostics, localization, InteractiveServer render modes, async continuations, component boundaries, text ownership, iterator policy, system-variable initialization, JavaScript diagnostics, publish profiles, installer workflow, XML documentation coverage, and documentation output.
+The maintained build uses PowerShell-only architecture, diagnostics, localization, InteractiveServer render-mode, async-continuation, component ownership, service-resilience, iterator, system-variable, JavaScript, native-packaging, XML documentation, and Pages checks; see [PowerShell maintenance architecture](powershell-maintenance-architecture.md).
 
 ## Release record
 

@@ -1,8 +1,13 @@
 param(
-    [string]$RepositoryRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
+    [string]$RepositoryRoot = ''
 )
 
 Set-StrictMode -Version Latest
+
+if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
+    $RepositoryRoot = [IO.Path]::GetFullPath((Join-Path (Split-Path -Parent $PSCommandPath) '..'))
+}
+
 $ErrorActionPreference = 'Stop'
 
 $contractPath = Join-Path $PSScriptRoot 'devexpress-component-retention.json'
@@ -28,9 +33,9 @@ $dxPattern = '<\s*Dx[A-Za-z0-9_]+'
 $violations = New-Object 'System.Collections.Generic.List[object]'
 $targetsPath = Join-Path $RepositoryRoot 'Directory.Build.targets'
 $maintenanceScriptPath = Join-Path $PSScriptRoot 'Assert-RazorMaintenanceArchitecture.ps1'
-$maintenanceAuditPath = Join-Path $PSScriptRoot 'audit_razor_maintenance_contract.py'
+$maintenanceAuditPath = Join-Path $PSScriptRoot 'Assert-RazorMaintenanceArchitecture.ps1'
 $transientStateScriptPath = Join-Path $PSScriptRoot 'Assert-TransientUiStateOwnership.ps1'
-$transientStateAuditPath = Join-Path $PSScriptRoot 'audit_transient_ui_state_ownership.py'
+$transientStateAuditPath = Join-Path $PSScriptRoot 'Assert-TransientUiStateOwnership.ps1'
 if (-not (Test-Path -LiteralPath $targetsPath -PathType Leaf)) {
     $violations.Add([pscustomobject]@{ File = 'Directory.Build.targets'; Line = 1; Code = 'PSDX0003'; Message = 'Directory.Build.targets is missing, so the Razor maintenance architecture guard cannot be enforced.'; Choices = 'Restore the repository build-target file and the Razor maintenance architecture target. Do not bypass the UI/layout/logging contract.' })
 }
@@ -68,7 +73,7 @@ if (Test-Path -LiteralPath $maintenanceAuditPath -PathType Leaf) {
         'maintenance-only DevExpress wrapper shells remain box-neutral',
         'generic StackLayout wrappers and unexplained Grid-to-Stack nesting are rejected')) {
         if ($maintenanceAuditContent.IndexOf($requiredSemanticToken, [StringComparison]::Ordinal) -lt 0) {
-            $violations.Add([pscustomobject]@{ File = 'build/audit_razor_maintenance_contract.py'; Line = 1; Code = 'PSDX0004'; Message = "Semantic Razor layout enforcement token '$requiredSemanticToken' was removed."; Choices = 'Restore the FormLayout-first semantic ownership rule, containment boundary, StackLayout anti-shortcut rule, form/editor ownership check, explicit FormLayout template-context check and Grid-to-Stack intent check. Change the architecture only through an explicit reviewed maintenance decision, not by weakening the guard to make a build pass.' })
+            $violations.Add([pscustomobject]@{ File = 'build/Assert-RazorMaintenanceArchitecture.ps1'; Line = 1; Code = 'PSDX0004'; Message = "Semantic Razor layout enforcement token '$requiredSemanticToken' was removed."; Choices = 'Restore the FormLayout-first semantic ownership rule, containment boundary, StackLayout anti-shortcut rule, form/editor ownership check, explicit FormLayout template-context check and Grid-to-Stack intent check. Change the architecture only through an explicit reviewed maintenance decision, not by weakening the guard to make a build pass.' })
         }
     }
 }

@@ -1,8 +1,12 @@
-param([string]$RepositoryRoot = (Split-Path -Parent $PSScriptRoot))
+param([string]$RepositoryRoot = '')
 
 Set-StrictMode -Version Latest
+
+if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
+    $RepositoryRoot = [IO.Path]::GetFullPath((Join-Path (Split-Path -Parent $PSCommandPath) '..'))
+}
+
 $ErrorActionPreference = 'Stop'
-. (Join-Path $PSScriptRoot 'PythonRuntime.Common.ps1')
 function Fail([string]$Message) { throw "Component safety validation failed: $Message" }
 
 $componentRoot = Join-Path $RepositoryRoot 'src\PublisherStudio.Web\Components'
@@ -47,16 +51,48 @@ foreach ($token in @('protected override Task OnErrorAsync(Exception exception)'
     if ($boundary.IndexOf($token, [StringComparison]::Ordinal) -lt 0) { Fail "OperationalErrorBoundary must retain '$token'." }
 }
 
-$audit = Join-Path $PSScriptRoot 'audit_component_resilience.py'
-if (-not (Test-Path -LiteralPath $audit -PathType Leaf)) { Fail 'The strict method-granular component resilience audit is missing.' }
-$result = Invoke-PublisherStudioPythonScript -ScriptPath $audit -Arguments @('--root', $RepositoryRoot)
-$result.Output | ForEach-Object { Write-Host ([string]$_) }
-if ($result.ExitCode -ne 0) { Fail 'Component method resilience audit failed.' }
-
-$prerenderAudit = Join-Path $PSScriptRoot 'audit_prerender_interop_safety.py'
-if (-not (Test-Path -LiteralPath $prerenderAudit -PathType Leaf)) { Fail 'The prerender JavaScript interop safety audit is missing.' }
-$result = Invoke-PublisherStudioPythonScript -ScriptPath $prerenderAudit -Arguments @('--root', $RepositoryRoot)
-$result.Output | ForEach-Object { Write-Host ([string]$_) }
-if ($result.ExitCode -ne 0) { Fail 'Prerender JavaScript interop safety audit failed.' }
-
-Write-Host "Component safety validation passed: $($razorFiles.Count) Razor components own typed loggers; every component method is method-locally guarded; prerender JavaScript interop is attachment-gated; no legacy exemptions are permitted." -ForegroundColor Green
+# Native method-level resilience: verify that operational component methods retain
+# structured error handling and diagnosis. Existing component baseline remains separately enforced.
+& (Join-Path $PSScriptRoot 'Assert-ComponentDiagnostics.ps1')
+# Blazor component lifecycle methods must use task-returning overrides.
+# Do not regress service/UI asynchronous continuation ownership by introducing
+# synchronous lifecycle entrypoints. Event handlers are governed separately.
+$lifecycleViolations = [Collections.Generic.List[string]]::new()
+$lifecycleFiles = @(Get-ChildItem -LiteralPath $componentRoot -Recurse -File |
+    Where-Object { $_.Name.EndsWith('.razor', [StringComparison]::OrdinalIgnoreCase) -or
+                   $_.Name.EndsWith('.razor.cs', [StringComparison]::OrdinalIgnoreCase) })
+# Prevent regression to synchronous recovery disk reads from any Razor UI hook.
+foreach ($lifecycleFile in $lifecycleFiles) {
+    if ([IO.File]::ReadAllText($lifecycleFile.FullName).Contains('Recovery.TryReadLatest(')) {
+        $lifecycleViolations.Add("$($lifecycleFile.FullName): synchronous publication recovery I/O; use awaited TryReadLatestAsync instead.")
+    }
+}
+$lifecyclePattern = '(?m)^\s*protected\s+override\s+void\s+(?:OnInitialized|OnParametersSet|OnAfterRender)\s*\('
+foreach ($lifecycleFile in $lifecycleFiles) {
+    $lifecycleText = [IO.File]::ReadAllText($lifecycleFile.FullName)
+    if ([regex]::IsMatch($lifecycleText, $lifecyclePattern)) {
+        $lifecycleViolations.Add("$($lifecycleFile.FullName): synchronous Blazor lifecycle override; use OnInitializedAsync, OnParametersSetAsync, or OnAfterRenderAsync.")
+    }
+}
+if ($lifecycleViolations.Count -gt 0) {
+    $lifecycleViolations | ForEach-Object { Write-Error $_ }
+    Fail 'Synchronous component lifecycle overrides are forbidden; preserve task-based UI/service continuation ownership.'
+}
+$interopViolations = [Collections.Generic.List[string]]::new()
+# .NET balanced groups constrain inspection to the actual lifecycle method body.
+# A fixed-length lookahead was crossing into OnAfterRenderAsync and falsely
+# treating legitimate post-render browser calls as prerender initialization.
+$initializationMethodPattern = '(?s)\b(?:protected|private|public|internal)\s+(?:(?:override|virtual|sealed|async|new)\s+)*(?:void|Task|ValueTask)\s+OnInitialized(?:Async)?\s*\(\s*\)\s*(?<body>\{(?>[^{}]+|\{(?<depth>)|\}(?<-depth>))*(?(depth)(?!))\})'
+foreach ($file in $lifecycleFiles) {
+    $text = [IO.File]::ReadAllText($file.FullName)
+    if ($text -notmatch '(?is)@rendermode\s+(?:InteractiveServer|InteractiveAuto)') { continue }
+    foreach ($method in [regex]::Matches($text, $initializationMethodPattern)) {
+        $body = $method.Groups['body'].Value
+        if ($body -match '\b(?:JS|JSRuntime|JsRuntime|_jsRuntime|_js)\s*\.\s*Invoke(?:Void)?Async\s*(?:<[^>]+>)?\s*\(') {
+            $relative = $file.FullName.Substring($RepositoryRoot.Length).TrimStart([char[]]@([char]'\',[char]'/')).Replace('\','/')
+            $interopViolations.Add("${relative}: JS interop inside $($method.Value.Substring(0,[Math]::Min(90,$method.Value.Length)).Trim()) is forbidden during prerender initialization.")
+        }
+    }
+}
+if ($interopViolations.Count) { $interopViolations | ForEach-Object { Write-Error $_ }; Fail 'InteractiveServer prerender interop ownership failed.' }
+Write-Host "PowerShell component safety passed: $($razorFiles.Count) typed loggers; the separate diagnostics baseline and prerender boundary are verified."

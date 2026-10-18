@@ -47,8 +47,16 @@
           StandardOutputImportance="High" StandardErrorImportance="High" />
   </Target>
 
+  <Target Name="AssertPublisherPowerShellMaintenance" BeforeTargets="BeforeBuild"
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web'">
+    <Error Condition="!Exists('$(MSBuildThisFileDirectory)build/Assert-MaintenanceArchitecture.ps1')" Text="PublisherStudio PowerShell-only maintenance guard is missing." />
+    <Exec Command="&quot;$(RepositoryPowerShell)&quot; $(RepositoryPowerShellArguments) -File &quot;$(MSBuildThisFileDirectory)build/Assert-MaintenanceArchitecture.ps1&quot;"
+          WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true"
+          StandardOutputImportance="High" StandardErrorImportance="High" />
+  </Target>
+
   <Target Name="AssertPublisherLoggingIntegrity"
-          BeforeTargets="BeforeBuild"
+          BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherPowerShellMaintenance"
           Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipLoggingIntegrityGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web'">
     <Error Condition="!Exists('$(LoggingIntegrityScript)')" Text="Logging integrity guard script is missing: $(LoggingIntegrityScript)" />
     <Exec Command="&quot;$(RepositoryPowerShell)&quot; $(RepositoryPowerShellArguments) -File &quot;$(LoggingIntegrityScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />

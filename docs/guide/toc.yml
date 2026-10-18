@@ -22,6 +22,8 @@
   href: ../articles/privacy-and-security.md
 - name: Architecture
   href: ../articles/architecture.md
+- name: PowerShell maintenance architecture (UML)
+  href: ../articles/powershell-maintenance-architecture.md
 - name: Developer build
   href: ../articles/developer-build.md
 - name: Windows + WSL Linux releases

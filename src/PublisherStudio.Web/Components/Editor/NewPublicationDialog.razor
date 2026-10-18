@@ -97,7 +97,8 @@
     [Parameter] public EventCallback Cancelled { get; set; }
 
     /// <summary>Refreshes template descriptors when the chooser transitions from closed to open.</summary>
-    protected override void OnParametersSet()
+    /// <returns>A task representing completion of the component lifecycle operation.</returns>
+    protected override Task OnParametersSetAsync()
     {
         try
         {
@@ -110,6 +111,7 @@
             Logger.LogError(exception, "Applying NewPublicationDialog parameters failed.");
             throw;
         }
+        return base.OnParametersSetAsync();
     }
 
     /// <summary>Reloads descriptors from the LocalApplicationData template library after an explicit user request.</summary>

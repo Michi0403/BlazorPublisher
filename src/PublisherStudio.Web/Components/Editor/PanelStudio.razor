@@ -944,7 +944,8 @@
     /// <summary>
     /// Handles the parameters set lifecycle or event notification for <see cref="PanelStudio"/>, updating the state required by the surrounding workflow.
     /// </summary>
-    protected override void OnParametersSet()
+    /// <returns>A task representing completion of the component lifecycle operation.</returns>
+    protected override Task OnParametersSetAsync()
     {
         try
         {
@@ -961,11 +962,11 @@
                 _initializationSource = "unknown";
                 _pictureEditorVisible = false;
                 _pictureEditorTargetId = null;
-                return;
+                return base.OnParametersSetAsync();
             }
 
             var id = InitialPanel?.Id;
-            if (_draft is not null && _loadedId == id) return;
+            if (_draft is not null && _loadedId == id) return base.OnParametersSetAsync();
             _initializationSource = InitialPanel is null ? "blank" : "existing";
             _draft = InitialPanel is null ? Panels.CreateBlank(Document) : (PanelElement)Files.CloneElement(InitialPanel);
             Panels.Normalize(Document, _draft);
@@ -996,9 +997,10 @@
         }
         catch (Exception __componentMethodException)
         {
-            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(OnParametersSet)} failed.");
+            Logger.LogError(__componentMethodException, $"Component method {nameof(PanelStudio)}.{nameof(OnParametersSetAsync)} failed.");
             throw;
         }
+        return base.OnParametersSetAsync();
     }
 
     /// <summary>

@@ -6,7 +6,6 @@ param(
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
-. (Join-Path $PSScriptRoot 'PythonRuntime.Common.ps1')
 
 function Fail([string]$Message) { throw "Architecture policy validation failed: $Message" }
 function Normalize-Signature([string]$Value) { return ([regex]::Replace($Value, '\s+', ' ')).Trim() }
@@ -15,22 +14,12 @@ $root = Split-Path -Parent $PSScriptRoot
 $isLocalGpt = Test-Path -LiteralPath (Join-Path $root 'LocalGPTWebviewWrapper\LocalGPT') -PathType Container
 $product = if ($isLocalGpt) { 'localgpt' } else { 'publisherstudio' }
 $sourceRoot = if ($isLocalGpt) { Join-Path $root 'LocalGPTWebviewWrapper\LocalGPT' } else { Join-Path $root 'src\PublisherStudio.Web' }
-$pythonScript = Join-Path $PSScriptRoot 'audit_application_architecture.py'
-
-function Invoke-PythonAudit {
-    $result = Invoke-PublisherStudioPythonScript -ScriptPath $pythonScript -Arguments @('--root', $root, '--product', $product, '--mode', $Mode) -AllowMissing
-    if ($null -eq $result) {
-        return $null
-    }
-
-    foreach ($line in $result.Output) { Write-Host ([string]$line) }
-    return [int]$result.ExitCode
-}
-
+# Preserve original offsets while masking comments: method body slicing uses
+# these indices against the original source, including XML documentation.
 function Remove-NonCode([string]$Text) {
     $withoutRawStrings = [regex]::Replace($Text, '(?s)\$*@?"{3,}.*?"{3,}', { param($match) ' ' * $match.Length })
     $withoutBlockComments = [regex]::Replace($withoutRawStrings, '(?s)/\*.*?\*/', { param($match) ' ' * $match.Length })
-    return [regex]::Replace($withoutBlockComments, '(?m)//.*$', '')
+    return [regex]::Replace($withoutBlockComments, '(?m)//[^\r\n]*', { param($match) ' ' * $match.Length })
 }
 
 function Invoke-StaticFallback {
@@ -238,13 +227,8 @@ function Invoke-MethodFallback {
     Write-Host 'Maintained operational diagnostics validation passed without a legacy method baseline.'
 }
 
-$pythonExit = Invoke-PythonAudit
-if ($null -ne $pythonExit) {
-    if ($pythonExit -ne 0) { Fail "Python architecture audit exited with code $pythonExit." }
-    exit 0
-}
-
-Write-Warning 'Python was not found; using the bundled Windows PowerShell fallback audit.'
+# No external interpreter may alter whether an architecture rule runs.
 if ($Mode -in @('static', 'all')) { Invoke-StaticFallback }
 if ($Mode -in @('methods', 'all')) { Invoke-MethodFallback }
 if ($Mode -in @('runtime', 'all')) { Invoke-RuntimeFallback }
+Write-Host "PublisherStudio native PowerShell architecture audit passed for mode $Mode."

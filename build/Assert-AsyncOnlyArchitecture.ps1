@@ -1,28 +1,20 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
-. (Join-Path $PSScriptRoot 'PythonRuntime.Common.ps1')
-
-function Fail([string]$Message) { throw "Async-boundary component/service architecture validation failed: $Message" }
-
-$root = Split-Path -Parent $PSScriptRoot
-$sourceRoot = Join-Path $root 'src\PublisherStudio.Web'
-$pythonScript = Join-Path $PSScriptRoot 'audit_async_only_architecture.py'
-if (-not (Test-Path -LiteralPath $pythonScript -PathType Leaf)) { Fail "The async-only architecture audit is missing: $pythonScript" }
-
-function Invoke-PythonAudit {
-    $result = Invoke-PublisherStudioPythonScript -ScriptPath $pythonScript -Arguments @('--source-root', $sourceRoot, '--product', 'PublisherStudio') -AllowMissing
-    if ($null -eq $result) {
-        return $null
+$root = Join-Path (Split-Path -Parent $PSScriptRoot) 'src/PublisherStudio.Web'
+$findings = [Collections.Generic.List[string]]::new()
+$count = 0
+foreach ($file in Get-ChildItem -LiteralPath $root -Recurse -File | Where-Object { $_.Extension -in @('.cs','.razor') -and $_.FullName -notmatch '[\\/](?:obj|bin|Migrations)[\\/]' }) {
+    $count++
+    if ($file.FullName -notmatch '[\\/](?:Controller|Components)[\\/]') { continue }
+    $source = [IO.File]::ReadAllText($file.FullName)
+    foreach ($match in [regex]::Matches($source, '(?m)\b(?:GetAwaiter\(\)\.GetResult\(\)|\.Wait\s*\(|Task\.Run\s*\([^)]*\)\.Wait\s*\()')) {
+        # Ignore documentation and comments; retain strict bans for executable signatures.
+        $prefix = $source.Substring(0,$match.Index)
+        $line = @($prefix.Split("`n")).Count
+        $lineText = ($source.Split("`n")[$line-1]).Trim()
+        if ($lineText.StartsWith('//') -or $lineText.StartsWith('*') -or $lineText.StartsWith('///')) { continue }
+        $findings.Add("$($file.FullName):$line sync-over-async invocation")
     }
-
-    foreach ($line in @($result.Output)) { Write-Host ([string]$line) }
-    return [int]$result.ExitCode
 }
-
-$pythonExit = Invoke-PythonAudit
-if ($null -eq $pythonExit) {
-    Fail 'Python 3 is required for the zero-baseline async-boundary component/service architecture audit.'
-}
-if ($pythonExit -ne 0) {
-    Fail "audit exited with code $pythonExit after reporting every detected violation."
-}
+if ($findings.Count) { $findings | Select-Object -First 80 | ForEach-Object { Write-Error $_ }; throw "Async-only source audit rejected $($findings.Count) findings." }
+Write-Host "PowerShell async-only UI/controller audit inspected $count files (no sync-over-async)."

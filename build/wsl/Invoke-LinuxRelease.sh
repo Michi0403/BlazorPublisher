@@ -49,10 +49,6 @@ if ! command -v dotnet >/dev/null 2>&1 || ! dotnet --list-sdks 2>/dev/null | gre
   printf '.NET 10 SDK is missing inside WSL. Run Setup-WslLinuxBuild.ps1 -Provision from Windows.\n' >&2
   exit 5
 fi
-if ! command -v python3 >/dev/null 2>&1; then
-  printf 'Python 3 is missing inside WSL. Run Setup-WslLinuxBuild.ps1 -Provision from Windows.\n' >&2
-  exit 6
-fi
 
 case "$product" in
   LocalGPT) product_slug='localgpt' ;;

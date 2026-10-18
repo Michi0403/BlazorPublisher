@@ -2105,11 +2105,12 @@
     /// <summary>
     /// Handles the parameters set lifecycle or event notification for <see cref="MediaStudio"/>, updating the state required by the surrounding workflow.
     /// </summary>
-    protected override void OnParametersSet()
+    /// <returns>A task representing completion of the component lifecycle operation.</returns>
+    protected override Task OnParametersSetAsync()
     {
         try
         {
-            if (!Visible || SessionId == Guid.Empty || SessionId == _loadedSession) return;
+            if (!Visible || SessionId == Guid.Empty || SessionId == _loadedSession) return base.OnParametersSetAsync();
             _loadedSession = SessionId;
             _recordingRecoveryAttemptedSession = Guid.Empty;
             RetirePreviewAssets();
@@ -2277,9 +2278,10 @@
         }
         catch (Exception __componentMethodException)
         {
-            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaStudio)}.{nameof(OnParametersSet)} failed.");
+            Logger.LogError(__componentMethodException, $"Component method {nameof(MediaStudio)}.{nameof(OnParametersSetAsync)} failed.");
             throw;
         }
+        return base.OnParametersSetAsync();
     }
 
     /// <summary>

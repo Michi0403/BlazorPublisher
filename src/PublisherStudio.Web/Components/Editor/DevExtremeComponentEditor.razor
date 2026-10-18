@@ -1078,7 +1078,8 @@
     /// <summary>
     /// Handles the parameters set lifecycle or event notification for <see cref="DevExtremeComponentEditor"/>, updating the state required by the surrounding workflow.
     /// </summary>
-    protected override void OnParametersSet()
+    /// <returns>A task representing completion of the component lifecycle operation.</returns>
+    protected override Task OnParametersSetAsync()
     {
         try
         {
@@ -1097,9 +1098,10 @@
         }
         catch (Exception __componentMethodException)
         {
-            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(OnParametersSet)} failed.");
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DevExtremeComponentEditor)}.{nameof(OnParametersSetAsync)} failed.");
             throw;
         }
+        return base.OnParametersSetAsync();
     }
 
 

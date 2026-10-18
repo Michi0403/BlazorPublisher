@@ -172,11 +172,12 @@
     /// <summary>
     /// Handles the parameters set lifecycle or event notification for <see cref="BarcodeEditor"/>, updating the state required by the surrounding workflow.
     /// </summary>
-    protected override void OnParametersSet()
+    /// <returns>A task representing completion of the component lifecycle operation.</returns>
+    protected override Task OnParametersSetAsync()
     {
         try
         {
-            if (!Visible || Item is null || Item.Id == _loadedId) return;
+            if (!Visible || Item is null || Item.Id == _loadedId) return base.OnParametersSetAsync();
             _loadedId = Item.Id;
             Copy(Item, _draft);
             _svg = Item.SvgMarkup ?? string.Empty;
@@ -187,9 +188,10 @@
         }
         catch (Exception __componentMethodException)
         {
-            Logger.LogError(__componentMethodException, $"Component method {nameof(BarcodeEditor)}.{nameof(OnParametersSet)} failed.");
+            Logger.LogError(__componentMethodException, $"Component method {nameof(BarcodeEditor)}.{nameof(OnParametersSetAsync)} failed.");
             throw;
         }
+        return base.OnParametersSetAsync();
     }
     /// <summary>
     /// Handles the after render async lifecycle or event notification for <see cref="BarcodeEditor"/>, updating the state required by the surrounding workflow.

@@ -45,7 +45,8 @@
     /// <summary>
     /// Handles the initialized lifecycle or event notification for <see cref="DocumentationViewerHost"/>, updating the state required by the surrounding workflow.
     /// </summary>
-    protected override void OnInitialized()
+    /// <returns>A task representing completion of the component lifecycle operation.</returns>
+    protected override Task OnInitializedAsync()
     {
         try
         {
@@ -62,9 +63,10 @@
         }
         catch (Exception __componentMethodException)
         {
-            Logger.LogError(__componentMethodException, $"Component method {nameof(DocumentationViewerHost)}.{nameof(OnInitialized)} failed.");
+            Logger.LogError(__componentMethodException, $"Component method {nameof(DocumentationViewerHost)}.{nameof(OnInitializedAsync)} failed.");
             throw;
         }
+        return base.OnInitializedAsync();
     }
 
     /// <summary>

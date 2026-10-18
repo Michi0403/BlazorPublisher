@@ -1,10 +1,15 @@
 param(
-    [string]$RepositoryRoot = (Split-Path -Parent $PSScriptRoot),
+    [string]$RepositoryRoot = '',
     [switch]$SkipNodeRuntime
 )
 
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
+
+if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
+    $RepositoryRoot = [IO.Path]::GetFullPath((Join-Path (Split-Path -Parent $PSCommandPath) '..'))
+}
+
 
 $requiredRelativePaths = @(
     "docs/index.md",
@@ -18,12 +23,12 @@ $requiredRelativePaths = @(
     "docs/templates/publisherstudio/public/favicon.svg",
     "docs/templates/publisherstudio/public/logo.svg",
     "build/NodeRuntime.Common.ps1",
-    "build/PythonRuntime.Common.ps1",
+    "build/Assert-MaintenanceArchitecture.ps1",
     "build/Ensure-WireProtocolPackage.ps1",
     "build/Ensure-ReleasePackagingPackage.ps1",
     "build/NativeReleasePackaging.ps1",
     "build/Initialize-MacReleaseTrust.ps1",
-    ".github/scripts/prepare-pages-artifact.py"
+    "build/Assert-PagesArtifact.ps1"
 )
 
 $missing = [System.Collections.Generic.List[string]]::new()
@@ -40,10 +45,7 @@ if ($missing.Count -gt 0) {
 }
 
 Write-Host "PublisherStudio source preflight: $($requiredRelativePaths.Count) required source file(s) are present." -ForegroundColor Green
-. (Join-Path $PSScriptRoot 'PythonRuntime.Common.ps1')
-$pythonRuntime = Resolve-PublisherStudioPythonRuntime
-Write-Host "PublisherStudio Python preflight: using $($pythonRuntime.DisplayName)." -ForegroundColor Green
-
+& (Join-Path $PSScriptRoot 'Assert-MaintenanceArchitecture.ps1') -RepositoryRoot $RepositoryRoot
 if ($SkipNodeRuntime) {
     Write-Host 'PublisherStudio Node.js preflight skipped because this delegated release child reuses parent-prepared browser assets and documentation.' -ForegroundColor DarkCyan
 }

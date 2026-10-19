@@ -148,6 +148,7 @@
                     {
                         <DxRibbonGroup Text='@LT("Rendered video")' IconCssClass="pub-icon pub-icon-effects">
                             <DxRibbonItem Text='@LT("Render selected range to video…")' IconCssClass="pub-icon pub-icon-download" Enabled="@(HasSource && !_renderingVideoExport && !_renderingTimelineSelectionExport)" Click="RenderEffectsToVideo" />
+                            <DxRibbonItem Text='@LT("Render selected range to animated GIF…")' IconCssClass="pub-icon pub-icon-download" Enabled="@(HasSource && !_renderingVideoExport && !_renderingTimelineSelectionExport)" Click="RenderEffectsToGif" />
                             <DxRibbonItem Text='@LT("Export selected ranges separately…")' IconCssClass="pub-icon pub-icon-download" Enabled="@CanExportSelectedTimelineRanges" Click="ExportSelectedTimelineRangesSeparately" />
                             <DxRibbonItem Text='@LT("Export selected ranges combined…")' IconCssClass="pub-icon pub-icon-download" Enabled="@CanExportSelectedTimelineRanges" Click="ExportSelectedTimelineRangesCombined" />
                             <DxRibbonItem Text='@LT("Cancel rendered export")' IconCssClass="pub-icon pub-icon-stop" Enabled="@(_renderingVideoExport || _renderingTimelineSelectionExport)" Click="CancelRenderedVideoExport" />
@@ -2422,7 +2423,7 @@
         try
         {
             if (_disposed) throw new ObjectDisposedException(nameof(MediaStudio));
-            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=4.0.9").ConfigureAwait(true);
+            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=4.2.8").ConfigureAwait(true);
             _self ??= DotNetObjectReference.Create(this);
             if (SessionId != Guid.Empty)
             {
@@ -7245,6 +7246,35 @@
         {
             Logger.LogError(__componentMethodException, $"Component method {nameof(MediaStudio)}.{nameof(RenderEffectsToVideo)} failed.");
             throw;
+        }
+    }
+
+    /// <summary>Exports the selected Video Studio range and active effect layers as animated GIF.</summary>
+    private async Task RenderEffectsToGif()
+    {
+        if (!IsVideo || !HasSource || SelectedSegment is null || !IsPlayableSegment(SelectedSegment) ||
+            _renderingVideoExport || _renderingTimelineSelectionExport) return;
+        _error = null;
+        try
+        {
+            var module = await EnsureMediaModuleAsync().ConfigureAwait(true);
+            var start = _videoSelectionIsPoint ? _trimStart : VideoSelectionStart;
+            var end = _videoSelectionIsPoint ? _trimEnd : VideoSelectionEnd;
+            if (end <= start + .001) { start = _trimStart; end = _trimEnd; }
+            var started = await module.InvokeAsync<bool>("startRenderedGifExport",
+                "media-studio-preview", _self,
+                BuildVideoEffectConfiguration(RecordingTargetWidth, RecordingTargetHeight),
+                BuildBrowserRecordingOptions(), start, end, Math.Max(.1, _playbackRate), _name).ConfigureAwait(true);
+            if (!started) { _warning = LT("A rendered video export is already running."); return; }
+            _renderingVideoExport = true;
+            _warning = LT("Rendering the selected range as animated GIF with the current effect layers (GIF has no audio).");
+            await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+        }
+        catch (Exception ex) when (ex is JSDisconnectedException or TaskCanceledException or ObjectDisposedException or JSException)
+        {
+            _renderingVideoExport = false;
+            _error = $"{LT("Animated GIF export could not start")}: {ex.Message}";
+            Logger.LogError(ex, "Video Studio GIF export could not start for session {SessionId}.", SessionId);
         }
     }
 

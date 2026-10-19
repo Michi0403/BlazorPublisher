@@ -1969,7 +1969,7 @@
             }
             catch (JSException)
             {
-                var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js?v=4.0.9").ConfigureAwait(true);
+                var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js?v=4.2.8").ConfigureAwait(true);
                 await using var configuredModuleAsyncDisposal = module.ConfigureAwait(true);
                 await module.InvokeVoidAsync("clickElementById", id).ConfigureAwait(true);
             }
@@ -2351,7 +2351,7 @@
                 var objectName = Files.SafeFileName(selected.Name);
                 var fileName = $"{baseName}-{objectName}.{normalized}";
                 ShowNotice($"Rendering {selected.Name} through Picture Studio as merged {normalized.ToUpperInvariant()}…");
-                var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/pictureStudioInterop.js?v=2.6.5").ConfigureAwait(true);
+                var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/pictureStudioInterop.js?v=4.2.8").ConfigureAwait(true);
                 try
                 {
                     if (normalized == "svg")
@@ -2398,7 +2398,7 @@
                 var fileName = $"{baseName}-{objectName}-layered.svg";
                 await CloseSelectedPictureExport().ConfigureAwait(true);
                 ShowNotice($"Exporting {selected.Name} with editable Picture Studio layers…");
-                var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/pictureStudioInterop.js?v=2.6.5").ConfigureAwait(true);
+                var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/pictureStudioInterop.js?v=4.2.8").ConfigureAwait(true);
                 try
                 {
                     await module.InvokeVoidAsync("downloadPictureStudioSvg", selected.PictureSource, fileName).ConfigureAwait(true);
@@ -3463,7 +3463,7 @@
                 var bytes = buffer.ToArray();
                 if (bytes.Length == 0) throw new InvalidDataException("The selected media file is empty.");
 
-                module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=4.0.9").ConfigureAwait(true);
+                module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaStudioInterop.js?v=4.2.8").ConfigureAwait(true);
                 temporaryAssetId = Guid.NewGuid();
                 var inspectionUrl = MediaAssets.RegisterBytes(temporaryAssetId, bytes, mimeType);
                 MediaSourceInfo info;

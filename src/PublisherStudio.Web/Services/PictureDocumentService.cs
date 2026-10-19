@@ -141,10 +141,20 @@ public sealed class PictureDocumentService
             document.GridSpacingPx = Math.Clamp(document.GridSpacingPx <= 0 ? 25 : document.GridSpacingPx, 2, 1000);
             document.Background = string.IsNullOrWhiteSpace(document.Background) ? "transparent" : document.Background;
             document.Layers ??= [];
+            document.AnimationFrameDelaysMs ??= [];
+            if (document.AnimationFrameDelaysMs.Count > 500)
+                document.AnimationFrameDelaysMs = document.AnimationFrameDelaysMs.Take(500).ToList();
+            for (var index = 0; index < document.AnimationFrameDelaysMs.Count; index++)
+                document.AnimationFrameDelaysMs[index] = Math.Clamp(document.AnimationFrameDelaysMs[index], 20, 655350);
+            document.ActiveAnimationFrame = Math.Clamp(document.ActiveAnimationFrame, 0,
+                Math.Max(0, document.AnimationFrameDelaysMs.Count - 1));
+            document.AnimationLoopCount = Math.Clamp(document.AnimationLoopCount, 0, 65535);
 
             foreach (var layer in document.Layers)
             {
                 layer.Name = string.IsNullOrWhiteSpace(layer.Name) ? layer.Kind.ToString() : layer.Name;
+                layer.AnimationFrameIndex = Math.Clamp(layer.AnimationFrameIndex, -1,
+                    Math.Max(-1, document.AnimationFrameDelaysMs.Count - 1));
                 layer.GroupPath = layer.GroupPath?.Trim() ?? string.Empty;
                 layer.Width = Math.Clamp(layer.Width <= 0 ? 1 : layer.Width, 1, 16384);
                 layer.Height = Math.Clamp(layer.Height <= 0 ? 1 : layer.Height, 1, 16384);

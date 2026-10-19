@@ -7936,6 +7936,45 @@ async function waitForStoryImages(doc) { try {
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:callback:images.map@7058', __javascriptError); throw __javascriptError; }}));
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:waitForStoryImages@7055', __javascriptError); throw __javascriptError; }}
 
+// Text-decoration is painted by its originating element, even when a nested run
+// overrides its color or sets text-decoration-line:none. RichEdit can emit an
+// underlined outer run spanning a differently colored inner run and its trailing
+// separator. Put the decoration on the actual visible glyph runs instead.
+function normalizeStoryPreviewUnderlines(root) { try {
+    const underlined = [...root.querySelectorAll('*')].filter(node =>
+        (node.style?.getPropertyValue('text-decoration-line') || '').split(/\s+/).includes('underline') ||
+        (node.style?.getPropertyValue('text-decoration') || '').split(/\s+/).includes('underline'));
+    const roots = underlined.filter(node => !underlined.some(other => other !== node && other.contains(node)));
+    for (const decorated of roots) {
+        const walker = root.ownerDocument.createTreeWalker(decorated, NodeFilter.SHOW_TEXT);
+        const textNodes = [];
+        while (walker.nextNode()) textNodes.push(walker.currentNode);
+        for (const node of textNodes) {
+            if (!node.parentNode || !node.nodeValue) continue;
+            const parts = node.nodeValue.match(/\s+|[^\s]+/g) || [];
+            const fragment = root.ownerDocument.createDocumentFragment();
+            for (const part of parts) {
+                if (/^\s+$/.test(part)) fragment.appendChild(root.ownerDocument.createTextNode(part));
+                else {
+                    const run = root.ownerDocument.createElement('span');
+                    run.style.setProperty('text-decoration-line', 'underline');
+                    run.style.setProperty('text-decoration-color', 'currentColor');
+                    run.textContent = part;
+                    fragment.appendChild(run);
+                }
+            }
+            node.parentNode.replaceChild(fragment, node);
+        }
+        for (const inner of [decorated, ...decorated.querySelectorAll('*')]) {
+            if (underlined.includes(inner)) {
+                inner.style.setProperty('text-decoration', 'none');
+                inner.style.setProperty('text-decoration-line', 'none');
+            }
+        }
+    }
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:normalizeStoryPreviewUnderlines', __javascriptError); throw __javascriptError; }
+}
+
 async function prepareStoryPreviewHtml(html, preferredBackground = '') { try {
     const source = String(html || '');
     if (!source.trim()) return {
@@ -8045,6 +8084,7 @@ async function prepareStoryPreviewHtml(html, preferredBackground = '') { try {
             wrapper.setAttribute('data-publisher-print-fill', 'true');
         }
         wrapper.innerHTML = cloneBody.innerHTML;
+        normalizeStoryPreviewUnderlines(wrapper);
         return { html: wrapper.outerHTML, background: documentBackground };
     } finally {
         frame.remove();

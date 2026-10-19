@@ -28,12 +28,32 @@ function Test-ReleasePackagingPackage {
         $archive = [System.IO.Compression.ZipFile]::OpenRead($Path)
         try {
             $entryNames = @($archive.Entries | ForEach-Object { $_.FullName.Replace('\', '/') })
-            $hasNuspec = @($entryNames | Where-Object { $_ -like '*.nuspec' }).Count -gt 0
-            $hasToolSettings = @($entryNames | Where-Object { $_ -like 'tools/*/any/DotnetToolSettings.xml' }).Count -gt 0
-            $hasToolAssembly = @($entryNames | Where-Object { $_ -like 'tools/*/any/LocalGPT.ReleasePackaging.dll' }).Count -gt 0
+            $nuspecEntries = @($archive.Entries | Where-Object { $_.FullName -like '*.nuspec' })
+            if ($nuspecEntries.Count -ne 1) { return $false }
+            $nuspecStream = $nuspecEntries[0].Open()
+            try {
+                $nuspecReader = [IO.StreamReader]::new($nuspecStream)
+                try { [xml]$nuspec = $nuspecReader.ReadToEnd() }
+                finally { $nuspecReader.Dispose() }
+            }
+            finally { $nuspecStream.Dispose() }
+            $packageId = $nuspec.SelectSingleNode("/*[local-name()='package']/*[local-name()='metadata']/*[local-name()='id']")
+            $packageVersion = $nuspec.SelectSingleNode("/*[local-name()='package']/*[local-name()='metadata']/*[local-name()='version']")
+            if ($null -eq $packageId -or $null -eq $packageVersion -or
+                -not [string]::Equals([string]$packageId.InnerText, 'LocalGPT.ReleasePackaging', [StringComparison]::Ordinal) -or
+                -not [string]::Equals([string]$packageVersion.InnerText, $Version, [StringComparison]::Ordinal)) { return $false }
+            $requiredToolEntries = @(
+                'tools/net10.0/any/DotnetToolSettings.xml',
+                'tools/net10.0/any/LocalGPT.ReleasePackaging.dll',
+                'tools/net10.0/any/LocalGPT.ReleasePackaging.deps.json',
+                'tools/net10.0/any/LocalGPT.ReleasePackaging.runtimeconfig.json'
+            )
+            foreach ($requiredEntry in $requiredToolEntries) {
+                if ($entryNames -cnotcontains $requiredEntry) { return $false }
+            }
             $hasMit = $entryNames -contains 'licenses/PDFsharp-6.2.4-MIT-LICENSE.txt'
             $hasNotices = $entryNames -contains 'licenses/THIRD-PARTY-NOTICES.txt'
-            return $hasNuspec -and $hasToolSettings -and $hasToolAssembly -and $hasMit -and $hasNotices
+            return $hasMit -and $hasNotices
         }
         finally { $archive.Dispose() }
     }
@@ -81,6 +101,7 @@ try {
     # Recheck under the lock because another build may have populated the cache while this process waited.
     if (-not $ForceDownload -and (Test-ReleasePackagingPackage $packagePath)) {
         Write-Host "Using cached authoritative LocalGPT release-packaging package: $packagePath" -ForegroundColor DarkGreen
+        Write-Host "Validated cached NuGet tool identity: LocalGPT.ReleasePackaging $Version; SHA-256 $((Get-FileHash -LiteralPath $packagePath -Algorithm SHA256).Hash)." -ForegroundColor DarkCyan
     }
     else {
         Remove-Item -LiteralPath $packagePath -Force -ErrorAction SilentlyContinue

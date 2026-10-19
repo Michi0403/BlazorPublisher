@@ -161,6 +161,19 @@ public partial class PictureEditor
     /// Stores the internal pending raster initialization state used by <see cref="PictureEditor"/> while executing its surrounding workflow.
     /// </summary>
     private bool _pendingRasterInitialization;
+    private string? _gifImportId;
+    private readonly List<(string DataUrl, int DelayMs)> _gifImportedFrames = [];
+    private StringBuilder? _gifFrameBuffer;
+    private int _gifImportCount;
+    private int _gifImportWidth;
+    private int _gifImportHeight;
+    private int _gifFrameNextChunk;
+    private int _gifFrameExpectedChunks;
+    private int _gifFrameDelayMs;
+    private int _gifImportCharacterCount;
+    private bool _gifImportStartsDocument;
+    private Guid? _gifImportReplaceLayerId;
+    private string _gifImportName = "Picture";
     /// <summary>
     /// Stores the internal error state used by <see cref="PictureEditor"/> while executing its surrounding workflow.
     /// </summary>
@@ -558,7 +571,7 @@ public partial class PictureEditor
         try
         {
             if (!Visible) return;
-            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/pictureStudioInterop.js?v=2.6.5").ConfigureAwait(true);
+            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/pictureStudioInterop.js?v=4.2.8").ConfigureAwait(true);
             _self ??= DotNetObjectReference.Create(this);
             if (_pendingRasterInitialization && !string.IsNullOrWhiteSpace(InitialRasterDataUrl))
             {
@@ -575,7 +588,10 @@ public partial class PictureEditor
                     {
                         var natural = await _module.InvokeAsync<PictureImageSize>("getPictureImageSize", InitialRasterDataUrl).ConfigureAwait(true);
                         var fitted = FitRasterCanvasSize(natural.Width, natural.Height);
-                        State.StartFromRaster(InitialRasterDataUrl, InitialName, fitted.Width, fitted.Height);
+                        if (InitialRasterDataUrl.StartsWith("data:image/gif;", StringComparison.OrdinalIgnoreCase))
+                            await StartGifImport(InitialRasterDataUrl, InitialName, startNew: true).ConfigureAwait(true);
+                        else
+                            State.StartFromRaster(InitialRasterDataUrl, InitialName, fitted.Width, fitted.Height);
                     }
                     catch (Exception ex)
                     {
@@ -1143,7 +1159,12 @@ public partial class PictureEditor
                 var size = _module is null
                     ? new PictureImageSize()
                     : await _module.InvokeAsync<PictureImageSize>("getPictureImageSize", dataUrl).ConfigureAwait(true);
-                if (!forceAdd && _replaceRasterLayerId is Guid targetId && State.ReplaceRaster(targetId, dataUrl))
+                if (file.ContentType.Equals("image/gif", StringComparison.OrdinalIgnoreCase))
+                {
+                    await StartGifImport(dataUrl, file.Name, startNew: false,
+                        replaceLayerId: forceAdd ? null : _replaceRasterLayerId).ConfigureAwait(true);
+                }
+                else if (!forceAdd && _replaceRasterLayerId is Guid targetId && State.ReplaceRaster(targetId, dataUrl))
                     State.SelectLayer(targetId);
                 else
                     State.AddRaster(dataUrl, file.Name, size.Width, size.Height,
@@ -1735,6 +1756,132 @@ public partial class PictureEditor
         }
     }
 
+    /// <summary>Starts a streamed browser GIF decode, without flattening animation into a still PNG.</summary>
+    private async Task StartGifImport(string dataUrl, string name, bool startNew, Guid? replaceLayerId = null)
+    {
+        if (_module is null || _self is null) throw new InvalidOperationException("Picture Studio is not initialized.");
+        if (_gifImportId is not null) throw new InvalidOperationException("An animated GIF import is already running.");
+        _gifImportId = Guid.NewGuid().ToString("N");
+        _gifImportedFrames.Clear();
+        _gifFrameBuffer = null;
+        _gifImportCharacterCount = 0;
+        _gifImportName = name;
+        _gifImportStartsDocument = startNew;
+        _gifImportReplaceLayerId = replaceLayerId;
+        _notice = LT("Decoding animated GIF frames…");
+        try
+        {
+            await _module.InvokeVoidAsync("startPictureStudioGifImport", dataUrl, _self, _gifImportId).ConfigureAwait(true);
+        }
+        catch
+        {
+            _gifImportId = null;
+            _notice = null;
+            throw;
+        }
+    }
+
+    /// <summary>Accepts the expected frame count and canvas dimensions for a GIF import.</summary>
+    [JSInvokable]
+    public bool BeginGifImport(string importId, int frameCount, int width, int height)
+    {
+        if (_gifImportId != importId || frameCount is < 1 or > 500 ||
+            width is < 1 or > 8192 || height is < 1 or > 8192 ||
+            (long)frameCount * width * height > 300_000_000) return false;
+        _gifImportCount = frameCount;
+        _gifImportWidth = width;
+        _gifImportHeight = height;
+        return true;
+    }
+
+    /// <summary>Receives the next ordered bounded PNG chunk belonging to one decoded GIF frame.</summary>
+    [JSInvokable]
+    public bool AppendGifFrameChunk(string importId, int frameIndex, int chunkIndex,
+        int chunkCount, int delayMs, string chunk)
+    {
+        if (_gifImportId != importId || frameIndex != _gifImportedFrames.Count ||
+            chunkCount < 1 || chunkCount > 20000 || chunkIndex < 0 || chunkIndex >= chunkCount ||
+            chunk.Length > 24 * 1024 || _gifImportCharacterCount + chunk.Length > 170_000_000) return false;
+        if (chunkIndex == 0)
+        {
+            _gifFrameBuffer = new StringBuilder();
+            _gifFrameExpectedChunks = chunkCount;
+            _gifFrameNextChunk = 0;
+            _gifFrameDelayMs = delayMs;
+        }
+        if (_gifFrameBuffer is null || chunkCount != _gifFrameExpectedChunks ||
+            chunkIndex != _gifFrameNextChunk) return false;
+        _gifFrameBuffer.Append(chunk);
+        _gifImportCharacterCount += chunk.Length;
+        _gifFrameNextChunk++;
+        if (_gifFrameNextChunk == _gifFrameExpectedChunks)
+        {
+            var dataUrl = _gifFrameBuffer.ToString();
+            if (!dataUrl.StartsWith("data:image/png;base64,", StringComparison.OrdinalIgnoreCase)) return false;
+            _gifImportedFrames.Add((dataUrl, _gifFrameDelayMs));
+            _gifFrameBuffer = null;
+        }
+        return true;
+    }
+
+    /// <summary>Commits fully decoded GIF frames as editable timed layers in one state change.</summary>
+    [JSInvokable]
+    public async Task<bool> CompleteGifImport(string importId)
+    {
+        if (_gifImportId != importId || _gifImportedFrames.Count != _gifImportCount ||
+            _gifFrameBuffer is not null) return false;
+        try
+        {
+            State.ImportGifFrames(_gifImportedFrames, _gifImportName, _gifImportWidth, _gifImportHeight,
+                _gifImportStartsDocument, _gifImportReplaceLayerId);
+            _notice = $"{LT("Imported GIF frames")}: {_gifImportedFrames.Count}";
+            _error = null;
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+            Logger.LogError(ex, "GIF frame import failed.");
+            return false;
+        }
+        finally
+        {
+            _gifImportId = null;
+            _gifImportedFrames.Clear();
+            await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+        }
+    }
+
+    /// <summary>Reports a GIF decode/transfer failure rather than silently converting it to a still.</summary>
+    [JSInvokable]
+    public async Task FailGifImport(string importId, string error)
+    {
+        if (_gifImportId != importId) return;
+        _gifImportId = null;
+        _gifImportedFrames.Clear();
+        _gifFrameBuffer = null;
+        _notice = null;
+        _error = $"{LT("Animated GIF import failed")}: {error}";
+        await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+    }
+
+    private void PreviousGifFrame() => State.SetActiveAnimationFrame(
+        Math.Max(0, State.Document.ActiveAnimationFrame - 1));
+
+    private void NextGifFrame() => State.SetActiveAnimationFrame(
+        Math.Min(State.Document.AnimationFrameDelaysMs.Count - 1, State.Document.ActiveAnimationFrame + 1));
+
+    private async Task DownloadGif()
+    {
+        if (_module is null) return;
+        try
+        {
+            await _module.InvokeVoidAsync("downloadPictureStudioGif", State.CloneDocument(),
+                $"{Files.SafeFileName(State.Document.Name)}.gif").ConfigureAwait(true);
+        }
+        catch (Exception ex) { _error = ex.Message; }
+    }
+
     /// <summary>Renders the current picture for the Mainframe and optionally preserves the editable Picture Studio document.</summary>
     /// <param name="preserveLayers">Value indicating whether preserve layers should apply to this operation.</param>
     /// <returns>A task that completes when the operation has finished.</returns>
@@ -1767,7 +1914,7 @@ public partial class PictureEditor
                 await _module.InvokeVoidAsync(
                     "startPictureStudioDataUrlExport",
                     sourceDocument,
-                    "image/png",
+                    sourceDocument.AnimationFrameDelaysMs.Count > 0 ? "image/gif" : "image/png",
                     1d,
                     _self,
                     exportId).ConfigureAwait(true);

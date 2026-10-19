@@ -69,6 +69,16 @@ if ($RequirePdf -and [string]::IsNullOrWhiteSpace($PackagingTool)) {
 if (-not [string]::IsNullOrWhiteSpace($PackagingTool)) {
     $PackagingTool = [IO.Path]::GetFullPath($PackagingTool)
     if (-not (Test-Path -LiteralPath $PackagingTool -PathType Leaf)) { throw "Release-packaging tool was not found: $PackagingTool" }
+    if ($RequirePdf) {
+        $packagingCapabilities = if ([IO.Path]::GetExtension($PackagingTool) -eq '.dll') {
+            @(& dotnet $PackagingTool capabilities 2>$null)
+        }
+        else { @(& $PackagingTool capabilities 2>$null) }
+        $packagingCapabilitiesExitCode = [int]$LASTEXITCODE
+        if ($packagingCapabilitiesExitCode -ne 0 -or $packagingCapabilities -cnotcontains 'pdf-merge-input-list') {
+            throw "Documentation PDF requires LocalGPT.ReleasePackaging with --input-list support (exit=$packagingCapabilitiesExitCode): $PackagingTool. Restore the matching verified release package before building."
+        }
+    }
 }
 
 Write-Host "PublisherStudio documentation input: repository=$RepositoryRoot; assembly=$AssemblyPath; xml=$XmlDocumentationPath; version=$Version"
@@ -1028,6 +1038,8 @@ function ConvertTo-PublisherStudioFileUri {
 }
 
 function Find-PublisherStudioDocumentationBrowser {
+    param([string]$ExcludePath = '')
+
     $candidates = [System.Collections.Generic.List[object]]::new()
     if (-not [string]::IsNullOrWhiteSpace($env:PUBLISHERSTUDIO_DOCUMENTATION_BROWSER)) {
         $candidates.Add([pscustomobject]@{ Path = $env:PUBLISHERSTUDIO_DOCUMENTATION_BROWSER; Name = "configured-browser" })
@@ -1081,6 +1093,7 @@ function Find-PublisherStudioDocumentationBrowser {
         try { $fullPath = [IO.Path]::GetFullPath([string]$candidate.Path) }
         catch { continue }
         if (-not $visited.Add($fullPath)) { continue }
+        if (-not [string]::IsNullOrWhiteSpace($ExcludePath) -and [string]::Equals($fullPath, $ExcludePath, [StringComparison]::OrdinalIgnoreCase)) { continue }
         if (Test-Path -LiteralPath $fullPath -PathType Leaf) {
             return [pscustomobject]@{ Path = $fullPath; Name = [string]$candidate.Name }
         }
@@ -1619,13 +1632,17 @@ function New-PublisherStudioHtmlPrintBook {
         [ValidateRange(0, 1000000)][int]$StartIndex = 0,
         [ValidateRange(0, 1000000)][int]$MaximumPages = 0,
         [switch]$SuppressFrontMatter,
-        [switch]$FrontMatterOnly
+        [switch]$FrontMatterOnly,
+        [switch]$SuppressPrintCover
     )
 
 
     $allPages = @(Get-PublisherStudioPrintPageFiles -SiteRoot $SiteRoot)
     if ($allPages.Count -eq 0) { throw "The DocFX site did not contain printable HTML pages." }
-    $pages = if ($FrontMatterOnly) { @($allPages) } elseif ($MaximumPages -gt 0) { @($allPages | Select-Object -Skip $StartIndex -First $MaximumPages) } else { @($allPages | Select-Object -Skip $StartIndex) }
+    # Front matter uses the same deterministic source-page ordering and bounded slices as the
+    # document body. Rendering an index for every API page in one Chromium print operation
+    # exhausted the renderer even when the main document was already chunked.
+    $pages = if ($MaximumPages -gt 0) { @($allPages | Select-Object -Skip $StartIndex -First $MaximumPages) } else { @($allPages | Select-Object -Skip $StartIndex) }
     if ($pages.Count -eq 0) { throw "The requested DocFX print-book slice did not contain any pages (start=$StartIndex; maximum=$MaximumPages; total=$($allPages.Count))." }
 
     $anchorMap = New-Object 'System.Collections.Generic.Dictionary[string,string]' ([StringComparer]::OrdinalIgnoreCase)
@@ -1896,11 +1913,13 @@ html, body { background: #fff0f8 !important; color: #51285d !important; }
     [void]$builder.AppendLine($printStyles)
     [void]$builder.AppendLine('</head><body class="publisherstudio-print-book">')
     if (-not $SuppressFrontMatter) {
+    if (-not $SuppressPrintCover) {
     [void]$builder.AppendLine('<section class="publisherstudio-print-cover">')
     [void]$builder.AppendLine("<h1>PublisherStudio $Version</h1>")
     [void]$builder.AppendLine('<p>A cozy, practical guide to creating, publishing, recording, and extending projects with PublisherStudio.</p>')
-    [void]$builder.AppendLine("<p>&#x1F43E; $($pageModels.Count) HTML reference pages · carefully arranged in 2026 · generated $([DateTime]::UtcNow.ToString('u'))</p>")
+    [void]$builder.AppendLine("<p>&#x1F43E; $($allPages.Count) HTML reference pages · carefully arranged in 2026 · generated $([DateTime]::UtcNow.ToString('u'))</p>")
     [void]$builder.AppendLine('</section>')
+    }
     [void]$builder.AppendLine('<section class="publisherstudio-print-toc"><h1>Contents</h1>')
     [void]$builder.AppendLine('<div class="publisherstudio-print-toc-section"><h2>Create, publish, and understand PublisherStudio</h2><ol class="publisherstudio-print-toc-conceptual">')
     foreach ($page in @($pageModels | Where-Object { -not $_.IsApi })) {
@@ -2102,19 +2121,43 @@ function Stop-PublisherStudioDocumentationBrowserProfileProcesses {
     catch { }
 }
 
+# The browser's native Win32 file writer does not consistently honor long-path opt-in, even
+# when PowerShell/.NET can create the directory. Fail before an 8-minute browser timeout if
+# an Edge output/profile path has no safe room for its internally generated cache filenames.
+function Assert-PublisherStudioBrowserPdfPaths {
+    param(
+        [Parameter(Mandatory)][string]$PdfPath,
+        [Parameter(Mandatory)][string]$ProfileCacheRoot
+    )
+
+    $fullPdfPath = [IO.Path]::GetFullPath($PdfPath)
+    $pdfParent = [IO.Path]::GetDirectoryName($fullPdfPath)
+    if (-not (Test-Path -LiteralPath $pdfParent -PathType Container)) {
+        throw "Browser PDF output directory does not exist: $pdfParent"
+    }
+    if ([Runtime.InteropServices.RuntimeInformation]::IsOSPlatform([Runtime.InteropServices.OSPlatform]::Windows)) {
+        # Edge may append 80+ characters under its profile cache. Its --print-to-pdf
+        # writer also fails above classic MAX_PATH despite a successful process exit.
+        if ($fullPdfPath.Length -gt 240 -or $ProfileCacheRoot.Length -gt 170) {
+            throw "Browser PDF path preflight failed on Windows (output=$($fullPdfPath.Length) chars, profile cache=$($ProfileCacheRoot.Length) chars). Move the repository/build cache to a shorter path or set FUTURE2_BUILD_STORAGE_ROOT / FUTURE2_DOCUMENTATION_CACHE_ROOT before the build. Output: $fullPdfPath"
+        }
+    }
+}
+
 function Invoke-PublisherStudioBrowserPdf {
     param(
         [Parameter(Mandatory)][string]$BrowserPath,
         [Parameter(Mandatory)][string]$HtmlPath,
         [Parameter(Mandatory)][string]$PdfPath,
         [Parameter(Mandatory)][string]$WorkingRoot,
-        [long]$MinimumBytes = 1048576
+        [long]$MinimumBytes = 1048576,
+        [string]$ContextLabel = 'documentation PDF'
     )
 
     Remove-Item -LiteralPath $PdfPath -Force -ErrorAction SilentlyContinue
     $inputUri = ConvertTo-PublisherStudioFileUri -Path $HtmlPath
     $diagnostics = [System.Collections.Generic.List[string]]::new()
-    $profileParentRoot = Join-Path $documentationToolCacheRoot 'browser-profiles'
+    $profileParentRoot = Join-Path $documentationToolCacheRoot 'bp'
     New-Item -ItemType Directory -Path $profileParentRoot -Force | Out-Null
     $lastExitCode = -1
     $renderProfiles = @(
@@ -2131,12 +2174,13 @@ function Invoke-PublisherStudioBrowserPdf {
             # Keep Chromium's volatile profile outside the print-book directory. Chromium child
             # processes can retire profile files asynchronously, which makes recursive Remove-Item
             # race with disappearing files on Windows PowerShell.
-            $profileRoot = Join-Path $profileParentRoot ("browser-profile-" + [Guid]::NewGuid().ToString('N'))
-            $profileCacheRoot = Join-Path $profileRoot 'cache'
-            $profileCrashRoot = Join-Path $profileRoot 'crash'
+            $profileRoot = Join-Path $profileParentRoot ("p" + [Guid]::NewGuid().ToString('N'))
+            $profileCacheRoot = Join-Path $profileRoot 'c'
+            $profileCrashRoot = Join-Path $profileRoot 'd'
             New-Item -ItemType Directory -Path $profileCacheRoot -Force | Out-Null
             New-Item -ItemType Directory -Path $profileCrashRoot -Force | Out-Null
             try {
+                Assert-PublisherStudioBrowserPdfPaths -PdfPath $PdfPath -ProfileCacheRoot $profileCacheRoot
                 $arguments = @(
                     $headlessMode,
                     "--disable-gpu",
@@ -2185,6 +2229,7 @@ function Invoke-PublisherStudioBrowserPdf {
                 # checks, the render is complete and the lingering browser tree can be closed immediately.
                 $pdfCompletedBeforeProcessExit = $false
                 $processDeadline = [DateTime]::UtcNow.AddMilliseconds($browserPdfTimeoutMilliseconds)
+                $nextProgressReport = [DateTime]::UtcNow.AddSeconds(5)
                 $liveLastObservedLength = -1L
                 $liveStableLengthChecks = 0
                 while (-not $process.HasExited -and [DateTime]::UtcNow -lt $processDeadline) {
@@ -2201,6 +2246,11 @@ function Invoke-PublisherStudioBrowserPdf {
                             $pdfCompletedBeforeProcessExit = $true
                             break
                         }
+                    }
+                    if ([DateTime]::UtcNow -ge $nextProgressReport) {
+                        $observedBytes = if ($null -ne $livePdfFile) { [long]$livePdfFile.Length } else { 0L }
+                        Write-Host ("Printing {0}: active ({1}, {2}); PDF={3:n0} bytes, elapsed={4:n0}s." -f $ContextLabel,$renderProfile.Name,$headlessMode,$observedBytes,($browserPdfTimeoutMilliseconds / 1000.0 - ($processDeadline - [DateTime]::UtcNow).TotalSeconds)) -ForegroundColor DarkCyan
+                        $nextProgressReport = [DateTime]::UtcNow.AddSeconds(5)
                     }
                     Start-Sleep -Milliseconds 500
                 }
@@ -2222,8 +2272,18 @@ function Invoke-PublisherStudioBrowserPdf {
                 }
                 Stop-PublisherStudioDocumentationBrowserProfileProcesses -ProfileRoot $profileRoot
                 $output = @()
-                try { $output += @(([string]$stdoutTask.Result -split "`r?`n") | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }) } catch { }
-                try { $output += @(([string]$stderrTask.Result -split "`r?`n") | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }) } catch { }
+                # Browser child processes may retain pipe handles after a forced termination.
+                # Preserve diagnostics, but never block the build indefinitely draining them.
+                try {
+                    if ($stdoutTask.Wait(3000)) { $output += @(([string]$stdoutTask.Result -split "`r?`n") | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }) }
+                    else { $diagnostics.Add('Browser stdout stream was still open after process termination.') }
+                }
+                catch { $diagnostics.Add("Browser stdout collection failed: $($_.Exception.Message)") }
+                try {
+                    if ($stderrTask.Wait(3000)) { $output += @(([string]$stderrTask.Result -split "`r?`n") | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }) }
+                    else { $diagnostics.Add('Browser stderr stream was still open after process termination.') }
+                }
+                catch { $diagnostics.Add("Browser stderr collection failed: $($_.Exception.Message)") }
                 $process.Dispose()
                 foreach ($line in $output) {
                     $safeLine = [regex]::Replace([string]$line, '(?i)\berror\s*:', 'diagnostic:')
@@ -2302,7 +2362,7 @@ function Invoke-PublisherStudioBrowserPdfWithRetry {
             }
             Start-Sleep -Milliseconds 500
         }
-        $lastResult = Invoke-PublisherStudioBrowserPdf -BrowserPath $BrowserPath -HtmlPath $HtmlPath -PdfPath $PdfPath -WorkingRoot $WorkingRoot -MinimumBytes $MinimumBytes
+        $lastResult = Invoke-PublisherStudioBrowserPdf -BrowserPath $BrowserPath -HtmlPath $HtmlPath -PdfPath $PdfPath -WorkingRoot $WorkingRoot -MinimumBytes $MinimumBytes -ContextLabel $ContextLabel
         foreach ($line in @($lastResult.Diagnostics)) { $combinedDiagnostics.Add("attempt $renderAttempt/${maximumAttempts}: $line") }
         if ($lastResult.Succeeded) {
             return [pscustomobject]@{ Succeeded = $true; ExitCode = [int]$lastResult.ExitCode; Diagnostics = @($combinedDiagnostics); HeadlessMode = [string]$lastResult.HeadlessMode; RenderMode = [string]$lastResult.RenderMode; AccessibilityMode = [string]$lastResult.AccessibilityMode; AttemptCount = $renderAttempt }
@@ -2323,25 +2383,28 @@ function Invoke-PublisherStudioChunkedBrowserPdf {
         [Parameter(Mandatory)][int]$TotalPageCount,
         [Parameter(Mandatory)][int]$ChunkPages,
         [Parameter(Mandatory)][string]$ChunkCacheRoot,
-        [long]$MinimumBytes = 1048576
+        [long]$MinimumBytes = 1048576,
+        [switch]$ForceRebuild
     )
 
     $diagnostics = [System.Collections.Generic.List[string]]::new()
     $chunkRoot = Join-Path $WorkingRoot 'browser-chunks'
     Remove-PublisherStudioTemporaryPath -Path $chunkRoot
     New-Item -ItemType Directory -Path $chunkRoot -Force | Out-Null
-    $durableChunkRoot = Join-Path $ChunkCacheRoot ("pages-{0}-total-{1}" -f $ChunkPages,$TotalPageCount)
+    $durableChunkRoot = Join-Path $ChunkCacheRoot ("v2-p{0}-n{1}" -f $ChunkPages,$TotalPageCount)
     New-Item -ItemType Directory -Path $durableChunkRoot -Force | Out-Null
     $chunkPdfs = [System.Collections.Generic.List[string]]::new()
     $renderedChunks = 0
     $reusedChunks = 0
+    $totalPdfParts = 1 + [int][Math]::Ceiling($TotalPageCount / [double]$ChunkPages)
+    Write-Host ("Documentation PDF rendering queue: 0/{0} validated part(s); source pages={1}, page batch={2}." -f $totalPdfParts,$TotalPageCount,$ChunkPages) -ForegroundColor DarkCyan
     try {
         # Keep browser output durable by documentation hash. A release interrupted after hours of
         # printing can therefore resume at the first missing chunk instead of re-rendering page 1.
         $frontMatterHtml = Join-Path $chunkRoot 'front-matter.html'
         $frontMatterPdf = Join-Path $durableChunkRoot 'front-matter.pdf'
         $indexedPages = New-PublisherStudioHtmlPrintBook -SiteRoot $SiteRoot -DestinationPath $frontMatterHtml -FrontMatterOnly
-        if (Test-PublisherStudioCompletePdf -Path $frontMatterPdf -MinimumBytes 65536) {
+        if (-not $ForceRebuild -and (Test-PublisherStudioCompletePdf -Path $frontMatterPdf -MinimumBytes 65536)) {
             $reusedChunks++
             Write-Host "Reusing durable documentation PDF cover/index for $indexedPages source pages." -ForegroundColor DarkGreen
         }
@@ -2359,6 +2422,7 @@ function Invoke-PublisherStudioChunkedBrowserPdf {
             Write-Host ("Completed PDF cover/index in {0:n1}s ({1:n0} bytes)." -f $timer.Elapsed.TotalSeconds,(Get-Item -LiteralPath $frontMatterPdf).Length) -ForegroundColor DarkGreen
         }
         $chunkPdfs.Add($frontMatterPdf)
+        Write-Host ("Documentation PDF rendering progress: {0}/{1} validated part(s) (cover/index)." -f $chunkPdfs.Count,$totalPdfParts) -ForegroundColor DarkGreen
         Remove-Item -LiteralPath $frontMatterHtml -Force -ErrorAction SilentlyContinue
         if ($documentationLowMemoryMode) {
             [GC]::Collect(2, [GCCollectionMode]::Optimized, $true, $true)
@@ -2371,7 +2435,7 @@ function Invoke-PublisherStudioChunkedBrowserPdf {
             $htmlPath = Join-Path $chunkRoot ("chunk-{0:D3}.html" -f $chunkNumber)
             $chunkPdf = Join-Path $durableChunkRoot ("chunk-{0:D3}.pdf" -f $chunkNumber)
             $writtenPages = New-PublisherStudioHtmlPrintBook -SiteRoot $SiteRoot -DestinationPath $htmlPath -StartIndex $start -MaximumPages $ChunkPages -SuppressFrontMatter
-            if (Test-PublisherStudioCompletePdf -Path $chunkPdf -MinimumBytes 65536) {
+            if (-not $ForceRebuild -and (Test-PublisherStudioCompletePdf -Path $chunkPdf -MinimumBytes 65536)) {
                 $reusedChunks++
                 Write-Host "Reusing durable documentation PDF chunk $chunkNumber ($writtenPages source pages; start $start of $TotalPageCount)." -ForegroundColor DarkGreen
             }
@@ -2389,6 +2453,7 @@ function Invoke-PublisherStudioChunkedBrowserPdf {
                 Write-Host ("Completed documentation PDF chunk {0} in {1:n1}s ({2:n0} bytes)." -f $chunkNumber,$timer.Elapsed.TotalSeconds,(Get-Item -LiteralPath $chunkPdf).Length) -ForegroundColor DarkGreen
             }
             $chunkPdfs.Add($chunkPdf)
+            Write-Host ("Documentation PDF rendering progress: {0}/{1} validated part(s) ({2}/{3} source-page batch(es))." -f $chunkPdfs.Count,$totalPdfParts,$chunkNumber,($totalPdfParts - 1)) -ForegroundColor DarkGreen
             Remove-Item -LiteralPath $htmlPath -Force -ErrorAction SilentlyContinue
             if ($documentationLowMemoryMode) {
                 [GC]::Collect(2, [GCCollectionMode]::Optimized, $true, $true)
@@ -2397,12 +2462,30 @@ function Invoke-PublisherStudioChunkedBrowserPdf {
         }
 
         Remove-Item -LiteralPath $PdfPath -Force -ErrorAction SilentlyContinue
-        $mergeArguments = [System.Collections.Generic.List[string]]::new()
-        $mergeArguments.Add('pdf-merge'); $mergeArguments.Add('--output'); $mergeArguments.Add($PdfPath)
-        foreach ($chunkPdf in $chunkPdfs) { $mergeArguments.Add('--input'); $mergeArguments.Add($chunkPdf) }
+        # Use a short UTF-8 manifest argument: passing hundreds of absolute PDF paths to
+        # Windows PowerShell's native-process launcher can exceed the Windows command-line limit.
+        # The ordered durable chunk paths stay in the repository-owned working directory.
+        $mergeInputListPath = Join-Path $chunkRoot 'pdf-merge-inputs.txt'
+        [IO.File]::WriteAllLines($mergeInputListPath, [string[]]$chunkPdfs.ToArray(), [Text.UTF8Encoding]::new($false))
+        $mergeArguments = @('pdf-merge', '--output', $PdfPath, '--input-list', $mergeInputListPath)
         Write-Host "Merging $($chunkPdfs.Count) durable PDF part(s) with LocalGPT.ReleasePackaging ($reusedChunks reused, $renderedChunks rendered this run)..." -ForegroundColor DarkCyan
-        $mergeOutput = if ([IO.Path]::GetExtension($PackagingTool) -eq '.dll') { @(& dotnet $PackagingTool @($mergeArguments) 2>&1) } else { @(& $PackagingTool @($mergeArguments) 2>&1) }
-        $mergeExitCode = [int]$LASTEXITCODE
+        $mergeExitCode = -1
+        $previousErrorActionPreference = $ErrorActionPreference
+        try {
+            # Windows PowerShell 5.1 represents redirected native stderr as ErrorRecord objects.
+            # Diagnostics alone must not interrupt a successful helper before LASTEXITCODE is read.
+            $ErrorActionPreference = 'Continue'
+            $mergeOutput = if ([IO.Path]::GetExtension($PackagingTool) -eq '.dll') {
+                @(& dotnet $PackagingTool @mergeArguments 2>&1)
+            }
+            else { @(& $PackagingTool @mergeArguments 2>&1) }
+            $mergeExitCode = [int]$LASTEXITCODE
+        }
+        catch {
+            $diagnostics.Add("Managed PDF merge invocation failed: $($_.Exception.Message). Durable chunks were retained for the next attempt.")
+            return [pscustomobject]@{ Succeeded = $false; ExitCode = $mergeExitCode; Diagnostics = @($diagnostics); RenderMode = ''; AccessibilityMode = 'unavailable'; ChunkCount = $chunkPdfs.Count; RenderedChunkCount = $renderedChunks; ReusedChunkCount = $reusedChunks }
+        }
+        finally { $ErrorActionPreference = $previousErrorActionPreference }
         foreach ($line in $mergeOutput) { if (-not [string]::IsNullOrWhiteSpace([string]$line)) { $diagnostics.Add([string]$line) } }
         if ($mergeExitCode -ne 0 -or -not (Test-PublisherStudioCompletePdf -Path $PdfPath -MinimumBytes $MinimumBytes)) {
             $diagnostics.Add("Managed PDF merge failed or produced an incomplete PDF (exit=$mergeExitCode). Durable chunks were retained for the next attempt.")
@@ -3235,10 +3318,16 @@ Use the grouped API navigation to browse namespaces, types, properties, methods,
             $browserResult = $null
             try {
                 $browser = Find-PublisherStudioDocumentationBrowser
+                $initialBrowserPath = if ($null -ne $browser) { [string]$browser.Path } else { '' }
                 if ($null -ne $browser) {
                     if ($requiresChunkedBrowserPdf) {
                         Write-Host "Printing $pdfSourcePageCount DocFX HTML pages in adaptive chunks of up to $browserPdfChunkPages pages with $($browser.Name); LocalGPT.ReleasePackaging will merge the chunks without a commercial PDF dependency." -ForegroundColor Cyan
-                        $browserChunkCacheRoot = Join-Path $documentationCacheEntryRoot 'browser-pdf-chunks'
+                        # Keep content-addressed browser PDF chunks under the repository documentation
+                        # storage, not beneath DocFX's already deep HTML payload cache. Chromium's
+                        # native Windows PDF writer cannot reliably create files beyond MAX_PATH.
+                        # The full documentation key preserves durable resume and cache isolation.
+                        $browserChunkCacheRoot = Join-Path (Join-Path $buildStorage.Documentation 'PublisherStudio/p') $documentationCacheKey
+                        Write-Host "Durable PublisherStudio PDF chunk cache: $browserChunkCacheRoot" -ForegroundColor DarkCyan
                         $browserResult = Invoke-PublisherStudioChunkedBrowserPdf -BrowserPath $browser.Path -SiteRoot $siteRoot -PdfPath $pdfPath -WorkingRoot $printBookRoot -PackagingTool $PackagingTool -TotalPageCount $pdfSourcePageCount -ChunkPages $browserPdfChunkPages -ChunkCacheRoot $browserChunkCacheRoot -MinimumBytes $minimumCompletePdfBytes
                         $pdfCandidateCount = if (Test-Path -LiteralPath $pdfPath -PathType Leaf) { 1 } else { 0 }
                         if ($browserResult.Succeeded) {

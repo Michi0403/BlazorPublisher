@@ -1,0 +1,7 @@
+# PublisherStudio 4.2.6 source validation
+
+The supplied 4.2.5 Windows log confirms application compilation, localization, DevExpress retention, service architecture, JavaScript diagnostics, XML documentation coverage, and DocFX HTML preflight succeeded; it confirms that cover/index part 1/16 did **not** complete. Those checks are not rerun here without a Windows PowerShell/.NET environment.
+
+Offline inspection covers: preserved authoritative LocalGPT.ReleasePackaging NuGet-tool ownership (v1.1.2), matching embedded package identity logic, bounded one-page browser proof, no 180-second virtual-time budget on static HTML, bounded redirected stdout/stderr collection after forced process shutdown, optional alternate-browser preflight with explicit user override honored, cover-index/body chunk paths and strict final-PDF verification unchanged. Change detection excludes the unchanged 4.2.5 history and includes the 4.2.6 changelog/version references.
+
+To validate on Windows: run the normal Debug build. It must print `Checking the installed browser's headless PDF printer` and `Documentation browser PDF preflight passed` before index rendering. A failed preflight must include its executable and browser diagnostics within a bounded time. If a browser renders the first 48-entry index, the build must proceed through all 16 index parts, all body chunks and `LocalGPT.ReleasePackaging` PDF merge; the current-version help-docs PDF must be present. None of those latter outcomes can be asserted from this environment.

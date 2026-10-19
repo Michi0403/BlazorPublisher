@@ -62,6 +62,12 @@ public sealed class PictureDocument
     /// </summary>
     /// <value>The layers value exposed by <see cref="PictureDocument"/>.</value>
     public List<PictureLayer> Layers { get; set; } = [];
+    /// <summary>Per-frame GIF delays in milliseconds. An empty list denotes an ordinary still picture.</summary>
+    public List<int> AnimationFrameDelaysMs { get; set; } = [];
+    /// <summary>Index of the GIF frame currently displayed and edited.</summary>
+    public int ActiveAnimationFrame { get; set; }
+    /// <summary>Number of GIF animation repetitions (zero means indefinitely).</summary>
+    public int AnimationLoopCount { get; set; }
 
 
 
@@ -135,6 +141,8 @@ public abstract class PictureLayer
     /// </summary>
     /// <value>The kind value exposed by <see cref="PictureLayer"/>.</value>
     public abstract PictureLayerKind Kind { get; }
+    /// <summary>Owning animation frame, or -1 for a layer visible in every GIF frame.</summary>
+    public int AnimationFrameIndex { get; set; } = -1;
     /// <summary>
     /// Gets or sets the x value that forms part of the picture layer state consumed or produced by the surrounding workflow.
     /// </summary>

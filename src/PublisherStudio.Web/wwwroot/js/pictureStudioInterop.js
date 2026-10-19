@@ -1,4 +1,5 @@
 // javascript-diagnostics: guarded
+import { decodeGifFrames, encodeGifFrames } from "./animatedGifInterop.js";
 var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics || {
     report(context, error) { try { console.error(`PublisherStudio JavaScript error in ${String(context || "browser-runtime")}.`, error); } catch (reportError) { console.error("PublisherStudio fallback JavaScript diagnostics failed.", reportError); } },
     guard(context, callback) { try { return callback; } catch (error) { console.error(`PublisherStudio fallback guard failed in ${String(context || "browser-runtime")}.`, error); return callback; } },
@@ -1611,6 +1612,8 @@ async function drawDocument(canvas, document, options = {}) { try {
     drawBackground(ctx, document, options.forceOpaque === true);
     const errors = [];
     for (const layer of document.layers) {
+        if (Number.isInteger(layer.animationFrameIndex) && layer.animationFrameIndex >= 0 &&
+            layer.animationFrameIndex !== (document.activeAnimationFrame || 0)) continue;
         const error = await drawLayer(ctx, layer);
         if (error) errors.push(error);
     }
@@ -2381,6 +2384,83 @@ async function createPictureStudioBlob(documentModel, mimeType = "image/png", qu
 
 const pictureExportChunkSize = 24 * 1024;
 
+// Keep every animated frame as an independently editable raster layer. The
+// Blazor transfer uses bounded chunks rather than returning giant image strings
+// through one SignalR message.
+export function startPictureStudioGifImport(dataUrl, dotNetReference, importId) {
+    void (async () => {
+        try {
+            let count = 0;
+            await decodeGifFrames(dataUrl, async frame => {
+                if (frame.index === 0) {
+                    count = frame.count;
+                    if (!await dotNetReference.invokeMethodAsync('BeginGifImport', importId, frame.count, frame.width, frame.height))
+                        throw new Error('The application rejected the GIF frame import.');
+                }
+                const chunkCount = Math.ceil(frame.dataUrl.length / pictureExportChunkSize);
+                for (let part = 0; part < chunkCount; part++) {
+                    const chunk = frame.dataUrl.slice(part * pictureExportChunkSize, (part + 1) * pictureExportChunkSize);
+                    if (!await dotNetReference.invokeMethodAsync('AppendGifFrameChunk', importId,
+                            frame.index, part, chunkCount, frame.delayMs, chunk))
+                        throw new Error(`The GIF frame ${frame.index + 1} could not be transferred.`);
+                }
+            });
+            if (count && !await dotNetReference.invokeMethodAsync('CompleteGifImport', importId))
+                throw new Error('The GIF import could not be completed.');
+        } catch (error) {
+            try { await dotNetReference.invokeMethodAsync('FailGifImport', importId, error?.message || String(error)); }
+            catch (disconnected) { publisherStudioDiagnostics.report('GIF import circuit disconnected', disconnected); }
+        }
+    })();
+}
+
+async function pictureGifBlob(documentModel) { try {
+    const source = normalizeDocument(documentModel);
+    const delays = Array.isArray(source.animationFrameDelaysMs) ? source.animationFrameDelaysMs : [];
+    const count = delays.length > 0 ? delays.length : 1;
+    if (count > 500) throw new Error('GIF export is limited to 500 frames.');
+    if (source.widthPx * source.heightPx * count > 300000000)
+        throw new Error('GIF export exceeds the safe decoded pixel budget. Reduce frame count or canvas size.');
+    const frames = [];
+    for (let frameIndex = 0; frameIndex < count; frameIndex++) {
+        const frameDocument = { ...source, activeAnimationFrame: frameIndex };
+        const canvas = await renderExportCanvas(frameDocument, 'image/png');
+        const rgba = canvas.getContext('2d', { willReadFrequently: true })
+            .getImageData(0, 0, canvas.width, canvas.height).data;
+        frames.push({ rgba, delayMs: delays[frameIndex] || 100 });
+    }
+    return encodeGifFrames(frames, source.widthPx, source.heightPx,
+        Number.isInteger(source.animationLoopCount) ? source.animationLoopCount : 0);
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:pictureGifBlob', __javascriptError); throw __javascriptError; }
+}
+
+async function pictureGifDataUrl(documentModel) { try {
+    const blob = await pictureGifBlob(documentModel);
+    return await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(reader.error || new Error('GIF bytes could not be encoded for Apply.'));
+        reader.readAsDataURL(blob);
+    });
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:pictureGifDataUrl', __javascriptError); throw __javascriptError; }
+}
+
+export async function downloadPictureStudioGif(documentModel, fileName) { try {
+    const blob = await pictureGifBlob(documentModel);
+    const url = URL.createObjectURL(blob);
+    try {
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = fileName;
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+    } finally { setTimeout(() => URL.revokeObjectURL(url), 2000); }
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:downloadPictureStudioGif', __javascriptError); throw __javascriptError; }
+}
+
+
+
 export function startPictureStudioDataUrlExport(
     documentModel,
     mimeType = "image/png",
@@ -2404,8 +2484,9 @@ async function exportPictureStudioDataUrlInChunks(
     dotNetReference,
     exportId) { try {
     try {
-        const canvas = await renderExportCanvas(documentModel, mimeType);
-        const dataUrl = canvas.toDataURL(mimeType, quality);
+        const dataUrl = mimeType === 'image/gif'
+            ? await pictureGifDataUrl(documentModel)
+            : (await renderExportCanvas(documentModel, mimeType)).toDataURL(mimeType, quality);
         if (!dataUrl || dataUrl === "data:," || !dataUrl.startsWith("data:image/"))
             throw new Error("The browser could not rasterize the picture.");
 

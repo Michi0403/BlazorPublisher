@@ -1,4 +1,5 @@
 // javascript-diagnostics: guarded
+import { encodeGifFrames } from "./animatedGifInterop.js";
 var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics || {
     report(context, error) { try { console.error(`PublisherStudio JavaScript error in ${String(context || "browser-runtime")}.`, error); } catch (reportError) { console.error("PublisherStudio fallback JavaScript diagnostics failed.", reportError); } },
     guard(context, callback) { try { return callback; } catch (error) { console.error(`PublisherStudio fallback guard failed in ${String(context || "browser-runtime")}.`, error); return callback; } },
@@ -2873,6 +2874,93 @@ export async function exportSelectedTimelineRanges(id, clips, recordingOptions, 
         if (state.renderExport === job) state.renderExport = null;
     }
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:exportSelectedTimelineRanges', __javascriptError); throw __javascriptError; }}
+
+// GIF exports sample the same Video Studio effect canvas as rendered video exports.
+// GIF has no audio stream, so only the composited image frames are downloaded.
+async function runRenderedGifExport(state, id, dotnet, effectConfig, rawOptions,
+    startSeconds, endSeconds, playbackRate, sourceName, job) { try {
+    const source = mediaElement(id);
+    if (!(source instanceof HTMLVideoElement) || !(source.currentSrc || source.src))
+        throw new Error('An active browser-readable Video Studio source is required.');
+    if (!window.publisherVideoEffects?.install)
+        throw new Error('The Video Studio effect renderer is not available.');
+    const options = normalizedRecordingOptions(rawOptions);
+    const video = document.createElement('video');
+    const canvas = document.createElement('canvas');
+    const key = `media-studio-gif-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    video.preload = 'auto'; video.playsInline = true; video.muted = true;
+    video.src = source.currentSrc || source.src;
+    video.style.cssText = 'position:fixed;left:-100000px;top:-100000px;width:2px;height:2px;opacity:0;pointer-events:none';
+    canvas.style.cssText = video.style.cssText;
+    document.body.append(video, canvas);
+    job.video = video; job.canvas = canvas; job.runtimeKey = key;
+    try {
+        await waitForMetadata(video);
+        if (job.cancelled) return;
+        const duration = Math.max(.01, Number(video.duration) || 0);
+        const start = Math.max(0, Math.min(duration, Number(startSeconds) || 0));
+        const end = Math.max(start + .001, Math.min(duration,
+            Number(endSeconds) > start ? Number(endSeconds) : duration));
+        const playback = Math.max(.1, Number(playbackRate) || 1);
+        const fps = Math.max(1, Math.min(30, options.frameRate > 0 ? options.frameRate : 12));
+        const frameCount = Math.max(1, Math.ceil((end - start) / playback * fps));
+        const width = options.width > 0 ? options.width : Math.max(2, Number(video.videoWidth) || 2);
+        const height = options.height > 0 ? options.height : Math.max(2, Number(video.videoHeight) || 2);
+        if (frameCount > 500 || width * height * frameCount > 60000000)
+            throw new Error('The selected GIF is too large. Select a shorter range, lower FPS, or a smaller output canvas.');
+        canvas.width = width; canvas.height = height;
+        window.publisherVideoEffects.install(key, video, canvas, {
+            ...(effectConfig || {}), outputWidth: width, outputHeight: height,
+            maximumPixels: 0, forceCanvas: true
+        });
+        const frames = [];
+        for (let index = 0; index < frameCount; index++) {
+            if (job.cancelled) return;
+            const position = Math.min(end, start + (index / fps) * playback);
+            await seekVideoForTimelineExport(video, position, 'GIF export seek');
+            await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+            if (job.cancelled) return;
+            const rgba = canvas.getContext('2d', { willReadFrequently: true })
+                .getImageData(0, 0, width, height).data;
+            frames.push({ rgba, delayMs: 1000 / fps });
+        }
+        if (job.cancelled) return;
+        const blob = encodeGifFrames(frames, width, height);
+        const fileName = `${String(sourceName || 'video').replace(/\.[^./\\]+$/, '') || 'video'}-rendered.gif`;
+        downloadBlob(blob, fileName);
+        await dotnet?.invokeMethodAsync('RenderedVideoExportReady', fileName,
+            'image/gif', blob.size, width, height, (end - start) / playback);
+    } finally {
+        try { video.pause(); } catch (_) { /* The video may already be disposed. */ }
+        window.publisherVideoEffects?.dispose(key);
+        video.removeAttribute('src');
+        video.load();
+        video.remove(); canvas.remove();
+        if (state.renderExport === job) state.renderExport = null;
+    }
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:runRenderedGifExport', __javascriptError); throw __javascriptError; }
+}
+
+export function startRenderedGifExport(id, dotnet, effectConfig, recordingOptions,
+    startSeconds, endSeconds, playbackRate, sourceName) { try {
+    const state = stateFor(id);
+    if (state.renderExport) return false;
+    if (dotnet) state.dotnet = dotnet;
+    const job = { cancelled: false, recorder: null, video: null, canvas: null,
+        runtimeKey: '', frame: 0, resolvePlayback: null };
+    state.renderExport = job;
+    void runRenderedGifExport(state, id, state.dotnet, effectConfig, recordingOptions,
+        startSeconds, endSeconds, playbackRate, sourceName, job)
+        .catch(async error => {
+            if (!job.cancelled) {
+                try { await state.dotnet?.invokeMethodAsync('RenderedVideoExportFailed', error?.message || String(error)); }
+                catch (callbackError) { publisherStudioDiagnostics.report('Video Studio GIF failure callback', callbackError); }
+            }
+            if (state.renderExport === job) state.renderExport = null;
+        });
+    return true;
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/mediaStudioInterop.js:startRenderedGifExport', __javascriptError); throw __javascriptError; }
+}
 
 export function startRenderedVideoExport(id, dotnet, effectConfig, recordingOptions, startSeconds, endSeconds, playbackRate, audioGain, sourceName) { try {
     const state = stateFor(id);

@@ -318,6 +318,9 @@ public sealed class PictureEditorStateService
     {
             if (id is not null && Document.Layers.All(layer => layer.Id != id)) return;
             SelectedLayerId = id;
+            var animationFrameIndex = SelectedLayer?.AnimationFrameIndex ?? -1;
+            if (animationFrameIndex >= 0 && animationFrameIndex < Document.AnimationFrameDelaysMs.Count)
+                Document.ActiveAnimationFrame = animationFrameIndex;
             EndLiveEdit();
             Notify(false);
     
@@ -328,6 +331,83 @@ public sealed class PictureEditorStateService
         throw;
     }
 }
+
+    /// <summary>Imports full-sized GIF frames as independently editable, timed raster layers.</summary>
+    /// <param name="frames">Decoded PNG frame data and individual frame delays.</param>
+    /// <param name="name">Name of the source GIF.</param>
+    /// <param name="width">Original frame width.</param>
+    /// <param name="height">Original frame height.</param>
+    /// <param name="startNew">Whether this GIF initializes the whole Picture Studio document.</param>
+    /// <param name="replaceLayerId">Optional raster layer replaced by the GIF.</param>
+    public void ImportGifFrames(IReadOnlyList<(string DataUrl, int DelayMs)> frames, string name,
+        int width, int height, bool startNew = false, Guid? replaceLayerId = null)
+    {
+        try
+        {
+            ArgumentNullException.ThrowIfNull(frames);
+            if (frames.Count is < 1 or > 500 || width is < 1 or > 8192 || height is < 1 or > 8192 ||
+                (long)width * height * frames.Count > 100_000_000)
+                throw new InvalidDataException("The animated GIF exceeds the supported frame or pixel budget.");
+            if (frames.Any(frame => string.IsNullOrWhiteSpace(frame.DataUrl) ||
+                !frame.DataUrl.StartsWith("data:image/png;base64,", StringComparison.OrdinalIgnoreCase)))
+                throw new InvalidDataException("An animated GIF frame does not contain decoded PNG data.");
+
+            // Work on a detached canonical document; a failed import never corrupts the open picture.
+            var staged = startNew
+                ? _documentFactory.CreatePicture(width, height, true)
+                : _documents.Clone(Document);
+            if (startNew) staged.Name = name;
+            if (!startNew && replaceLayerId is Guid id)
+                staged.Layers.RemoveAll(layer => layer.Id == id);
+            staged.Layers.RemoveAll(layer => layer.AnimationFrameIndex >= 0);
+            staged.AnimationFrameDelaysMs = frames.Select(frame => Math.Clamp(frame.DelayMs, 20, 655350)).ToList();
+            staged.ActiveAnimationFrame = 0;
+            staged.AnimationLoopCount = 0;
+            Guid? firstLayerId = null;
+            for (var index = 0; index < frames.Count; index++)
+            {
+                var layer = _documents.AddRasterLayer(staged, frames[index].DataUrl,
+                    $"GIF frame {index + 1:000}", width, height, width / 2d, height / 2d);
+                layer.Name = $"GIF frame {index + 1:000} ({staged.AnimationFrameDelaysMs[index]} ms)";
+                layer.GroupPath = "GIF frames";
+                layer.X = 0;
+                layer.Y = 0;
+                layer.Width = staged.WidthPx;
+                layer.Height = staged.HeightPx;
+                layer.AnimationFrameIndex = index;
+                firstLayerId ??= layer.Id;
+            }
+
+            if (startNew) ResetHistory();
+            else Capture();
+            Document = staged;
+            SelectedLayerId = firstLayerId;
+            Notify();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Trace.TraceError($"Service method PictureEditorStateService.ImportGifFrames failed: {ex}");
+            throw;
+        }
+    }
+
+    /// <summary>Changes the GIF preview frame without changing the actual image layers.</summary>
+    /// <param name="frameIndex">Zero-based frame index.</param>
+    public void SetActiveAnimationFrame(int frameIndex)
+    {
+        try
+        {
+            if (frameIndex < 0 || frameIndex >= Document.AnimationFrameDelaysMs.Count) return;
+            Document.ActiveAnimationFrame = frameIndex;
+            EndLiveEdit();
+            Notify(false);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Trace.TraceError($"Service method PictureEditorStateService.SetActiveAnimationFrame failed: {ex}");
+            throw;
+        }
+    }
 
     /// <summary>
     /// Adds raster as part of the picture editor state service workflow, applying the service's runtime policy, state management, and diagnostics as required.

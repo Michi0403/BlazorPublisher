@@ -1692,6 +1692,8 @@ function hitLayer(document, x, y) { try {
     for (let index = document.layers.length - 1; index >= 0; index--) {
         const layer = document.layers[index];
         if (!layer.visible) continue;
+        if (Number.isInteger(layer.animationFrameIndex) && layer.animationFrameIndex >= 0 &&
+            layer.animationFrameIndex !== (document.activeAnimationFrame || 0)) continue;
         if (!pointPassesLayerClip(layer, x, y)) continue;
         if (layerKind(layer) === "paint") {
             if (hitPaintLayer(layer, x, y)) return layer;
@@ -1734,13 +1736,22 @@ function reportRenderState(editor, message) { try {
     else if (hadError) safeInvoke(editor, "PictureRenderRecovered");
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:reportRenderState@1557', __javascriptError); throw __javascriptError; }}
 
+// A frame can contain asynchronous raster/SVG decodes. Never clear the visible
+// editor canvas while an earlier frame is still loading, and never let an older
+// completion overwrite a later document or selection. This is shared by *all*
+// Picture Studio formats; GIF does not own the canvas lifecycle.
+// Compose on a private canvas. Async PNG/GIF/SVG decoding must never blank
+// the displayed picture or commit the result of an obsolete frame selection.
 function scheduleEditorRender(editor) { try {
     if (editor.animationFrame || !editor.canvas || !editor.document) return;
     editor.animationFrame = requestAnimationFrame(async () => { try {
         editor.animationFrame = 0;
         const token = ++editor.renderToken;
+        const target = editor.canvas;
+        const documentSnapshot = editor.document;
+        const stage = createCanvas(documentSnapshot.widthPx, documentSnapshot.heightPx);
         try {
-            const rendered = await drawDocument(editor.canvas, editor.document, {
+            const rendered = await drawDocument(stage, documentSnapshot, {
                 grid: true,
                 selectedLayerId: editor.selectedLayerId,
                 zoom: editor.zoom,
@@ -1748,16 +1759,60 @@ function scheduleEditorRender(editor) { try {
                 areaSelection: editor.areaSelection,
                 selectionMode: isAreaSelectionTool(editor.toolSettings?.tool)
             });
-            if (token === editor.renderToken) {
-                const errors = Array.isArray(rendered.pictureStudioErrors) ? rendered.pictureStudioErrors : [];
-                reportRenderState(editor, errors[0] || "");
-            }
+            if (token !== editor.renderToken || editor.canvas !== target || !target.isConnected) return;
+            const context = target.getContext("2d", { alpha: true, desynchronized: false });
+            if (!context) throw new Error("Picture Studio canvas 2D context is unavailable.");
+            if (target.width !== rendered.width) target.width = rendered.width;
+            if (target.height !== rendered.height) target.height = rendered.height;
+            context.setTransform(1, 0, 0, 1, 0, 0);
+            context.clearRect(0, 0, target.width, target.height);
+            context.drawImage(rendered, 0, 0);
+            reportRenderState(editor, rendered.pictureStudioErrors?.[0] || "");
         } catch (error) {
-            reportRenderState(editor, error?.message || String(error));
+            if (token === editor.renderToken) reportRenderState(editor, error?.message || String(error));
         }
-        if (token !== editor.renderToken) scheduleEditorRender(editor);
-     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:callback:requestAnimationFrame@1568', __javascriptError); throw __javascriptError; }});
- } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:scheduleEditorRender@1566', __javascriptError); throw __javascriptError; }}
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:scheduleEditorRender:frame', __javascriptError); throw __javascriptError; }});
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:scheduleEditorRender', __javascriptError); throw __javascriptError; }}
+
+// The DevExpress popup can replace its body independently of the Blazor component.
+// A one-time _initialized flag cannot own that browser-side DOM lifetime.
+function ensurePictureStudioCanvas(editor) { try {
+    const current = document.getElementById(editor.canvasId);
+    if (!current) {
+        editor.canvasAwaited = true;
+        return false;
+    }
+    const wasAwaited = editor.canvasAwaited === true;
+    editor.canvasAwaited = false;
+    if (editor.canvas !== current || current.dataset.pictureStudioBound !== "true") {
+        const needsFirstDocument = !editor.document;
+        ++editor.renderToken; // Invalidate in-flight rendering of the removed canvas.
+        bindEditorCanvas(editor, current);
+        if (editor.document) {
+            current.style.width = `${Math.round(editor.document.widthPx * editor.zoom)}px`;
+            current.style.height = `${Math.round(editor.document.heightPx * editor.zoom)}px`;
+            scheduleEditorRender(editor);
+        } else if (needsFirstDocument && wasAwaited) {
+            // Popup canvas appeared after Blazor's first after-render callback.
+            // Ask the component to send its authoritative document exactly once.
+            void safeInvoke(editor, "PictureCanvasAttached");
+        }
+    }
+    // Popup-body replacement also replaces the drag/drop host. Rebind only on
+    // identity change; never tear down an in-progress drag on each Blazor render.
+    if (editor.rootId && editor.dropRoot !== document.getElementById(editor.rootId))
+        bindPictureDrop(editor, editor.rootId, editor.imageInputId, editor.layeredInputId);
+    return true;
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:ensurePictureStudioCanvas', __javascriptError); throw __javascriptError; }}
+
+function observePictureStudioCanvas(editor) { try {
+    if (editor.canvasObserver) return;
+    const observer = new MutationObserver(() => { try {
+        ensurePictureStudioCanvas(editor);
+     } catch (error) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:canvasMutation', error); }});
+    observer.observe(document.body, { childList: true, subtree: true });
+    editor.canvasObserver = observer;
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:observePictureStudioCanvas', __javascriptError); throw __javascriptError; }}
 
 function snap(value, spacing, enabled) { try {
     return enabled ? Math.round(value / spacing) * spacing : value;
@@ -2207,12 +2262,12 @@ function bindEditorCanvas(editor, canvas) { try {
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:bindEditorCanvas@1948', __javascriptError); throw __javascriptError; }}
 
 export function initializePictureStudio(canvasId, dotNetRef, rootId = "", imageInputId = "", layeredInputId = "") { try {
-    const canvas = document.getElementById(canvasId);
-    if (!canvas) return;
     let editor = editors.get(canvasId);
     if (!editor) {
         editor = {
             canvas: null,
+            canvasId,
+            canvasObserver: null,
             dotNetRef,
             document: null,
             selectedLayerId: null,
@@ -2256,9 +2311,14 @@ export function initializePictureStudio(canvasId, dotNetRef, rootId = "", imageI
         editors.set(canvasId, editor);
     } else {
         editor.dotNetRef = dotNetRef;
+        editor.canvasId = canvasId;
     }
-    bindEditorCanvas(editor, canvas);
-    bindPictureDrop(editor, rootId, imageInputId, layeredInputId);
+    editor.rootId = rootId;
+    editor.imageInputId = imageInputId;
+    editor.layeredInputId = layeredInputId;
+    const bound = ensurePictureStudioCanvas(editor);
+    observePictureStudioCanvas(editor);
+    return bound;
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:initializePictureStudio@2034', __javascriptError); throw __javascriptError; }}
 
 export function cancelPictureStudioInteraction(canvasId) { try {
@@ -2271,6 +2331,9 @@ export function disposePictureStudio(canvasId) { try {
     if (!editor) return;
     resetEditorPointerState(editor, true);
     if (editor.animationFrame) cancelAnimationFrame(editor.animationFrame);
+    ++editor.renderToken;
+    editor.canvasObserver?.disconnect();
+    editor.canvasObserver = null;
     releasePictureDropBindings(editor);
     const handlers = editor.globalHandlers;
     if (handlers) {
@@ -2298,7 +2361,8 @@ export async function renderPictureStudio(canvasId, documentModel, selectedLayer
     const canvas = document.getElementById(canvasId);
     if (!canvas) return;
     const editor = editors.get(canvasId);
-    if (!editor) return;
+    if (!editor) throw new Error("Picture Studio canvas render requested before the editor was initialized.");
+    if (!ensurePictureStudioCanvas(editor)) return;
     const nextDocument = cloneDocument(documentModel);
     editor.layerDragCache?.clear?.();
     editor.mergedDragDataUrl = "";
@@ -2310,6 +2374,7 @@ export async function renderPictureStudio(canvasId, documentModel, selectedLayer
     canvas.style.width = `${Math.round(nextDocument.widthPx * editor.zoom)}px`;
     canvas.style.height = `${Math.round(nextDocument.heightPx * editor.zoom)}px`;
     if (!editor.interaction && !editor.drawing && !editor.pathDraft) editor.document = nextDocument;
+    ++editor.renderToken; // Invalidate any earlier asynchronous frame immediately.
     updateCanvasCursor(editor);
     scheduleEditorRender(editor);
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:renderPictureStudio@2120', __javascriptError); throw __javascriptError; }}
@@ -2368,6 +2433,8 @@ async function renderExportCanvas(documentModel, mimeType) { try {
         zoom: 1,
         forceOpaque: mimeType === "image/jpeg"
     });
+    if (canvas.pictureStudioErrors?.length)
+        throw new Error(`Cannot export an incomplete picture: ${canvas.pictureStudioErrors[0]}`);
     return canvas;
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:renderExportCanvas@2183', __javascriptError); throw __javascriptError; }}
 
@@ -2383,6 +2450,96 @@ async function createPictureStudioBlob(documentModel, mimeType = "image/png", qu
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:createPictureStudioBlob@2201', __javascriptError); throw __javascriptError; }}
 
 const pictureExportChunkSize = 24 * 1024;
+// Store only one rendered frame per interop call. Canonical animation/layer
+// ownership remains in PictureDocumentService and PictureEditorStateService.
+// This avoids serializing every PNG frame for each canvas refresh or export.
+const pictureGifFrameSessions = new Map();
+
+export function beginPictureStudioGifFrames(exportId, frameCount, width, height, loopCount) { try {
+    if (!exportId || !Number.isInteger(frameCount) || frameCount < 1 || frameCount > 500 ||
+        !Number.isInteger(width) || !Number.isInteger(height) || width < 1 || height < 1 ||
+        width > 8192 || height > 8192 || width * height * frameCount > 100000000)
+        throw new Error('Invalid GIF encoding session dimensions or frame count.');
+    if (pictureGifFrameSessions.has(exportId)) throw new Error('Duplicate GIF encoding session.');
+    pictureGifFrameSessions.set(exportId, { width, height, frameCount, loopCount, frames: [] });
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:beginPictureStudioGifFrames', __javascriptError); throw __javascriptError; }}
+
+export async function appendPictureStudioGifFrame(exportId, frameDocument, delayMs) { try {
+    const session = pictureGifFrameSessions.get(exportId);
+    if (!session || session.frames.length >= session.frameCount)
+        throw new Error('The GIF session is missing or already complete.');
+    const documentModel = normalizeDocument(frameDocument);
+    if (documentModel.widthPx !== session.width || documentModel.heightPx !== session.height)
+        throw new Error('The GIF frame dimensions do not match the original document.');
+    const canvas = await renderExportCanvas(documentModel, 'image/png');
+    const context = canvas.getContext('2d', { willReadFrequently: true });
+    if (!context) throw new Error('Cannot read the rendered GIF frame pixels.');
+    session.frames.push({ rgba: context.getImageData(0, 0, session.width, session.height).data,
+        delayMs: Math.max(20, Math.min(655350, Number(delayMs) || 100)) });
+    return session.frames.length;
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:appendPictureStudioGifFrame', __javascriptError); throw __javascriptError; }}
+
+export function cancelPictureStudioGifFrames(exportId) { try {
+    pictureGifFrameSessions.delete(exportId);
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:cancelPictureStudioGifFrames', __javascriptError); throw __javascriptError; }}
+
+function takeCompletedPictureGif(exportId) { try {
+    const session = pictureGifFrameSessions.get(exportId);
+    if (!session || session.frames.length !== session.frameCount)
+        throw new Error('The animated picture export has incomplete frame data.');
+    pictureGifFrameSessions.delete(exportId);
+    return encodeGifFrames(session.frames, session.width, session.height, session.loopCount);
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:takeCompletedPictureGif', __javascriptError); throw __javascriptError; }}
+
+async function pictureStudioBlobToDataUrl(blob) { try {
+    return await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(reader.error || new Error('GIF bytes could not be encoded for Apply.'));
+        reader.readAsDataURL(blob);
+    });
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:pictureStudioBlobToDataUrl', __javascriptError); throw __javascriptError; }}
+
+async function deliverPictureStudioDataUrl(dataUrl, dotNetReference, exportId) { try {
+    if (!dataUrl || !String(dataUrl).startsWith('data:image/'))
+        throw new Error('The rendered picture data URL is invalid.');
+    const chunkCount = Math.ceil(dataUrl.length / pictureExportChunkSize);
+    if (!await dotNetReference.invokeMethodAsync('BeginPictureExport', exportId, dataUrl.length, chunkCount)) return;
+    for (let chunkIndex = 0; chunkIndex < chunkCount; chunkIndex++) {
+        const chunk = dataUrl.slice(chunkIndex * pictureExportChunkSize, (chunkIndex + 1) * pictureExportChunkSize);
+        if (!await dotNetReference.invokeMethodAsync('AppendPictureExportChunk', exportId, chunkIndex, chunk)) return;
+    }
+    await dotNetReference.invokeMethodAsync('CompletePictureExport', exportId);
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:deliverPictureStudioDataUrl', __javascriptError); throw __javascriptError; }}
+
+export function finishPictureStudioGifApply(exportId, dotNetReference) { try {
+    // The .NET -> JS call must unwind before callbacks start on the same circuit.
+    void Promise.resolve().then(async () => {
+        try {
+            const dataUrl = await pictureStudioBlobToDataUrl(takeCompletedPictureGif(exportId));
+            await deliverPictureStudioDataUrl(dataUrl, dotNetReference, exportId);
+        } catch (error) {
+            pictureGifFrameSessions.delete(exportId);
+            try { await dotNetReference.invokeMethodAsync('FailPictureExport', exportId, error?.message || String(error)); }
+            catch (disconnected) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:finishPictureStudioGifApply:disconnect', disconnected); }
+        }
+    });
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:finishPictureStudioGifApply', __javascriptError); throw __javascriptError; }}
+
+export async function finishPictureStudioGifDownload(exportId, fileName) { try {
+    const blob = takeCompletedPictureGif(exportId);
+    const url = URL.createObjectURL(blob);
+    try {
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = fileName;
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+    } finally { setTimeout(() => URL.revokeObjectURL(url), 2000); }
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:finishPictureStudioGifDownload', __javascriptError); throw __javascriptError; }}
+
+
 
 // Keep every animated frame as an independently editable raster layer. The
 // Blazor transfer uses bounded chunks rather than returning giant image strings
@@ -2708,6 +2865,8 @@ export async function createPictureStudioSvg(documentModel) { try {
     for (let index = 0; index < document.layers.length; index++) {
         const layer = document.layers[index];
         if (!layer || layer.visible === false || clamp(layer.opacity ?? 1, 0, 1) <= 0) continue;
+        if (Number.isInteger(layer.animationFrameIndex) && layer.animationFrameIndex >= 0 &&
+            layer.animationFrameIndex !== (document.activeAnimationFrame || 0)) continue;
         const kind = layerKind(layer);
         const prefix = `ps-${svgIdentifier(layer.id, `layer-${index}`)}-${index}`;
         let markup;
@@ -2995,6 +3154,7 @@ export async function importPictureStudioSvg(dataUrl, fileName) { try {
     root.setAttribute("width", `${viewport.width}px`);
     root.setAttribute("height", `${viewport.height}px`);
     if (!root.hasAttribute("viewBox")) root.setAttribute("viewBox", viewport.viewBox.join(" "));
+    const safeWholeSvgMarkup = root.outerHTML;
     root.style.position = "fixed";
     root.style.left = "-100000px";
     root.style.top = "-100000px";
@@ -3052,7 +3212,21 @@ export async function importPictureStudioSvg(dataUrl, fileName) { try {
         }
         if (visualElements.length > 5000)
             issues.push({ severity: 1, code: "SVG_LAYER_LIMIT", message: "The SVG contains more than 5000 visual objects; remaining objects were not imported as separate layers.", source: null });
-        if (!layers.length) throw new Error("The SVG contains no supported visible vector objects.");
+        if (!layers.length) {
+            // Some valid documents rely on nested symbols, use references, or SVG
+            // constructs whose browser geometry cannot be decomposed safely.
+            // Keep the sanitized source editable instead of rejecting the import.
+            issues.push({ severity: 1, code: "SVG_SINGLE_LAYER_FALLBACK",
+                message: "Object decomposition was unavailable; the sanitized SVG was retained as an editable vector layer.", source: null });
+            layers.push({
+                $type: "svg", id: crypto.randomUUID(), name: String(fileName || "SVG").replace(/\.(?:svg|svgz)$/i, ""),
+                groupPath: "", x: 0, y: 0, width: viewport.width, height: viewport.height,
+                rotation: 0, opacity: 1, visible: true, locked: false, blendMode: "Normal",
+                brightness: 1, contrast: 1, saturation: 1, hueRotation: 0, blur: 0,
+                grayscale: 0, sepia: 0, invert: 0, svgMarkup: safeWholeSvgMarkup,
+                sourceFormat: "SVG", sourceElementId: "", preserveAspectRatio: true
+            });
+        }
         return {
             document: {
                 id: crypto.randomUUID(),

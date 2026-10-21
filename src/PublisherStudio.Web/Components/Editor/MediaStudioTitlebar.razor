@@ -1,0 +1,10 @@
+@namespace PublisherStudio.Components.Editor
+@inject ILogger<MediaStudioTitlebar> Logger
+@* razor-structural-renderer | reason: This is an existing media popup child surface; an added DxFormLayout or wrapper would change the popup layout and sizing. *@
+<header class="media-studio-titlebar">
+    <div>
+        <strong>@Title</strong>
+        <span>@Subtitle</span>
+    </div>
+    <button type="button" title="@CloseLabel" @onclick="CloseRequested">×</button>
+</header>

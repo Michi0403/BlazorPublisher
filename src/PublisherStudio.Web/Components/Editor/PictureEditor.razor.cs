@@ -44,6 +44,8 @@ public partial class PictureEditor
     /// </summary>
     /// <value>The state value exposed by <see cref="PictureEditor"/>.</value>
     [Inject] public PictureEditorStateService State { get; set; } = default!;
+    /// <summary>Provides frame-bounded picture rendering without truncating the canonical editable document.</summary>
+    [Inject] private PictureDocumentService PictureDocuments { get; set; } = default!;
     /// <summary>
     /// Gets or sets the open raster importer value that forms part of the picture editor state consumed or produced by the surrounding workflow.
     /// </summary>
@@ -309,6 +311,8 @@ public partial class PictureEditor
     /// </summary>
     /// <value>The is picture exporting value exposed by <see cref="PictureEditor"/>.</value>
     private bool IsPictureExporting => _pictureExportId is not null;
+    /// <summary>Blocks export/apply while an animated source is still being decoded into editable frames.</summary>
+    private bool IsPictureBusy => IsPictureExporting || _gifImportId is not null;
     /// <summary>
     /// Gets a value indicating whether use LocalGPT OCR applies to the picture editor state.
     /// </summary>
@@ -528,6 +532,10 @@ public partial class PictureEditor
             }
             if (SessionId == Guid.Empty || SessionId == _loadedSession) return base.OnParametersSetAsync();
             _loadedSession = SessionId;
+            // A late decode callback must never import frames into a newly opened picture.
+            _gifImportId = null;
+            _gifImportedFrames.Clear();
+            _gifFrameBuffer = null;
             _error = null;
             _notice = null;
             _renderErrorActive = false;
@@ -571,8 +579,27 @@ public partial class PictureEditor
         try
         {
             if (!Visible) return;
-            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/pictureStudioInterop.js?v=4.2.8").ConfigureAwait(true);
+            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/pictureStudioInterop.js?v=4.3.7").ConfigureAwait(true);
             _self ??= DotNetObjectReference.Create(this);
+            // DevExpress may replace the popup's canvas without recreating this component.
+            // Reconfirm the browser-owned binding on *every* render; JS is idempotent
+            // and observes subsequent popup DOM replacement independently.
+            var canvasBound = await _module.InvokeAsync<bool>("initializePictureStudio",
+                RuntimePolicy.PictureStudio.CanvasId, _self,
+                RuntimePolicy.PictureStudio.StudioRootId,
+                RuntimePolicy.PictureStudio.ImageDropInputId,
+                RuntimePolicy.PictureStudio.LayerDropInputId).ConfigureAwait(true);
+            if (!canvasBound)
+            {
+                _initialized = false;
+                Logger.LogDebug("Picture Studio popup canvas is not attached yet; postponing document rendering.");
+                return;
+            }
+            if (!_initialized)
+            {
+                _initialized = true;
+                _renderRequested = true;
+            }
             if (_pendingRasterInitialization && !string.IsNullOrWhiteSpace(InitialRasterDataUrl))
             {
                 _pendingRasterInitialization = false;
@@ -586,12 +613,47 @@ public partial class PictureEditor
                 {
                     try
                     {
-                        var natural = await _module.InvokeAsync<PictureImageSize>("getPictureImageSize", InitialRasterDataUrl).ConfigureAwait(true);
-                        var fitted = FitRasterCanvasSize(natural.Width, natural.Height);
-                        if (InitialRasterDataUrl.StartsWith("data:image/gif;", StringComparison.OrdinalIgnoreCase))
-                            await StartGifImport(InitialRasterDataUrl, InitialName, startNew: true).ConfigureAwait(true);
+                        if (InitialRasterDataUrl.StartsWith("data:image/svg+xml;", StringComparison.OrdinalIgnoreCase))
+                        {
+                            // SVG decomposition owns SVG dimensions; browser Image sizing
+                            // is neither necessary nor guaranteed for complex vector files.
+                            try
+                            {
+                                var importedSvg = await _module.InvokeAsync<PictureImportResult>(
+                                    "importPictureStudioSvg", InitialRasterDataUrl, InitialName).ConfigureAwait(true);
+                                State.StartFromDocument(importedSvg.Document);
+                            }
+                            catch (Exception svgException)
+                            {
+                                Logger.LogWarning(svgException, "Picture Studio retained the source SVG image because vector import failed.");
+                                var svgSize = await _module.InvokeAsync<PictureImageSize>(
+                                    "getPictureImageSize", InitialRasterDataUrl).ConfigureAwait(true);
+                                var fittedSvgSize = FitRasterCanvasSize(svgSize.Width, svgSize.Height);
+                                State.StartFromRaster(InitialRasterDataUrl, InitialName, fittedSvgSize.Width, fittedSvgSize.Height);
+                                _notice = svgException.Message;
+                            }
+                        }
                         else
+                        {
+                            var natural = await _module.InvokeAsync<PictureImageSize>("getPictureImageSize", InitialRasterDataUrl).ConfigureAwait(true);
+                            var fitted = FitRasterCanvasSize(natural.Width, natural.Height);
+                            // Open the actual image first. Animated decoding is optional,
+                            // never a prerequisite for a normal editable picture canvas.
                             State.StartFromRaster(InitialRasterDataUrl, InitialName, fitted.Width, fitted.Height);
+                            if (InitialRasterDataUrl.StartsWith("data:image/gif;", StringComparison.OrdinalIgnoreCase))
+                            {
+                                try
+                                {
+                                    await StartGifImport(InitialRasterDataUrl, InitialName, startNew: false,
+                                        replaceLayerId: State.SelectedLayerId).ConfigureAwait(true);
+                                }
+                                catch (Exception gifException)
+                                {
+                                    Logger.LogWarning(gifException, "Picture Studio retained the normal GIF image because frame editing could not start.");
+                                    _notice = LT("Animated GIF import failed") + ": " + gifException.Message;
+                                }
+                            }
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -600,18 +662,6 @@ public partial class PictureEditor
                         State.SetDocumentName(InitialName);
                     }
                 }
-            }
-            if (!_initialized)
-            {
-                await _module.InvokeVoidAsync(
-                    "initializePictureStudio",
-                    RuntimePolicy.PictureStudio.CanvasId,
-                    _self,
-                    RuntimePolicy.PictureStudio.StudioRootId,
-                    RuntimePolicy.PictureStudio.ImageDropInputId,
-                    RuntimePolicy.PictureStudio.LayerDropInputId).ConfigureAwait(true);
-                _initialized = true;
-                _renderRequested = true;
             }
             if (_renderRequested)
             {
@@ -653,10 +703,12 @@ public partial class PictureEditor
     {
         try
         {
-            if (_module is null || !Visible) return;
+            if (_module is null || !Visible || !_initialized) return;
             try
             {
-                await _module.InvokeVoidAsync("renderPictureStudio", RuntimePolicy.PictureStudio.CanvasId, State.Document, State.SelectedLayerId?.ToString(), State.Document.Zoom, new
+                await _module.InvokeVoidAsync("renderPictureStudio", RuntimePolicy.PictureStudio.CanvasId,
+                    PictureDocuments.CreateFrameRenderProjection(State.Document, State.Document.ActiveAnimationFrame),
+                    State.SelectedLayerId?.ToString(), State.Document.Zoom, new
                 {
                     Tool = _drawTool.ToString(),
                     Color = _drawColor,
@@ -672,6 +724,7 @@ public partial class PictureEditor
             }
             catch (Exception ex)
             {
+                Logger.LogError(ex, "Picture Studio failed to render the editor canvas.");
                 _error = ex.Message;
                 await InvokeAsync(StateHasChanged).ConfigureAwait(true);
             }
@@ -932,6 +985,24 @@ public partial class PictureEditor
         }
     }
 
+    /// <summary>Requests the authoritative picture after DevExpress attaches a new canvas to its popup portal.</summary>
+    /// <returns>A task that schedules the normal Blazor render without changing the canonical picture.</returns>
+    [JSInvokable]
+    public async Task PictureCanvasAttached()
+    {
+        try
+        {
+            if (!Visible) return;
+            _renderRequested = true;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Picture Studio could not refresh the canvas after popup attachment.");
+            throw;
+        }
+    }
+
     /// <summary>
     /// Performs picture render failed for <see cref="PictureEditor"/>, keeping the operation consistent with the state and invariants of the surrounding picture editor workflow.
     /// </summary>
@@ -1156,13 +1227,62 @@ public partial class PictureEditor
                 using var buffer = new MemoryStream();
                 await stream.CopyToAsync(buffer).ConfigureAwait(true);
                 var dataUrl = $"data:{file.ContentType};base64,{Convert.ToBase64String(buffer.ToArray())}";
-                var size = _module is null
+                // SVG geometry is resolved by the SVG importer, not by raster
+                // Image.decode(), which can reject otherwise valid vector documents.
+                var size = _module is null || file.ContentType.Equals("image/svg+xml", StringComparison.OrdinalIgnoreCase)
                     ? new PictureImageSize()
                     : await _module.InvokeAsync<PictureImageSize>("getPictureImageSize", dataUrl).ConfigureAwait(true);
                 if (file.ContentType.Equals("image/gif", StringComparison.OrdinalIgnoreCase))
                 {
-                    await StartGifImport(dataUrl, file.Name, startNew: false,
-                        replaceLayerId: forceAdd ? null : _replaceRasterLayerId).ConfigureAwait(true);
+                    // First commit the ordinary raster image. On a successful decode
+                    // its placeholder is replaced transactionally by timed frames;
+                    // failures retain the still image and every other layer.
+                    Guid? placeholderId;
+                    if (!forceAdd && _replaceRasterLayerId is Guid target && State.ReplaceRaster(target, dataUrl))
+                    {
+                        placeholderId = target;
+                        State.SelectLayer(target);
+                    }
+                    else
+                    {
+                        placeholderId = State.AddRaster(dataUrl, file.Name, size.Width, size.Height,
+                            forceAdd ? _pendingDropX : null, forceAdd ? _pendingDropY : null).Id;
+                    }
+                    try
+                    {
+                        await StartGifImport(dataUrl, file.Name, startNew: false,
+                            replaceLayerId: placeholderId).ConfigureAwait(true);
+                    }
+                    catch (Exception gifException)
+                    {
+                        Logger.LogWarning(gifException, "Picture Studio kept the raster placeholder for an uneditable animated GIF.");
+                        _notice = LT("Animated GIF import failed") + ": " + gifException.Message;
+                    }
+                }
+                else if (file.ContentType.Equals("image/svg+xml", StringComparison.OrdinalIgnoreCase) && _module is not null)
+                {
+                    // SVG inserted through the ordinary image chooser should retain its
+                    // vector document/layers, just like the layered import command.
+                    try
+                    {
+                        var importedSvg = await _module.InvokeAsync<PictureImportResult>(
+                            "importPictureStudioSvg", dataUrl, file.Name).ConfigureAwait(true);
+                        var addedLayers = State.AddImportedLayers(importedSvg.Document,
+                            Path.GetFileNameWithoutExtension(file.Name), forceAdd ? _pendingDropX : null,
+                            forceAdd ? _pendingDropY : null);
+                        if (addedLayers == 0)
+                            throw new InvalidDataException("The SVG import did not contain any editable layers.");
+                    }
+                    catch (Exception svgException)
+                    {
+                        Logger.LogWarning(svgException, "SVG vector decomposition failed; keeping the original SVG as a raster-compatible image layer.");
+                        if (!forceAdd && _replaceRasterLayerId is Guid svgTarget && State.ReplaceRaster(svgTarget, dataUrl))
+                            State.SelectLayer(svgTarget);
+                        else
+                            State.AddRaster(dataUrl, file.Name, 0, 0,
+                                forceAdd ? _pendingDropX : null, forceAdd ? _pendingDropY : null);
+                        _notice = svgException.Message;
+                    }
                 }
                 else if (!forceAdd && _replaceRasterLayerId is Guid targetId && State.ReplaceRaster(targetId, dataUrl))
                     State.SelectLayer(targetId);
@@ -1820,6 +1940,9 @@ public partial class PictureEditor
             if (!dataUrl.StartsWith("data:image/png;base64,", StringComparison.OrdinalIgnoreCase)) return false;
             _gifImportedFrames.Add((dataUrl, _gifFrameDelayMs));
             _gifFrameBuffer = null;
+            _notice = $"{LT("Decoding animated GIF frames…")} {_gifImportedFrames.Count}/{_gifImportCount}";
+            TaskRunner.Run(nameof(PictureEditor), nameof(AppendGifFrameChunk),
+                async _ => await InvokeAsync(StateHasChanged).ConfigureAwait(true));
         }
         return true;
     }
@@ -1862,7 +1985,29 @@ public partial class PictureEditor
         _gifFrameBuffer = null;
         _notice = null;
         _error = $"{LT("Animated GIF import failed")}: {error}";
+        // The still-image preview or existing document remains intact.
+        Logger.LogWarning("Animated GIF frame import was unavailable; the original image remains editable as a raster: {Reason}", error);
         await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+    }
+
+    /// <summary>True when the current static composition has layers that can become animated frames.</summary>
+    private bool CanConvertLayersToGif => !IsPictureBusy &&
+        State.Document.AnimationFrameDelaysMs.Count == 0 &&
+        State.Document.Layers.Count(layer => layer.Visible) >= 2;
+
+    /// <summary>Explicitly builds an undoable frame timeline from the visible picture layers.</summary>
+    private void ConvertVisibleLayersToGifFrames()
+    {
+        try
+        {
+            if (State.ConvertVisibleLayersToGifFrames())
+                _notice = LT("Converted visible layers to GIF frames");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Picture Studio could not convert layers into GIF frames.");
+            _error = ex.Message;
+        }
     }
 
     private void PreviousGifFrame() => State.SetActiveAnimationFrame(
@@ -1873,13 +2018,60 @@ public partial class PictureEditor
 
     private async Task DownloadGif()
     {
-        if (_module is null) return;
+        if (_module is null || IsPictureBusy) return;
         try
         {
-            await _module.InvokeVoidAsync("downloadPictureStudioGif", State.CloneDocument(),
-                $"{Files.SafeFileName(State.Document.Name)}.gif").ConfigureAwait(true);
+            var exportDocument = State.CloneDocument();
+            if (exportDocument.AnimationFrameDelaysMs.Count > 0)
+            {
+                var exportId = Guid.NewGuid().ToString("N");
+                await SendPictureGifFramesAsync(exportDocument, exportId).ConfigureAwait(true);
+                await _module.InvokeVoidAsync("finishPictureStudioGifDownload", exportId,
+                    $"{Files.SafeFileName(exportDocument.Name)}.gif").ConfigureAwait(true);
+            }
+            else
+            {
+                await _module.InvokeVoidAsync("downloadPictureStudioGif", exportDocument,
+                    $"{Files.SafeFileName(exportDocument.Name)}.gif").ConfigureAwait(true);
+            }
         }
         catch (Exception ex) { _error = ex.Message; }
+    }
+
+    /// <summary>
+    /// Transfers one animation frame at a time into the existing browser GIF encoder.
+    /// This never serializes all frame PNG payloads in one Blazor interop request.
+    /// </summary>
+    /// <param name="document">Complete source document, including unmodified layer graph.</param>
+    /// <param name="exportId">Stable identifier for the browser GIF encoding operation.</param>
+    /// <returns>A task that completes after every frame has been rendered and staged.</returns>
+    private async Task SendPictureGifFramesAsync(PictureDocument document, string exportId)
+    {
+        try
+        {
+            if (_module is null) throw new InvalidOperationException("Picture Studio is not ready.");
+            var frameCount = document.AnimationFrameDelaysMs.Count;
+            if (frameCount is < 1 or > 500)
+                throw new InvalidDataException("The GIF frame count is not supported.");
+            await _module.InvokeVoidAsync("beginPictureStudioGifFrames", exportId, frameCount,
+                document.WidthPx, document.HeightPx, document.AnimationLoopCount).ConfigureAwait(true);
+            for (var frame = 0; frame < frameCount; frame++)
+            {
+                var frameDocument = PictureDocuments.CreateFrameRenderProjection(document, frame);
+                await _module.InvokeVoidAsync("appendPictureStudioGifFrame", exportId,
+                    frameDocument, document.AnimationFrameDelaysMs[frame]).ConfigureAwait(true);
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Picture Studio failed to transfer animated GIF frames for export.");
+            if (_module is not null)
+            {
+                try { await _module.InvokeVoidAsync("cancelPictureStudioGifFrames", exportId).ConfigureAwait(true); }
+                catch (Exception cleanupEx) { Logger.LogWarning(cleanupEx, "Could not release an incomplete GIF encoding session."); }
+            }
+            throw;
+        }
     }
 
     /// <summary>Renders the current picture for the Mainframe and optionally preserves the editable Picture Studio document.</summary>
@@ -1889,7 +2081,7 @@ public partial class PictureEditor
     {
         try
         {
-            if (_module is null || _self is null || _pictureExportId is not null) return;
+            if (_module is null || _self is null || IsPictureBusy) return;
 
             var exportId = Guid.NewGuid().ToString("N");
             var sourceDocument = State.CloneDocument();
@@ -1911,13 +2103,16 @@ public partial class PictureEditor
                 // reference and the 32 KB Interactive Server message-size ceiling.
                 // The JavaScript function starts the export and returns immediately;
                 // CompletePictureExport performs the actual insert after all chunks arrive.
-                await _module.InvokeVoidAsync(
-                    "startPictureStudioDataUrlExport",
-                    sourceDocument,
-                    sourceDocument.AnimationFrameDelaysMs.Count > 0 ? "image/gif" : "image/png",
-                    1d,
-                    _self,
-                    exportId).ConfigureAwait(true);
+                if (sourceDocument.AnimationFrameDelaysMs.Count > 0)
+                {
+                    await SendPictureGifFramesAsync(sourceDocument, exportId).ConfigureAwait(true);
+                    await _module.InvokeVoidAsync("finishPictureStudioGifApply", exportId, _self).ConfigureAwait(true);
+                }
+                else
+                {
+                    await _module.InvokeVoidAsync("startPictureStudioDataUrlExport",
+                        sourceDocument, "image/png", 1d, _self, exportId).ConfigureAwait(true);
+                }
             }
             catch (Exception ex)
             {
@@ -7257,6 +7452,9 @@ public partial class PictureEditor
     private string LayerDescription(PictureLayer layer) {
         try
         {
+            if (layer.AnimationFrameIndex >= 0 &&
+                layer.AnimationFrameIndex < State.Document.AnimationFrameDelaysMs.Count)
+                return $"{LT("GIF frame")} {layer.AnimationFrameIndex + 1}/{State.Document.AnimationFrameDelaysMs.Count} · {State.Document.AnimationFrameDelaysMs[layer.AnimationFrameIndex]} ms";
             return layer switch
     {
         RasterPictureLayer raster => LT(raster.FitMode.ToString()),

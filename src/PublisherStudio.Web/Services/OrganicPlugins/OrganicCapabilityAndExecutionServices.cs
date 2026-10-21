@@ -501,6 +501,7 @@ public sealed class OrganicCapabilityCatalog(
 /// <param name="resultStore">Organic result store dependency used by the organic work executor workflow to provide the corresponding application capability.</param>
 /// <param name="recurringScreenReader">Recurring screen reader service dependency used by the organic work executor workflow to provide the corresponding application capability.</param>
 /// <param name="runtimePolicy">Runtime policy containing persisted operator-owned payload limits.</param>
+/// <param name="extensions">DI-owned executable handlers for additional catalog-defined capabilities.</param>
 /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class OrganicWorkExecutor(
     IOrganicPluginProtocolCodec codec,
@@ -515,8 +516,38 @@ public sealed class OrganicWorkExecutor(
     IOrganicResultStore resultStore,
     IRecurringScreenReaderService recurringScreenReader,
     PublisherStudio.Services.Configuration.IPublisherRuntimePolicyDataService runtimePolicy,
+    IEnumerable<IOrganicExecutableCapabilityHandler> extensions,
     ILogger<OrganicWorkExecutor> logger) : IOrganicWorkExecutor
 {
+    /// <summary>Extension handlers are resolved through DI and may not shadow native owned operations.</summary>
+    private readonly IReadOnlyDictionary<string, IOrganicExecutableCapabilityHandler> extensionHandlers =
+        extensions.ToDictionary(handler => handler.CapabilityKey, StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>Checks whether a persisted descriptor refers to a real executable native or DI handler.</summary>
+    /// <param name="capabilityKey">Candidate capability key.</param>
+    /// <returns>Whether the route can execute through this service.</returns>
+    public bool SupportsCapability(string capabilityKey)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(capabilityKey)) return false;
+            return (capabilityKey is
+                "publisher.screen.capture" or "publisher.screen.record" or
+                "publisher.screen.capture.result" or "publisher.screenreader.start" or
+                "publisher.screenreader.stop" or "publisher.input.execute" or
+                "publisher.input.result" or "publisher.openscad.generate" or
+                "publisher.spreadsheet.inspect" or "publisher.text.insert.propose" or
+                "publisher.text.edit.request" or "publisher.website.content.request" or
+                "publisher.business-context" or "publisher.documentation.profile" or
+                "publisher.media.capabilities" or "publisher.file.formats")
+                || extensionHandlers.ContainsKey(capabilityKey);
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Organic capability availability check failed.");
+            throw;
+        }
+    }
     /// <summary>
     /// Performs execute for <see cref="OrganicWorkExecutor"/>, keeping the operation consistent with the state and invariants of the surrounding organic work executor workflow.
     /// </summary>
@@ -544,6 +575,11 @@ public sealed class OrganicWorkExecutor(
                 if (!Guid.TryParse(GetString(parameters, "sessionId", string.Empty), out var sessionId))
                     throw new ArgumentException("sessionId is required.");
                 result = new { SessionId = sessionId, Stopped = await recurringScreenReader.StopAsync(sessionId).ConfigureAwait(false) };
+            }
+            else if (extensionHandlers.TryGetValue(envelope.CapabilityKey, out var extension) &&
+                     envelope.CapabilityKey is not ("publisher.screen.capture" or "publisher.screen.record" or "publisher.screen.capture.result" or "publisher.screenreader.start" or "publisher.screenreader.stop" or "publisher.input.execute" or "publisher.input.result" or "publisher.openscad.generate" or "publisher.spreadsheet.inspect" or "publisher.text.insert.propose" or "publisher.text.edit.request" or "publisher.website.content.request" or "publisher.business-context" or "publisher.documentation.profile" or "publisher.media.capabilities" or "publisher.file.formats"))
+            {
+                result = await extension.ExecuteAsync(envelope, cancellationToken).ConfigureAwait(false);
             }
             else
             {

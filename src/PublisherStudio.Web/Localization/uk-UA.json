@@ -36,6 +36,8 @@
   "Phrase.Clear␠rating": "очистити rating",
   "Phrase.Components␠in": "Компоненти в",
   "Phrase.Copy": "Копіювати",
+  "Phrase.Convert␠visible␠layers␠to␠GIF␠frames": "Перетворити видимі шари на кадри GIF",
+  "Phrase.Converted␠visible␠layers␠to␠GIF␠frames": "Видимі шари перетворено на кадри GIF",
   "Phrase.Council␠answer␠tokens": "рада відповідь tokens",
   "Phrase.Council␠context␠tokens": "рада контекст tokens",
   "Phrase.Council␠downloadable␠artifacts": "рада доступний для завантаження артефакти",
@@ -3435,5 +3437,8 @@
   "Text.Choose␠the␠required␠argument,␠value,␠range,␠financial,␠target,␠or␠hierarchy␠fields␠for␠this␠visual.": "Choose the required argument, value, range, financial, target, or hierarchy fields for this visual.",
   "Text.This␠visual␠uses␠an␠embedded␠snapshot␠and␠the␠configured␠web␠binding.": "This visual uses an embedded snapshot and the configured web binding.",
   "Text.The␠visual␠uses␠publication␠data␠stored␠in␠the␠document.": "The visual uses publication data stored in the document.",
-  "Text.Finalizing␠recording…": "Finalizing recording…"
+  "Text.Finalizing␠recording…": "Finalizing recording…",
+  "Phrase.AI␠write␠story": "ШІ: написати історію",
+  "Phrase.AI␠create␠spreadsheet": "ШІ: створити електронну таблицю",
+  "Phrase.AI␠help␠with␠selected␠object": "ШІ: допомогти з вибраним об’єктом"
 }

@@ -71,7 +71,7 @@
       "minNotificationCalls": 0
     },
     "Components/Editor/MediaStudio.razor": {
-      "minCatchBlocks": 61,
+      "minCatchBlocks": 0,
       "minLogCalls": 0,
       "minNotificationCalls": 0
     },
@@ -236,6 +236,56 @@
       "minNotificationCalls": 0
     },
     "Components/Editor/PageEffectLayerRenderer.razor": {
+      "minCatchBlocks": 0,
+      "minLogCalls": 0,
+      "minNotificationCalls": 0
+    },
+    "Components/Editor/MediaStudio.StateAndParameters.razor.cs": {
+      "minCatchBlocks": 3,
+      "minLogCalls": 3,
+      "minNotificationCalls": 0
+    },
+    "Components/Editor/MediaStudio.TimelineEditing.razor.cs": {
+      "minCatchBlocks": 52,
+      "minLogCalls": 52,
+      "minNotificationCalls": 0
+    },
+    "Components/Editor/MediaStudio.TimelineAndLayers.razor.cs": {
+      "minCatchBlocks": 48,
+      "minLogCalls": 48,
+      "minNotificationCalls": 0
+    },
+    "Components/Editor/MediaStudio.LayerEffectsAndFrames.razor.cs": {
+      "minCatchBlocks": 57,
+      "minLogCalls": 57,
+      "minNotificationCalls": 0
+    },
+    "Components/Editor/MediaStudio.SourceAndRecordingOptions.razor.cs": {
+      "minCatchBlocks": 62,
+      "minLogCalls": 45,
+      "minNotificationCalls": 9
+    },
+    "Components/Editor/MediaStudio.ExportAndRecording.razor.cs": {
+      "minCatchBlocks": 55,
+      "minLogCalls": 56,
+      "minNotificationCalls": 7
+    },
+    "Components/Editor/MediaStudio.PlaybackAndInteraction.razor.cs": {
+      "minCatchBlocks": 70,
+      "minLogCalls": 47,
+      "minNotificationCalls": 3
+    },
+    "Components/Editor/MediaStudio.RenderBindings.razor.cs": {
+      "minCatchBlocks": 84,
+      "minLogCalls": 84,
+      "minNotificationCalls": 0
+    },
+    "Components/Editor/MediaStudioTitlebar.razor.cs": {
+      "minCatchBlocks": 0,
+      "minLogCalls": 0,
+      "minNotificationCalls": 0
+    },
+    "Components/Editor/MediaStudioFooter.razor.cs": {
       "minCatchBlocks": 0,
       "minLogCalls": 0,
       "minNotificationCalls": 0

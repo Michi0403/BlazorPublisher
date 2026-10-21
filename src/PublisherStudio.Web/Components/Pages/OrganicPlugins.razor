@@ -15,6 +15,7 @@
 @inject ISupervisedTaskRunner TaskRunner
 @inject NavigationManager Navigation
 @inject EditorStateService EditorState
+@inject PublisherAiDocumentInsertionService DocumentInsertion
 @inject IJSRuntime JS
 @inject IOptions<OrganicPluginOptions> OrganicOptions
 
@@ -81,7 +82,7 @@
             <div>
                 <span class="organic-badge">1-Wire AI</span>
                 <h2>Create with LocalGPT</h2>
-                <p class="organic-note">Describe the result you want. PublisherStudio chooses a suitable LocalGPT team/preset when possible and keeps the returned text reviewable before it changes your publication.</p>
+                <p class="organic-note">Describe the result you want. PublisherStudio chooses a suitable LocalGPT team/preset when possible and inserts explicitly requested stories and spreadsheets into your publication; other proposals remain reviewable.</p>
             </div>
             <span class="organic-link-state">@(Connection.State.IsLinked ? "Ready" : "Connect LocalGPT first")</span>
         </div>
@@ -107,8 +108,8 @@
             </label>
         </div>
         <div class="organic-ai-assist-actions">
-            <button type="button" class="organic-primary" disabled="@(!CanGenerateTextProposal)" @onclick="GenerateTextProposalAsync">Create proposal</button>
-            <small>Inserted proposals become normal PublisherStudio content and are therefore baked into normal HTML/export output.</small>
+            <button type="button" class="organic-primary" disabled="@(!CanGenerateTextProposal)" @onclick="GenerateTextProposalAsync">Generate and insert</button>
+            <small>User-initiated story and spreadsheet results become native, undoable PublisherStudio objects. Unsolicited proposals remain review-only.</small>
         </div>
         <details class="organic-inline-advanced">
             <summary>Team / preset override</summary>
@@ -603,6 +604,7 @@
             _capabilities = await CapabilityCatalog.GetCapabilitiesAsync().ConfigureAwait(true);
             Refresh();
             ApplyCurrentPublisherContext();
+            ApplyAuthorizedProposals();
     
         }
         catch (Exception __componentMethodException)
@@ -753,6 +755,7 @@
                 {
                         SynchronizeDiscoveryActivation();
                         Refresh();
+                        ApplyAuthorizedProposals();
                         StateHasChanged();
                 }).ConfigureAwait(true));
         }
@@ -944,20 +947,29 @@
             try
             {
                 var resolvedTeamKey = ResolveAiAssistTeamKey();
+                var kind = ResolveInsertionKind();
+                var autoInsert = kind is "writing" or "spreadsheet";
+                var insertionTarget = autoInsert ? $"publisher-ai:{Guid.NewGuid():N}" : _textGenerationTarget.Trim();
                 var request = NewCouncilRequest(resolvedTeamKey);
                 request.RequestedOrganicCapabilities = ResolveAiAssistCapabilities();
                 request.ExternalProjectContextJson = System.Text.Json.JsonSerializer.Serialize(new
                 {
                     Source = "PublisherStudio",
-                    Target = _textGenerationTarget,
-                    Workflow = "Reviewable PublisherStudio AI Assist proposal",
+                    Target = insertionTarget,
+                    UserTarget = _textGenerationTarget,
+                    Workflow = autoInsert ? "User-authorized PublisherStudio document insertion" : "Reviewable PublisherStudio AI Assist proposal",
                     Profile = _aiAssistProfile,
                     TeamKey = resolvedTeamKey,
                     Publication = EditorState.Document.Name,
                     Page = EditorState.CurrentPage.Name,
                     SelectedElementId = EditorState.SelectedElement?.Id,
                     SelectedElementName = EditorState.SelectedElement?.Name,
-                    SelectedElementKind = EditorState.SelectedElement?.Kind.ToString()
+                    SelectedElementKind = EditorState.SelectedElement?.Kind.ToString(),
+                    // Bounded, existing publication previews only. Never put document contents in the navigation URL.
+                    SelectedStoryPreview = EditorState.SelectedElement is TextFrameElement story
+                        ? story.PreviewHtml[..Math.Min(story.PreviewHtml.Length, 12000)] : null,
+                    SelectedSpreadsheetPreview = EditorState.SelectedElement is SpreadsheetElement sheet
+                        ? sheet.PreviewHtml[..Math.Min(sheet.PreviewHtml.Length, 12000)] : null
                 });
                 request.Prompt = $"""
     PublisherStudio AI Assist request:
@@ -967,13 +979,22 @@
     {_textGenerationPrompt.Trim()}
 
     Required result contract:
-    1. Use the connected PublisherStudio context and any requested organic capability that is actually advertised; do not invent unavailable routes.
-    2. Generate the final reviewable text/result description for the target above. For spreadsheet, project or OpenSCAD work, preserve domain-specific structure and include exact source/formula/code where useful.
-    3. Before completing the Council run, invoke the LocalGPT DX function publisher.text.proposal.request with JSON parameters containing target, text and a concise reason.
-    4. Do not mutate the publication automatically. Once the user inserts the proposal it becomes ordinary PublisherStudio content and is included in normal HTML/export output.
+    1. Use available PublisherStudio context and registered capabilities; do not invent routes.
+    2. {(kind == "spreadsheet" ? "Return the requested workbook content as CSV text with rows and columns (or a valid Markdown table). Include formulas only as spreadsheet cells; do not generate executable scripts." : "Return the finished story/document as plain text with paragraph breaks, ready to insert in PublisherStudio.")}
+    3. Invoke the registered DX function publisher.text.proposal.request with parameters: target exactly '{insertionTarget}', text containing the full final result, and reason.
+    4. {(autoInsert ? "The user explicitly requested automatic insertion into the current PublisherStudio document. The receiving frontend checks this specific request and target before committing." : "Leave the result reviewable; the user will decide where to insert it.")}
     """;
-                var id = await Connection.SendCouncilRequestAsync(request).ConfigureAwait(true);
-                Notifications.Success($"Text-generation Council request {id} was submitted.", "Text proposal requested", nameof(OrganicPlugins));
+                if (autoInsert) DocumentInsertion.Authorize(insertionTarget, kind);
+                try
+                {
+                    var id = await Connection.SendCouncilRequestAsync(request).ConfigureAwait(true);
+                    Notifications.Success($"AI Assist Council request {id} was submitted.", "AI Assist requested", nameof(OrganicPlugins));
+                }
+                catch
+                {
+                    if (autoInsert) DocumentInsertion.Cancel(insertionTarget);
+                    throw;
+                }
                 _textGenerationPrompt = string.Empty;
             }
             catch (Exception ex)
@@ -986,6 +1007,45 @@
         catch (Exception __componentMethodException)
         {
             Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicPlugins)}.{nameof(GenerateTextProposalAsync)} failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Applies only locally authorized, correlated proposals on the Blazor UI dispatcher.</summary>
+    private void ApplyAuthorizedProposals()
+    {
+        try
+        {
+            foreach (var proposal in ResultStore.GetTextProposals())
+            {
+                if (!DocumentInsertion.TryApply(proposal)) continue;
+                ResultStore.RemoveTextProposal(proposal.Id);
+                Notifications.Success("AI result inserted into the publication and added to undo history.", "AI Assist", nameof(OrganicPlugins));
+            }
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Could not apply a locally authorized AI Assist proposal.");
+        }
+    }
+
+    /// <summary>Identifies the native PublisherStudio document representation to use for AI insertion.</summary>
+    private string ResolveInsertionKind()
+    {
+        try
+        {
+            if (_aiAssistProfile is "project" or "openscad") return _aiAssistProfile;
+            var task = _textGenerationPrompt.ToLowerInvariant();
+            if (task.Contains("spreadsheet", StringComparison.Ordinal) ||
+                task.Contains("csv", StringComparison.Ordinal) ||
+                task.Contains("table", StringComparison.Ordinal)) return "spreadsheet";
+            if (_aiAssistProfile is "spreadsheet" or "writing") return _aiAssistProfile;
+            if (EditorState.SelectedElement is SpreadsheetElement) return "spreadsheet";
+            return "writing";
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Could not determine the requested AI Assist document kind.");
             throw;
         }
     }
@@ -1003,6 +1063,9 @@
                 if (selected is null)
                 {
                     _textGenerationTarget = $"{EditorState.CurrentPage.Name} in {EditorState.Document.Name}";
+                    var pageQuery = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(new Uri(Navigation.Uri).Query);
+                    if (pageQuery.TryGetValue("assist", out var pageMode) && pageMode.ToString() is "writing" or "spreadsheet")
+                        _aiAssistProfile = pageMode.ToString();
                     return;
                 }
 
@@ -1015,6 +1078,10 @@
                     _ when selected.Name.Contains("OpenSCAD", StringComparison.OrdinalIgnoreCase) || selected.Name.Contains("3D", StringComparison.OrdinalIgnoreCase) => "openscad",
                     _ => "auto"
                 };
+                var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(new Uri(Navigation.Uri).Query);
+                if (query.TryGetValue("assist", out var requestedMode) &&
+                    requestedMode.ToString() is "writing" or "spreadsheet" or "openscad" or "project")
+                    _aiAssistProfile = requestedMode.ToString();
             }
             catch (Exception exception)
             {

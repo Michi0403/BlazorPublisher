@@ -36,6 +36,8 @@
   "Phrase.Clear␠rating": "Limpiar rating",
   "Phrase.Components␠in": "Componentes en",
   "Phrase.Copy": "Copiar",
+  "Phrase.Convert␠visible␠layers␠to␠GIF␠frames": "Convertir las capas visibles en fotogramas GIF",
+  "Phrase.Converted␠visible␠layers␠to␠GIF␠frames": "Capas visibles convertidas en fotogramas GIF",
   "Phrase.Council␠answer␠tokens": "Consejo respuesta tokens",
   "Phrase.Council␠context␠tokens": "Consejo contexto tokens",
   "Phrase.Council␠downloadable␠artifacts": "Consejo descargable artefactos",
@@ -3435,5 +3437,8 @@
   "Text.Choose␠the␠required␠argument,␠value,␠range,␠financial,␠target,␠or␠hierarchy␠fields␠for␠this␠visual.": "Choose the required argument, value, range, financial, target, or hierarchy fields for this visual.",
   "Text.This␠visual␠uses␠an␠embedded␠snapshot␠and␠the␠configured␠web␠binding.": "This visual uses an embedded snapshot and the configured web binding.",
   "Text.The␠visual␠uses␠publication␠data␠stored␠in␠the␠document.": "The visual uses publication data stored in the document.",
-  "Text.Finalizing␠recording…": "Finalizing recording…"
+  "Text.Finalizing␠recording…": "Finalizing recording…",
+  "Phrase.AI␠write␠story": "IA: escribir una historia",
+  "Phrase.AI␠create␠spreadsheet": "IA: crear una hoja de cálculo",
+  "Phrase.AI␠help␠with␠selected␠object": "IA: ayudar con el objeto seleccionado"
 }

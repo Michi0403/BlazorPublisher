@@ -1,0 +1,14 @@
+@namespace PublisherStudio.Components.Editor
+@inject ILogger<MediaStudioFooter> Logger
+@* razor-structural-renderer | reason: This is an existing media popup child surface; an added DxFormLayout or wrapper would change the popup layout and sizing. *@
+<footer class="media-studio-footer">
+    <span>@Status</span>
+    <div>
+        @if (DownloadAvailable)
+        {
+            <DxButton Text="@DownloadLabel" Click="@(() => DownloadRequested.InvokeAsync())" />
+        }
+        <DxButton Text="@CancelLabel" Click="@(() => CancelRequested.InvokeAsync())" />
+        <DxButton Text="@ApplyLabel" Enabled="@ApplyEnabled" Click="@(() => ApplyRequested.InvokeAsync())" RenderStyle="ButtonRenderStyle.Primary" />
+    </div>
+</footer>

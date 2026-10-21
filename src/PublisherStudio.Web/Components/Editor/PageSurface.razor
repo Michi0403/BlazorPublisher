@@ -6,6 +6,8 @@
 @inject ILogger<PageSurface> Logger
 @inject IPublisherRuntimePolicyDataService RuntimePolicy
 @inject PublicationEditorTextService EditorText
+@inject IFileLocalizationService Localization
+@inject NavigationManager Navigation
 
 <div class="razor-component-boundary">
 <DxFormLayout CssClass="razor-component-layout-owner PageSurface">
@@ -308,6 +310,16 @@
                 <DxContextMenuItem Text="@TimelineCommandText" Click="ToggleTimeline" />
             </Items>
         </DxContextMenuItem>
+        @if (State.SelectedElement is not null)
+        {
+            <DxContextMenuItem Text='@Localization.GetText("AI Assist selected object")' IconCssClass="pub-icon pub-icon-command" BeginGroup="true">
+                <Items>
+                    <DxContextMenuItem Text='@Localization.GetText("AI write story")' Click='() => OpenSelectedAiAssist("writing")' />
+                    <DxContextMenuItem Text='@Localization.GetText("AI create spreadsheet")' Click='() => OpenSelectedAiAssist("spreadsheet")' />
+                    <DxContextMenuItem Text='@Localization.GetText("AI help with selected object")' Click='() => OpenSelectedAiAssist("auto")' />
+                </Items>
+            </DxContextMenuItem>
+        }
         @if (State.SelectedElement is TextFrameElement textFrame)
         {
             <DxContextMenuItem Text="Edit story" IconCssClass="pub-icon pub-icon-edit" BeginGroup="true" Click="EditSelectedStory" />
@@ -967,7 +979,7 @@
                     $"{State.Document.View.GridSpacingMm.ToString("R", CultureInfo.InvariantCulture)}|{State.ConnectorTool}|{selectionKey}|{clipboardKey}";
                 var dataVisualLayoutKey = $"{State.CurrentPage.Id:N}|{State.Revision}|{State.Document.Zoom.ToString("R", CultureInfo.InvariantCulture)}|{State.Document.View.CanvasZoomMode}";
 
-                _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js?v=4.2.8").ConfigureAwait(true);
+                _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js?v=4.3.0").ConfigureAwait(true);
                 if (initializationKey != _canvasInitializationKey)
                 {
                     _self ??= DotNetObjectReference.Create(this);
@@ -1052,7 +1064,7 @@
     {
         try
         {
-            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js?v=4.2.8").ConfigureAwait(true);
+            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js?v=4.3.0").ConfigureAwait(true);
             var zoom = await _module.InvokeAsync<double>(
                 "calculateFitZoom",
                 "publisher-stage",
@@ -2096,12 +2108,25 @@
         }
     }
 
-    /// <summary>
-    /// Performs show element context menu for <see cref="PageSurface"/>, keeping the operation consistent with the state and invariants of the surrounding page surface workflow.
-    /// </summary>
-    /// <param name="element">Element value supplied to the page surface operation and used when producing its result.</param>
-    /// <param name="args">Args value supplied to the page surface operation and used when producing its result.</param>
-    /// <returns>A task that completes when the operation has finished.</returns>
+    /// <summary>Opens AI Assist with the selected object and requested native output kind.</summary>
+    /// <param name="kind">Requested supported AI Assist output kind.</param>
+    private void OpenSelectedAiAssist(string kind)
+    {
+        try
+        {
+            Navigation.NavigateTo("/organic-plugins?assist=" + Uri.EscapeDataString(kind));
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Could not open AI Assist for the selected publication element.");
+            throw;
+        }
+    }
+
+    /// <summary>Shows the native editor context menu for the selected element.</summary>
+    /// <param name="element">Element at the pointer position.</param>
+    /// <param name="args">Pointer event coordinates.</param>
+    /// <returns>A task for context menu display.</returns>
     private async Task ShowElementContextMenu(PublicationElement element, MouseEventArgs args)
     {
         try
@@ -2112,7 +2137,7 @@
             {
                 try
                 {
-                    _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js?v=4.2.8").ConfigureAwait(true);
+                    _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/publisherInterop.js?v=4.3.0").ConfigureAwait(true);
                     var point = await _module.InvokeAsync<double[]>("elementRelativePoint", "publisher-page", element.Id.ToString("D"), args.ClientX, args.ClientY).ConfigureAwait(true);
                     if (point.Length >= 2)
                     {

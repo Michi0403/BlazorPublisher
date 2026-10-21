@@ -36,6 +36,8 @@
   "Phrase.Clear␠rating": "Bewertung löschen",
   "Phrase.Components␠in": "Komponenten in",
   "Phrase.Copy": "Kopieren",
+  "Phrase.Convert␠visible␠layers␠to␠GIF␠frames": "Sichtbare Ebenen in GIF-Einzelbilder umwandeln",
+  "Phrase.Converted␠visible␠layers␠to␠GIF␠frames": "Sichtbare Ebenen wurden in GIF-Einzelbilder umgewandelt",
   "Phrase.Council␠answer␠tokens": "Antworttoken des KI-Rats",
   "Phrase.Council␠context␠tokens": "Kontexttoken des KI-Rats",
   "Phrase.Council␠downloadable␠artifacts": "Herunterladbare Rat-Artefakte",
@@ -3435,5 +3437,8 @@
   "Text.Choose␠the␠required␠argument,␠value,␠range,␠financial,␠target,␠or␠hierarchy␠fields␠for␠this␠visual.": "Wählen Sie die erforderlichen Argument-, Wert-, Bereichs-, Finanz-, Ziel- oder Hierarchiefelder für diese Datenvisualisierung.",
   "Text.This␠visual␠uses␠an␠embedded␠snapshot␠and␠the␠configured␠web␠binding.": "Diese Datenvisualisierung verwendet einen eingebetteten Snapshot und die konfigurierte Webbindung.",
   "Text.The␠visual␠uses␠publication␠data␠stored␠in␠the␠document.": "Die Datenvisualisierung verwendet im Dokument gespeicherte Publikationsdaten.",
-  "Text.Finalizing␠recording…": "Aufnahme wird abgeschlossen…"
+  "Text.Finalizing␠recording…": "Aufnahme wird abgeschlossen…",
+  "Phrase.AI␠write␠story": "KI: Geschichte schreiben",
+  "Phrase.AI␠create␠spreadsheet": "KI: Tabellenkalkulation erstellen",
+  "Phrase.AI␠help␠with␠selected␠object": "KI: Ausgewähltes Objekt bearbeiten"
 }

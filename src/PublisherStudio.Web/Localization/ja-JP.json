@@ -36,6 +36,8 @@
   "Phrase.Clear␠rating": "クリア rating",
   "Phrase.Components␠in": "コンポーネント：",
   "Phrase.Copy": "コピー",
+  "Phrase.Convert␠visible␠layers␠to␠GIF␠frames": "表示中のレイヤーをGIFフレームに変換",
+  "Phrase.Converted␠visible␠layers␠to␠GIF␠frames": "表示中のレイヤーをGIFフレームに変換しました",
   "Phrase.Council␠answer␠tokens": "評議会回答 tokens",
   "Phrase.Council␠context␠tokens": "評議会コンテキスト tokens",
   "Phrase.Council␠downloadable␠artifacts": "評議会ダウンロード可能成果物",
@@ -3435,5 +3437,8 @@
   "Text.Choose␠the␠required␠argument,␠value,␠range,␠financial,␠target,␠or␠hierarchy␠fields␠for␠this␠visual.": "Choose the required argument, value, range, financial, target, or hierarchy fields for this visual.",
   "Text.This␠visual␠uses␠an␠embedded␠snapshot␠and␠the␠configured␠web␠binding.": "This visual uses an embedded snapshot and the configured web binding.",
   "Text.The␠visual␠uses␠publication␠data␠stored␠in␠the␠document.": "The visual uses publication data stored in the document.",
-  "Text.Finalizing␠recording…": "Finalizing recording…"
+  "Text.Finalizing␠recording…": "Finalizing recording…",
+  "Phrase.AI␠write␠story": "AIでストーリーを書く",
+  "Phrase.AI␠create␠spreadsheet": "AIでスプレッドシートを作成",
+  "Phrase.AI␠help␠with␠selected␠object": "選択したオブジェクトをAIで支援"
 }

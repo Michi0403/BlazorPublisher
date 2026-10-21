@@ -174,6 +174,9 @@ public static class PublisherStudioServiceCollectionExtensions
         AddSingleton<IOrganicResultStore, OrganicResultStore>(services);
         AddSingleton<IOrganicReplayPolicyDataService, OrganicReplayPolicyDataService>(services);
         AddSingleton<IOrganicReplayGuard, OrganicReplayGuard>(services);
+        AddSingleton<IOrganicExecutableCapabilityHandler, MediaConversionJobsOrganicHandler>(services);
+        AddSingleton<IOrganicExecutableCapabilityHandler, MediaConversionProfilesOrganicHandler>(services);
+        AddSingleton<IOrganicExecutableCapabilityHandler, MediaConversionCancelOrganicHandler>(services);
         AddSingleton<IOrganicWorkExecutor, OrganicWorkExecutor>(services);
         AddSingleton<IOrganicWorkCoordinator, OrganicWorkCoordinator>(services);
         AddSingleton<ILocalGptConnectionService, LocalGptConnectionService>(services);
@@ -183,6 +186,7 @@ public static class PublisherStudioServiceCollectionExtensions
         services.AddHostedService<LocalGptDiscoveryHostedService>();
 
         AddScoped<EditorStateService, EditorStateService>(services);
+        AddScoped<PublisherAiDocumentInsertionService, PublisherAiDocumentInsertionService>(services);
         AddScoped<PictureEditorStateService, PictureEditorStateService>(services);
         AddArchitectureDescriptors(services);
         services.Configure<DebugExceptionDiagnosticsOptions>(configuration.GetSection("PublisherStudio:DebugExceptionDiagnostics"));

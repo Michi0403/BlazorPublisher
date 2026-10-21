@@ -77,6 +77,110 @@ public sealed class PictureDocumentService
 }
 
     /// <summary>
+    /// Creates the bounded render view of one animation frame while retaining the
+    /// canonical editable document, all layer metadata, and animation timing.
+    /// Large GIF frame payloads are transported only for the requested frame;
+    /// common raster, vector, effect, and paint layers remain visible in each frame.
+    /// </summary>
+    /// <param name="document">Authoritative editable picture document.</param>
+    /// <param name="frameIndex">Requested zero-based animation frame.</param>
+    /// <returns>A render-only projection without other frames' raster payloads.</returns>
+    public PictureDocument CreateFrameRenderProjection(PictureDocument document, int frameIndex)
+    {
+        try
+        {
+            ArgumentNullException.ThrowIfNull(document);
+            if (document.AnimationFrameDelaysMs.Count == 0) return document;
+            if (frameIndex < 0 || frameIndex >= document.AnimationFrameDelaysMs.Count)
+                throw new ArgumentOutOfRangeException(nameof(frameIndex));
+
+            return new PictureDocument
+            {
+                Id = document.Id,
+                Name = document.Name,
+                FormatVersion = document.FormatVersion,
+                WidthPx = document.WidthPx,
+                HeightPx = document.HeightPx,
+                Background = document.Background,
+                Zoom = document.Zoom,
+                GridVisible = document.GridVisible,
+                SnapToGrid = document.SnapToGrid,
+                GridSpacingPx = document.GridSpacingPx,
+                AnimationFrameDelaysMs = document.AnimationFrameDelaysMs,
+                ActiveAnimationFrame = frameIndex,
+                AnimationLoopCount = document.AnimationLoopCount,
+                Layers = document.Layers.Where(layer => layer.AnimationFrameIndex < 0 ||
+                    layer.AnimationFrameIndex == frameIndex).ToList()
+            };
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Trace.TraceError($"Service method PictureDocumentService.CreateFrameRenderProjection failed: {ex}");
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Reconciles GIF timing with the actual ordered, independently editable frame layers
+    /// after a layer is added, copied, moved, or removed. Static layers retain their own
+    /// positions, effects and content; no GIF action rewrites them.
+    /// </summary>
+    /// <param name="document">The authoritative picture document.</param>
+    /// <param name="preferredLayerId">The selected frame that should remain active, when present.</param>
+    public void SynchronizeAnimationFrameLayers(PictureDocument document, Guid? preferredLayerId)
+    {
+        try
+        {
+            ArgumentNullException.ThrowIfNull(document);
+            var frames = document.Layers.Where(layer => layer.AnimationFrameIndex >= 0 &&
+                !layer.AnimationFrameIsOverlay).ToList();
+            if (frames.Count > 500)
+                throw new InvalidDataException("An animated GIF may contain no more than 500 editable frames.");
+            if (frames.Count == 0)
+            {
+                document.Layers.RemoveAll(layer => layer.AnimationFrameIsOverlay);
+                document.AnimationFrameDelaysMs.Clear();
+                document.ActiveAnimationFrame = 0;
+                return;
+            }
+
+            // Capture the former frame identity before assigning new sequential indices.
+            // Duplicates inherit the source frame's duration; reordering moves duration
+            // with its frame instead of silently changing playback timing.
+            var formerActive = document.Layers.FirstOrDefault(layer =>
+                layer.AnimationFrameIndex == document.ActiveAnimationFrame && layer.AnimationFrameIndex >= 0);
+            var oldDelays = document.AnimationFrameDelaysMs.ToArray();
+            var newDelays = frames.Select(layer =>
+                layer.AnimationFrameIndex < oldDelays.Length
+                    ? Math.Clamp(oldDelays[layer.AnimationFrameIndex], 20, 655350)
+                    : 100).ToList();
+            var oldIndices = frames.Select(layer => layer.AnimationFrameIndex).ToArray();
+            // Overlay paint layers follow their former frame identity during reorder.
+            // Remove orphan overlays if their parent frame was deleted.
+            var overlays = document.Layers.Where(layer => layer.AnimationFrameIsOverlay).ToList();
+            foreach (var overlay in overlays)
+            {
+                var nextIndex = Array.IndexOf(oldIndices, overlay.AnimationFrameIndex);
+                if (nextIndex < 0) document.Layers.Remove(overlay);
+                else overlay.AnimationFrameIndex = nextIndex;
+            }
+            for (var index = 0; index < frames.Count; index++)
+                frames[index].AnimationFrameIndex = index;
+            document.AnimationFrameDelaysMs = newDelays;
+
+            var selectedFrame = frames.FirstOrDefault(layer => layer.Id == preferredLayerId)
+                ?? (formerActive is null ? null : frames.FirstOrDefault(layer => layer.Id == formerActive.Id))
+                ?? frames[0];
+            document.ActiveAnimationFrame = selectedFrame.AnimationFrameIndex;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Trace.TraceError($"Service method PictureDocumentService.SynchronizeAnimationFrameLayers failed: {ex}");
+            throw;
+        }
+    }
+
+    /// <summary>
     /// Adds raster layer as part of the picture document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     /// <param name="document">Document value supplied to the picture document operation and used when producing its result.</param>

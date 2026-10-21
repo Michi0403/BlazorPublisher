@@ -9,10 +9,12 @@ $RepositoryRoot = [IO.Path]::GetFullPath($RepositoryRoot)
 $inventoryPath = Join-Path $PSScriptRoot 'obsolete-python-maintenance.sha256'
 if (-not (Test-Path -LiteralPath $inventoryPath -PathType Leaf)) { throw "Missing Python migration inventory: $inventoryPath" }
 $backupRoot = Join-Path $RepositoryRoot 'artifacts/.build-storage/retired-python-maintenance'
+# Exact legacy test names are from the 4.3.4 release; only these overlay remnants are migrated.
+# Other Python sources remain forbidden by Assert-MaintenanceArchitecture.ps1.
 $movedCount = 0
 foreach ($line in [IO.File]::ReadAllLines($inventoryPath)) {
     if ([string]::IsNullOrWhiteSpace($line)) { continue }
-    if ($line -notmatch '^(?<hash>[a-f0-9]{64})  (?<relative>(?:(?:build|\.github/scripts)/[A-Za-z0-9_.\/-]+\.py|build/PythonRuntime\.Common\.ps1))$') {
+    if ($line -notmatch '^(?<hash>[a-f0-9]{64})  (?<relative>(?:(?:build|\.github/scripts)/[A-Za-z0-9_.\/-]+\.py|tests/static/test_(?:goal_bridge_release|goal_identity_release|organic_capability_release)\.py|build/PythonRuntime\.Common\.ps1))$') {
         throw "Malformed or unsafe obsolete-maintenance inventory entry: $line"
     }
     $relative = $Matches['relative']

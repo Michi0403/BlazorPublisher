@@ -143,6 +143,8 @@ public abstract class PictureLayer
     public abstract PictureLayerKind Kind { get; }
     /// <summary>Owning animation frame, or -1 for a layer visible in every GIF frame.</summary>
     public int AnimationFrameIndex { get; set; } = -1;
+    /// <summary>Marks an auxiliary frame-local edit rather than a timed frame keyframe.</summary>
+    public bool AnimationFrameIsOverlay { get; set; }
     /// <summary>
     /// Gets or sets the x value that forms part of the picture layer state consumed or produced by the surrounding workflow.
     /// </summary>

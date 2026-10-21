@@ -391,11 +391,26 @@ public interface IOrganicWorkCoordinator
     bool Decline(Guid id, string reason);
 }
 
-/// <summary>
-/// Defines the contract for organic work executor behavior, allowing callers to depend on the capability without coupling to a concrete implementation.
-/// </summary>
+/// <summary>Extensible executable handler for a catalog-backed PublisherStudio 1-Wire capability.</summary>
+public interface IOrganicExecutableCapabilityHandler
+{
+    /// <summary>Stable key matching the configurable PublisherStudio DX capability catalog.</summary>
+    /// <value>Exact executable capability identifier.</value>
+    string CapabilityKey { get; }
+    /// <summary>Runs only after the normal 1-Wire coordinator has applied the caller's permission and approval rules.</summary>
+    /// <param name="envelope">Validated and approved work envelope.</param>
+    /// <param name="cancellationToken">Cancels execution.</param>
+    /// <returns>A serializable result, with no implicit publication mutation.</returns>
+    Task<object> ExecuteAsync(OrganicWireEnvelope envelope, CancellationToken cancellationToken = default);
+}
+
+/// <summary>Dispatches authorized PublisherStudio organic work to native or registered executable handlers.</summary>
 public interface IOrganicWorkExecutor
 {
+    /// <summary>Determines whether a catalog key has a real registered executable handler.</summary>
+    /// <param name="capabilityKey">Catalog identifier to check.</param>
+    /// <returns>True only if the capability can be dispatched.</returns>
+    bool SupportsCapability(string capabilityKey);
     /// <summary>
     /// Performs execute for <see cref="IOrganicWorkExecutor"/>, keeping the operation consistent with the state and invariants of the surrounding organic work executor workflow.
     /// </summary>

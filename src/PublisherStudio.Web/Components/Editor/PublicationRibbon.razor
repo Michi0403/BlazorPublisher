@@ -265,7 +265,11 @@
     {
         <DxRibbonTab Text='@LT("LocalGPT AI")'>
             <DxRibbonGroup Text='@LT("Create with AI")' IconCssClass="pub-icon pub-icon-command">
-                <DxRibbonItem Text='@LT("AI Assist selected object")' IconCssClass="pub-icon pub-icon-command" IsPrimary="true" Click="OpenOrganicPlugins" />
+                <DxRibbonItem Text='@LT("AI Assist selected object")' IconCssClass="pub-icon pub-icon-command" IsPrimary="true" DropDownCssClass="publisher-ribbon-menu">
+                    <DxRibbonItem Text='@LT("AI write story")' Click='() => OpenAiAssistForSelected("writing")' />
+                    <DxRibbonItem Text='@LT("AI create spreadsheet")' Click='() => OpenAiAssistForSelected("spreadsheet")' />
+                    <DxRibbonItem Text='@LT("AI help with selected object")' Click='() => OpenAiAssistForSelected("auto")' />
+                </DxRibbonItem>
                 @if (HasCouncilTeam("openscad-team"))
                 {
                     <DxRibbonItem Text='@LT("OpenSCAD Team")' IconCssClass="pub-icon pub-icon-effects" Click="OpenOrganicPlugins" />
@@ -724,9 +728,22 @@
         }
     }
 
-    /// <summary>
-    /// Opens organic plugins for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
-    /// </summary>
+    /// <summary>Opens object-aware AI Assist without copying publication content into the URL.</summary>
+    /// <param name="kind">Requested AI output kind.</param>
+    private void OpenAiAssistForSelected(string kind)
+    {
+        try
+        {
+            Navigation.NavigateTo("/organic-plugins?assist=" + Uri.EscapeDataString(kind));
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Could not open object-aware AI Assist.");
+            throw;
+        }
+    }
+
+    /// <summary>Opens the organic plugin assistance page.</summary>
     private void OpenOrganicPlugins() {
         try
         {

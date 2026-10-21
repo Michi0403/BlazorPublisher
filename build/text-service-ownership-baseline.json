@@ -38,5 +38,8 @@
   "src/PublisherStudio.Web/Controllers/AssetController.cs|: Request.ContentType.Split(';', 2)[0].Trim();",
   "src/PublisherStudio.Web/Controllers/AutomationController.cs|var mimeType = metadata.Split(';', 2)[0].Replace(\"data:\", string.Empty, StringComparison.OrdinalIgnoreCase);",
   "src/PublisherStudio.Web/Controllers/SpreadsheetController.cs|var replaced = _sessions.Replace(",
-  "src/PublisherStudio.Web/Controllers/SpreadsheetController.cs|var replaced = _sessions.Replace(sessionId, workbook.FileName, format, output.ToArray());"
+  "src/PublisherStudio.Web/Controllers/SpreadsheetController.cs|var replaced = _sessions.Replace(sessionId, workbook.FileName, format, output.ToArray());",
+  "src/PublisherStudio.Web/Components/Editor/MediaStudio.SourceAndRecordingOptions.razor.cs|+ (unmatched.Count == 0 ? string.Empty : $\" Unmatched: {string.Join(\", \", unmatched.Take(8))}.\");",
+  "src/PublisherStudio.Web/Components/Editor/MediaStudio.SourceAndRecordingOptions.razor.cs|var clean = value.Trim().Replace('\\\\', '/');",
+  "src/PublisherStudio.Web/Components/Editor/MediaStudio.SourceAndRecordingOptions.razor.cs|clean = uri.LocalPath.Replace('\\\\', '/');"
 ]

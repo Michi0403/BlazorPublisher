@@ -166,13 +166,14 @@
                         <DxRibbonItem IconCssClass="pub-icon pub-icon-download" Text='@LT("Download")' DropDownCssClass="publisher-ribbon-menu">
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-download" Text='@LT("Download merged PNG")' Click="DownloadPng" />
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-download" Text='@LT("Download merged JPEG")' Click="DownloadJpeg" />
-                            <DxRibbonItem IconCssClass="pub-icon pub-icon-download" Text='@LT("Download animated GIF")' Enabled="@(!IsPictureExporting)" Click="DownloadGif" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-download" Text='@LT("Download animated GIF")' Enabled="@(!IsPictureBusy)" Click="DownloadGif" />
+                            <DxRibbonItem IconCssClass="pub-icon pub-icon-picture" Text='@LT("Convert visible layers to GIF frames")' Enabled="@CanConvertLayersToGif" Click="ConvertVisibleLayersToGifFrames" />
                             <DxRibbonItem IconCssClass="pub-icon pub-icon-download" Text='@LT("Download layered SVG")' Click="DownloadSvg" />
                         </DxRibbonItem>
                     </DxRibbonGroup>
                     <DxRibbonGroup Text='@LT("Publication")'>
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-picture" Text="@(EditingExisting ? LT("Apply layered") : LT("Insert layered"))" Enabled="@(!IsPictureExporting)" IsPrimary="true" Click="ApplyLayered" />
-                        <DxRibbonItem IconCssClass="pub-icon pub-icon-picture" Text="@(EditingExisting ? LT("Apply merged") : LT("Insert merged"))" Enabled="@(!IsPictureExporting)" Click="ApplyMerged" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-picture" Text="@(EditingExisting ? LT("Apply layered") : LT("Insert layered"))" Enabled="@(!IsPictureBusy)" IsPrimary="true" Click="ApplyLayered" />
+                        <DxRibbonItem IconCssClass="pub-icon pub-icon-picture" Text="@(EditingExisting ? LT("Apply merged") : LT("Insert merged"))" Enabled="@(!IsPictureBusy)" Click="ApplyMerged" />
                         <DxRibbonItem IconCssClass="pub-icon pub-icon-command" Text='@LT("Cancel")' Click="Cancel" />
                     </DxRibbonGroup>
                 </DxRibbonTab>
@@ -856,8 +857,8 @@
                 </div>
                 <div>
                     <DxButton Text='@LT("Cancel")' Click="Cancel" />
-                    <DxButton Text="@(IsPictureExporting ? LT("Rendering…") : EditingExisting ? LT("Apply layered") : LT("Insert layered"))" Enabled="@(!IsPictureExporting)" RenderStyle="ButtonRenderStyle.Primary" Click="ApplyLayered" />
-                    <DxButton Text="@(EditingExisting ? LT("Apply merged") : LT("Insert merged"))" Enabled="@(!IsPictureExporting)" Click="ApplyMerged" />
+                    <DxButton Text="@(IsPictureExporting ? LT("Rendering…") : EditingExisting ? LT("Apply layered") : LT("Insert layered"))" Enabled="@(!IsPictureBusy)" RenderStyle="ButtonRenderStyle.Primary" Click="ApplyLayered" />
+                    <DxButton Text="@(EditingExisting ? LT("Apply merged") : LT("Insert merged"))" Enabled="@(!IsPictureBusy)" Click="ApplyMerged" />
                 </div>
             </footer>
         </div>

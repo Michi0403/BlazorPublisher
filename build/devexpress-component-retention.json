@@ -79,8 +79,8 @@
       "MaximumNativeDisclosureTags": 10
     },
     "src/PublisherStudio.Web/Components/Editor/MediaStudio.razor": {
-      "MinimumDevExpressTags": 202,
-      "MaximumNativeInteractiveTags": 139,
+      "MinimumDevExpressTags": 200,
+      "MaximumNativeInteractiveTags": 138,
       "MaximumNativeDisclosureTags": 2
     },
     "src/PublisherStudio.Web/Components/Editor/NewPublicationDialog.razor": {
@@ -251,6 +251,16 @@
     "src/PublisherStudio.Web/Components/_Imports.razor": {
       "MinimumDevExpressTags": 0,
       "MaximumNativeInteractiveTags": 0,
+      "MaximumNativeDisclosureTags": 0
+    },
+    "src/PublisherStudio.Web/Components/Editor/MediaStudioFooter.razor": {
+      "MinimumDevExpressTags": 3,
+      "MaximumNativeInteractiveTags": 0,
+      "MaximumNativeDisclosureTags": 0
+    },
+    "src/PublisherStudio.Web/Components/Editor/MediaStudioTitlebar.razor": {
+      "MinimumDevExpressTags": 0,
+      "MaximumNativeInteractiveTags": 1,
       "MaximumNativeDisclosureTags": 0
     }
   }

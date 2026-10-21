@@ -11,11 +11,13 @@ namespace PublisherStudio.Services.OrganicPlugins;
 /// <param name="functionCatalog">Publisher devexpress function catalog data service dependency used by the object store organic capability workflow to provide the corresponding application capability.</param>
 /// <param name="legacyMetadataCatalog">Organic capability catalog dependency used by the object store organic capability workflow to provide the corresponding application capability.</param>
 /// <param name="mediaConversion">Media conversion service dependency used by the object store organic capability workflow to provide the corresponding application capability.</param>
+/// <param name="executor">Authoritative set of executable native and DI-owned capability keys.</param>
 /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class ObjectStoreOrganicCapabilityCatalog(
     IPublisherDxFunctionCatalogDataService functionCatalog,
     OrganicCapabilityCatalog legacyMetadataCatalog,
     IMediaConversionService mediaConversion,
+    IOrganicWorkExecutor executor,
     ILogger<ObjectStoreOrganicCapabilityCatalog> logger) : IOrganicCapabilityCatalog
 {
     /// <summary>
@@ -37,6 +39,13 @@ public sealed class ObjectStoreOrganicCapabilityCatalog(
         try
         {
             var capabilities = (await functionCatalog.GetFunctionsAsync(cancellationToken).ConfigureAwait(false)).ToList();
+            // The catalog is authoritative for policy but it cannot manufacture an executable
+            // implementation. Keep unsupported user-owned descriptors visible, not invocable.
+            foreach (var capability in capabilities)
+            {
+                if (!executor.SupportsCapability(capability.Key))
+                    capability.IsOnline = false;
+            }
             var media = await mediaConversion.GetCapabilitiesAsync(cancellationToken).ConfigureAwait(false);
             var mediaCapability = capabilities.FirstOrDefault(item =>
                 string.Equals(item.Key, "publisher.media.capabilities", StringComparison.OrdinalIgnoreCase));

@@ -111,7 +111,9 @@ public sealed class PictureEditorStateService
     try
     {
             Document = _documents.Clone(document);
-            SelectedLayerId = Document.Layers.LastOrDefault()?.Id;
+            SelectedLayerId = Document.Layers.FirstOrDefault(layer =>
+                layer.AnimationFrameIndex >= 0 && layer.AnimationFrameIndex == Document.ActiveAnimationFrame)?.Id
+                ?? Document.Layers.LastOrDefault()?.Id;
             ResetHistory();
             Notify();
     
@@ -357,9 +359,23 @@ public sealed class PictureEditorStateService
                 ? _documentFactory.CreatePicture(width, height, true)
                 : _documents.Clone(Document);
             if (startNew) staged.Name = name;
-            if (!startNew && replaceLayerId is Guid id)
-                staged.Layers.RemoveAll(layer => layer.Id == id);
-            staged.Layers.RemoveAll(layer => layer.AnimationFrameIndex >= 0);
+            // A PictureDocument has one animation timeline. A second GIF cannot
+            // overwrite the existing frames; preserve every existing layer and
+            // require a separately created document until multiple timelines exist.
+            if (!startNew && staged.AnimationFrameDelaysMs.Count > 0)
+                throw new InvalidOperationException("This picture already contains an animated timeline. The existing GIF layers were preserved; open the new GIF in its own picture document.");
+            // Use the ordinary raster placeholder's edited/inserted geometry.
+            // GIF decoding must not move its image to the document origin or
+            // expand it over the unrelated layer graph.
+            var replacedLayer = !startNew && replaceLayerId is Guid id
+                ? staged.Layers.FirstOrDefault(layer => layer.Id == id) : null;
+            var insertionIndex = replacedLayer is null ? staged.Layers.Count : staged.Layers.IndexOf(replacedLayer);
+            if (replacedLayer is not null)
+            {
+                if (replacedLayer.Locked)
+                    throw new InvalidOperationException("The target layer is locked and cannot be replaced with GIF frames.");
+                staged.Layers.Remove(replacedLayer);
+            }
             staged.AnimationFrameDelaysMs = frames.Select(frame => Math.Clamp(frame.DelayMs, 20, 655350)).ToList();
             staged.ActiveAnimationFrame = 0;
             staged.AnimationLoopCount = 0;
@@ -370,11 +386,51 @@ public sealed class PictureEditorStateService
                     $"GIF frame {index + 1:000}", width, height, width / 2d, height / 2d);
                 layer.Name = $"GIF frame {index + 1:000} ({staged.AnimationFrameDelaysMs[index]} ms)";
                 layer.GroupPath = "GIF frames";
-                layer.X = 0;
-                layer.Y = 0;
-                layer.Width = staged.WidthPx;
-                layer.Height = staged.HeightPx;
+                layer.X = replacedLayer?.X ?? 0;
+                layer.Y = replacedLayer?.Y ?? 0;
+                layer.Width = replacedLayer?.Width ?? staged.WidthPx;
+                layer.Height = replacedLayer?.Height ?? staged.HeightPx;
+                layer.Rotation = replacedLayer?.Rotation ?? 0;
+                layer.Opacity = replacedLayer?.Opacity ?? 1;
+                if (replacedLayer is not null)
+                {
+                    // Import is an enhancement of the *existing* raster layer,
+                    // not a destructive rewrite of normal picture adjustments.
+                    layer.Visible = replacedLayer.Visible;
+                    layer.Locked = replacedLayer.Locked;
+                    layer.BlendMode = replacedLayer.BlendMode;
+                    layer.ClipPolygon = replacedLayer.ClipPolygon.Select(point => new PicturePoint
+                    {
+                        X = point.X, Y = point.Y
+                    }).ToList();
+                    layer.ClipInverted = replacedLayer.ClipInverted;
+                    layer.Brightness = replacedLayer.Brightness;
+                    layer.Contrast = replacedLayer.Contrast;
+                    layer.Saturation = replacedLayer.Saturation;
+                    layer.HueRotation = replacedLayer.HueRotation;
+                    layer.Blur = replacedLayer.Blur;
+                    layer.Grayscale = replacedLayer.Grayscale;
+                    layer.Sepia = replacedLayer.Sepia;
+                    layer.Invert = replacedLayer.Invert;
+                    if (replacedLayer is RasterPictureLayer raster)
+                    {
+                        layer.FitMode = raster.FitMode;
+                        layer.FlipHorizontal = raster.FlipHorizontal;
+                        layer.FlipVertical = raster.FlipVertical;
+                        layer.TintColor = raster.TintColor;
+                        layer.TintOpacity = raster.TintOpacity;
+                        layer.ColorizeMode = raster.ColorizeMode;
+                        layer.ColorizeSourceColor = raster.ColorizeSourceColor;
+                        layer.ColorizeTargetColor = raster.ColorizeTargetColor;
+                        layer.ColorizeTolerance = raster.ColorizeTolerance;
+                        layer.ColorizeStrength = raster.ColorizeStrength;
+                    }
+                }
                 layer.AnimationFrameIndex = index;
+                // Preserve the placeholder's exact stack position relative to
+                // shapes, paint strokes, effects and other raster/vector layers.
+                staged.Layers.Remove(layer);
+                staged.Layers.Insert(Math.Min(insertionIndex + index, staged.Layers.Count), layer);
                 firstLayerId ??= layer.Id;
             }
 
@@ -391,6 +447,39 @@ public sealed class PictureEditorStateService
         }
     }
 
+    /// <summary>
+    /// Converts the visible layers of a static multilayer picture into ordered GIF frames.
+    /// The operation is explicit and undoable. Layer kinds, transforms and raster data
+    /// remain in the canonical document; only their animation-frame ownership changes.
+    /// </summary>
+    /// <param name="delayMs">Duration assigned to each layer frame in milliseconds.</param>
+    /// <returns>True when two or more visible layers became editable animation frames.</returns>
+    public bool ConvertVisibleLayersToGifFrames(int delayMs = 100)
+    {
+        try
+        {
+            if (Document.AnimationFrameDelaysMs.Count > 0) return false;
+            var frames = Document.Layers.Where(layer => layer.Visible).ToList();
+            if (frames.Count is < 2 or > 500 ||
+                (long)Document.WidthPx * Document.HeightPx * frames.Count > 100_000_000)
+                return false;
+            Capture();
+            for (var index = 0; index < frames.Count; index++)
+                frames[index].AnimationFrameIndex = index;
+            Document.AnimationFrameDelaysMs = Enumerable.Repeat(Math.Clamp(delayMs, 20, 655350), frames.Count).ToList();
+            Document.ActiveAnimationFrame = 0;
+            Document.AnimationLoopCount = 0;
+            SelectedLayerId = frames[0].Id;
+            Notify();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Trace.TraceError($"Service method PictureEditorStateService.ConvertVisibleLayersToGifFrames failed: {ex}");
+            throw;
+        }
+    }
+
     /// <summary>Changes the GIF preview frame without changing the actual image layers.</summary>
     /// <param name="frameIndex">Zero-based frame index.</param>
     public void SetActiveAnimationFrame(int frameIndex)
@@ -399,6 +488,8 @@ public sealed class PictureEditorStateService
         {
             if (frameIndex < 0 || frameIndex >= Document.AnimationFrameDelaysMs.Count) return;
             Document.ActiveAnimationFrame = frameIndex;
+            var currentFrame = Document.Layers.FirstOrDefault(layer => layer.AnimationFrameIndex == frameIndex);
+            if (currentFrame is not null) SelectedLayerId = currentFrame.Id;
             EndLiveEdit();
             Notify(false);
         }
@@ -462,8 +553,18 @@ public sealed class PictureEditorStateService
             ArgumentNullException.ThrowIfNull(importedDocument);
             var imported = _documents.Clone(importedDocument);
             if (imported.Layers.Count == 0) return 0;
+            if (imported.AnimationFrameDelaysMs.Count > 0 && Document.AnimationFrameDelaysMs.Count > 0)
+                throw new InvalidDataException("Both documents contain animated frames. Import each GIF into a separate timeline instead of overwriting existing layer timing.");
 
             Capture();
+            // An exported layered SVG can contain the authoritative PictureDocument
+            // (including GIF frame layers). Keep its timing when appending that SVG.
+            if (imported.AnimationFrameDelaysMs.Count > 0)
+            {
+                Document.AnimationFrameDelaysMs = imported.AnimationFrameDelaysMs.ToList();
+                Document.AnimationLoopCount = imported.AnimationLoopCount;
+                Document.ActiveAnimationFrame = imported.ActiveAnimationFrame;
+            }
             var scale = Math.Min(
                 Document.WidthPx * .84 / Math.Max(1, imported.WidthPx),
                 Document.HeightPx * .84 / Math.Max(1, imported.HeightPx));
@@ -487,6 +588,8 @@ public sealed class PictureEditorStateService
                 SelectedLayerId = layer.Id;
             }
 
+            if (imported.AnimationFrameDelaysMs.Count > 0)
+                _documents.SynchronizeAnimationFrameLayers(Document, SelectedLayerId);
             Notify();
             return imported.Layers.Count;
     
@@ -826,9 +929,29 @@ public sealed class PictureEditorStateService
             if (points.Count < 2) return;
             Capture();
             var layer = SelectedLayer as PaintPictureLayer;
-            if ((layer is null || layer.Locked) && kind == PictureStrokeKind.Eraser)
-                layer = Document.Layers.OfType<PaintPictureLayer>().LastOrDefault(candidate => !candidate.Locked);
-            if (layer is null || layer.Locked) layer = CreatePaintLayer(kind == PictureStrokeKind.Eraser ? "Eraser" : "Paint");
+            if (Document.AnimationFrameDelaysMs.Count > 0)
+            {
+                // A paint stroke while viewing GIF frame N must not appear on every frame.
+                var frameIndex = Document.ActiveAnimationFrame;
+                if (layer?.AnimationFrameIndex != frameIndex || layer.AnimationFrameIsOverlay != true)
+                    layer = Document.Layers.OfType<PaintPictureLayer>().LastOrDefault(candidate =>
+                        !candidate.Locked && candidate.AnimationFrameIsOverlay &&
+                        candidate.AnimationFrameIndex == frameIndex);
+                if (layer is null || layer.Locked)
+                {
+                    layer = CreatePaintLayer(kind == PictureStrokeKind.Eraser ? "Eraser" : "Paint");
+                    layer.AnimationFrameIndex = frameIndex;
+                    layer.AnimationFrameIsOverlay = true;
+                    layer.GroupPath = "GIF frame edits";
+                }
+            }
+            else
+            {
+                if ((layer is null || layer.Locked) && kind == PictureStrokeKind.Eraser)
+                    layer = Document.Layers.OfType<PaintPictureLayer>().LastOrDefault(candidate => !candidate.Locked);
+                if (layer is null || layer.Locked)
+                    layer = CreatePaintLayer(kind == PictureStrokeKind.Eraser ? "Eraser" : "Paint");
+            }
             var stroke = new PictureStroke
             {
                 Kind = kind,
@@ -887,6 +1010,12 @@ public sealed class PictureEditorStateService
             var index = Document.Layers.IndexOf(layer);
             Document.Layers.Remove(layer);
             SelectedLayerId = Document.Layers.Count == 0 ? null : Document.Layers[Math.Clamp(index - 1, 0, Document.Layers.Count - 1)].Id;
+            if (layer.AnimationFrameIndex >= 0)
+            {
+                _documents.SynchronizeAnimationFrameLayers(Document, SelectedLayerId);
+                SelectedLayerId = Document.Layers.FirstOrDefault(candidate =>
+                    candidate.AnimationFrameIndex == Document.ActiveAnimationFrame)?.Id ?? SelectedLayerId;
+            }
             Notify();
     
     }
@@ -1012,6 +1141,8 @@ public sealed class PictureEditorStateService
             clone.Y += 18;
             Document.Layers.Add(clone);
             SelectedLayerId = clone.Id;
+            if (clone.AnimationFrameIndex >= 0)
+                _documents.SynchronizeAnimationFrameLayers(Document, clone.Id);
             Notify();
     
     }
@@ -1039,6 +1170,8 @@ public sealed class PictureEditorStateService
             clone.Y += 18;
             Document.Layers.Insert(Document.Layers.IndexOf(layer) + 1, clone);
             SelectedLayerId = clone.Id;
+            if (clone.AnimationFrameIndex >= 0)
+                _documents.SynchronizeAnimationFrameLayers(Document, clone.Id);
             Notify();
     
     }
@@ -1112,6 +1245,8 @@ public sealed class PictureEditorStateService
             Capture();
             Document.Layers.RemoveAt(index);
             Document.Layers.Insert(target, layer);
+            if (Document.AnimationFrameDelaysMs.Count > 0)
+                _documents.SynchronizeAnimationFrameLayers(Document, SelectedLayerId);
             Notify();
     
     }
@@ -1140,6 +1275,8 @@ public sealed class PictureEditorStateService
             Document.Layers.RemoveAt(currentIndex);
             Document.Layers.Insert(Math.Clamp(destination, 0, Document.Layers.Count), layer);
             SelectedLayerId = layer.Id;
+            if (Document.AnimationFrameDelaysMs.Count > 0)
+                _documents.SynchronizeAnimationFrameLayers(Document, layer.Id);
             Notify();
         }
         catch (Exception __serviceMethodException)
@@ -1161,6 +1298,8 @@ public sealed class PictureEditorStateService
             Capture();
             Document.Layers.Remove(layer);
             Document.Layers.Add(layer);
+            if (Document.AnimationFrameDelaysMs.Count > 0)
+                _documents.SynchronizeAnimationFrameLayers(Document, SelectedLayerId);
             Notify();
     
     }
@@ -1183,6 +1322,8 @@ public sealed class PictureEditorStateService
             Capture();
             Document.Layers.Remove(layer);
             Document.Layers.Insert(0, layer);
+            if (Document.AnimationFrameDelaysMs.Count > 0)
+                _documents.SynchronizeAnimationFrameLayers(Document, SelectedLayerId);
             Notify();
     
     }
@@ -1400,7 +1541,9 @@ public sealed class PictureEditorStateService
     try
     {
             Document = _documents.Deserialize(json);
-            SelectedLayerId = Document.Layers.LastOrDefault()?.Id;
+            SelectedLayerId = Document.Layers.FirstOrDefault(layer =>
+                layer.AnimationFrameIndex >= 0 && layer.AnimationFrameIndex == Document.ActiveAnimationFrame)?.Id
+                ?? Document.Layers.LastOrDefault()?.Id;
             _liveEditKey = null;
             Notify();
     
@@ -1495,6 +1638,8 @@ public sealed class PictureEditorStateService
     try
     {
             var wrapper = _documentFactory.CreatePicture(Document.WidthPx, Document.HeightPx, true);
+            wrapper.AnimationFrameDelaysMs = Document.AnimationFrameDelaysMs.ToList();
+            wrapper.ActiveAnimationFrame = Document.ActiveAnimationFrame;
             wrapper.Layers.Add(layer);
             return _documents.Clone(wrapper).Layers[0];
     

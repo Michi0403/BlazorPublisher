@@ -14,6 +14,9 @@ public sealed class PublisherAiChatRequest
     /// <summary>Gets or sets the LocalGPT Council team key selected by the publication author.</summary>
     /// <value>The team key value exposed by <see cref="PublisherAiChatRequest"/>.</value>
     public string TeamKey { get; set; } = "general";
+    /// <summary>Optional executable organic capability keys required by the user goal.</summary>
+    /// <value>Catalog keys to be resolved by LocalGPT before Council dispatch.</value>
+    public List<string> RequiredCapabilities { get; set; } = [];
     /// <summary>Gets or sets optional author instructions that are prepended as publication context.</summary>
     /// <value>The system prompt value exposed by <see cref="PublisherAiChatRequest"/>.</value>
     public string SystemPrompt { get; set; } = string.Empty;
@@ -26,6 +29,15 @@ public sealed class PublisherAiChatRequest
     /// <summary>Gets or sets the maximum visible answer-token budget requested for this component interaction.</summary>
     /// <value>The max output tokens value exposed by <see cref="PublisherAiChatRequest"/>.</value>
     public int MaxOutputTokens { get; set; } = 8192;
+    /// <summary>Optional Council round limit selected by the calling publication component.</summary>
+    /// <value>Maximum number of Council rounds for this request.</value>
+    public int MaxRounds { get; set; } = 1;
+    /// <summary>Optional concurrency budget, independently of Council team membership.</summary>
+    /// <value>Maximum simultaneous AI participants.</value>
+    public int MaxParallelModels { get; set; } = 1;
+    /// <summary>Whether the human explicitly requested a Council-generated implementation artifact.</summary>
+    /// <value>Whether Council should generate a project artifact.</value>
+    public bool GenerateImplementationArtifact { get; set; }
 }
 
 /// <summary>
@@ -44,6 +56,12 @@ public sealed class PublisherAiChatResponse
     /// <summary>Gets or sets the LocalGPT Council run identifier when one is present in the result.</summary>
     /// <value>The run identifier value exposed by <see cref="PublisherAiChatResponse"/>.</value>
     public string RunId { get; set; } = string.Empty;
+    /// <summary>Stable LocalGPT goal identity, even when a decomposed goal uses several Council runs.</summary>
+    /// <value>Goal checkpoint identity; blank for older LocalGPT versions.</value>
+    public string GoalId { get; set; } = string.Empty;
+    /// <summary>The complete structured Council result for callers that support detailed steps or artifacts.</summary>
+    /// <value>JSON returned unchanged from the trusted paired LocalGPT 1-Wire result.</value>
+    public string ResultJson { get; set; } = string.Empty;
 }
 
 /// <summary>
@@ -109,16 +127,21 @@ public sealed class PublisherAiBridgeService(
             var councilRequest = new OrganicCouncilPromptRequest
             {
                 TeamKey = teamKey,
-                MaxRounds = 1,
-                MaxParallelModels = 1,
+                RequestedOrganicCapabilities = request.RequiredCapabilities
+                    .Where(value => !string.IsNullOrWhiteSpace(value))
+                    .Distinct(StringComparer.OrdinalIgnoreCase).ToList(),
+                MaxRounds = Math.Clamp(request.MaxRounds, 1, 128),
+                MaxParallelModels = Math.Clamp(request.MaxParallelModels, 1, 32),
                 MaxOutputTokens = Math.Clamp(request.MaxOutputTokens, 256, 262144),
                 MaxContextTokens = 262144,
                 IncludeMemory = request.IncludeMemory,
                 // Publisher-started Council work is intentionally a normal LocalGPT /chat session.
                 // Keep it durable so provider reasoning, function calls/results and the final answer
                 // remain available after the correlated 1-Wire request itself has completed.
-                SaveToMemory = true,
-                GenerateImplementationArtifact = false,
+                SaveToMemory = request.SaveToMemory,
+                GenerateImplementationArtifact = request.GenerateImplementationArtifact,
+                // A browser request must never self-attest human approval. Consequential
+                // artifacts use the separately maintained Council / human-collaboration gate.
                 UserConfirmedArtifactBuild = false,
                 ExternalProjectContextJson = JsonSerializer.Serialize(new
                 {
@@ -127,18 +150,11 @@ public sealed class PublisherAiBridgeService(
                     TeamKey = teamKey
                 })
             };
+            // Keep the author's goal intact. The former answer-only wrapper suppressed tool-oriented work.
+            // Author instructions originate from the request, not an internal hardcoded Council prompt.
             councilRequest.Prompt = string.IsNullOrWhiteSpace(systemPrompt)
-                ? $"Answer this PublisherStudio publication chat message as the LocalGPT AI Council. Return the user-facing answer only.\n\nUser message:\n{prompt}"
-                : $"""
-Answer this PublisherStudio publication chat message as the LocalGPT AI Council.
-Publication author instructions:
-{systemPrompt}
-
-User message:
-{prompt}
-
-Return the user-facing answer only.
-""";
+                ? prompt
+                : string.Concat(systemPrompt, "\n\n", prompt);
 
             var correlationId = await localGpt.SendCouncilRequestAsync(councilRequest, cancellationToken).ConfigureAwait(false);
             var deadline = DateTimeOffset.UtcNow.AddMinutes(10);
@@ -161,11 +177,11 @@ Return the user-facing answer only.
                 var resultJson = ReadPropertyString(response, "ResultJson");
                 if (string.IsNullOrWhiteSpace(resultJson))
                     throw new InvalidDataException("LocalGPT returned an empty Council result.");
-                var (text, runId) = ReadCouncilResult(resultJson);
+                var (text, runId, goalId) = ReadCouncilResult(resultJson);
                 if (string.IsNullOrWhiteSpace(text))
                     throw new InvalidDataException("LocalGPT completed the Council run without a visible final answer.");
                 logger.LogInformation("PublisherStudio AI chat request {CorrelationId} completed through LocalGPT Council run {RunId}.", correlationId, runId);
-                return new PublisherAiChatResponse { Text = text, CorrelationId = correlationId, RunId = runId };
+                return new PublisherAiChatResponse { Text = text, CorrelationId = correlationId, RunId = runId, GoalId = goalId, ResultJson = resultJson };
             }
         }
         catch (OperationCanceledException exception) when (cancellationToken.IsCancellationRequested)
@@ -205,20 +221,31 @@ Return the user-facing answer only.
     /// </summary>
     /// <param name="json">Json value supplied to the publisher AI bridge operation and used when producing its result.</param>
     /// <returns>The string text string run identifier produced by the operation.</returns>
-    private (string Text, string RunId) ReadCouncilResult(string json)
+    private (string Text, string RunId, string GoalId) ReadCouncilResult(string json)
     {
         using var document = JsonDocument.Parse(json);
         var root = document.RootElement;
-        if (root.ValueKind != JsonValueKind.Object) return (string.Empty, string.Empty);
+        if (root.ValueKind != JsonValueKind.Object) return (string.Empty, string.Empty, string.Empty);
         string text = string.Empty;
         string runId = string.Empty;
+        string goalId = string.Empty;
         foreach (var property in root.EnumerateObject())
         {
             if (property.Name.Equals("FinalAnswer", StringComparison.OrdinalIgnoreCase) && property.Value.ValueKind == JsonValueKind.String)
                 text = property.Value.GetString() ?? string.Empty;
             else if (property.Name.Equals("RunId", StringComparison.OrdinalIgnoreCase))
                 runId = property.Value.ValueKind == JsonValueKind.String ? property.Value.GetString() ?? string.Empty : property.Value.GetRawText().Trim('"');
+            else if (property.Name.Equals("GoalExecution", StringComparison.OrdinalIgnoreCase) &&
+                property.Value.ValueKind == JsonValueKind.Object)
+            {
+                foreach (var detail in property.Value.EnumerateObject())
+                {
+                    if (detail.Name.Equals("GoalId", StringComparison.OrdinalIgnoreCase) &&
+                        detail.Value.ValueKind == JsonValueKind.String)
+                        goalId = detail.Value.GetString() ?? string.Empty;
+                }
+            }
         }
-        return (text, runId);
+        return (text, runId, goalId);
     }
 }

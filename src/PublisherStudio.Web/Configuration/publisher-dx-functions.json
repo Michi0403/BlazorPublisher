@@ -787,6 +787,156 @@
       "interactionEditor": 0,
       "configurationKey": "publisher:publisher.documentation.profile",
       "source": "PublisherStudio object store"
+    },
+    {
+      "key": "publisher.media.jobs",
+      "displayName": "Media conversion jobs",
+      "description": "Inspect up to fifty active/recent media conversion jobs without disclosing local source paths.",
+      "controller": "OrganicPlugins",
+      "method": "POST",
+      "route": "/api/organic/capabilities/publisher.media.jobs",
+      "parameterSchemaJson": "{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}",
+      "organs": [
+        "eyes"
+      ],
+      "skills": [
+        "ffmpeg",
+        "video",
+        "audio",
+        "conversion"
+      ],
+      "requiredSkillKeys": [
+        "ffmpeg",
+        "video",
+        "audio",
+        "conversion"
+      ],
+      "uiActivationKeys": [],
+      "isOnline": true,
+      "isEnabled": true,
+      "isReadOnly": true,
+      "requiresHumanConfirmation": false,
+      "supportsScheduling": false,
+      "supportsRecurringExecution": false,
+      "requiresHumanInteractionOnTargetSystem": false,
+      "requiresAutomatedInteractionOnTargetSystem": false,
+      "interactionValueSchemaJson": "{\"type\":\"object\",\"properties\":{}}",
+      "inputContract": "Parameters matching: {\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}",
+      "outputContract": "A bounded JSON WorkResult associated with the original CorrelationId.",
+      "securityContract": "Requires an explicitly linked peer and the PublisherStudio exposure/invocation permission matrix.",
+      "organicUseCase": "PublisherStudio organic capability.",
+      "suggestedCouncilRoles": [
+        "ffmpeg",
+        "video",
+        "audio",
+        "conversion"
+      ],
+      "isExposedToPeer": true,
+      "allowPeerInvocation": true,
+      "requiresFrontendUserConfirmation": false,
+      "interactionEditor": 0,
+      "configurationKey": "publisher:publisher.media.jobs",
+      "source": "PublisherStudio object store"
+    },
+    {
+      "key": "publisher.media.profiles",
+      "displayName": "Media conversion profiles",
+      "description": "Inspect the current user-configured PublisherStudio media conversion profiles.",
+      "controller": "OrganicPlugins",
+      "method": "POST",
+      "route": "/api/organic/capabilities/publisher.media.profiles",
+      "parameterSchemaJson": "{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}",
+      "organs": [
+        "eyes"
+      ],
+      "skills": [
+        "ffmpeg",
+        "video",
+        "audio",
+        "conversion"
+      ],
+      "requiredSkillKeys": [
+        "ffmpeg",
+        "video",
+        "audio",
+        "conversion"
+      ],
+      "uiActivationKeys": [],
+      "isOnline": true,
+      "isEnabled": true,
+      "isReadOnly": true,
+      "requiresHumanConfirmation": false,
+      "supportsScheduling": false,
+      "supportsRecurringExecution": false,
+      "requiresHumanInteractionOnTargetSystem": false,
+      "requiresAutomatedInteractionOnTargetSystem": false,
+      "interactionValueSchemaJson": "{\"type\":\"object\",\"properties\":{}}",
+      "inputContract": "Parameters matching: {\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}",
+      "outputContract": "A bounded JSON WorkResult associated with the original CorrelationId.",
+      "securityContract": "Requires an explicitly linked peer and the PublisherStudio exposure/invocation permission matrix.",
+      "organicUseCase": "PublisherStudio organic capability.",
+      "suggestedCouncilRoles": [
+        "ffmpeg",
+        "video",
+        "audio",
+        "conversion"
+      ],
+      "isExposedToPeer": true,
+      "allowPeerInvocation": true,
+      "requiresFrontendUserConfirmation": false,
+      "interactionEditor": 0,
+      "configurationKey": "publisher:publisher.media.profiles",
+      "source": "PublisherStudio object store"
+    },
+    {
+      "key": "publisher.media.cancel",
+      "displayName": "Cancel media conversion",
+      "description": "Requests cancellation of one in-progress PublisherStudio media conversion job after explicit PublisherStudio user confirmation.",
+      "controller": "OrganicPlugins",
+      "method": "POST",
+      "route": "/api/organic/capabilities/publisher.media.cancel",
+      "parameterSchemaJson": "{\"type\":\"object\",\"properties\":{\"jobId\":{\"type\":\"string\",\"format\":\"uuid\"}},\"additionalProperties\":false,\"required\":[\"jobId\"]}",
+      "organs": [
+        "eyes"
+      ],
+      "skills": [
+        "ffmpeg",
+        "video",
+        "audio",
+        "conversion"
+      ],
+      "requiredSkillKeys": [
+        "ffmpeg",
+        "video",
+        "audio",
+        "conversion"
+      ],
+      "uiActivationKeys": [],
+      "isOnline": true,
+      "isEnabled": true,
+      "isReadOnly": false,
+      "requiresHumanConfirmation": true,
+      "supportsScheduling": false,
+      "supportsRecurringExecution": false,
+      "requiresHumanInteractionOnTargetSystem": false,
+      "requiresAutomatedInteractionOnTargetSystem": false,
+      "interactionValueSchemaJson": "{\"type\":\"object\",\"properties\":{}}",
+      "inputContract": "Parameters matching: {\"type\":\"object\",\"properties\":{\"jobId\":{\"type\":\"string\",\"format\":\"uuid\"}},\"additionalProperties\":false,\"required\":[\"jobId\"]}",
+      "outputContract": "A bounded JSON WorkResult associated with the original CorrelationId.",
+      "securityContract": "Requires a linked peer and the operator-configured PublisherStudio permission matrix; cancellation requires fresh frontend confirmation.",
+      "organicUseCase": "PublisherStudio organic capability.",
+      "suggestedCouncilRoles": [
+        "ffmpeg",
+        "video",
+        "audio",
+        "conversion"
+      ],
+      "isExposedToPeer": true,
+      "allowPeerInvocation": true,
+      "requiresFrontendUserConfirmation": true,
+      "interactionEditor": 0,
+      "configurationKey": "publisher:publisher.media.cancel",
+      "source": "PublisherStudio object store"
     }
   ]
 }

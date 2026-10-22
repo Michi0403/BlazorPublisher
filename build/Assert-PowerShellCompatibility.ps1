@@ -230,6 +230,27 @@ if ((Test-Path -LiteralPath $buildStorageHelperPath -PathType Leaf) -and
         $failures.Add('build/Build-Documentation.ps1 must place isolated browser profiles inside the repository-owned documentation cache. Architectural repair: use $documentationToolCacheRoot/browser-profiles instead of the operating-system temp directory.')
     }
 
+    # Release and normal Debug must agree on the parser and storage contract. This
+    # verifies the actual MSBuild target and the direct local-development entrypoint.
+    $msbuildTargetsPath = Join-Path $root 'Directory.Build.targets'
+    $localDevelopmentPath = Join-Path $root 'Build-LocalDevelopment.ps1'
+    if (-not (Test-Path -LiteralPath $msbuildTargetsPath -PathType Leaf) -or
+        -not (Test-Path -LiteralPath $localDevelopmentPath -PathType Leaf)) {
+        $failures.Add('Debug/release PowerShell compatibility parity requires Directory.Build.targets and Build-LocalDevelopment.ps1.')
+    }
+    else {
+        $msbuildTargetsText = [IO.File]::ReadAllText($msbuildTargetsPath)
+        $localDevelopmentText = [IO.File]::ReadAllText($localDevelopmentPath)
+        if ($msbuildTargetsText.IndexOf('<Target Name="AssertPublisherPowerShellCompatibility" BeforeTargets="BeforeBuild"', [StringComparison]::Ordinal) -lt 0 -or
+            $msbuildTargetsText.IndexOf('AfterTargets="AssertPublisherPowerShellCompatibility"', [StringComparison]::Ordinal) -lt 0 -or
+            $msbuildTargetsText.IndexOf('build/Assert-PowerShellCompatibility.ps1', [StringComparison]::Ordinal) -lt 0) {
+            $failures.Add('Directory.Build.targets must run Assert-PowerShellCompatibility.ps1 before normal Debug and Release Web builds. Architectural repair: restore the unconditional non-design-time guard and its maintenance ordering.')
+        }
+        if ($localDevelopmentText.IndexOf("Join-Path `$root 'build/Assert-PowerShellCompatibility.ps1'", [StringComparison]::Ordinal) -lt 0) {
+            $failures.Add('Build-LocalDevelopment.ps1 must run the PowerShell compatibility preflight before restore/build.')
+        }
+    }
+
     $defaultStorageNeedle = 'Join-Path $repository ''artifacts/.build-storage'''
     if ($buildStorageHelperText.IndexOf($defaultStorageNeedle, [System.StringComparison]::Ordinal) -lt 0) {
         $failures.Add('build/RepositoryBuildStorage.Common.ps1 must provide a zero-configuration default at <repository>/artifacts/.build-storage when FUTURE2_BUILD_STORAGE_ROOT is unset. Environment variables are optional overrides, not prerequisites for a normal clone.')

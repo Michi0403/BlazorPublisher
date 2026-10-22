@@ -47,7 +47,17 @@
           StandardOutputImportance="High" StandardErrorImportance="High" />
   </Target>
 
-  <Target Name="AssertPublisherPowerShellMaintenance" BeforeTargets="BeforeBuild"
+  <!-- Keep the early PowerShell compatibility/storage preflight consistent across Debug
+       (including Visual Studio), local-development CLI and Build-Release entrypoints. -->
+  <Target Name="AssertPublisherPowerShellCompatibility" BeforeTargets="BeforeBuild"
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web'">
+    <Error Condition="!Exists('$(MSBuildThisFileDirectory)build/Assert-PowerShellCompatibility.ps1')" Text="PublisherStudio PowerShell compatibility guard is missing." />
+    <Exec Command="&quot;$(RepositoryPowerShell)&quot; $(RepositoryPowerShellArguments) -File &quot;$(MSBuildThisFileDirectory)build/Assert-PowerShellCompatibility.ps1&quot;"
+          WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true"
+          StandardOutputImportance="High" StandardErrorImportance="High" />
+  </Target>
+
+  <Target Name="AssertPublisherPowerShellMaintenance" BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherPowerShellCompatibility"
           Condition="'$(DesignTimeBuild)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web'">
     <Error Condition="!Exists('$(MSBuildThisFileDirectory)build/Assert-MaintenanceArchitecture.ps1')" Text="PublisherStudio PowerShell-only maintenance guard is missing." />
     <Exec Command="&quot;$(RepositoryPowerShell)&quot; $(RepositoryPowerShellArguments) -File &quot;$(MSBuildThisFileDirectory)build/Assert-MaintenanceArchitecture.ps1&quot;"

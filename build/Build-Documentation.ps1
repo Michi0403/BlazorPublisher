@@ -2157,7 +2157,8 @@ function Invoke-PublisherStudioBrowserPdf {
     Remove-Item -LiteralPath $PdfPath -Force -ErrorAction SilentlyContinue
     $inputUri = ConvertTo-PublisherStudioFileUri -Path $HtmlPath
     $diagnostics = [System.Collections.Generic.List[string]]::new()
-    $profileParentRoot = Join-Path $documentationToolCacheRoot 'bp'
+    # Isolated Chromium user-data profiles follow the repository documentation cache, not OS temp.
+    $profileParentRoot = Join-Path $documentationToolCacheRoot 'browser-profiles'
     New-Item -ItemType Directory -Path $profileParentRoot -Force | Out-Null
     $lastExitCode = -1
     $renderProfiles = @(

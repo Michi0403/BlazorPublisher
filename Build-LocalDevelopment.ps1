@@ -22,6 +22,8 @@ function Initialize-BuildConsoleEncoding {
 }
 Initialize-BuildConsoleEncoding
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
+# Use the same parser and repository-cache contract as Build-Release.ps1 before restore.
+& (Join-Path $root 'build/Assert-PowerShellCompatibility.ps1')
 & (Join-Path $root ([IO.Path]::Combine('build', 'Assert-SourcePackagePrerequisites.ps1'))) -RepositoryRoot $root
 & (Join-Path $root ([IO.Path]::Combine('build', 'Assert-CrossPlatformBoundaries.ps1'))) -RepositoryRoot $root
 Write-Host "Refreshing reviewed PublisherStudio frontend SHA-256 inventory before the ordered CLI build..." -ForegroundColor DarkCyan

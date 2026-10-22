@@ -8,7 +8,9 @@ public enum BrowserAutomationCommandKind
     /// <summary>
     /// Selects the click option for <see cref="BrowserAutomationCommandKind"/>, giving callers a named value for that supported mode or state.
     /// </summary>
-    Click, DoubleClick, ContextMenu, MouseMove, MouseDown, MouseUp, Wheel, Focus, Blur, TypeText, SetValue, KeyDown, KeyUp, KeyPress
+    Click, DoubleClick, ContextMenu, MouseMove, MouseDown, MouseUp, Wheel, Focus, Blur, TypeText, SetValue, KeyDown, KeyUp, KeyPress,
+    /// <summary>Read-only bounded snapshot of visible PublisherStudio controls and publication elements.</summary>
+    InspectView
 }
 
 /// <summary>

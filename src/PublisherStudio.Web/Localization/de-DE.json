@@ -3440,5 +3440,12 @@
   "Text.Finalizing␠recording…": "Aufnahme wird abgeschlossen…",
   "Phrase.AI␠write␠story": "KI: Geschichte schreiben",
   "Phrase.AI␠create␠spreadsheet": "KI: Tabellenkalkulation erstellen",
-  "Phrase.AI␠help␠with␠selected␠object": "KI: Ausgewähltes Objekt bearbeiten"
+  "Phrase.AI␠help␠with␠selected␠object": "KI: Ausgewähltes Objekt bearbeiten",
+  "Reconnect to LocalGPT?": "Mit LocalGPT erneut verbinden?",
+  "A previously linked LocalGPT was detected. Reconnect only if you approve.": "Eine zuvor verbundene LocalGPT-Instanz wurde erkannt. Nur mit Ihrer Zustimmung erneut verbinden.",
+  "Reconnect": "Erneut verbinden",
+  "Ask LocalGPT about this object": "LocalGPT zu diesem Objekt befragen",
+  "LocalGPT Council is thinking...": "LocalGPT-Council arbeitet...",
+  "Ask LocalGPT": "LocalGPT fragen",
+  "Connection and advanced settings": "Verbindung und erweiterte Einstellungen"
 }

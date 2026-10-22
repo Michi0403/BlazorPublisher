@@ -302,6 +302,48 @@
       "source": "PublisherStudio object store"
     },
     {
+      "key": "publisher.browser.view.inspect",
+      "displayName": "Eyes: inspect visible PublisherStudio view",
+      "description": "Queue a bounded read-only browser DOM view including visible controls, geometry and publication element identifiers. Excludes field values/passwords and requires enabled browser automation in the linked tab.",
+      "controller": "OrganicPlugins",
+      "method": "POST",
+      "route": "/api/organic/capabilities/publisher.browser.view.inspect",
+      "parameterSchemaJson": "{\"type\":\"object\",\"properties\":{\"selector\":{\"type\":\"string\",\"maxLength\":160}}}",
+      "organs": [
+        "eyes"
+      ],
+      "skills": [
+        "vision",
+        "screen",
+        "browser",
+        "ui-inspection"
+      ],
+      "requiredSkillKeys": [],
+      "uiActivationKeys": [],
+      "isOnline": true,
+      "isEnabled": true,
+      "isReadOnly": true,
+      "requiresHumanConfirmation": true,
+      "supportsScheduling": false,
+      "supportsRecurringExecution": false,
+      "requiresHumanInteractionOnTargetSystem": true,
+      "requiresAutomatedInteractionOnTargetSystem": true,
+      "interactionValueSchemaJson": "{\"type\":\"object\",\"properties\":{}}",
+      "inputContract": "Optional selector for an explicitly enabled PublisherStudio browser tab. Returns a requestId; obtain bounded view JSON with publisher.input.result.",
+      "outputContract": "A queued requestId and status; the paired input.result returns bounded visible UI roles, labels, element ids, bounds and viewport, without form values.",
+      "securityContract": "Requires an explicitly linked peer and the PublisherStudio exposure/invocation permission matrix.",
+      "organicUseCase": "PublisherStudio organic capability.",
+      "suggestedCouncilRoles": [
+        "evidence verifier"
+      ],
+      "isExposedToPeer": true,
+      "allowPeerInvocation": true,
+      "requiresFrontendUserConfirmation": true,
+      "interactionEditor": 1,
+      "configurationKey": "publisher:publisher.browser.view.inspect",
+      "source": "PublisherStudio object store"
+    },
+    {
       "key": "publisher.input.result",
       "displayName": "Hands: browser input result",
       "description": "Reads the status and bounded result of a previously queued browser input command.",

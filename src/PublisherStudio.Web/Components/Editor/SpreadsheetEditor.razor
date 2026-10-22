@@ -4,6 +4,8 @@
 @inject SpreadsheetSessionStore Sessions
 @inject PublicationDataService DataService
 @inject ILogger<SpreadsheetEditor> Logger
+@inject PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService LocalGptConnection
+@inject PublisherStudio.Services.OrganicPlugins.PublisherAiDocumentInsertionService AiInsertion
 
 @if (Visible && SessionId != Guid.Empty)
 {
@@ -30,6 +32,24 @@
                 <span><i class="pub-icon pub-icon-spreadsheet"></i>DevExpress Spreadsheet Studio</span>
                 <small>XLSX, XLSM, XLS, CSV, and TXT · edited legacy/text files save as XLSX · XLSM macros are preserved but cannot run or be edited</small>
             </div>
+            @if (OpenAiOnShow && LocalGptConnection.State.HasCapability("council.run"))
+            {
+                <DxFormLayout CssClass="razor-section-layout-owner">
+                    <DxFormLayoutItem ColSpanMd="12">
+                        <Template Context="spreadsheetAiContext">
+                            <div class="spreadsheet-ai-workspace">
+                                <strong>LocalGPT AI spreadsheet</strong>
+                                <DxMemo Rows="2" @bind-Text="_aiSpreadsheetPrompt" NullText="Describe columns, data, formulas and layout for the workbook." />
+                                <DxButton Text="Create with AI" Click="RequestAiSpreadsheetAsync" Enabled="@(!_aiSubmitting && !string.IsNullOrWhiteSpace(_aiSpreadsheetPrompt))" />
+                                @if (!string.IsNullOrWhiteSpace(_aiStatus))
+                                {
+                                    <span role="status">@_aiStatus</span>
+                                }
+                            </div>
+                        </Template>
+                    </DxFormLayoutItem>
+                </DxFormLayout>
+            }
             <div class="spreadsheet-editor-host">
                 <iframe id="@FrameId" title="Spreadsheet Studio" src="@EditorUrl"></iframe>
                 @if (!_ready || _opening)
@@ -180,6 +200,15 @@
     /// </summary>
     /// <value>The file name value exposed by <see cref="SpreadsheetEditor"/>.</value>
     [Parameter] public string FileName { get; set; } = "Spreadsheet.xlsx";
+    /// <summary>Whether the user specifically opened this workbook for connected LocalGPT assistance.</summary>
+    /// <value>Native AI panel visibility request.</value>
+    [Parameter] public bool OpenAiOnShow { get; set; }
+    /// <summary>Current user-authored spreadsheet request, never model-generated policy.</summary>
+    private string _aiSpreadsheetPrompt = string.Empty;
+    /// <summary>Whether submission to the trusted paired LocalGPT connection is being performed.</summary>
+    private bool _aiSubmitting;
+    /// <summary>Current native spreadsheet assistance status text.</summary>
+    private string _aiStatus = string.Empty;
     /// <summary>
     /// Gets or sets the saved value that forms part of the spreadsheet editor state consumed or produced by the surrounding workflow.
     /// </summary>
@@ -282,10 +311,66 @@
     /// <value>The selection preview rows value exposed by <see cref="SpreadsheetEditor"/>.</value>
     private IEnumerable<List<string>> SelectionPreviewRows => GetSelectionPreviewRowsForRender();
 
-    /// <summary>
-    /// Handles the parameters set lifecycle or event notification for <see cref="SpreadsheetEditor"/>, updating the state required by the surrounding workflow.
-    /// </summary>
-    /// <returns>A task representing completion of the component lifecycle operation.</returns>
+    /// <summary>Submits a user-started native workbook creation task through the linked Council and authorized insertion contract.</summary>
+    /// <returns>Completion of the Council request submission, not completion of remote generation.</returns>
+    private async Task RequestAiSpreadsheetAsync()
+    {
+        try
+        {
+            if (_aiSubmitting || !Visible || SessionId == Guid.Empty ||
+                !LocalGptConnection.State.HasCapability("council.run") || string.IsNullOrWhiteSpace(_aiSpreadsheetPrompt))
+                return;
+            _aiSubmitting = true;
+            _aiStatus = "Submitting spreadsheet request to LocalGPT…";
+            var target = $"SpreadsheetStudio:{SessionId:N}:{Guid.NewGuid():N}";
+            AiInsertion.Authorize(target, "spreadsheet");
+            try
+            {
+                var request = new OrganicCouncilPromptRequest
+                {
+                    TeamKey = LocalGptConnection.State.RemoteCapabilities
+                        .Where(capability => capability.IsOnline && capability.IsEnabled &&
+                            string.Equals(capability.Key, "council.run", StringComparison.OrdinalIgnoreCase))
+                        .SelectMany(capability => capability.Skills)
+                        .FirstOrDefault(team => team.Contains("spreadsheet", StringComparison.OrdinalIgnoreCase))
+                        ?? "general",
+                    MaxRounds = 1,
+                    MaxParallelModels = 1,
+                    MaxOutputTokens = 16384,
+                    RequestedOrganicCapabilities = ["publisher.business-context", "publisher.text.insert.propose"],
+                    ExternalProjectContextJson = System.Text.Json.JsonSerializer.Serialize(new
+                    {
+                        Source = "PublisherStudio Spreadsheet Studio",
+                        SessionId,
+                        FileName,
+                        Target = target,
+                        Workflow = "Authorized native spreadsheet insertion"
+                    }),
+                    Prompt = $"Create a CSV spreadsheet for this PublisherStudio request: {_aiSpreadsheetPrompt.Trim()}\nReturn a correctly structured CSV, including headers, and invoke publisher.text.proposal.request using target exactly '{target}', the complete CSV as text, and a concise reason. Do not mutate any publication without its locally registered approval."
+                };
+                var correlationId = await LocalGptConnection.SendCouncilRequestAsync(request).ConfigureAwait(true);
+                _aiStatus = $"Council request {correlationId} submitted. The workbook is updated after the reviewed result returns.";
+                _aiSpreadsheetPrompt = string.Empty;
+            }
+            catch
+            {
+                AiInsertion.Cancel(target);
+                throw;
+            }
+        }
+        catch (Exception exception)
+        {
+            _aiStatus = exception.Message;
+            Logger.LogError(exception, "Native spreadsheet AI request failed.");
+        }
+        finally
+        {
+            _aiSubmitting = false;
+        }
+    }
+
+    /// <summary>Maintains the browser-owned workbook lifecycle when the requested session changes.</summary>
+    /// <returns>Completion of the passive parameter update.</returns>
     protected override Task OnParametersSetAsync()
     {
         try

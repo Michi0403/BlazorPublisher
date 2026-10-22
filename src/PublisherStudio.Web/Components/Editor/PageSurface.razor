@@ -8,6 +8,7 @@
 @inject PublicationEditorTextService EditorText
 @inject IFileLocalizationService Localization
 @inject NavigationManager Navigation
+@inject PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService LocalGptConnection
 
 <div class="razor-component-boundary">
 <DxFormLayout CssClass="razor-component-layout-owner PageSurface">
@@ -310,7 +311,7 @@
                 <DxContextMenuItem Text="@TimelineCommandText" Click="ToggleTimeline" />
             </Items>
         </DxContextMenuItem>
-        @if (State.SelectedElement is not null)
+        @if (State.SelectedElement is not null && LocalGptConnection.State.HasCapability("council.run"))
         {
             <DxContextMenuItem Text='@Localization.GetText("AI Assist selected object")' IconCssClass="pub-icon pub-icon-command" BeginGroup="true">
                 <Items>
@@ -2108,13 +2109,19 @@
         }
     }
 
-    /// <summary>Opens AI Assist with the selected object and requested native output kind.</summary>
+    /// <summary>Routes a user-selected AI action to the owning publication editor.</summary>
+    /// <value>Awaitable selected-object assistance request.</value>
+    [Parameter] public EventCallback<string> RequestAiAssist { get; set; }
+
+    /// <summary>Opens native PublisherStudio AI assistance for the selected object.</summary>
     /// <param name="kind">Requested supported AI Assist output kind.</param>
-    private void OpenSelectedAiAssist(string kind)
+    /// <returns>Completion of the owning editor request.</returns>
+    private async Task OpenSelectedAiAssist(string kind)
     {
         try
         {
-            Navigation.NavigateTo("/organic-plugins?assist=" + Uri.EscapeDataString(kind));
+            if (!LocalGptConnection.State.HasCapability("council.run")) return;
+            await RequestAiAssist.InvokeAsync(kind).ConfigureAwait(true);
         }
         catch (Exception exception)
         {

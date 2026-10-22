@@ -3440,5 +3440,12 @@
   "Text.Finalizing␠recording…": "Finalizing recording…",
   "Phrase.AI␠write␠story": "IA: escribir una historia",
   "Phrase.AI␠create␠spreadsheet": "IA: crear una hoja de cálculo",
-  "Phrase.AI␠help␠with␠selected␠object": "IA: ayudar con el objeto seleccionado"
+  "Phrase.AI␠help␠with␠selected␠object": "IA: ayudar con el objeto seleccionado",
+  "Reconnect to LocalGPT?": "¿Volver a conectar con LocalGPT?",
+  "A previously linked LocalGPT was detected. Reconnect only if you approve.": "Se detectó una conexión anterior con LocalGPT. Reconecte solo con su autorización.",
+  "Reconnect": "Reconectar",
+  "Ask LocalGPT about this object": "Preguntar a LocalGPT sobre este objeto",
+  "LocalGPT Council is thinking...": "El Consejo de LocalGPT está pensando...",
+  "Ask LocalGPT": "Preguntar a LocalGPT",
+  "Connection and advanced settings": "Conexión y configuración avanzada"
 }

@@ -46,7 +46,56 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
         target.dispatchEvent(new Event('change', { bubbles: true, composed: true }));
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/automationInterop.js:setNativeValue@33', __javascriptError); throw __javascriptError; }}
 
+    // Read-only eyes: visible viewport structure, not credentials, form values, or hidden DOM.
+    // The existing session-scoped browser automation consent and 1-Wire permission matrix
+    // govern when this may be requested by a linked peer.
+    function inspectView(selector) { try {
+        if (sessionStorage.getItem(storageKey) !== 'true' || !state.running)
+            throw new Error('Browser automation is not enabled for this PublisherStudio session.');
+        const root = selector ? document.querySelector(selector) : document.body;
+        if (!(root instanceof Element)) throw new Error('No visible browser view matches the selector.');
+        const maxElements = 100, maxBytes = 18000;
+        const width = window.innerWidth, height = window.innerHeight;
+        const candidates = root.querySelectorAll('button,a,input,textarea,select,[role="button"],[role="tab"],[role="menuitem"],[role="dialog"],[role="textbox"],[data-publication-element],h1,h2,h3,h4,label,[aria-label],.dxbl-popup');
+        const nodes = [];
+        const compact = (value, length = 100) => String(value || '').replace(/\s+/g, ' ').trim().slice(0, length);
+        for (const element of candidates) {
+            if (nodes.length >= maxElements) break;
+            if (element.closest('[data-sensitive],[data-private],[aria-hidden="true"],input[type="password"],input[type="hidden"]')) continue;
+            if (element.matches('[contenteditable], [contenteditable="true"], [type="password"], [type="hidden"]')) continue;
+            const style = window.getComputedStyle(element);
+            if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) continue;
+            const bounds = element.getBoundingClientRect();
+            if (!bounds.width || !bounds.height || bounds.right <= 0 || bounds.bottom <= 0 || bounds.left >= width || bounds.top >= height) continue;
+            const tag = element.tagName.toLowerCase();
+            const permittedText = (tag === 'button' || tag === 'a' || /^h[1-4]$/.test(tag) || tag === 'label')
+                ? [...element.childNodes].filter(node => node.nodeType === Node.TEXT_NODE).map(node => node.textContent).join(' ') : '';
+            const label = compact(element.getAttribute('aria-label') || element.getAttribute('title') || permittedText || element.getAttribute('placeholder'));
+            const id = compact(element.id, 90);
+            const elementId = compact(element.getAttribute('data-element-id'), 90);
+            if (!label && !id && !elementId && !element.getAttribute('role')) continue;
+            nodes.push({ tag, role: compact(element.getAttribute('role'), 35), label, id, elementId,
+                kind: compact(element.getAttribute('data-element-kind'), 45),
+                selected: element.getAttribute('data-selected') === 'true',
+                disabled: element.matches(':disabled, [aria-disabled="true"]'),
+                rect: [Math.round(bounds.x),Math.round(bounds.y),Math.round(bounds.width),Math.round(bounds.height)] });
+        }
+        const documentNode = document.querySelector('[data-page-id]');
+        const snapshot = { path: location.pathname, title: compact(document.title),
+            viewport: { width, height },
+            publication: documentNode ? { pageId: compact(documentNode.getAttribute('data-page-id'), 90),
+                widthMm: compact(documentNode.getAttribute('data-page-width-mm'), 16),
+                heightMm: compact(documentNode.getAttribute('data-page-height-mm'), 16) } : null,
+            elements: nodes, truncated: nodes.length >= maxElements };
+        let result = JSON.stringify(snapshot);
+        while (result.length > maxBytes && snapshot.elements.length) {
+            snapshot.elements.pop(); snapshot.truncated = true; result = JSON.stringify(snapshot);
+        }
+        return result;
+     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/automationInterop.js:inspectView', __javascriptError); throw __javascriptError; }}
+
     async function execute(command) { try {
+        if (String(command.kind || '').toLowerCase() === 'inspectview') return inspectView(command.selector || 'body');
         const target = resolveTarget(command.selector, command.x, command.y);
         if (!(target instanceof Element)) throw new Error('No browser element matched the automation command.');
         const options = eventOptions(command, target);

@@ -3440,5 +3440,12 @@
   "Text.Finalizing␠recording…": "Finalizing recording…",
   "Phrase.AI␠write␠story": "AI write story",
   "Phrase.AI␠create␠spreadsheet": "AI create spreadsheet",
-  "Phrase.AI␠help␠with␠selected␠object": "AI help with selected object"
+  "Phrase.AI␠help␠with␠selected␠object": "AI help with selected object",
+  "Reconnect to LocalGPT?": "Reconnect to LocalGPT?",
+  "A previously linked LocalGPT was detected. Reconnect only if you approve.": "A previously linked LocalGPT was detected. Reconnect only if you approve.",
+  "Reconnect": "Reconnect",
+  "Ask LocalGPT about this object": "Ask LocalGPT about this object",
+  "LocalGPT Council is thinking...": "LocalGPT Council is thinking...",
+  "Ask LocalGPT": "Ask LocalGPT",
+  "Connection and advanced settings": "Connection and advanced settings"
 }

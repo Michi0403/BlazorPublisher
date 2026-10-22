@@ -70,7 +70,7 @@
             <DxRibbonItem IconCssClass="pub-icon pub-icon-layers" Text='@LT("Ungroup")' Enabled="State.CanUngroupSelection" Click="UngroupSelected" />
         </DxRibbonGroup>
         <DxRibbonGroup Text='@LT("LocalGPT")' IconCssClass="pub-icon pub-icon-command">
-            <DxRibbonItem Text="@LocalGptButtonText" IconCssClass="pub-icon pub-icon-command" Click="OpenOrganicPlugins" />
+            <DxRibbonItem Text="@LocalGptButtonText" IconCssClass="pub-icon pub-icon-command" Click="OpenLocalGptEntryAsync" />
         </DxRibbonGroup>
     </DxRibbonTab>
 
@@ -276,11 +276,12 @@
                 }
                 @if (HasCouncilTeam("spreadsheet-team"))
                 {
-                    <DxRibbonItem Text='@LT("Spreadsheet Team")' IconCssClass="pub-icon pub-icon-spreadsheet" Click="OpenOrganicPlugins" />
+                    <DxRibbonItem Text='@LT("Spreadsheet Team")' IconCssClass="pub-icon pub-icon-spreadsheet" Click='() => OpenAiAssistForSelected("spreadsheet")' />
                 }
             </DxRibbonGroup>
             <DxRibbonGroup Text='@LT("Connection & safety")' IconCssClass="pub-icon pub-icon-info">
                 <DxRibbonItem Text='@LT("Eye/hand actions require permission")' Enabled="false" />
+                <DxRibbonItem Text='@LT("Connection and advanced settings")' Click="OpenOrganicPlugins" />
             </DxRibbonGroup>
         </DxRibbonTab>
     }
@@ -728,17 +729,46 @@
         }
     }
 
-    /// <summary>Opens object-aware AI Assist without copying publication content into the URL.</summary>
+    /// <summary>Requests the native selected-object editor for a linked LocalGPT AI action.</summary>
+    /// <value>Task-aware editor activation handler.</value>
+    [Parameter] public EventCallback<string> OnAiAssist { get; set; }
+
+    /// <summary>Opens an authorized native selected-object AI editor without navigating away.</summary>
     /// <param name="kind">Requested AI output kind.</param>
-    private void OpenAiAssistForSelected(string kind)
+    /// <returns>Awaitable editor activation.</returns>
+    private async Task OpenAiAssistForSelected(string kind)
     {
         try
         {
-            Navigation.NavigateTo("/organic-plugins?assist=" + Uri.EscapeDataString(kind));
+            if (!CanShowAiCouncil) return;
+            await OnAiAssist.InvokeAsync(kind).ConfigureAwait(true);
         }
         catch (Exception exception)
         {
             Logger.LogError(exception, "Could not open object-aware AI Assist.");
+            throw;
+        }
+    }
+
+    /// <summary>Opens the native AI editor for a linked peer; connection diagnostics remain separate.</summary>
+    /// <returns>Completion of the selected native editor activation.</returns>
+    private async Task OpenLocalGptEntryAsync()
+    {
+        try
+        {
+            if (!CanShowAiCouncil)
+            {
+                OpenOrganicPlugins();
+                return;
+            }
+            var mode = State.SelectedElement is SpreadsheetElement ? "spreadsheet"
+                : State.SelectedElement is TextFrameElement ? "writing"
+                : State.SelectedElement is null ? "writing" : "auto";
+            await OnAiAssist.InvokeAsync(mode).ConfigureAwait(true);
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "LocalGPT native editor entry failed.");
             throw;
         }
     }

@@ -3440,5 +3440,12 @@
   "Text.Finalizing␠recording…": "Finalizing recording…",
   "Phrase.AI␠write␠story": "AIでストーリーを書く",
   "Phrase.AI␠create␠spreadsheet": "AIでスプレッドシートを作成",
-  "Phrase.AI␠help␠with␠selected␠object": "選択したオブジェクトをAIで支援"
+  "Phrase.AI␠help␠with␠selected␠object": "選択したオブジェクトをAIで支援",
+  "Reconnect to LocalGPT?": "LocalGPT に再接続しますか？",
+  "A previously linked LocalGPT was detected. Reconnect only if you approve.": "以前接続した LocalGPT が見つかりました。承認した場合のみ再接続します。",
+  "Reconnect": "再接続",
+  "Ask LocalGPT about this object": "このオブジェクトについて LocalGPT に質問",
+  "LocalGPT Council is thinking...": "LocalGPT Council が処理中...",
+  "Ask LocalGPT": "LocalGPT に質問",
+  "Connection and advanced settings": "接続と詳細設定"
 }

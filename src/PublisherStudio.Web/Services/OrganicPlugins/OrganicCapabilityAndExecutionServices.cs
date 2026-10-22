@@ -49,6 +49,7 @@ public sealed class OrganicCapabilityCatalog(
                 Capability("publisher.screenreader.start", "Start recurring screen-reader help", "Starts one debounced single-flight screen-reader session. The interval is clamped to at least 15 seconds.", "eyes", false, true, true),
                 Capability("publisher.screenreader.stop", "Stop recurring screen-reader help", "Stops a recurring screen-reader session by id.", "eyes", false, true, true),
                 Capability("publisher.input.execute", "Hands: browser input", "Queues one bounded mouse, keyboard, hover, focus or gesture command through the existing automation service.", "hands", false, true, true),
+                Capability("publisher.browser.view.inspect", "Eyes: visible browser view", "Queues a bounded read-only view of visible PublisherStudio controls, document geometry and selected elements. Passwords and entered field values are excluded. Requires an enabled browser automation tab and frontend approval; retrieve the result with publisher.input.result.", "eyes", true, true, true),
                 Capability("publisher.input.result", "Hands: browser input result", "Reads the status and bounded result of a previously queued browser input command.", "eyes", true, false, true),
                 Capability("publisher.openscad.generate", "OpenSCAD canonical project generation", "Validates and renders a canonical OpenScadDocument/OpenScadNode graph through the existing registered renderer path.", "hands", false, true, false),
                 Capability("publisher.spreadsheet.inspect", "Spreadsheet session inspection", "Returns bounded metadata and preview evidence for an existing workbook session without mutation.", "eyes", true, true, true),
@@ -535,7 +536,7 @@ public sealed class OrganicWorkExecutor(
                 "publisher.screen.capture" or "publisher.screen.record" or
                 "publisher.screen.capture.result" or "publisher.screenreader.start" or
                 "publisher.screenreader.stop" or "publisher.input.execute" or
-                "publisher.input.result" or "publisher.openscad.generate" or
+                "publisher.input.result" or "publisher.browser.view.inspect" or "publisher.openscad.generate" or
                 "publisher.spreadsheet.inspect" or "publisher.text.insert.propose" or
                 "publisher.text.edit.request" or "publisher.website.content.request" or
                 "publisher.business-context" or "publisher.documentation.profile" or
@@ -577,7 +578,7 @@ public sealed class OrganicWorkExecutor(
                 result = new { SessionId = sessionId, Stopped = await recurringScreenReader.StopAsync(sessionId).ConfigureAwait(false) };
             }
             else if (extensionHandlers.TryGetValue(envelope.CapabilityKey, out var extension) &&
-                     envelope.CapabilityKey is not ("publisher.screen.capture" or "publisher.screen.record" or "publisher.screen.capture.result" or "publisher.screenreader.start" or "publisher.screenreader.stop" or "publisher.input.execute" or "publisher.input.result" or "publisher.openscad.generate" or "publisher.spreadsheet.inspect" or "publisher.text.insert.propose" or "publisher.text.edit.request" or "publisher.website.content.request" or "publisher.business-context" or "publisher.documentation.profile" or "publisher.media.capabilities" or "publisher.file.formats"))
+                     envelope.CapabilityKey is not ("publisher.screen.capture" or "publisher.screen.record" or "publisher.screen.capture.result" or "publisher.screenreader.start" or "publisher.screenreader.stop" or "publisher.input.execute" or "publisher.input.result" or "publisher.browser.view.inspect" or "publisher.openscad.generate" or "publisher.spreadsheet.inspect" or "publisher.text.insert.propose" or "publisher.text.edit.request" or "publisher.website.content.request" or "publisher.business-context" or "publisher.documentation.profile" or "publisher.media.capabilities" or "publisher.file.formats"))
             {
                 result = await extension.ExecuteAsync(envelope, cancellationToken).ConfigureAwait(false);
             }
@@ -590,6 +591,7 @@ public sealed class OrganicWorkExecutor(
                     "publisher.screen.capture.result" => ReadScreenshotResult(parameters),
                     "publisher.input.execute" => QueueInput(parameters),
                     "publisher.input.result" => ReadInputResult(parameters),
+                    "publisher.browser.view.inspect" => QueueBrowserView(parameters),
                     "publisher.openscad.generate" => GenerateOpenScad(parameters),
                     "publisher.spreadsheet.inspect" => InspectSpreadsheet(parameters),
                     "publisher.text.insert.propose" => ProposeText(parameters),
@@ -776,6 +778,28 @@ public sealed class OrganicWorkExecutor(
     /// </summary>
     /// <param name="parameters">Parameters value supplied to the organic work executor operation and used when producing its result.</param>
     /// <returns>The object produced by the operation.</returns>
+    /// <summary>Queues a read-only representation of the currently visible PublisherStudio browser view under the existing automation consent boundary.</summary>
+    /// <param name="parameters">Optional bounded CSS root selector for the current browser view.</param>
+    /// <returns>Queue identity; the peer retrieves the view through publisher.input.result after the authorized tab responds.</returns>
+    private object QueueBrowserView(JsonElement parameters)
+    {
+        try
+        {
+            var command = input.Enqueue(new BrowserAutomationCommand
+            {
+                Kind = BrowserAutomationCommandKind.InspectView,
+                Selector = GetString(parameters, "selector", "body")
+            });
+            logger.LogInformation("Queued permitted read-only browser view {RequestId}.", command.Id);
+            return new { command.Id, command.Status, ResultCapability = "publisher.input.result" };
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Could not queue a browser view inspection.");
+            throw;
+        }
+    }
+
     private object QueueInput(JsonElement parameters)
     {
     try

@@ -627,8 +627,10 @@
             _automationStateLoaded = true;
             try { _browserAutomationEnabled = await JS.InvokeAsync<bool>("publisherAutomation.isEnabled").ConfigureAwait(true); }
             catch (JSException exception) { Logger.LogDebug(exception, "Browser automation state is not available before JavaScript startup completes."); }
+            if (Connection.State.IsLinked && !string.IsNullOrWhiteSpace(Connection.State.PeerId))
+                await JS.InvokeVoidAsync("localStorage.setItem", "publisherstudio.localgpt.lastLinkedPeer", Connection.State.PeerId).ConfigureAwait(true);
             await InvokeAsync(StateHasChanged).ConfigureAwait(true);
-    
+
         }
         catch (Exception __componentMethodException)
         {
@@ -751,11 +753,16 @@
             TaskRunner.Run(
                 nameof(OrganicPlugins),
                 nameof(OnServiceChanged),
-                async _ => await InvokeAsync(() =>
+                async _ => await InvokeAsync(async () =>
                 {
                         SynchronizeDiscoveryActivation();
                         Refresh();
                         ApplyAuthorizedProposals();
+                        if (Connection.State.IsLinked && !string.IsNullOrWhiteSpace(Connection.State.PeerId))
+                        {
+                            try { await JS.InvokeVoidAsync("localStorage.setItem", "publisherstudio.localgpt.lastLinkedPeer", Connection.State.PeerId).ConfigureAwait(true); }
+                            catch (JSException exception) { Logger.LogWarning(exception, "Could not remember the linked LocalGPT browser peer."); }
+                        }
                         StateHasChanged();
                 }).ConfigureAwait(true));
         }

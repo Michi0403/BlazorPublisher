@@ -939,7 +939,8 @@
     }
 
     /// <summary>
-    /// Handles the organic state changed lifecycle or event notification for <see cref="StoryEditor"/>, updating the state required by the surrounding workflow.
+    /// Bridges the synchronous OrganicResults/LocalGPT Changed events into supervised asynchronous work.
+    /// The event contracts are Action, so this adapter must remain void (and must not be async void).
     /// </summary>
     private void OnOrganicStateChanged()
     {
@@ -947,16 +948,42 @@
         {
             TaskRunner.Run(
                 nameof(StoryEditor),
-                nameof(OnOrganicStateChanged),
-                async _ => await InvokeAsync(() =>
-                {
-                        RefreshAiProposals();
-                        StateHasChanged();
-                }).ConfigureAwait(true));
+                nameof(OnOrganicStateChangedAsync),
+                _ => InvokeAsync(OnOrganicStateChangedAsync));
         }
         catch (Exception __componentMethodException)
         {
             Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(OnOrganicStateChanged)} failed.");
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Refreshes the visible proposal state and inserts a matching authorized AI result on the
+    /// Blazor renderer dispatcher, retaining the existing DevExpress RichEdit caret ownership.
+    /// </summary>
+    /// <returns>A task that completes when the result has been handled and the UI state refreshed.</returns>
+    private async Task OnOrganicStateChangedAsync()
+    {
+        try
+        {
+            RefreshAiProposals();
+            if (Visible && _aiAutomaticTarget is { } expected && _selection is not null)
+            {
+                var matched = _aiProposals.FirstOrDefault(candidate =>
+                    string.Equals(candidate.Target, expected, StringComparison.Ordinal));
+                if (matched is not null)
+                {
+                    _aiAutomaticTarget = null;
+                    await InsertAiProposalAsync(matched).ConfigureAwait(true);
+                }
+            }
+
+            StateHasChanged();
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(OnOrganicStateChangedAsync)} failed.");
             throw;
         }
     }
@@ -1157,10 +1184,11 @@
         }
     }
 
-    /// <summary>
-    /// Performs request AI story for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
-    /// </summary>
-    /// <returns>A task that completes when the operation has finished.</returns>
+    /// <summary>Opaque single-request target for automatic insertion into the already open RichEdit surface.</summary>
+    private string? _aiAutomaticTarget;
+
+    /// <summary>Submits a user-requested story generation task to the existing authenticated Council bridge.</summary>
+    /// <returns>Completion of request submission; final content arrives via the correlated proposal channel.</returns>
     private async Task RequestAiStoryAsync()
     {
         try
@@ -1168,6 +1196,7 @@
             if (!CanSendAiStoryRequest || TextFrame is null) return;
             try
             {
+                var target = $"StoryEditor:{TextFrame.Id}:{Guid.NewGuid():N}";
                 var request = new OrganicCouncilPromptRequest
                 {
                     TeamKey = _aiTeamKey,
@@ -1185,7 +1214,7 @@
                         PageName,
                         StoryId = TextFrame.Id,
                         StoryName = TextFrame.Name,
-                        Target = AiProposalTarget,
+                        Target = target,
                         Workflow = "Reviewable story text proposal"
                     })
                 };
@@ -1199,9 +1228,10 @@
 
     Required result contract:
     1. Produce polished story text matching the user's topic, audience, tone and requested facts.
-    2. Before completing, invoke publisher.text.proposal.request with JSON parameters containing target exactly '{AiProposalTarget}', the final text, and a concise reason.
+    2. Before completing, invoke publisher.text.proposal.request with JSON parameters containing target exactly '{target}', the final text, and a concise reason.
     3. Never mutate the publication automatically. The user reviews and explicitly inserts the proposal in PublisherStudio.
     """;
+                _aiAutomaticTarget = target;
                 var correlationId = await LocalGptConnection.SendCouncilRequestAsync(request).ConfigureAwait(true);
                 Logger.LogInformation("Submitted StoryEditor AI Council request {CorrelationId} for story {StoryId}.", correlationId, TextFrame.Id);
                 Notifications.Success($"Council request {correlationId} was submitted. You can close this editor; the run remains active.", "Story proposal requested", nameof(StoryEditor));
@@ -1209,6 +1239,7 @@
             }
             catch (Exception ex)
             {
+                _aiAutomaticTarget = null;
                 Logger.LogError(ex, "Could not submit an AI Council story request for {StoryId}.", TextFrame.Id);
                 _error = ex.Message;
                 Notifications.Error(ex.Message, "Story proposal request failed", nameof(StoryEditor));

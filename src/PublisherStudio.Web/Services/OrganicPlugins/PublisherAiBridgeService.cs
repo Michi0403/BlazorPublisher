@@ -246,6 +246,28 @@ public sealed class PublisherAiBridgeService(
                 }
             }
         }
+        if (string.IsNullOrWhiteSpace(text) && root.TryGetProperty("Steps", out var steps) &&
+            steps.ValueKind == JsonValueKind.Array)
+        {
+            foreach (var step in steps.EnumerateArray().Reverse())
+            {
+                if (step.ValueKind != JsonValueKind.Object) continue;
+                if (step.TryGetProperty("VisibleContent", out var visible) && visible.ValueKind == JsonValueKind.String &&
+                    !string.IsNullOrWhiteSpace(visible.GetString()))
+                {
+                    text = visible.GetString() ?? string.Empty;
+                    break;
+                }
+                if (step.TryGetProperty("Content", out var content) && content.ValueKind == JsonValueKind.String &&
+                    !string.IsNullOrWhiteSpace(content.GetString()))
+                {
+                    text = content.GetString() ?? string.Empty;
+                    break;
+                }
+            }
+            if (!string.IsNullOrWhiteSpace(text))
+                logger.LogWarning("Council {RunId} returned no final answer; using recorded visible step output.", runId);
+        }
         return (text, runId, goalId);
     }
 }

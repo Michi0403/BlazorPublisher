@@ -25,6 +25,9 @@
 @inject PublisherStudio.Services.OrganicPlugins.ILocalGptConnectionService LocalGptConnection
 @inject PublisherStudio.Services.OrganicPlugins.IOrganicResultStore OrganicResults
 @inject PublisherStudio.Services.OrganicPlugins.PublisherAiDocumentInsertionService AiInsertion
+@inject PublisherStudio.Services.OrganicPlugins.ILocalGptDiscoveryRegistry LocalGptDiscovery
+@inject PublisherStudio.Services.OrganicPlugins.ILocalGptDiscoveryActivationService LocalGptDiscoveryActivation
+@inject PublisherStudio.Services.OrganicPlugins.IPublisherAiBridgeService AiBridge
 
 <div class="razor-component-boundary">
 <DxFormLayout CssClass="razor-component-layout-owner Editor">
@@ -33,6 +36,50 @@
 <PageTitle>BlazorPublisher</PageTitle>
 
 <UserNotificationHost />
+
+@if (_reconnectPromptVisible)
+{
+    <DxPopup Visible="true" Width="min(470px, 94vw)" ShowHeader="false"
+             CloseOnEscape="false" CloseOnOutsideClick="false">
+        <BodyContentTemplate Context="reconnectPopupContext">
+            <div class="publisher-dialog" aria-label='@LT("Reconnect to LocalGPT?")'>
+                <header><h2>@LT("Reconnect to LocalGPT?")</h2></header>
+                <p>@LT("A previously linked LocalGPT was detected. Reconnect only if you approve.")</p>
+                <footer class="publisher-dialog-actions">
+                    <DxButton Text='@LT("Cancel")' Click="DeclineLocalGptReconnectAsync" />
+                    <DxButton Text='@LT("Reconnect")' RenderStyle="ButtonRenderStyle.Primary" Click="ApproveLocalGptReconnectAsync" />
+                </footer>
+            </div>
+        </BodyContentTemplate>
+    </DxPopup>
+}
+@if (_objectAiHelpVisible)
+{
+    <DxPopup Visible="true" Width="min(680px, 95vw)" MaxHeight="80vh"
+             ShowHeader="false" CloseOnEscape="false" CloseOnOutsideClick="false">
+        <BodyContentTemplate Context="objectHelpPopupContext">
+            <div class="publisher-dialog" aria-label='@LT("AI help with selected object")'>
+                <header><h2>@LT("AI help with selected object")</h2></header>
+                <DxFormLayout CssClass="razor-section-layout-owner">
+                    <DxFormLayoutItem ColSpanMd="12">
+                        <Template Context="objectAiHelpFormContext">
+                            <p>@(State.SelectedElement?.Name) · @(State.SelectedElement?.Kind)</p>
+                            <DxMemo Rows="4" @bind-Text="_objectAiHelpPrompt" NullText='@LT("Ask LocalGPT about this object")' />
+                            @if (_objectAiHelpBusy) { <p role="status">@LT("LocalGPT Council is thinking...")</p> }
+                            @if (!string.IsNullOrWhiteSpace(_objectAiHelpResponse))
+                            { <pre class="organic-ai-response" style="white-space:pre-wrap">@_objectAiHelpResponse</pre> }
+                        </Template>
+                    </DxFormLayoutItem>
+                </DxFormLayout>
+                <footer class="publisher-dialog-actions">
+                    <DxButton Text='@LT("Cancel")' Click="CloseObjectAiHelpAsync" />
+                    <DxButton Text='@LT("Ask LocalGPT")' Enabled="@(!_objectAiHelpBusy && !string.IsNullOrWhiteSpace(_objectAiHelpPrompt))"
+                              RenderStyle="ButtonRenderStyle.Primary" Click="AskObjectAiHelpAsync" />
+                </footer>
+            </div>
+        </BodyContentTemplate>
+    </DxPopup>
+}
 
 <div class="publisher-shell @(_recoveryCandidate is not null ? "has-recovery" : null)">
     <WebDataRefreshHost State="State" />
@@ -72,7 +119,7 @@
         </aside>
     }
 
-    <PublicationRibbon State="State"
+    <PublicationRibbon State="State" OnAiAssist="OpenSelectedAiAssistAsync"
                        TimelineVisible="_timelineVisible"
                        OnNew="NewDocument"
                        OnNewFromTemplate="OpenNewPublicationTemplates"
@@ -154,7 +201,7 @@
     <div id="publisher-workspace" class="editor-workspace @(_timelineVisible ? "timeline-open" : null)">
         <PageNavigator State="State" TimelineVisible="_timelineVisible" RequestToggleTimeline="ToggleTimeline" />
         <button type="button" class="workspace-splitter splitter-left" data-workspace-splitter="left" title="Drag to resize pages pane; double-click to collapse" aria-label="Resize pages pane"></button>
-        <PageSurface @ref="_pageSurface" State="State" SelectionVisualsEnabled="@MainframeSelectionVisualsEnabled" InteractionEnabled="@MainframeSelectionVisualsEnabled" EditTextRequested="OpenStoryEditorById" RequestPicture="OpenPicturePicker" RequestReplacePicture="OpenReplacePicturePicker" RequestCreatePicture="CreatePicture" RequestEditPicture="EditSelectedPicture"
+        <PageSurface @ref="_pageSurface" State="State" RequestAiAssist="OpenSelectedAiAssistAsync" SelectionVisualsEnabled="@MainframeSelectionVisualsEnabled" InteractionEnabled="@MainframeSelectionVisualsEnabled" EditTextRequested="OpenStoryEditorById" RequestPicture="OpenPicturePicker" RequestReplacePicture="OpenReplacePicturePicker" RequestCreatePicture="CreatePicture" RequestEditPicture="EditSelectedPicture"
                      RequestInsertSpreadsheet="OpenSpreadsheetPicker" RequestCreateSpreadsheet="CreateSpreadsheet" RequestEditSpreadsheet="OpenSpreadsheetEditor" RequestDownloadSpreadsheet="DownloadSelectedSpreadsheet"
                      RequestInsertDataVisual="InsertDataVisual" RequestEditDataVisual="OpenDataVisualEditor" RequestManageData="OpenDataManager"
                      RequestInsertComponent="InsertComponent" RequestEditComponent="OpenComponentEditor"
@@ -247,7 +294,7 @@
              Saved="SaveStory"
              Cancelled="CloseStoryEditor" />
 
-<SpreadsheetEditor Visible="@_spreadsheetEditorVisible"
+<SpreadsheetEditor OpenAiOnShow="_spreadsheetOpenAiOnShow" Visible="@_spreadsheetEditorVisible"
                    SessionId="@_spreadsheetEditorSessionId"
                    FileName="@_spreadsheetEditorFileName"
                    Saved="SaveSpreadsheet"
@@ -508,6 +555,8 @@
     /// Stores the internal story open AI on show state used by <see cref="Editor"/> while executing its surrounding workflow.
     /// </summary>
     private bool _storyOpenAiOnShow;
+    /// <summary>Opens the selected native Spreadsheet Studio AI panel for a locally initiated request.</summary>
+    private bool _spreadsheetOpenAiOnShow;
     /// <summary>
     /// Stores the internal spreadsheet editor visible state used by <see cref="Editor"/> while executing its surrounding workflow.
     /// </summary>
@@ -764,6 +813,7 @@
             StreamingSession.Changed += StateChanged;
             StreamingSession.HotkeyTriggered += HandleGlobalStreamingHotkey;
             LocalGptConnection.Changed += LocalGptConnectionChanged;
+            LocalGptDiscovery.Changed += OnReconnectDiscoveryChanged;
             OrganicResults.Changed += OnAiInsertionResult;
             ApplyPendingAiInsertions();
             _recoveryCandidate = await Recovery.TryReadLatestAsync().ConfigureAwait(true);
@@ -805,6 +855,20 @@
             {
                 if (!AiInsertion.TryApply(proposal)) continue;
                 OrganicResults.RemoveTextProposal(proposal.Id);
+                if (_spreadsheetEditorVisible && _spreadsheetOpenAiOnShow &&
+                    _spreadsheetEditorTargetId is Guid targetId &&
+                    State.SelectedElement is SpreadsheetElement updated && updated.Id == targetId)
+                {
+                    // Reopen the native workbook against its new canonical bytes. This is limited to
+                    // AI-created spreadsheets; an unrelated spreadsheet editor is never rebound.
+                    if (_spreadsheetEditorSessionId != Guid.Empty)
+                        SpreadsheetSessions.Remove(_spreadsheetEditorSessionId);
+                    var newSession = SpreadsheetSessions.Create(updated.Id, updated.WorkbookFileName,
+                        updated.StorageFormat, updated.WorkbookContent);
+                    _spreadsheetEditorSessionId = newSession.Id;
+                    _spreadsheetEditorFileName = newSession.FileName;
+                    _pendingNewSpreadsheetId = null;
+                }
                 Notifications.Success("AI Assist content inserted into the publication.", "AI Assist", nameof(Editor));
             }
         }
@@ -823,6 +887,26 @@
     {
         try
         {
+            if (firstRender && !LocalGptConnection.State.IsConnected)
+            {
+                // Browser-owned opt-in preference; no automatic connection or trust escalation.
+                try
+                {
+                    var previous = await JS.InvokeAsync<string?>("localStorage.getItem", "publisherstudio.localgpt.lastLinkedPeer").ConfigureAwait(true);
+                    var prompted = await JS.InvokeAsync<string?>("sessionStorage.getItem", "publisherstudio.localgpt.reconnectPrompted").ConfigureAwait(true);
+                    if (!string.IsNullOrWhiteSpace(previous) && !string.Equals(prompted, "yes", StringComparison.Ordinal))
+                    {
+                        _reconnectPeerId = previous;
+                        _reconnectPromptVisible = true;
+                        await JS.InvokeVoidAsync("sessionStorage.setItem", "publisherstudio.localgpt.reconnectPrompted", "yes").ConfigureAwait(true);
+                        StateHasChanged();
+                    }
+                }
+                catch (JSException exception)
+                {
+                    Logger.LogWarning(exception, "LocalGPT reconnect browser preferences are unavailable; continuing without a reconnect prompt.");
+                }
+            }
             if (!_workspaceInitialized)
             {
                 await JS.InvokeVoidAsync("publisherStudio.initializeWorkspace", "publisher-workspace").ConfigureAwait(true);
@@ -899,7 +983,15 @@
     private void LocalGptConnectionChanged() {
         try
         {
-            TaskRunner.Run(nameof(Editor), nameof(LocalGptConnectionChanged), async _ => await InvokeAsync(StateHasChanged).ConfigureAwait(true));
+            TaskRunner.Run(nameof(Editor), nameof(LocalGptConnectionChanged), async _ => await InvokeAsync(async () =>
+            {
+                if (LocalGptConnection.State.IsLinked && !string.IsNullOrWhiteSpace(LocalGptConnection.State.PeerId))
+                {
+                    try { await JS.InvokeVoidAsync("localStorage.setItem", "publisherstudio.localgpt.lastLinkedPeer", LocalGptConnection.State.PeerId).ConfigureAwait(true); }
+                    catch (JSException exception) { Logger.LogWarning(exception, "Could not remember the linked LocalGPT browser peer."); }
+                }
+                StateHasChanged();
+            }).ConfigureAwait(true));
         }
         catch (Exception __componentMethodException)
         {
@@ -985,10 +1077,195 @@
             throw;
         }
     }
-    /// <summary>
-    /// Adds AI text quick for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
-    /// </summary>
-    /// <returns>A task that completes when the operation has finished.</returns>
+    // The browser owns the prior successful peer choice. A new session must explicitly opt in.
+    private bool _reconnectPromptVisible;
+    private string _reconnectPeerId = string.Empty;
+    private bool _reconnectRequested;
+    private bool _objectAiHelpVisible;
+    private bool _objectAiHelpBusy;
+    private string _objectAiHelpPrompt = string.Empty;
+    private string _objectAiHelpResponse = string.Empty;
+
+    /// <summary>Declines the optional reconnect request without opening a socket.</summary>
+    private Task DeclineLocalGptReconnectAsync()
+    {
+        try
+        {
+            _reconnectPromptVisible = false;
+            _reconnectRequested = false;
+            return Task.CompletedTask;
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Could not close the LocalGPT reconnect prompt.");
+            throw;
+        }
+    }
+
+    /// <summary>Starts discovery only after an explicit local user reconnect decision.</summary>
+    private async Task ApproveLocalGptReconnectAsync()
+    {
+        try
+        {
+            _reconnectPromptVisible = false;
+            if (string.IsNullOrWhiteSpace(_reconnectPeerId) || LocalGptConnection.State.IsConnected) return;
+            _reconnectRequested = true;
+            LocalGptDiscoveryActivation.Request("PublisherStudio.Editor.Reconnect");
+            await TryReconnectLocalGptAsync().ConfigureAwait(true);
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "LocalGPT reconnect was requested but could not start.");
+            Notifications.Error(exception.Message, "LocalGPT reconnect", nameof(Editor));
+        }
+    }
+
+    /// <summary>Observes authorized discovery without starting a connection on its own.</summary>
+    private void OnReconnectDiscoveryChanged()
+    {
+        try
+        {
+            if (!_reconnectRequested || _disposed) return;
+            TaskRunner.Run(nameof(Editor), nameof(OnReconnectDiscoveryChanged),
+                async _ => await InvokeAsync(TryReconnectLocalGptAsync).ConfigureAwait(true));
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "LocalGPT reconnect discovery notification failed.");
+        }
+    }
+
+    /// <summary>Connects only to the previously approved and discovered peer.</summary>
+    private async Task TryReconnectLocalGptAsync()
+    {
+        try
+        {
+            if (_disposed || !_reconnectRequested || LocalGptConnection.State.IsConnected) return;
+            var peer = LocalGptDiscovery.GetPeer(_reconnectPeerId);
+            if (peer is null) return;
+            _reconnectRequested = false;
+            try
+            {
+                var result = await LocalGptConnection.ConnectAsync(peer.PeerId).ConfigureAwait(true);
+                if (result.IsLinked)
+                    Notifications.Success("LocalGPT link restored.", "LocalGPT reconnect", nameof(Editor));
+                else if (result.IsConnected)
+                    Notifications.Information("Transport connected. If requested, approve the link in LocalGPT Human Collaboration.", "LocalGPT reconnect", nameof(Editor));
+            }
+            finally
+            {
+                LocalGptDiscoveryActivation.Release("PublisherStudio.Editor.Reconnect");
+            }
+        }
+        catch (Exception exception)
+        {
+            _reconnectRequested = false;
+            LocalGptDiscoveryActivation.Release("PublisherStudio.Editor.Reconnect");
+            Logger.LogError(exception, "LocalGPT reconnect attempt failed.");
+            Notifications.Error(exception.Message, "LocalGPT reconnect", nameof(Editor));
+        }
+    }
+
+    /// <summary>Closes generic AI help without modifying the selected object.</summary>
+    private Task CloseObjectAiHelpAsync()
+    {
+        try
+        {
+            _objectAiHelpVisible = false;
+            return Task.CompletedTask;
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Could not close the selected object AI help dialog.");
+            throw;
+        }
+    }
+
+    /// <summary>Asks the connected Council about the current object without bypassing publication mutation approvals.</summary>
+    private async Task AskObjectAiHelpAsync()
+    {
+        try
+        {
+            if (_objectAiHelpBusy || !CanUseAiCouncil || State.SelectedElement is null ||
+                string.IsNullOrWhiteSpace(_objectAiHelpPrompt)) return;
+            var originalId = State.SelectedElement.Id;
+            var objectName = State.SelectedElement.Name;
+            var objectKind = State.SelectedElement.Kind.ToString();
+            _objectAiHelpBusy = true;
+            _objectAiHelpResponse = string.Empty;
+            try
+            {
+                var response = await AiBridge.ChatAsync(new PublisherStudio.Services.OrganicPlugins.PublisherAiChatRequest
+                {
+                    Prompt = _objectAiHelpPrompt.Trim(),
+                    TeamKey = "general",
+                    SystemPrompt = $"Current PublisherStudio publication: {State.Document.Name}; page: {State.CurrentPage.Name}; selected object ID: {originalId}; name: {objectName}; kind: {objectKind}. Provide object-specific guidance. Do not claim edits unless verified by an authorized PublisherStudio command.",
+                    MaxRounds = 1,
+                    MaxParallelModels = 1
+                }).ConfigureAwait(true);
+                _objectAiHelpResponse = response.Text;
+            }
+            catch (Exception exception)
+            {
+                _objectAiHelpResponse = exception.Message;
+                Logger.LogError(exception, "Selected object AI help failed.");
+            }
+            finally
+            {
+                _objectAiHelpBusy = false;
+            }
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Could not dispatch selected object AI help.");
+            throw;
+        }
+    }
+
+    /// <summary>Opens a native authoring surface for the selected LocalGPT action rather than navigating to connection settings.</summary>
+    /// <param name="kind">The requested native content or context-assistance operation.</param>
+    /// <returns>Completion of the native editor activation.</returns>
+    private async Task OpenSelectedAiAssistAsync(string kind)
+    {
+        try
+        {
+            if (!CanUseAiCouncil) return;
+            switch (kind)
+            {
+                case "writing":
+                    if (State.SelectedElement is not TextFrameElement)
+                    {
+                        var story = State.AddText();
+                        State.SelectElement(story.Id);
+                    }
+                    await CancelPublisherPointerAsync().ConfigureAwait(true);
+                    _storyOpenAiOnShow = true;
+                    _storyEditorVisible = true;
+                    break;
+                case "spreadsheet":
+                    if (State.SelectedElement is SpreadsheetElement sheet)
+                        await OpenSpreadsheetEditorById(sheet.Id).ConfigureAwait(true);
+                    else
+                        await CreateSpreadsheet().ConfigureAwait(true);
+                    _spreadsheetOpenAiOnShow = true;
+                    break;
+                default:
+                    // Generic help stays within the mainframe and cannot change an object by inference.
+                    _objectAiHelpResponse = string.Empty;
+                    _objectAiHelpPrompt = string.Empty;
+                    _objectAiHelpVisible = State.SelectedElement is not null;
+                    break;
+            }
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Could not activate the selected-object LocalGPT authoring workflow.");
+            throw;
+        }
+    }
+
+    /// <summary>Adds a new text frame and opens the native LocalGPT Story Editor.</summary>
+    /// <returns>Completion of editor activation.</returns>
     private async Task AddAiTextQuick()
     {
         try
@@ -3352,6 +3629,7 @@
             }
             if (_spreadsheetEditorSessionId != Guid.Empty) SpreadsheetSessions.Remove(_spreadsheetEditorSessionId);
             _spreadsheetEditorVisible = false;
+            _spreadsheetOpenAiOnShow = false;
             _spreadsheetEditorSessionId = Guid.Empty;
             _spreadsheetEditorTargetId = null;
             _pendingNewSpreadsheetId = null;
@@ -3382,6 +3660,7 @@
             }
             if (_spreadsheetEditorSessionId != Guid.Empty) SpreadsheetSessions.Remove(_spreadsheetEditorSessionId);
             _spreadsheetEditorVisible = false;
+            _spreadsheetOpenAiOnShow = false;
             _spreadsheetEditorSessionId = Guid.Empty;
             _spreadsheetEditorTargetId = null;
             _pendingNewSpreadsheetId = null;
@@ -5467,6 +5746,8 @@
             StreamingSession.HotkeyTriggered -= HandleGlobalStreamingHotkey;
             LocalGptConnection.Changed -= LocalGptConnectionChanged;
             OrganicResults.Changed -= OnAiInsertionResult;
+            LocalGptDiscovery.Changed -= OnReconnectDiscoveryChanged;
+            LocalGptDiscoveryActivation.Release("PublisherStudio.Editor.Reconnect");
             if (_interactiveAttached)
             {
                 _interactiveAttached = false;

@@ -3440,5 +3440,12 @@
   "Text.Finalizing␠recording…": "Finalizing recording…",
   "Phrase.AI␠write␠story": "ШІ: написати історію",
   "Phrase.AI␠create␠spreadsheet": "ШІ: створити електронну таблицю",
-  "Phrase.AI␠help␠with␠selected␠object": "ШІ: допомогти з вибраним об’єктом"
+  "Phrase.AI␠help␠with␠selected␠object": "ШІ: допомогти з вибраним об’єктом",
+  "Reconnect to LocalGPT?": "Повторно підключитися до LocalGPT?",
+  "A previously linked LocalGPT was detected. Reconnect only if you approve.": "Виявлено попереднє підключення до LocalGPT. Повторне підключення лише за вашою згодою.",
+  "Reconnect": "Підключити знову",
+  "Ask LocalGPT about this object": "Запитати LocalGPT про цей об’єкт",
+  "LocalGPT Council is thinking...": "Рада LocalGPT обмірковує відповідь...",
+  "Ask LocalGPT": "Запитати LocalGPT",
+  "Connection and advanced settings": "Підключення та додаткові налаштування"
 }

@@ -8,6 +8,8 @@ namespace PublisherStudio.Services.OrganicPlugins;
 /// </summary>
 public sealed class PublisherAiChatRequest
 {
+    /// <summary>Selects the locally configured provider; never includes credentials.</summary>
+    public string Provider { get; set; } = "LocalGptCouncil";
     /// <summary>Gets or sets the user-visible prompt submitted by an AI-enabled publication component.</summary>
     /// <value>The prompt value exposed by <see cref="PublisherAiChatRequest"/>.</value>
     public string Prompt { get; set; } = string.Empty;

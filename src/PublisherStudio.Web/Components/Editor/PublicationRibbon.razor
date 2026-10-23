@@ -77,21 +77,25 @@
     <DxRibbonTab Text='@LT("Insert")'>
         <DxRibbonGroup Text='@LT("Content")' IconCssClass="pub-icon pub-icon-insert">
             <DxRibbonItem Text='@LT("Objects")' IconCssClass="pub-icon pub-icon-insert" IsPrimary="true" DropDownCssClass="publisher-ribbon-menu">
-                <DxRibbonItem Text='@LT("Panel / dashboard")' IconCssClass="pub-icon pub-icon-panel" Click="RequestPanel" />
                 <DxRibbonItem Text='@LT("Web content")' IconCssClass="pub-icon pub-icon-web" Click="RequestHtmlEmbed" />
-                <DxRibbonItem Text='@LT("Interactive 3D blob")' IconCssClass="pub-icon pub-icon-effects" Click="RequestVideoBlob" />
                 <DxRibbonItem Text='@LT("Text Box")' IconCssClass="pub-icon pub-icon-text" Click="AddText" />
                 <DxRibbonItem Text='@LT("WordArt")' IconCssClass="pub-icon pub-icon-wordart" Click="AddWordArt" />
-                <DxRibbonItem Text='@LT("Picture")' IconCssClass="pub-icon pub-icon-picture" Click="RequestPicture" />
-                <DxRibbonItem Text='@LT("Create picture")' IconCssClass="pub-icon pub-icon-picture" Click="RequestCreatePicture" />
                 <DxRibbonItem Text='@LT("Spreadsheet")' IconCssClass="pub-icon pub-icon-spreadsheet" Click="RequestSpreadsheet" />
                 <DxRibbonItem Text='@LT("Create spreadsheet")' IconCssClass="pub-icon pub-icon-spreadsheet" Click="RequestCreateSpreadsheet" />
             </DxRibbonItem>
             <DxRibbonItem Text='@LT("Media")' IconCssClass="pub-icon pub-icon-command" DropDownCssClass="publisher-ribbon-menu">
                 <DxRibbonItem Text='@LT("Insert video")' IconCssClass="pub-icon pub-icon-video" Click="RequestVideo" />
                 <DxRibbonItem Text='@LT("Insert audio")' IconCssClass="pub-icon pub-icon-audio" Click="RequestAudio" />
+                <DxRibbonItem Text='@LT("Picture")' IconCssClass="pub-icon pub-icon-picture" Click="RequestPicture" />
+                <DxRibbonItem Text='@LT("Create picture")' IconCssClass="pub-icon pub-icon-picture" Click="RequestCreatePicture" />
                 <DxRibbonItem IconCssClass="pub-icon pub-icon-video" Text='@LT("Create video")' Click="RequestCreateVideo" />
                 <DxRibbonItem IconCssClass="pub-icon pub-icon-audio" Text='@LT("Create audio")' Click="RequestCreateAudio" />
+                @if (CanShowAiCouncil)
+                {
+                    <DxRibbonItem Text='@LT("Create picture with AI")' IconCssClass="pub-icon pub-icon-picture" Click='() => OpenAiAssistForSelected("picture")' />
+                    <DxRibbonItem Text='@LT("Create video with AI")' IconCssClass="pub-icon pub-icon-video" Click='() => OpenAiAssistForSelected("video")' />
+                    <DxRibbonItem Text='@LT("Create audio with AI")' IconCssClass="pub-icon pub-icon-audio" Click='() => OpenAiAssistForSelected("audio")' />
+                }
             </DxRibbonItem>
         </DxRibbonGroup>
         <DxRibbonGroup Text='@LT("Data")' IconCssClass="pub-icon pub-icon-chart">
@@ -115,9 +119,16 @@
             <DxRibbonItem Text='@LT("Barcode / QR")' IconCssClass="pub-icon pub-icon-barcode" IsPrimary="true" Click="RequestBarcode" />
         </DxRibbonGroup>
         <DxRibbonGroup Text='@LT("Panels")' IconCssClass="pub-icon pub-icon-panel">
-            <DxRibbonItem Text='@LT("Insert blank panel")' IconCssClass="pub-icon pub-icon-panel" IsPrimary="true" Click="RequestPanel" />
-            <DxRibbonItem Text='@LT("Panel library")' IconCssClass="pub-icon pub-icon-chart" Click="RequestPanelLibrary" />
-            <DxRibbonItem Text='@LT("Media converter")' IconCssClass="pub-icon pub-icon-media" Click="RequestMediaConverter" />
+            <DxRibbonItem Text='@LT("Panels")' IconCssClass="pub-icon pub-icon-panel" IsPrimary="true" DropDownCssClass="publisher-ribbon-menu">
+                <DxRibbonItem Text='@LT("Panel library")' IconCssClass="pub-icon pub-icon-chart" Click="RequestPanelLibrary" />
+                <DxRibbonItem Text='@LT("Insert blank panel")' IconCssClass="pub-icon pub-icon-panel" Click="RequestPanel" />
+                <DxRibbonItem Text='@LT("Interactive 3D blob")' IconCssClass="pub-icon pub-icon-effects" Click="RequestVideoBlob" />
+                @if (CanShowAiCouncil)
+                {
+                    <DxRibbonItem Text='@LT("Create panel template with AI")' IconCssClass="pub-icon pub-icon-panel" Click='() => OpenAiAssistForSelected("template")' />
+                    <DxRibbonItem Text='@LT("Create 3D blob with AI")' IconCssClass="pub-icon pub-icon-effects" Click='() => OpenAiAssistForSelected("blob3d")' />
+                }
+            </DxRibbonItem>
         </DxRibbonGroup>
         <DxRibbonGroup Text='@LT("Interactive")' IconCssClass="pub-icon pub-icon-web">
             <DxRibbonItem Text='@LT("Professional components")' IconCssClass="pub-icon pub-icon-command" IsPrimary="true" DropDownCssClass="publisher-ribbon-menu">
@@ -152,6 +163,7 @@
                         <DxRibbonItem Text='@LT("Gallery")' Click="AddComponentGallery" />
                         <DxRibbonItem Text='@LT("Tile View")' Click="AddComponentTileView" />
                         <DxRibbonItem Text='@LT("Chat")' Click="AddComponentChat" />
+                <DxRibbonItem Text='@LT("AI Chat")' IconCssClass="pub-icon pub-icon-command" Click="AddAiChat" />
                 </DxRibbonItem>
             </DxRibbonItem>
         </DxRibbonGroup>
@@ -1044,6 +1056,8 @@
     /// </summary>
     /// <value>The on insert component value exposed by <see cref="PublicationRibbon"/>.</value>
     [Parameter] public EventCallback<PublicationComponentKind> OnInsertComponent { get; set; }
+    /// <summary>Requests a configured DevExtreme AI Chat with a selectable optional provider.</summary>
+    [Parameter] public EventCallback OnInsertAiChat { get; set; }
     /// <summary>
     /// Gets or sets the on edit component value that forms part of the publication ribbon state consumed or produced by the surrounding workflow.
     /// </summary>
@@ -3663,6 +3677,21 @@
     /// Adds component chat for <see cref="PublicationRibbon"/>, keeping the operation consistent with the state and invariants of the surrounding publication ribbon workflow.
     /// </summary>
     /// <returns>A task that completes when the operation has finished.</returns>
+    /// <summary>Opens the native AI Chat component configuration without requiring LocalGPT.</summary>
+    /// <returns>Completion of the editor command.</returns>
+    private Task AddAiChat()
+    {
+        try
+        {
+            return OnInsertAiChat.InvokeAsync();
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Publication Ribbon could not open AI Chat.");
+            throw;
+        }
+    }
+
     private Task AddComponentChat() {
         try
         {

@@ -3447,5 +3447,18 @@
   "Ask LocalGPT about this object": "Запитати LocalGPT про цей об’єкт",
   "LocalGPT Council is thinking...": "Рада LocalGPT обмірковує відповідь...",
   "Ask LocalGPT": "Запитати LocalGPT",
-  "Connection and advanced settings": "Підключення та додаткові налаштування"
+  "Connection and advanced settings": "Підключення та додаткові налаштування",
+  "Phrase.Create␠picture␠with␠AI": "Створити зображення за допомогою ШІ",
+  "Phrase.Create␠video␠with␠AI": "Створити відео за допомогою ШІ",
+  "Phrase.Create␠audio␠with␠AI": "Створити аудіо за допомогою ШІ",
+  "Phrase.Create␠panel␠template␠with␠AI": "Створити шаблон панелі за допомогою ШІ",
+  "Phrase.Create␠3D␠blob␠with␠AI": "Створити 3D-обʼєкт за допомогою ШІ",
+  "Phrase.Create␠templates␠by␠prompt": "Створити шаблони за запитом",
+  "Phrase.PublisherStudio␠media␠AI␠assistant": "Медіа ШІ-помічник PublisherStudio",
+  "Phrase.Describe␠your␠goal.␠LocalGPT␠may␠propose␠a␠model␠or␠a␠native␠Studio␠workflow.␠No␠media␠is␠inserted␠without␠a␠verified␠result␠and␠your␠approval.": "Опишіть мету. LocalGPT може запропонувати модель або процес Studio. Медіа не вставляються без перевіреного результату й вашого схвалення.",
+  "Phrase.Describe␠the␠picture,␠video,␠audio␠or␠panel␠you␠want": "Опишіть бажане зображення, відео, аудіо або панель",
+  "Phrase.CanIRun.ai␠scores␠require␠a␠separate␠approved␠lookup;␠recommendations␠are␠not␠proof␠of␠installed␠models.": "Оцінки CanIRun.ai потребують окремого схваленого запиту; рекомендації не означають, що модель установлена.",
+  "Phrase.Find␠compatible␠models": "Знайти сумісні моделі",
+  "Phrase.Open␠native␠Studio": "Відкрити Studio",
+  "Phrase.LocalGPT␠returned␠no␠verified␠output.␠Review␠the␠Council␠session␠before␠retrying.": "LocalGPT не повернув перевіреного результату. Перевірте сесію Council перед повторною спробою."
 }

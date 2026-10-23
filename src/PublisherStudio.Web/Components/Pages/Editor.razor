@@ -28,6 +28,7 @@
 @inject PublisherStudio.Services.OrganicPlugins.ILocalGptDiscoveryRegistry LocalGptDiscovery
 @inject PublisherStudio.Services.OrganicPlugins.ILocalGptDiscoveryActivationService LocalGptDiscoveryActivation
 @inject PublisherStudio.Services.OrganicPlugins.IPublisherAiBridgeService AiBridge
+@inject PublisherStudio.Services.OrganicPlugins.IPublisherDirectAiService DirectAi
 
 <div class="razor-component-boundary">
 <DxFormLayout CssClass="razor-component-layout-owner Editor">
@@ -48,6 +49,38 @@
                 <footer class="publisher-dialog-actions">
                     <DxButton Text='@LT("Cancel")' Click="DeclineLocalGptReconnectAsync" />
                     <DxButton Text='@LT("Reconnect")' RenderStyle="ButtonRenderStyle.Primary" Click="ApproveLocalGptReconnectAsync" />
+                </footer>
+            </div>
+        </BodyContentTemplate>
+    </DxPopup>
+}
+@if (_mediaAiVisible)
+{
+    <DxPopup Visible="true" Width="min(860px, 96vw)" MaxHeight="85vh"
+             ShowHeader="false" CloseOnEscape="false" CloseOnOutsideClick="false">
+        <BodyContentTemplate Context="mediaAiPopupContext">
+            <div class="publisher-dialog" aria-label='@LT("PublisherStudio media AI assistant")'>
+                <header><h2>@_mediaAiTitle</h2></header>
+                <DxFormLayout CssClass="razor-section-layout-owner">
+                    <DxFormLayoutItem ColSpanMd="12">
+                        <Template Context="mediaAiFormContext">
+                            <p>@LT("Describe your goal. LocalGPT may propose a model or a native Studio workflow. No media is inserted without a verified result and your approval.")</p>
+                            <DxMemo Rows="5" @bind-Text="_mediaAiPrompt" NullText='@LT("Describe the picture, video, audio or panel you want")' />
+                            @if (_mediaAiBusy) { <p role="status">@LT("LocalGPT Council is thinking...")</p> }
+                            @if (!string.IsNullOrWhiteSpace(_mediaAiResponse))
+                            {
+                                <pre class="organic-ai-response" style="white-space:pre-wrap;max-height:42vh;overflow:auto">@_mediaAiResponse</pre>
+                            }
+                            <p>@LT("CanIRun.ai scores require a separate approved lookup; recommendations are not proof of installed models.")</p>
+                        </Template>
+                    </DxFormLayoutItem>
+                </DxFormLayout>
+                <footer class="publisher-dialog-actions">
+                    <DxButton Text='@LT("Close")' Click="CloseMediaAiAsync" />
+                    <DxButton Text='@LT("Find compatible models")' Enabled="@(!_mediaAiBusy)" Click="AskMediaModelFitAsync" />
+                    <DxButton Text='@LT("Open native Studio")' Enabled="@(!_mediaAiBusy)" Click="ContinueMediaAiInStudioAsync" />
+                    <DxButton Text='@LT("Ask LocalGPT")' Enabled="@(!_mediaAiBusy && !string.IsNullOrWhiteSpace(_mediaAiPrompt))"
+                              RenderStyle="ButtonRenderStyle.Primary" Click="AskMediaAiAsync" />
                 </footer>
             </div>
         </BodyContentTemplate>
@@ -159,6 +192,7 @@
                        OnEditDataVisual="OpenDataVisualEditor"
                        OnManageData="OpenDataManager"
                        OnInsertComponent="InsertComponent"
+                       OnInsertAiChat="InsertAiChatQuick"
                        OnEditComponent="OpenComponentEditor"
                        OnInsertPanel="InsertPanel"
                        OnInsertHtmlEmbed="InsertHtmlEmbed"
@@ -189,8 +223,8 @@
         @if (CanUseAiCouncil)
         {
             <button type="button" title='@LT("Create a text frame and open LocalGPT AI assistance in Story Editor")' @onclick="AddAiTextQuick"><i class="pub-icon pub-icon-text"></i>@LT("AI Text")</button>
-            <button type="button" title='@LT("Insert a DevExtreme Chat already wired to the paired LocalGPT Council bridge")' @onclick="InsertAiChatQuick"><i class="pub-icon pub-icon-command"></i>@LT("AI Chat")</button>
         }
+        <button type="button" title='@LT("Insert DevExtreme Chat with optional LocalGPT or server-configured OpenAI")' @onclick="InsertAiChatQuick"><i class="pub-icon pub-icon-command"></i>@LT("AI Chat")</button>
         <button type="button" draggable="true" data-publisher-insert="picture" title='@LT("Drag to choose and place a picture, or click to insert")' @onclick="OpenPicturePicker"><i class="pub-icon pub-icon-picture"></i>@LT("Picture")</button>
         <button type="button" draggable="true" data-publisher-insert="spreadsheet" title='@LT("Drag to create and place a spreadsheet, or click to open a workbook")' @onclick="OpenSpreadsheetPicker"><i class="pub-icon pub-icon-spreadsheet"></i>@LT("Sheet")</button>
         <button type="button" draggable="true" data-publisher-insert="video" title='@LT("Drag to create or import and place a video, or click to insert")' @onclick="OpenVideoPicker"><i class="pub-icon pub-icon-video"></i>@LT("Video")</button>
@@ -227,6 +261,7 @@
                         OnEditDataVisual="OpenDataVisualEditor"
                         OnManageData="OpenDataManager"
                         OnInsertComponent="InsertComponent"
+                       OnInsertAiChat="InsertAiChatQuick"
                         OnEditComponent="OpenComponentEditor"
                         OnInsertVideo="OpenVideoPicker"
                         OnInsertAudio="OpenAudioPicker"
@@ -253,7 +288,8 @@
 
     @if (State.Document.View.PanelLibraryVisible)
     {
-        <PanelLibrary Insert="InsertPanelPreset" InsertTemplate="InsertDivTemplate" Close="ClosePanelLibrary" />
+        <PanelLibrary Insert="InsertPanelPreset" InsertTemplate="InsertDivTemplate" Close="ClosePanelLibrary"
+                      AiAvailable="CanUseAiCouncil" RequestAiTemplate="OpenAiPanelTemplateAsync" />
     }
 
     <footer class="status-bar">
@@ -1081,6 +1117,13 @@
     private bool _reconnectPromptVisible;
     private string _reconnectPeerId = string.Empty;
     private bool _reconnectRequested;
+    private bool _mediaAiVisible;
+    private bool _mediaAiBusy;
+    private string _mediaAiKind = string.Empty;
+    private string _mediaAiTitle = string.Empty;
+    private string _mediaAiPrompt = string.Empty;
+    private string _mediaAiResponse = string.Empty;
+
     private bool _objectAiHelpVisible;
     private bool _objectAiHelpBusy;
     private string _objectAiHelpPrompt = string.Empty;
@@ -1222,6 +1265,193 @@
         }
     }
 
+    /// <summary>Opens the prompt-based panel authoring surface without leaving the Panel Library.</summary>
+    /// <returns>An awaited native editor operation.</returns>
+    private Task OpenAiPanelTemplateAsync()
+    {
+        try
+        {
+            return OpenMediaAiAsync("template");
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Opening prompt-based panel template authoring failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Opens a capability-specific AI request inside the current publication circuit.</summary>
+    /// <param name="kind">A fixed, user-selected media or panel workflow key.</param>
+    /// <returns>A task for the native popup activation.</returns>
+    private Task OpenMediaAiAsync(string kind)
+    {
+        try
+        {
+            if (!CanUseAiCouncil || kind is not ("picture" or "video" or "audio" or "template" or "blob3d"))
+                return Task.CompletedTask;
+            _mediaAiKind = kind;
+            _mediaAiTitle = kind switch
+            {
+                "picture" => LT("Create picture with AI"),
+                "video" => LT("Create video with AI"),
+                "audio" => LT("Create audio with AI"),
+                "template" => LT("Create templates by prompt"),
+                _ => LT("Create 3D blob with AI")
+            };
+            _mediaAiPrompt = string.Empty;
+            _mediaAiResponse = string.Empty;
+            _mediaAiVisible = true;
+            State.SetPanelLibraryVisible(false);
+            return Task.CompletedTask;
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Opening LocalGPT media/panel authoring failed for {Kind}.", kind);
+            throw;
+        }
+    }
+
+    /// <summary>Closes the native AI request without inventing a generated media asset.</summary>
+    private Task CloseMediaAiAsync()
+    {
+        try
+        {
+            if (!_mediaAiBusy) _mediaAiVisible = false;
+            return Task.CompletedTask;
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Closing LocalGPT media/panel authoring failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Asks LocalGPT for an executable, reviewable path through existing PublisherStudio media capabilities.</summary>
+    private Task AskMediaAiAsync()
+    {
+        try
+        {
+            return RequestMediaAiAsync(findModels: false);
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Submitting media AI request failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Asks the Council to review installed models and propose an optional human-approved CanIRun.ai lookup.</summary>
+    private Task AskMediaModelFitAsync()
+    {
+        try
+        {
+            return RequestMediaAiAsync(findModels: true);
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Submitting media hardware-fit request failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Uses the selected media Council seed only when the linked LocalGPT actually advertises it.</summary>
+    /// <param name="kind">The native media/panel authoring mode.</param>
+    /// <returns>A negotiated team key or the backward-compatible general Council.</returns>
+    private string ResolvePublisherMediaTeamKey(string kind)
+    {
+        try
+        {
+            var requested = kind switch
+            {
+                "picture" => "publisher-image",
+                "video" => "publisher-video",
+                "audio" => "publisher-audio",
+                _ => "publisher-panel"
+            };
+            return LocalGptConnection.State.RemoteCapabilities
+                .Where(capability => capability.IsEnabled && capability.IsOnline &&
+                    string.Equals(capability.Key, "council.run", StringComparison.OrdinalIgnoreCase))
+                .SelectMany(capability => capability.Skills)
+                .Any(key => string.Equals(key, requested, StringComparison.OrdinalIgnoreCase))
+                ? requested : "general";
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Checking negotiated PublisherStudio media Council teams failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Submits bounded media context through the existing secured 1-Wire Council bridge.</summary>
+    /// <param name="findModels">Whether the user explicitly requested model-compatibility discovery.</param>
+    private async Task RequestMediaAiAsync(bool findModels)
+    {
+        try
+        {
+            if (_mediaAiBusy || !_mediaAiVisible || !CanUseAiCouncil ||
+                (!findModels && string.IsNullOrWhiteSpace(_mediaAiPrompt))) return;
+            var kind = _mediaAiKind;
+            var prompt = _mediaAiPrompt.Trim();
+            _mediaAiBusy = true;
+            _mediaAiResponse = string.Empty;
+            try
+            {
+                var instructions = findModels
+                    ? "First inspect LocalGPT's configured provider/model inventory with initial.setup.status. If no suitable installed model exists, request a separate human-approved initial.setup.canirun.recommendations lookup using locally reviewed hardware. Never send device details or contact CanIRun.ai without that approval. Report attributed, category-relevant image/video/audio scores only from actual returned data, with exact model identities, not guesses or fixed rankings."
+                    : "Work with the exact available PublisherStudio 1-Wire capabilities and existing native Picture, Video, Audio, Panel and OpenSCAD workflows. Identify whether a real generator/tool is available. Only report a media asset as created when an actual validated output and receipt exist; otherwise provide a bounded plan or reviewable source/code. For panel templates include native-safe component structure and field choices for user review; no arbitrary JavaScript execution or remote mutation. Never bypass approval for canvas edits, file writes, generated code execution or browser automation.";
+                var response = await AiBridge.ChatAsync(new PublisherStudio.Services.OrganicPlugins.PublisherAiChatRequest
+                {
+                    TeamKey = ResolvePublisherMediaTeamKey(kind),
+                    Prompt = findModels ? $"Find approved hardware-fit model recommendations for {_mediaAiTitle}. User request: {prompt}" : prompt,
+                    SystemPrompt = $"PublisherStudio media workflow={kind}; publication={State.Document.Name}; page={State.CurrentPage.Name}; user-selected target={State.SelectedElement?.Name ?? "new object"}. {instructions}",
+                    MaxRounds = 1,
+                    MaxParallelModels = 1
+                }).ConfigureAwait(true);
+                _mediaAiResponse = string.IsNullOrWhiteSpace(response.Text)
+                    ? LT("LocalGPT returned no verified output. Review the Council session before retrying.")
+                    : response.Text;
+            }
+            catch (Exception exception)
+            {
+                _mediaAiResponse = exception.Message;
+                Logger.LogError(exception, "PublisherStudio AI generation planning failed for {Kind}.", kind);
+            }
+            finally
+            {
+                _mediaAiBusy = false;
+            }
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "PublisherStudio AI request orchestration failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Opens the existing native editor after an explicit user action; Council text is never treated as generated binary media.</summary>
+    private async Task ContinueMediaAiInStudioAsync()
+    {
+        try
+        {
+            if (_mediaAiBusy || !_mediaAiVisible) return;
+            var kind = _mediaAiKind;
+            _mediaAiVisible = false;
+            switch (kind)
+            {
+                case "picture": await CreatePicture().ConfigureAwait(true); break;
+                case "video": await CreateVideo().ConfigureAwait(true); break;
+                case "audio": await CreateAudio().ConfigureAwait(true); break;
+                case "template": InsertPanel(); break;
+                case "blob3d": await InsertDefaultVideoBlob().ConfigureAwait(true); break;
+            }
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Opening native media/panel Studio from AI plan failed.");
+            throw;
+        }
+    }
+
     /// <summary>Opens a native authoring surface for the selected LocalGPT action rather than navigating to connection settings.</summary>
     /// <param name="kind">The requested native content or context-assistance operation.</param>
     /// <returns>Completion of the native editor activation.</returns>
@@ -1241,6 +1471,13 @@
                     await CancelPublisherPointerAsync().ConfigureAwait(true);
                     _storyOpenAiOnShow = true;
                     _storyEditorVisible = true;
+                    break;
+                case "picture":
+                case "video":
+                case "audio":
+                case "template":
+                case "blob3d":
+                    await OpenMediaAiAsync(kind).ConfigureAwait(true);
                     break;
                 case "spreadsheet":
                     if (State.SelectedElement is SpreadsheetElement sheet)
@@ -1292,14 +1529,14 @@
     {
         try
         {
-            if (!CanUseAiCouncil) return;
             await CancelPublisherPointerAsync().ConfigureAwait(true);
             var component = State.AddDevExtremeComponent(PublicationComponentKind.Chat);
-            component.ChatAiMode = PublicationChatAiMode.LocalGptCouncil;
+            component.ChatAiMode = CanUseAiCouncil ? PublicationChatAiMode.LocalGptCouncil
+                : DirectAi.IsAvailable() ? PublicationChatAiMode.OpenAiServer : PublicationChatAiMode.None;
             component.ChatAiTeamKey = "general";
             component.ChatCurrentUserName = "Reader";
             component.ChatPlatform = PublicationChatPlatform.Preview;
-            component.Title = "Ask LocalGPT";
+            component.Title = CanUseAiCouncil ? "Ask LocalGPT" : DirectAi.IsAvailable() ? "Ask OpenAI" : "Chat";
             _pendingNewComponentId = component.Id;
             _componentEditorVisible = true;
     

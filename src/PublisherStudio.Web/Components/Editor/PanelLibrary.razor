@@ -15,7 +15,13 @@
         <div class="panel-library-dock" aria-label='@LT("Panel and dashboard library")'>
     <header>
         <div><strong>@LT("Panel library")</strong><small>@LT("Reusable live views built from PublisherStudio components.")</small></div>
-        <button type="button" class="window-close" aria-label='@LT("Close Panel library")' @onclick="Close">×</button>
+        <div class="panel-library-header-actions">
+            @if (AiAvailable)
+            {
+                <DxButton Text='@LT("Create templates by prompt")' RenderStyle="ButtonRenderStyle.Primary" Click="RequestAiTemplateAsync" />
+            }
+            <DxButton Text='@LT("Close Panel library")' Click="ClosePanelLibraryAsync" />
+        </div>
     </header>
     <div class="panel-library-section-heading">
         <strong>@LT("Built-in panels")</strong>
@@ -88,6 +94,40 @@
     /// <summary>Gets or sets the callback used to close the Panel Library.</summary>
     /// <value>The close callback exposed by <see cref="PanelLibrary"/>.</value>
     [Parameter] public EventCallback Close { get; set; }
+    /// <summary>Whether the active editor circuit has an approved, linked Council capability.</summary>
+    [Parameter] public bool AiAvailable { get; set; }
+    /// <summary>Requests a user-authored AI panel-template workflow in the native editor.</summary>
+    [Parameter] public EventCallback RequestAiTemplate { get; set; }
+
+
+    /// <summary>Opens prompt-based template assistance via the parent editor's approved Council workflow.</summary>
+    private async Task RequestAiTemplateAsync()
+    {
+        try
+        {
+            if (!AiAvailable) return;
+            await RequestAiTemplate.InvokeAsync().ConfigureAwait(true);
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Opening Panel Library prompt-based template assistance failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Closes the library through its existing editor-owned state callback.</summary>
+    private async Task ClosePanelLibraryAsync()
+    {
+        try
+        {
+            await Close.InvokeAsync().ConfigureAwait(true);
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Closing Panel Library failed.");
+            throw;
+        }
+    }
 
     /// <summary>Loads local Div-template descriptors when the Panel Library is initialized.</summary>
     /// <returns>A task representing completion of the component lifecycle operation.</returns>

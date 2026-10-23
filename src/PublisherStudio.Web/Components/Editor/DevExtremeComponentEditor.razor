@@ -549,11 +549,18 @@
                                     <label>Input placeholder<input @bind="_draft.Placeholder" placeholder="Send a message…" /></label>
                                     <label>Display mode<select @bind="_draft.ChatDisplayMode">@foreach (var mode in Enum.GetValues<PublicationChatDisplayMode>()) { <option value="@mode">@mode</option> }</select></label>
                                     <label>AI assistant<select @bind="_draft.ChatAiMode">@foreach (var mode in Enum.GetValues<PublicationChatAiMode>()) { <option value="@mode">@mode</option> }</select></label>
-                                    @if (_draft.ChatAiMode == PublicationChatAiMode.LocalGptCouncil)
+                                    @if (_draft.ChatAiMode != PublicationChatAiMode.None)
                                     {
-                                        <label>Council team<input @bind="_draft.ChatAiTeamKey" placeholder="general" /></label>
+                                        @if (_draft.ChatAiMode == PublicationChatAiMode.OpenAiServer)
+                                        {
+                                            <p class="component-form-wide component-info">OpenAI provider: configured on the PublisherStudio server. API keys are never written to publications or exported websites. Standalone exports need an independently configured secure AI endpoint.</p>
+                                        }
+                                        @if (_draft.ChatAiMode == PublicationChatAiMode.LocalGptCouncil)
+                                        {
+                                            <label>Council team<input @bind="_draft.ChatAiTeamKey" placeholder="general" /></label>
+                                        }
                                         <label>Maximum AI output tokens<input type="number" min="256" max="262144" step="256" @bind="_draft.ChatAiMaxOutputTokens" /></label>
-                                        <label class="component-form-wide">AI role / publication instructions<textarea rows="3" @bind="_draft.ChatAiSystemPrompt" placeholder="Optional instructions for this embedded LocalGPT Council chat"></textarea></label>
+                                        <label class="component-form-wide">AI role / publication instructions<textarea rows="3" @bind="_draft.ChatAiSystemPrompt" placeholder="Optional instructions for the selected AI provider"></textarea></label>
                                     }
                                     <label>Maximum visible messages<input type="number" min="1" max="100" @bind="_draft.ChatMaxVisibleMessages" /></label>
                                     <label>Background opacity<input type="range" min="0" max="1" step="0.05" @bind="_draft.ChatBackgroundOpacity" /></label>
@@ -573,7 +580,7 @@
                                         <label><input type="checkbox" @bind="_draft.ChatAiSaveToMemory" /> Save Council result to memory</label>
                                     }
                                 </div>
-                                <p class="component-info">Auto uses interactive chat for the operator and a privacy-safe viewer overlay in broadcast output. ViewerOnly and StreamOverlay never render a message input, moderation controls, sender credentials, or private operator metadata. Normal stream chat continues to use <code>window.PublisherStudioChatBridge</code>. When LocalGPT Council AI is selected, the same DevExtreme Chat posts through PublisherStudio's same-origin AI bridge, which owns the paired 1-Wire connection. Standalone exports remain fully usable without LocalGPT; only the optional AI reply reports that no compatible bridge endpoint is available.</p>
+                                <p class="component-info">Auto uses interactive chat for the operator and a privacy-safe viewer overlay in broadcast output. ViewerOnly and StreamOverlay never render a message input, moderation controls, sender credentials, or private operator metadata. Normal stream chat continues to use <code>window.PublisherStudioChatBridge</code>. AI Chat offers LocalGPT Council through approved 1-Wire or server-configured OpenAI without LocalGPT. API keys remain on the server, never in the publication. Standalone website exports keep the native DevExtreme Chat UI but require their own secure backend to receive AI replies.</p>
                             }
                             @if (SupportsGridOptions || _draft.ComponentKind == PublicationComponentKind.TreeList)
                             {

@@ -94,8 +94,50 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
         return result;
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/automationInterop.js:inspectView', __javascriptError); throw __javascriptError; }}
 
+    // Panel/Div modules share PublisherStudioPublicationRuntime with standalone website exports.
+    // Introspection does not return component configuration, data rows, tokens, or field values.
+    function inspectModules() { try {
+        if (sessionStorage.getItem(storageKey) !== 'true' || !state.running)
+            throw new Error('PublisherStudio browser automation consent is required.');
+        const runtime = window.PublisherStudioOrganicModuleRuntime;
+        if (!runtime?.list) throw new Error('The module runtime has not initialized.');
+        const modules = runtime.list().slice(0, 48).map(module => {
+            const target = document.querySelector(`[data-element-id="${module.elementId}"]`);
+            const rect = target?.getBoundingClientRect?.();
+            return { elementId: module.elementId, kind: module.kind, fields: module.fields,
+                methods: module.functions.map(item => item.name), functions: module.functions,
+                rect: rect ? [Math.round(rect.x), Math.round(rect.y), Math.round(rect.width), Math.round(rect.height)] : [] };
+        });
+        const result = { modules, truncated: modules.length >= 64,
+            invokeCapability: 'publisher.panel.module.invoke', resultCapability: 'publisher.input.result' };
+        while (JSON.stringify(result).length > 16000 && result.modules.length) {
+            result.modules.pop(); result.truncated = true;
+        }
+        return JSON.stringify(result);
+    } catch (__javascriptError) { publisherStudioDiagnostics.report('js/automationInterop.js:inspectModules', __javascriptError); throw __javascriptError; }}
+
+    async function invokeModule(command) { try {
+        if (sessionStorage.getItem(storageKey) !== 'true' || !state.running)
+            throw new Error('PublisherStudio browser automation consent is required.');
+        const runtime = window.PublisherStudioOrganicModuleRuntime;
+        if (!runtime?.describe || !runtime?.invoke) throw new Error('The module runtime is unavailable.');
+        const elementId = String(command.selector || '').trim();
+        if (!/^[0-9a-f-]{36}$/i.test(elementId)) throw new Error('Invalid module identifier.');
+        const method = String(command.key || '').trim();
+        const available = runtime.describe(elementId)?.methods || [];
+        if (!available.some(name => name.toLowerCase() === method.toLowerCase()))
+            throw new Error('The requested function is not available on the current module.');
+        let value = null;
+        if (command.text) value = JSON.parse(String(command.text));
+        const applied = await runtime.invoke({ elementId, method, value });
+        if (applied !== true) throw new Error('The module operation did not confirm success.');
+        return JSON.stringify({ elementId, method, applied: true });
+    } catch (__javascriptError) { publisherStudioDiagnostics.report('js/automationInterop.js:invokeModule', __javascriptError); throw __javascriptError; }}
+
     async function execute(command) { try {
         if (String(command.kind || '').toLowerCase() === 'inspectview') return inspectView(command.selector || 'body');
+        if (String(command.kind || '').toLowerCase() === 'inspectmodules') return inspectModules();
+        if (String(command.kind || '').toLowerCase() === 'invokemodule') return await invokeModule(command);
         const target = resolveTarget(command.selector, command.x, command.y);
         if (!(target instanceof Element)) throw new Error('No browser element matched the automation command.');
         const options = eventOptions(command, target);

@@ -979,6 +979,106 @@
       "interactionEditor": 0,
       "configurationKey": "publisher:publisher.media.cancel",
       "source": "PublisherStudio object store"
+    },
+    {
+      "key": "publisher.panel.modules.inspect",
+      "displayName": "Panel / Div Studio module functions",
+      "description": "Discover available methods on actual mounted PublisherStudio Panel/Div modules. Only module IDs, kinds and callable method names are returned; no data rows or entered fields.",
+      "controller": "OrganicPlugins",
+      "method": "POST",
+      "route": "/api/organic/capabilities/publisher.panel.modules.inspect",
+      "parameterSchemaJson": "{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}",
+      "organs": [
+        "eyes"
+      ],
+      "skills": [
+        "panel",
+        "div",
+        "module",
+        "discovery"
+      ],
+      "requiredSkillKeys": [
+        "panel",
+        "div",
+        "module",
+        "discovery"
+      ],
+      "uiActivationKeys": [
+        "publisherstudio.browser.automation"
+      ],
+      "isOnline": true,
+      "isEnabled": true,
+      "isReadOnly": true,
+      "requiresHumanConfirmation": false,
+      "supportsScheduling": false,
+      "supportsRecurringExecution": false,
+      "requiresHumanInteractionOnTargetSystem": true,
+      "requiresAutomatedInteractionOnTargetSystem": true,
+      "interactionValueSchemaJson": "{\"type\":\"object\",\"properties\":{}}",
+      "inputContract": "Uses the current browser tab; no passwords, credentials, or arbitrary scripts.",
+      "outputContract": "Queued request ID; retrieve module inventory through publisher.input.result.",
+      "securityContract": "Existing linked-peer permission matrix and an explicitly enabled browser automation tab; module invocation also requires PublisherStudio human confirmation.",
+      "organicUseCase": "Discover executable functions of mounted Panel/Div Studio modules.",
+      "suggestedCouncilRoles": [
+        "panel composer",
+        "runtime verifier"
+      ],
+      "isExposedToPeer": true,
+      "allowPeerInvocation": true,
+      "requiresFrontendUserConfirmation": true,
+      "interactionEditor": 1,
+      "configurationKey": "publisher:publisher.panel.modules.inspect",
+      "source": "PublisherStudio object store"
+    },
+    {
+      "key": "publisher.panel.module.invoke",
+      "displayName": "Invoke Panel / Div Studio module function",
+      "description": "Invoke an explicitly approved method on one visible Panel/Div module in the connected PublisherStudio browser tab. The same runtime methods are used in standalone exports.",
+      "controller": "OrganicPlugins",
+      "method": "POST",
+      "route": "/api/organic/capabilities/publisher.panel.module.invoke",
+      "parameterSchemaJson": "{\"type\":\"object\",\"properties\":{\"elementId\":{\"type\":\"string\",\"format\":\"uuid\"},\"method\":{\"type\":\"string\",\"maxLength\":40},\"value\":{}},\"required\":[\"elementId\",\"method\"],\"additionalProperties\":false}",
+      "organs": [
+        "hands"
+      ],
+      "skills": [
+        "panel",
+        "div",
+        "module",
+        "function"
+      ],
+      "requiredSkillKeys": [
+        "panel",
+        "div",
+        "module",
+        "function"
+      ],
+      "uiActivationKeys": [
+        "publisherstudio.browser.automation"
+      ],
+      "isOnline": true,
+      "isEnabled": true,
+      "isReadOnly": false,
+      "requiresHumanConfirmation": true,
+      "supportsScheduling": false,
+      "supportsRecurringExecution": false,
+      "requiresHumanInteractionOnTargetSystem": true,
+      "requiresAutomatedInteractionOnTargetSystem": true,
+      "interactionValueSchemaJson": "{\"type\":\"object\",\"properties\":{}}",
+      "inputContract": "elementId GUID, one advertised method, optional bounded JSON value; no arbitrary browser JS.",
+      "outputContract": "Queued request ID; retrieve the verified function result through publisher.input.result.",
+      "securityContract": "Existing linked-peer permission matrix and an explicitly enabled browser automation tab; module invocation also requires PublisherStudio human confirmation.",
+      "organicUseCase": "Execute an approved function exposed by a mounted Panel/Div Studio module.",
+      "suggestedCouncilRoles": [
+        "panel composer",
+        "runtime verifier"
+      ],
+      "isExposedToPeer": true,
+      "allowPeerInvocation": true,
+      "requiresFrontendUserConfirmation": true,
+      "interactionEditor": 1,
+      "configurationKey": "publisher:publisher.panel.module.invoke",
+      "source": "PublisherStudio object store"
     }
   ]
 }

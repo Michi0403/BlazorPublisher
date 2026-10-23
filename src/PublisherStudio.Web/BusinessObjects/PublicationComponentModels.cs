@@ -170,7 +170,9 @@ public enum PublicationChatAiMode
     /// <summary>
     /// Selects the local GPT council option for <see cref="PublicationChatAiMode"/>, giving callers a named value for that supported mode or state.
     /// </summary>
-    LocalGptCouncil
+    LocalGptCouncil,
+    /// <summary>Uses a configured OpenAI-compatible server-side provider without requiring LocalGPT.</summary>
+    OpenAiServer
 }
 
 /// <summary>

@@ -807,6 +807,11 @@ public sealed class OrganicWorkExecutor(
             var kindName = GetString(parameters, "kind", string.Empty);
             if (!Enum.TryParse<BrowserAutomationCommandKind>(kindName, true, out var kind))
                 throw new ArgumentException("A valid browser automation kind is required.");
+            // Capability-specific commands must never be reachable through the older,
+            // more permissive generic browser-input capability. The dedicated organic
+            // handlers own approval and typed module identity validation.
+            if (kind is BrowserAutomationCommandKind.InspectModules or BrowserAutomationCommandKind.InvokeModule)
+                throw new ArgumentException("Module operations require their dedicated organic capability and its approval policy.");
             var command = new BrowserAutomationCommand
             {
                 Kind = kind, Selector = GetString(parameters, "selector", string.Empty), Text = GetString(parameters, "text", string.Empty),
@@ -1184,10 +1189,11 @@ public sealed class OrganicWorkCoordinator(
                     advertised.ConfigurationKey, codec.JsonOptions);
             }
             var requiresFreshCaptureConsent = envelope.CapabilityKey is "publisher.screen.capture" or "publisher.screen.record";
-            if (requiresFreshCaptureConsent)
+            var requiresFreshModuleConsent = string.Equals(envelope.CapabilityKey, "publisher.panel.module.invoke", StringComparison.OrdinalIgnoreCase);
+            if (requiresFreshCaptureConsent || requiresFreshModuleConsent)
             {
-                // Screen sharing is deliberately non-persistable. Even an AllowAlways rule may not bypass
-                // the current PublisherStudio confirmation and the browser's fresh getDisplayMedia prompt.
+                // Fresh screen capture and consequential module mutation are non-persistable.
+                // Saved peer permission must not bypass PublisherStudio confirmation.
                 envelope.RequiresHumanInteractionOnTargetSystem = true;
                 envelope.ApprovalMode = OrganicApprovalMode.AskEveryTime;
                 envelope.NormalizeInteractionKind();
@@ -1198,7 +1204,7 @@ public sealed class OrganicWorkCoordinator(
                 CapabilityKey = envelope.CapabilityKey, Request = envelope,
                 Status = !exposed || permissions.IsDenied(envelope)
                     ? OrganicWorkStatus.Declined
-                    : requiresFreshCaptureConsent
+                    : (requiresFreshCaptureConsent || requiresFreshModuleConsent)
                         ? OrganicWorkStatus.PendingApproval
                         : permissions.IsAllowed(envelope)
                             ? OrganicWorkStatus.Queued

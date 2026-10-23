@@ -1160,7 +1160,7 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:applyChatInputState@1123', __javascriptError); throw __javascriptError; }}
 
     function chatUsesLocalGptAi(config) { try {
-        return lower(config?.chatAiMode) === "localgptcouncil";
+        return ["localgptcouncil", "openaiserver"].includes(lower(config?.chatAiMode));
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:chatUsesLocalGptAi', __javascriptError); throw __javascriptError; }}
 
     function refreshChatItems(state) { try {
@@ -1175,22 +1175,31 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
         const state = states.get(element);
         const timestamp = new Date();
         const responseMessage = {
-            id: `localgpt-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-            text: "LocalGPT Council is thinking…",
+            id: `ai-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+            text: lower(config?.chatAiMode) === "openaiserver" ? "OpenAI is thinking…" : "LocalGPT Council is thinking…",
             timestamp,
-            author: { id: "localgpt-council", name: "LocalGPT Council", avatarUrl: "" },
+            author: { id: "ai-provider", name: lower(config?.chatAiMode) === "openaiserver" ? "OpenAI" : "LocalGPT Council", avatarUrl: "" },
             platform: activeChatPlatform(config),
             channel: activeChatChannel(config)
         };
         try {
             if (state) renderChatMessage(state, responseMessage);
             const endpoint = String(window.PublisherStudioAiEndpoint || "/api/publisher-ai/chat");
+            // AI uses the same discoverable module interface as 1-Wire, but a chat answer
+            // never directly invokes a remote method. Only the existing reviewed work
+            // coordinator may perform consequential 1-Wire operations.
+            const moduleList = window.PublisherStudioOrganicModuleRuntime?.list?.().slice(0, 12) || [];
+            const moduleHint = moduleList.length
+                ? "\n\nAvailable mounted PublisherStudio module functions (read-only context; do not claim an action succeeded unless its 1-Wire invocation result confirms it): "
+                    + JSON.stringify(moduleList).slice(0, 3500)
+                : "";
             const response = await fetch(endpoint, {
                 method: "POST",
                 headers: { "Content-Type": "application/json", "Accept": "application/json" },
                 credentials: "same-origin",
                 body: JSON.stringify({
-                    prompt: String(message?.text || ""),
+                    prompt: String(message?.text || "") + moduleHint,
+                    provider: lower(config?.chatAiMode) === "openaiserver" ? "OpenAiServer" : "LocalGptCouncil",
                     teamKey: String(config.chatAiTeamKey || "general"),
                     systemPrompt: String(config.chatAiSystemPrompt || ""),
                     includeMemory: config.chatAiIncludeMemory !== false,
@@ -2452,6 +2461,18 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
             } else target.textContent = value ?? "";
             return true;
         }
+        if (name === "sortbycolumn") {
+            const kind = lower(state?.config?.kind);
+            if (kind !== "datagrid" && kind !== "treelist") throw new Error("Sorting is not supported by this module kind.");
+            if (!instance?.columnOption) throw new Error("The module has no active sortable grid instance.");
+            const field = String(value?.field || "").trim();
+            const permittedFields = (state?.config?.fields || []).map(column => String(column.dataField || column.name || ""));
+            if (!field || !permittedFields.includes(field)) throw new Error("The requested sorting field is not configured on this module.");
+            const direction = String(value?.direction || "asc").toLowerCase();
+            if (direction !== "asc" && direction !== "desc") throw new Error("Sorting direction must be asc or desc.");
+            instance.columnOption(field, "sortOrder", direction);
+            return true;
+        }
         if (name === "clearfilter") {
             const dataSource = instance?.getDataSource?.() || state?.dataSource;
             dataSource?.filter?.(null);
@@ -2715,10 +2736,110 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
         getBroadcastLayers(context, pageElementId) { try { return chatBroadcastLayers(context || {}, pageElementId);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:getBroadcastLayers@2244', __javascriptError); throw __javascriptError; }}
     };
 
+    // One canonical frontend function list for modules inside the authoring canvas and exported websites.
+    // It is intentionally narrower than the full DevExtreme API: arbitrary option mutation and
+    // scripting are not exposed to remote agents.
+    function availableModuleMethods(targetOrAddress) { try {
+        const target = resolvePublicationObject(targetOrAddress);
+        if (!target || !target.isConnected || target.closest?.('[hidden],[aria-hidden="true"],[data-sensitive],[data-private]')) return [];
+        const bounds = target.getBoundingClientRect?.();
+        const style = window.getComputedStyle?.(target);
+        if (!bounds || !bounds.width || !bounds.height || bounds.right <= 0 || bounds.bottom <= 0 ||
+            bounds.left >= window.innerWidth || bounds.top >= window.innerHeight ||
+            style?.display === "none" || style?.visibility === "hidden") return [];
+        const host = publicationObjectComponentHost(target);
+        const state = host ? states.get(host) : null;
+        const instance = state?.instance;
+        const methods = ["click", "focus", "blur", "show", "hide", "toggleVisibility", "enable", "disable"];
+        if (instance?.repaint) methods.push("repaint");
+        if (state && host) methods.push("refreshData");
+        if (instance?.reset) methods.push("reset");
+        if (instance?.option && (instance.option("value") !== undefined || instance.option("text") !== undefined))
+            methods.push("setValue", "setText");
+        if (instance?.getDataSource) methods.push("clearFilter");
+        const kind = lower(state?.config?.kind);
+        if ((kind === "datagrid" || kind === "treelist") && instance?.columnOption &&
+            (state?.config?.fields || []).some(column => column.dataField || column.name)) methods.push("sortByColumn");
+        if (instance?.clearSelection) methods.push("clearSelection");
+        if (instance?.selectAll) methods.push("selectAll");
+        if (instance?.scrollToTime) methods.push("scrollToTime");
+        const media = target.matches?.("video,audio") ? target : target.querySelector?.("video,audio");
+        if (media) methods.push("play", "pause", "togglePlayback", "mute", "unmute", "setVolume", "seek");
+        return methods;
+    } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:availableModuleMethods', __javascriptError); throw __javascriptError; }}
+
+    function describeModule(targetOrAddress) { try {
+        const target = resolvePublicationObject(targetOrAddress);
+        if (!target) return null;
+        const host = publicationObjectComponentHost(target);
+        const state = host ? states.get(host) : null;
+        const columns = (state?.config?.fields || []).slice(0, 24).map(field =>
+            String(field.dataField || field.name || "").slice(0, 80)).filter(Boolean);
+        return { kind: String(state?.config?.kind || host?.dataset.psComponentKind || target.dataset?.elementKind || "").slice(0, 60),
+            fields: columns, methods: availableModuleMethods(targetOrAddress) };
+    } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:describeModule', __javascriptError); throw __javascriptError; }}
+
+    // Stable, provider-neutral interface consumed by authored/exported DevExtreme components.
+    // 1-Wire itself is NOT initialized in static exports: the connected editor owns the network
+    // transport, peer permissions and mandatory confirmations. Offline pages only invoke local
+    // functions already implemented by PublisherStudioPublicationRuntime.
+    const moduleParameterContract = Object.freeze({
+        sortByColumn: 'object: { field: configured column name, direction: asc|desc }',
+        setValue: 'scalar: string|number|boolean|null',
+        setText: 'string',
+        setVolume: 'number: 0..1',
+        seek: 'number: seconds',
+        scrollToTime: 'ISO 8601 date string',
+        refreshData: 'none',
+        clearFilter: 'none',
+        clearSelection: 'none',
+        selectAll: 'none'
+    });
+
+    function availableOrganicModules(root = document) { try {
+        const scope = root instanceof Element || root instanceof Document ? root : document;
+        const items = [...scope.querySelectorAll('[data-publication-element][data-element-id], [data-panel-element][data-element-id]')];
+        if (scope instanceof Element && scope.matches('[data-publication-element][data-element-id], [data-panel-element][data-element-id]')) items.unshift(scope);
+        const modules = [];
+        for (const target of items) {
+            if (modules.length >= 48) break;
+            if (!target?.isConnected || target.closest?.('[data-private],[data-sensitive],[hidden],[aria-hidden="true"]')) continue;
+            const id = String(target.getAttribute('data-element-id') || '');
+            if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) continue;
+            const description = describeModule(id);
+            if (!description?.methods?.length) continue;
+            modules.push({
+                elementId: id,
+                kind: description.kind,
+                fields: description.fields,
+                functions: description.methods.map(name => ({ name, input: moduleParameterContract[name] || 'none' }))
+            });
+        }
+        return modules;
+    } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:availableOrganicModules', __javascriptError); throw __javascriptError; }}
+
+    async function invokeOrganicModule(command) { try {
+        if (!command || typeof command !== 'object') throw new Error('A typed module command is required.');
+        const id = String(command.elementId || '');
+        const name = String(command.method || '');
+        const permitted = availableModuleMethods(id);
+        if (!permitted.includes(name)) throw new Error('Module method is unavailable or the module is not visible.');
+        return await invokeObjectMethod(id, name, command.value === undefined ? null : command.value);
+    } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:invokeOrganicModule', __javascriptError); throw __javascriptError; }}
+
+    window.PublisherStudioOrganicModuleRuntime = Object.freeze({
+        schemaVersion: 1,
+        list: availableOrganicModules,
+        invoke: invokeOrganicModule,
+        describe: describeModule
+    });
+
     window.PublisherStudioPublicationRuntime = {
         objects: publicationObjectsApi,
         publication: publicationNavigationApi,
         resolveObject: resolvePublicationObject,
+        methods: availableModuleMethods,
+        describeModule,
         call(address, method, value) { try { return invokeObjectMethod(address, method, value); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:PublisherStudioPublicationRuntime.call', __javascriptError); throw __javascriptError; } },
         start(root) { try { startPublicationBehaviors(root || document); return true; } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:PublisherStudioPublicationRuntime.start', __javascriptError); throw __javascriptError; } },
         refresh(root) { try { startPublicationBehaviors(root || document); return true; } catch (__javascriptError) { publisherStudioDiagnostics.report('js/componentRuntime.js:PublisherStudioPublicationRuntime.refresh', __javascriptError); throw __javascriptError; } }
@@ -2760,5 +2881,6 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
 
 // Guard exported browser namespaces after the file has initialized.
 publisherStudioDiagnostics.guardObject("PublisherStudioPublicationRuntime", window.PublisherStudioPublicationRuntime);
+publisherStudioDiagnostics.guardObject("PublisherStudioOrganicModuleRuntime", window.PublisherStudioOrganicModuleRuntime);
 publisherStudioDiagnostics.guardObject("PublisherStudioChatRuntime", window.PublisherStudioChatRuntime);
 publisherStudioDiagnostics.guardObject("PublisherStudioComponentRuntime", window.PublisherStudioComponentRuntime);

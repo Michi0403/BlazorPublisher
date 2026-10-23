@@ -3447,5 +3447,18 @@
   "Ask LocalGPT about this object": "Interroger LocalGPT sur cet objet",
   "LocalGPT Council is thinking...": "Le conseil LocalGPT réfléchit...",
   "Ask LocalGPT": "Demander à LocalGPT",
-  "Connection and advanced settings": "Connexion et paramètres avancés"
+  "Connection and advanced settings": "Connexion et paramètres avancés",
+  "Phrase.Create␠picture␠with␠AI": "Créer une image avec IA",
+  "Phrase.Create␠video␠with␠AI": "Créer une vidéo avec IA",
+  "Phrase.Create␠audio␠with␠AI": "Créer un audio avec IA",
+  "Phrase.Create␠panel␠template␠with␠AI": "Créer un modèle de panneau avec IA",
+  "Phrase.Create␠3D␠blob␠with␠AI": "Créer un objet 3D avec IA",
+  "Phrase.Create␠templates␠by␠prompt": "Créer des modèles à partir d’une demande",
+  "Phrase.PublisherStudio␠media␠AI␠assistant": "Assistant multimédia IA PublisherStudio",
+  "Phrase.Describe␠your␠goal.␠LocalGPT␠may␠propose␠a␠model␠or␠a␠native␠Studio␠workflow.␠No␠media␠is␠inserted␠without␠a␠verified␠result␠and␠your␠approval.": "Décrivez votre objectif. LocalGPT peut proposer un modèle ou un flux Studio. Aucun média ne sera inséré sans résultat vérifié et votre approbation.",
+  "Phrase.Describe␠the␠picture,␠video,␠audio␠or␠panel␠you␠want": "Décrivez l’image, la vidéo, l’audio ou le panneau souhaité",
+  "Phrase.CanIRun.ai␠scores␠require␠a␠separate␠approved␠lookup;␠recommendations␠are␠not␠proof␠of␠installed␠models.": "Les scores CanIRun.ai exigent une recherche approuvée ; une recommandation ne prouve pas que le modèle est installé.",
+  "Phrase.Find␠compatible␠models": "Trouver des modèles compatibles",
+  "Phrase.Open␠native␠Studio": "Ouvrir Studio",
+  "Phrase.LocalGPT␠returned␠no␠verified␠output.␠Review␠the␠Council␠session␠before␠retrying.": "LocalGPT n’a fourni aucun résultat vérifié. Examinez la session Council avant de réessayer."
 }

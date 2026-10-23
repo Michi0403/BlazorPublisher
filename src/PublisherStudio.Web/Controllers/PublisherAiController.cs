@@ -12,6 +12,7 @@ namespace PublisherStudio.Controllers;
 [Route("api/publisher-ai")]
 public sealed class PublisherAiController(
     IPublisherAiBridgeService bridge,
+    IPublisherDirectAiService directAi,
     ILogger<PublisherAiController> logger) : ControllerBase
 {
     /// <summary>Returns whether the currently running PublisherStudio instance can route AI component requests to LocalGPT.</summary>
@@ -21,7 +22,7 @@ public sealed class PublisherAiController(
     {
         try
         {
-            return Ok(new { available = bridge.IsAvailable(), provider = "LocalGPT 1-Wire Council" });
+            return Ok(new { available = bridge.IsAvailable() || directAi.IsAvailable(), localGpt = bridge.IsAvailable(), openAi = directAi.IsAvailable(), provider = "LocalGPT 1-Wire Council or server-configured OpenAI" });
         }
         catch (Exception exception)
         {
@@ -39,6 +40,14 @@ public sealed class PublisherAiController(
     {
         try
         {
+            if (string.Equals(request.Provider, "OpenAiServer", StringComparison.OrdinalIgnoreCase))
+            {
+                if (!directAi.IsAvailable())
+                    return StatusCode(StatusCodes.Status503ServiceUnavailable, new { error = "OpenAI is not configured on the PublisherStudio host." });
+                return Ok(await directAi.ChatAsync(request, cancellationToken).ConfigureAwait(false));
+            }
+            if (!string.Equals(request.Provider, "LocalGptCouncil", StringComparison.OrdinalIgnoreCase))
+                return BadRequest(new { error = "Unsupported AI provider." });
             if (!bridge.IsAvailable())
                 return StatusCode(StatusCodes.Status503ServiceUnavailable, new { error = "LocalGPT is not linked or Council execution is unavailable." });
             return Ok(await bridge.ChatAsync(request, cancellationToken).ConfigureAwait(false));

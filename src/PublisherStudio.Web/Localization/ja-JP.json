@@ -3447,5 +3447,18 @@
   "Ask LocalGPT about this object": "このオブジェクトについて LocalGPT に質問",
   "LocalGPT Council is thinking...": "LocalGPT Council が処理中...",
   "Ask LocalGPT": "LocalGPT に質問",
-  "Connection and advanced settings": "接続と詳細設定"
+  "Connection and advanced settings": "接続と詳細設定",
+  "Phrase.Create␠picture␠with␠AI": "AIで画像を作成",
+  "Phrase.Create␠video␠with␠AI": "AIで動画を作成",
+  "Phrase.Create␠audio␠with␠AI": "AIで音声を作成",
+  "Phrase.Create␠panel␠template␠with␠AI": "AIでパネルテンプレートを作成",
+  "Phrase.Create␠3D␠blob␠with␠AI": "AIで3Dブロブを作成",
+  "Phrase.Create␠templates␠by␠prompt": "プロンプトからテンプレートを作成",
+  "Phrase.PublisherStudio␠media␠AI␠assistant": "PublisherStudio メディアAIアシスタント",
+  "Phrase.Describe␠your␠goal.␠LocalGPT␠may␠propose␠a␠model␠or␠a␠native␠Studio␠workflow.␠No␠media␠is␠inserted␠without␠a␠verified␠result␠and␠your␠approval.": "目標を説明してください。LocalGPTはモデルやStudioの操作手順を提案できます。検証済みの結果と承認なしにメディアは挿入されません。",
+  "Phrase.Describe␠the␠picture,␠video,␠audio␠or␠panel␠you␠want": "作成したい画像、動画、音声、パネルを説明",
+  "Phrase.CanIRun.ai␠scores␠require␠a␠separate␠approved␠lookup;␠recommendations␠are␠not␠proof␠of␠installed␠models.": "CanIRun.aiのスコアには別途承認が必要です。推奨モデルはインストール済みとは限りません。",
+  "Phrase.Find␠compatible␠models": "対応モデルを探す",
+  "Phrase.Open␠native␠Studio": "Studioを開く",
+  "Phrase.LocalGPT␠returned␠no␠verified␠output.␠Review␠the␠Council␠session␠before␠retrying.": "LocalGPTから検証済みの結果がありませんでした。再試行前にCouncilセッションを確認してください。"
 }

@@ -3447,5 +3447,18 @@
   "Ask LocalGPT about this object": "Ask LocalGPT about this object",
   "LocalGPT Council is thinking...": "LocalGPT Council is thinking...",
   "Ask LocalGPT": "Ask LocalGPT",
-  "Connection and advanced settings": "Connection and advanced settings"
+  "Connection and advanced settings": "Connection and advanced settings",
+  "Phrase.Create␠picture␠with␠AI": "Create picture with AI",
+  "Phrase.Create␠video␠with␠AI": "Create video with AI",
+  "Phrase.Create␠audio␠with␠AI": "Create audio with AI",
+  "Phrase.Create␠panel␠template␠with␠AI": "Create panel template with AI",
+  "Phrase.Create␠3D␠blob␠with␠AI": "Create 3D blob with AI",
+  "Phrase.Create␠templates␠by␠prompt": "Create templates by prompt",
+  "Phrase.PublisherStudio␠media␠AI␠assistant": "PublisherStudio media AI assistant",
+  "Phrase.Describe␠your␠goal.␠LocalGPT␠may␠propose␠a␠model␠or␠a␠native␠Studio␠workflow.␠No␠media␠is␠inserted␠without␠a␠verified␠result␠and␠your␠approval.": "Describe your goal. LocalGPT may propose a model or a native Studio workflow. No media is inserted without a verified result and your approval.",
+  "Phrase.Describe␠the␠picture,␠video,␠audio␠or␠panel␠you␠want": "Describe the picture, video, audio or panel you want",
+  "Phrase.CanIRun.ai␠scores␠require␠a␠separate␠approved␠lookup;␠recommendations␠are␠not␠proof␠of␠installed␠models.": "CanIRun.ai scores require a separate approved lookup; recommendations are not proof of installed models.",
+  "Phrase.Find␠compatible␠models": "Find compatible models",
+  "Phrase.Open␠native␠Studio": "Open native Studio",
+  "Phrase.LocalGPT␠returned␠no␠verified␠output.␠Review␠the␠Council␠session␠before␠retrying.": "LocalGPT returned no verified output. Review the Council session before retrying."
 }

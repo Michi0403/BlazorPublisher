@@ -3,8 +3,8 @@
 # Build scripts refresh this manifest before validation; direct IDE/MSBuild builds validate it without silently blessing changes.
 
 95dbae7db0a97a5fa255ba8171393a02fc643a1cd30d77f2a7592337fede8723  src/PublisherStudio.Web/wwwroot/js/animatedGifInterop.js
-675c9cb63a5f039ddd84660fd989ebe9a86165613d25f1a5d054cb82ea4f9927  src/PublisherStudio.Web/wwwroot/js/automationInterop.js
-7b823db16d63987fd92635246e09ed6dc59d1ec70a8f8880017a49a12f508011  src/PublisherStudio.Web/wwwroot/js/componentRuntime.js
+957a43073ec9d2d55d2532a5dc1446ae7a6ec32c21fd2d46603c7094047309d4  src/PublisherStudio.Web/wwwroot/js/automationInterop.js
+0253bbb93a0830e993639685229a426cc896b05dd2538d82fa729d07d3535b8f  src/PublisherStudio.Web/wwwroot/js/componentRuntime.js
 a648300afe0816ac57424b4b0aa378533852406be2ad811b66fab2583fb4a562  src/PublisherStudio.Web/wwwroot/js/documentationViewer.js
 48fab690a539ae53fbc5913c30cfbbcd6995844a739d1786e79608fc78297404  src/PublisherStudio.Web/wwwroot/js/javascript-diagnostics.js
 004532949e098f082bffb96746286c0d0b3b86ce61ca677ce4389a7546a9ce97  src/PublisherStudio.Web/wwwroot/js/liveDataInterop.js

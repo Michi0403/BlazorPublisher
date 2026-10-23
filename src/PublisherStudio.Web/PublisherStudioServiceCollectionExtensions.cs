@@ -177,10 +177,13 @@ public static class PublisherStudioServiceCollectionExtensions
         AddSingleton<IOrganicExecutableCapabilityHandler, MediaConversionJobsOrganicHandler>(services);
         AddSingleton<IOrganicExecutableCapabilityHandler, MediaConversionProfilesOrganicHandler>(services);
         AddSingleton<IOrganicExecutableCapabilityHandler, MediaConversionCancelOrganicHandler>(services);
+        AddSingleton<IOrganicExecutableCapabilityHandler, PanelModuleInspectOrganicHandler>(services);
+        AddSingleton<IOrganicExecutableCapabilityHandler, PanelModuleInvokeOrganicHandler>(services);
         AddSingleton<IOrganicWorkExecutor, OrganicWorkExecutor>(services);
         AddSingleton<IOrganicWorkCoordinator, OrganicWorkCoordinator>(services);
         AddSingleton<ILocalGptConnectionService, LocalGptConnectionService>(services);
         AddSingleton<IPublisherAiBridgeService, PublisherAiBridgeService>(services);
+        AddSingleton<IPublisherDirectAiService, PublisherDirectAiService>(services);
         AddSingleton<IRecurringScreenReaderService, RecurringScreenReaderService>(services);
 
         services.AddHostedService<LocalGptDiscoveryHostedService>();

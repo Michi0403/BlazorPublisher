@@ -10,7 +10,11 @@ public enum BrowserAutomationCommandKind
     /// </summary>
     Click, DoubleClick, ContextMenu, MouseMove, MouseDown, MouseUp, Wheel, Focus, Blur, TypeText, SetValue, KeyDown, KeyUp, KeyPress,
     /// <summary>Read-only bounded snapshot of visible PublisherStudio controls and publication elements.</summary>
-    InspectView
+    InspectView,
+    /// <summary>Read-only list of executable functions exposed by visible Panel/Div Studio modules.</summary>
+    InspectModules,
+    /// <summary>Executes one approved Panel/Div Studio module method within the opted-in browser tab.</summary>
+    InvokeModule
 }
 
 /// <summary>

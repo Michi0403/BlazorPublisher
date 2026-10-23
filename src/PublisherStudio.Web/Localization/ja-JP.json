@@ -3460,5 +3460,6 @@
   "Phrase.CanIRun.ai␠scores␠require␠a␠separate␠approved␠lookup;␠recommendations␠are␠not␠proof␠of␠installed␠models.": "CanIRun.aiのスコアには別途承認が必要です。推奨モデルはインストール済みとは限りません。",
   "Phrase.Find␠compatible␠models": "対応モデルを探す",
   "Phrase.Open␠native␠Studio": "Studioを開く",
-  "Phrase.LocalGPT␠returned␠no␠verified␠output.␠Review␠the␠Council␠session␠before␠retrying.": "LocalGPTから検証済みの結果がありませんでした。再試行前にCouncilセッションを確認してください。"
+  "Phrase.LocalGPT␠returned␠no␠verified␠output.␠Review␠the␠Council␠session␠before␠retrying.": "LocalGPTから検証済みの結果がありませんでした。再試行前にCouncilセッションを確認してください。",
+  "Phrase.Insert␠DevExtreme␠Chat␠with␠optional␠LocalGPT␠or␠server-configured␠OpenAI": "LocalGPT またはサーバーで設定した OpenAI を任意で使用できる DevExtreme Chat を挿入"
 }

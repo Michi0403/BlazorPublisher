@@ -3460,5 +3460,6 @@
   "Phrase.CanIRun.ai␠scores␠require␠a␠separate␠approved␠lookup;␠recommendations␠are␠not␠proof␠of␠installed␠models.": "Оцінки CanIRun.ai потребують окремого схваленого запиту; рекомендації не означають, що модель установлена.",
   "Phrase.Find␠compatible␠models": "Знайти сумісні моделі",
   "Phrase.Open␠native␠Studio": "Відкрити Studio",
-  "Phrase.LocalGPT␠returned␠no␠verified␠output.␠Review␠the␠Council␠session␠before␠retrying.": "LocalGPT не повернув перевіреного результату. Перевірте сесію Council перед повторною спробою."
+  "Phrase.LocalGPT␠returned␠no␠verified␠output.␠Review␠the␠Council␠session␠before␠retrying.": "LocalGPT не повернув перевіреного результату. Перевірте сесію Council перед повторною спробою.",
+  "Phrase.Insert␠DevExtreme␠Chat␠with␠optional␠LocalGPT␠or␠server-configured␠OpenAI": "Вставити чат DevExtreme з необов’язковим LocalGPT або OpenAI, налаштованим на сервері"
 }

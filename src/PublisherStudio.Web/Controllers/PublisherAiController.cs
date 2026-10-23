@@ -7,6 +7,7 @@ namespace PublisherStudio.Controllers;
 /// Exposes the same-origin PublisherStudio AI bridge used by AI-enabled DevExtreme publication components while the editor/runtime is hosted by PublisherStudio.
 /// </summary>
 /// <param name="bridge">AI bridge service that owns the secured LocalGPT 1-Wire interaction.</param>
+/// <param name="directAi">Direct AI provider for server-configured OpenAI-compatible endpoints.</param>
 /// <param name="logger">Logger used to record controller-boundary diagnostics.</param>
 [ApiController]
 [Route("api/publisher-ai")]

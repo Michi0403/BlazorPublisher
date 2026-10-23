@@ -3460,5 +3460,6 @@
   "Phrase.CanIRun.ai␠scores␠require␠a␠separate␠approved␠lookup;␠recommendations␠are␠not␠proof␠of␠installed␠models.": "CanIRun.ai-Werte erfordern eine gesondert genehmigte Abfrage; Empfehlungen beweisen keine installierten Modelle.",
   "Phrase.Find␠compatible␠models": "Kompatible Modelle finden",
   "Phrase.Open␠native␠Studio": "Studio öffnen",
-  "Phrase.LocalGPT␠returned␠no␠verified␠output.␠Review␠the␠Council␠session␠before␠retrying.": "LocalGPT lieferte kein überprüftes Ergebnis. Prüfen Sie die Council-Sitzung vor einem erneuten Versuch."
+  "Phrase.LocalGPT␠returned␠no␠verified␠output.␠Review␠the␠Council␠session␠before␠retrying.": "LocalGPT lieferte kein überprüftes Ergebnis. Prüfen Sie die Council-Sitzung vor einem erneuten Versuch.",
+  "Phrase.Insert␠DevExtreme␠Chat␠with␠optional␠LocalGPT␠or␠server-configured␠OpenAI": "DevExtreme-Chat einfügen, optional mit LocalGPT oder serverseitig konfiguriertem OpenAI"
 }

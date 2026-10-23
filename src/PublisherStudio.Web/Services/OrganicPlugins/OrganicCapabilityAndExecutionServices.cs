@@ -773,11 +773,6 @@ public sealed class OrganicWorkExecutor(
     }
 }
 
-    /// <summary>
-    /// Performs queue input for <see cref="OrganicWorkExecutor"/>, keeping the operation consistent with the state and invariants of the surrounding organic work executor workflow.
-    /// </summary>
-    /// <param name="parameters">Parameters value supplied to the organic work executor operation and used when producing its result.</param>
-    /// <returns>The object produced by the operation.</returns>
     /// <summary>Queues a read-only representation of the currently visible PublisherStudio browser view under the existing automation consent boundary.</summary>
     /// <param name="parameters">Optional bounded CSS root selector for the current browser view.</param>
     /// <returns>Queue identity; the peer retrieves the view through publisher.input.result after the authorized tab responds.</returns>

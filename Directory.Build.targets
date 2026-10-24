@@ -35,6 +35,7 @@
     <XmlDocumentationCoverageScript>$(MSBuildThisFileDirectory)build/Assert-XmlDocumentationCoverage.ps1</XmlDocumentationCoverageScript>
     <DevExpressComponentRetentionScript>$(MSBuildThisFileDirectory)build/Assert-DevExpressComponentRetention.ps1</DevExpressComponentRetentionScript>
     <RazorMaintenanceArchitectureScript>$(MSBuildThisFileDirectory)build/Assert-RazorMaintenanceArchitecture.ps1</RazorMaintenanceArchitectureScript>
+    <EditorComponentParameterContractsScript>$(MSBuildThisFileDirectory)build/Assert-EditorComponentParameterContracts.ps1</EditorComponentParameterContractsScript>
   </PropertyGroup>
 
   <Target Name="EnsurePublisherWireProtocolPackage"
@@ -107,8 +108,17 @@
     <Exec Command="&quot;$(RepositoryPowerShell)&quot; $(RepositoryPowerShellArguments) -File &quot;$(RazorMaintenanceArchitectureScript)&quot; -Product publisherstudio" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
   </Target>
 
-  <Target Name="AssertPublisherOperationalDiagnostics"
+  <!-- Validate authored parent/child Blazor parameter contracts before compilation.
+       This catches unknown EventCallback names that otherwise fail on the first live render. -->
+  <Target Name="AssertPublisherEditorComponentParameters"
           BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherStudioRazorComponentAttributeExpressions"
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web'">
+    <Error Condition="!Exists('$(EditorComponentParameterContractsScript)')" Text="PublisherStudio editor parameter contract guard is missing." />
+    <Exec Command="&quot;$(RepositoryPowerShell)&quot; $(RepositoryPowerShellArguments) -File &quot;$(EditorComponentParameterContractsScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
+  </Target>
+
+  <Target Name="AssertPublisherOperationalDiagnostics"
+          BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherEditorComponentParameters"
           Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipOperationalDiagnosticsGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web'">
     <Error Condition="!Exists('$(OperationalDiagnosticsScript)')" Text="Operational diagnostics guard script is missing: $(OperationalDiagnosticsScript)" />
     <Exec Command="&quot;$(RepositoryPowerShell)&quot; $(RepositoryPowerShellArguments) -File &quot;$(OperationalDiagnosticsScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />

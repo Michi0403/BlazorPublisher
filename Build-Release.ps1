@@ -76,6 +76,7 @@ Write-Host "Refreshing reviewed PublisherStudio frontend SHA-256 inventory befor
 & (Join-Path $root 'build/Assert-PanelStudioInteractionLifecycle.ps1')
 & (Join-Path $root 'build/Assert-PanelStudioPersistence.ps1')
 & (Join-Path $root 'build/Assert-XmlDocumentationCoverage.ps1')
+& (Join-Path $root 'build/Assert-EditorComponentParameterContracts.ps1')
 function Clear-RepositoryReleaseBuildState {
     param([switch]$BestEffort)
     $directories = @(

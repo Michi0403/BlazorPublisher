@@ -1642,7 +1642,12 @@ function New-PublisherStudioHtmlPrintBook {
     # Front matter uses the same deterministic source-page ordering and bounded slices as the
     # document body. Rendering an index for every API page in one Chromium print operation
     # exhausted the renderer even when the main document was already chunked.
-    $pages = if ($MaximumPages -gt 0) { @($allPages | Select-Object -Skip $StartIndex -First $MaximumPages) } else { @($allPages | Select-Object -Skip $StartIndex) }
+    # Keep a real array even when the final PDF batch contains a single HTML page.
+    # Assigning an if-expression here unwraps singleton pipeline output under StrictMode.
+    $pages = @(
+        if ($MaximumPages -gt 0) { $allPages | Select-Object -Skip $StartIndex -First $MaximumPages }
+        else { $allPages | Select-Object -Skip $StartIndex }
+    )
     if ($pages.Count -eq 0) { throw "The requested DocFX print-book slice did not contain any pages (start=$StartIndex; maximum=$MaximumPages; total=$($allPages.Count))." }
 
     $anchorMap = New-Object 'System.Collections.Generic.Dictionary[string,string]' ([StringComparer]::OrdinalIgnoreCase)
@@ -2354,19 +2359,32 @@ function Invoke-PublisherStudioBrowserPdfWithRetry {
     $lastResult = $null
     $maximumAttempts = 1 + $browserPdfChunkRetries
     for ($renderAttempt = 1; $renderAttempt -le $maximumAttempts; $renderAttempt++) {
+        # Only the active failed candidate is disposable; all verified earlier chunks are durable.
+        if (Test-Path -LiteralPath $PdfPath -PathType Leaf) {
+            Remove-Item -LiteralPath $PdfPath -Force -ErrorAction Stop
+        }
         if ($renderAttempt -gt 1) {
             Write-Host "Retrying $ContextLabel with a fresh isolated browser profile (attempt $renderAttempt of $maximumAttempts)..." -ForegroundColor Yellow
-            Remove-Item -LiteralPath $PdfPath -Force -ErrorAction SilentlyContinue
             if ($documentationLowMemoryMode) {
                 [GC]::Collect(2, [GCCollectionMode]::Optimized, $true, $true)
                 [GC]::WaitForPendingFinalizers()
             }
             Start-Sleep -Milliseconds 500
         }
-        $lastResult = Invoke-PublisherStudioBrowserPdf -BrowserPath $BrowserPath -HtmlPath $HtmlPath -PdfPath $PdfPath -WorkingRoot $WorkingRoot -MinimumBytes $MinimumBytes -ContextLabel $ContextLabel
+        try {
+            $lastResult = Invoke-PublisherStudioBrowserPdf -BrowserPath $BrowserPath -HtmlPath $HtmlPath -PdfPath $PdfPath -WorkingRoot $WorkingRoot -MinimumBytes $MinimumBytes -ContextLabel $ContextLabel
+        }
+        catch {
+            $combinedDiagnostics.Add("attempt $renderAttempt/${maximumAttempts}: browser renderer threw $($_.Exception.GetType().Name): $($_.Exception.Message)")
+            $lastResult = [pscustomobject]@{ Succeeded = $false; ExitCode = -1; Diagnostics = @(); HeadlessMode = ''; RenderMode = ''; AccessibilityMode = 'unavailable' }
+        }
         foreach ($line in @($lastResult.Diagnostics)) { $combinedDiagnostics.Add("attempt $renderAttempt/${maximumAttempts}: $line") }
-        if ($lastResult.Succeeded) {
+        if ($lastResult.Succeeded -and (Test-PublisherStudioCompletePdf -Path $PdfPath -MinimumBytes $MinimumBytes)) {
             return [pscustomobject]@{ Succeeded = $true; ExitCode = [int]$lastResult.ExitCode; Diagnostics = @($combinedDiagnostics); HeadlessMode = [string]$lastResult.HeadlessMode; RenderMode = [string]$lastResult.RenderMode; AccessibilityMode = [string]$lastResult.AccessibilityMode; AttemptCount = $renderAttempt }
+        }
+        $combinedDiagnostics.Add("attempt $renderAttempt/${maximumAttempts}: incomplete or missing PDF candidate was rejected; only this chunk will be regenerated.")
+        if (Test-Path -LiteralPath $PdfPath -PathType Leaf) {
+            Remove-Item -LiteralPath $PdfPath -Force -ErrorAction Stop
         }
     }
     $exitCode = if ($null -ne $lastResult) { [int]$lastResult.ExitCode } else { -1 }
@@ -2405,12 +2423,16 @@ function Invoke-PublisherStudioChunkedBrowserPdf {
         $frontMatterHtml = Join-Path $chunkRoot 'front-matter.html'
         $frontMatterPdf = Join-Path $durableChunkRoot 'front-matter.pdf'
         $indexedPages = New-PublisherStudioHtmlPrintBook -SiteRoot $SiteRoot -DestinationPath $frontMatterHtml -FrontMatterOnly
+        $cachedCoverPresent = Test-Path -LiteralPath $frontMatterPdf -PathType Leaf
         if (-not $ForceRebuild -and (Test-PublisherStudioCompletePdf -Path $frontMatterPdf -MinimumBytes 65536)) {
             $reusedChunks++
             Write-Host "Reusing durable documentation PDF cover/index for $indexedPages source pages." -ForegroundColor DarkGreen
         }
         else {
-            Remove-Item -LiteralPath $frontMatterPdf -Force -ErrorAction SilentlyContinue
+            if ($cachedCoverPresent -and -not $ForceRebuild) {
+                Write-Warning "Discarding incomplete cached documentation cover/index; verified source-page chunks remain untouched."
+            }
+            if ($cachedCoverPresent) { Remove-Item -LiteralPath $frontMatterPdf -Force -ErrorAction Stop }
             Write-Host "Printing complete documentation PDF cover/index for $indexedPages source pages with the installed browser..." -ForegroundColor DarkCyan
             $timer = [Diagnostics.Stopwatch]::StartNew()
             $frontMatterResult = Invoke-PublisherStudioBrowserPdfWithRetry -BrowserPath $BrowserPath -HtmlPath $frontMatterHtml -PdfPath $frontMatterPdf -WorkingRoot $chunkRoot -ContextLabel "documentation PDF cover/index" -MinimumBytes 65536
@@ -2436,12 +2458,16 @@ function Invoke-PublisherStudioChunkedBrowserPdf {
             $htmlPath = Join-Path $chunkRoot ("chunk-{0:D3}.html" -f $chunkNumber)
             $chunkPdf = Join-Path $durableChunkRoot ("chunk-{0:D3}.pdf" -f $chunkNumber)
             $writtenPages = New-PublisherStudioHtmlPrintBook -SiteRoot $SiteRoot -DestinationPath $htmlPath -StartIndex $start -MaximumPages $ChunkPages -SuppressFrontMatter
+            $cachedChunkPresent = Test-Path -LiteralPath $chunkPdf -PathType Leaf
             if (-not $ForceRebuild -and (Test-PublisherStudioCompletePdf -Path $chunkPdf -MinimumBytes 65536)) {
                 $reusedChunks++
                 Write-Host "Reusing durable documentation PDF chunk $chunkNumber ($writtenPages source pages; start $start of $TotalPageCount)." -ForegroundColor DarkGreen
             }
             else {
-                Remove-Item -LiteralPath $chunkPdf -Force -ErrorAction SilentlyContinue
+                if ($cachedChunkPresent -and -not $ForceRebuild) {
+                    Write-Warning "Discarding incomplete cached documentation PDF chunk $chunkNumber; earlier verified chunks remain untouched."
+                }
+                if ($cachedChunkPresent) { Remove-Item -LiteralPath $chunkPdf -Force -ErrorAction Stop }
                 Write-Host "Printing documentation PDF chunk $chunkNumber ($writtenPages source pages; start $start of $TotalPageCount) with the installed browser..." -ForegroundColor DarkCyan
                 $timer = [Diagnostics.Stopwatch]::StartNew()
                 $result = Invoke-PublisherStudioBrowserPdfWithRetry -BrowserPath $BrowserPath -HtmlPath $htmlPath -PdfPath $chunkPdf -WorkingRoot $chunkRoot -ContextLabel "documentation PDF chunk $chunkNumber" -MinimumBytes 65536

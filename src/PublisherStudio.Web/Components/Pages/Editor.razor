@@ -2,6 +2,7 @@
 @page "/"
 @implements IDisposable
 @inject EditorStateService State
+@inject PublicationEditorTextService EditorText
 @inject PublicationFileService Files
 @inject IPublisherTemplateLibraryService TemplateLibrary
 @inject IPublisherDocumentFactory DocumentFactory
@@ -56,29 +57,31 @@
 }
 @if (_mediaAiVisible)
 {
-    <DxPopup Visible="true" Width="min(860px, 96vw)" MaxHeight="85vh"
+    <DxPopup Visible="true" Width="min(760px, 96vw)" MaxHeight="85vh"
              ShowHeader="false" CloseOnEscape="false" CloseOnOutsideClick="false">
         <BodyContentTemplate Context="mediaAiPopupContext">
-            <div class="publisher-dialog" aria-label='@LT("PublisherStudio media AI assistant")'>
+            <div class="publisher-dialog publisher-ai-dialog" aria-label='@LT("PublisherStudio media AI assistant")'>
+                <DxButton CssClass="publisher-ai-close" Text="×" Click="CloseMediaAiAsync" />
                 <header><h2>@_mediaAiTitle</h2></header>
                 <DxFormLayout CssClass="razor-section-layout-owner">
                     <DxFormLayoutItem ColSpanMd="12">
                         <Template Context="mediaAiFormContext">
                             <p>@LT("Describe your goal. LocalGPT may propose a model or a native Studio workflow. No media is inserted without a verified result and your approval.")</p>
+                            <label for="publisher-media-team">Council team</label>
+                            <DxComboBox TData="string" TValue="string" Data="@AvailableAiTeamKeys" @bind-Value="_mediaAiTeamKey" />
                             <DxMemo Rows="5" @bind-Text="_mediaAiPrompt" NullText='@LT("Describe the picture, video, audio or panel you want")' />
                             @if (_mediaAiBusy) { <p role="status">@LT("LocalGPT Council is thinking...")</p> }
                             @if (!string.IsNullOrWhiteSpace(_mediaAiResponse))
                             {
                                 <pre class="organic-ai-response" style="white-space:pre-wrap;max-height:42vh;overflow:auto">@_mediaAiResponse</pre>
                             }
-                            <p>@LT("CanIRun.ai scores require a separate approved lookup; recommendations are not proof of installed models.")</p>
+                            <p>LocalGPT must return a verified result before any generated media is considered available. The native 3D blob is a separate default object.</p>
                         </Template>
                     </DxFormLayoutItem>
                 </DxFormLayout>
                 <footer class="publisher-dialog-actions">
                     <DxButton Text='@LT("Close")' Click="CloseMediaAiAsync" />
-                    <DxButton Text='@LT("Find compatible models")' Enabled="@(!_mediaAiBusy)" Click="AskMediaModelFitAsync" />
-                    <DxButton Text='@LT("Open native Studio")' Enabled="@(!_mediaAiBusy)" Click="ContinueMediaAiInStudioAsync" />
+                    <DxButton Text="Insert default 3D blob / Open Studio" Click="ContinueMediaAiInStudioAsync" />
                     <DxButton Text='@LT("Ask LocalGPT")' Enabled="@(!_mediaAiBusy && !string.IsNullOrWhiteSpace(_mediaAiPrompt))"
                               RenderStyle="ButtonRenderStyle.Primary" Click="AskMediaAiAsync" />
                 </footer>
@@ -91,12 +94,15 @@
     <DxPopup Visible="true" Width="min(680px, 95vw)" MaxHeight="80vh"
              ShowHeader="false" CloseOnEscape="false" CloseOnOutsideClick="false">
         <BodyContentTemplate Context="objectHelpPopupContext">
-            <div class="publisher-dialog" aria-label='@LT("AI help with selected object")'>
+            <div class="publisher-dialog publisher-ai-dialog" aria-label='@LT("AI help with selected object")'>
+                <DxButton CssClass="publisher-ai-close" Text="×" Click="CloseObjectAiHelpAsync" />
                 <header><h2>@LT("AI help with selected object")</h2></header>
                 <DxFormLayout CssClass="razor-section-layout-owner">
                     <DxFormLayoutItem ColSpanMd="12">
                         <Template Context="objectAiHelpFormContext">
                             <p>@(State.SelectedElement?.Name) · @(State.SelectedElement?.Kind)</p>
+                            <label for="publisher-object-team">Council team</label>
+                            <DxComboBox TData="string" TValue="string" Data="@AvailableAiTeamKeys" @bind-Value="_objectAiTeamKey" />
                             <DxMemo Rows="4" @bind-Text="_objectAiHelpPrompt" NullText='@LT("Ask LocalGPT about this object")' />
                             @if (_objectAiHelpBusy) { <p role="status">@LT("LocalGPT Council is thinking...")</p> }
                             @if (!string.IsNullOrWhiteSpace(_objectAiHelpResponse))
@@ -326,6 +332,8 @@
              PageNumber="@CurrentPageNumber"
              PageCount="@State.Document.Pages.Count"
              OpenAiOnShow="_storyOpenAiOnShow"
+             DefaultAiTeamKey="@StoryDefaultTeamKey"
+             DefaultAiModels="@ConfiguredAiModels"
              Saved="SaveStory"
              Cancelled="CloseStoryEditor" />
 
@@ -922,6 +930,20 @@
     {
         try
         {
+            if (firstRender)
+            {
+                try
+                {
+                    var preferred = await JS.InvokeAsync<string?>("localStorage.getItem", AiTeamPreferenceStorageKey).ConfigureAwait(true);
+                    _globalAiTeamKey = string.IsNullOrWhiteSpace(preferred) ? "auto" : preferred.Trim();
+                    _globalAiModels = await JS.InvokeAsync<string?>("localStorage.getItem", AiModelPreferenceStorageKey).ConfigureAwait(true) ?? string.Empty;
+                    StateHasChanged();
+                }
+                catch (JSException exception)
+                {
+                    Logger.LogDebug(exception, "LocalGPT team preference storage is unavailable.");
+                }
+            }
             if (firstRender && !LocalGptConnection.State.IsConnected)
             {
                 // Browser-owned opt-in preference; no automatic connection or trust escalation.
@@ -1116,6 +1138,15 @@
     private bool _reconnectPromptVisible;
     private string _reconnectPeerId = string.Empty;
     private bool _reconnectRequested;
+    private const string AiTeamPreferenceStorageKey = "publisherstudio.localgpt.preferredCouncilTeam";
+    private const string AiModelPreferenceStorageKey = "publisherstudio.localgpt.preferredModelNames";
+    private string _globalAiModels = string.Empty;
+    private List<string> ConfiguredAiModels => EditorText.ParsePreferredAiModels(_globalAiModels);
+    private string _globalAiTeamKey = "auto";
+    private string _mediaAiTeamKey = "general";
+    private string _objectAiTeamKey = "general";
+    private CancellationTokenSource? _mediaAiCancellation;
+    private int _mediaAiGeneration;
     private bool _mediaAiVisible;
     private bool _mediaAiBusy;
     private string _mediaAiKind = string.Empty;
@@ -1123,6 +1154,8 @@
     private string _mediaAiPrompt = string.Empty;
     private string _mediaAiResponse = string.Empty;
 
+    private CancellationTokenSource? _objectAiCancellation;
+    private int _objectAiGeneration;
     private bool _objectAiHelpVisible;
     private bool _objectAiHelpBusy;
     private string _objectAiHelpPrompt = string.Empty;
@@ -1213,7 +1246,10 @@
     {
         try
         {
+            _objectAiGeneration++;
+            _objectAiCancellation?.Cancel();
             _objectAiHelpVisible = false;
+            _objectAiHelpBusy = false;
             return Task.CompletedTask;
         }
         catch (Exception exception)
@@ -1233,6 +1269,9 @@
             var originalId = State.SelectedElement.Id;
             var objectName = State.SelectedElement.Name;
             var objectKind = State.SelectedElement.Kind.ToString();
+            var generation = ++_objectAiGeneration;
+            var cancellation = new CancellationTokenSource();
+            _objectAiCancellation = cancellation;
             _objectAiHelpBusy = true;
             _objectAiHelpResponse = string.Empty;
             try
@@ -1240,21 +1279,33 @@
                 var response = await AiBridge.ChatAsync(new PublisherStudio.Services.OrganicPlugins.PublisherAiChatRequest
                 {
                     Prompt = _objectAiHelpPrompt.Trim(),
-                    TeamKey = "general",
+                    TeamKey = _objectAiTeamKey,
+                    ModelNames = ConfiguredAiModels,
                     SystemPrompt = $"Current PublisherStudio publication: {State.Document.Name}; page: {State.CurrentPage.Name}; selected object ID: {originalId}; name: {objectName}; kind: {objectKind}. Provide object-specific guidance. Do not claim edits unless verified by an authorized PublisherStudio command.",
                     MaxRounds = 1,
                     MaxParallelModels = 1
-                }).ConfigureAwait(true);
-                _objectAiHelpResponse = response.Text;
+                }, cancellation.Token).ConfigureAwait(true);
+                if (generation == _objectAiGeneration && _objectAiHelpVisible)
+                    _objectAiHelpResponse = response.Text;
+            }
+            catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
+            {
+                // The user closed the popup; never render a late answer into a new session.
             }
             catch (Exception exception)
             {
-                _objectAiHelpResponse = exception.Message;
+                if (generation == _objectAiGeneration && _objectAiHelpVisible)
+                    _objectAiHelpResponse = exception.Message;
                 Logger.LogError(exception, "Selected object AI help failed.");
             }
             finally
             {
-                _objectAiHelpBusy = false;
+                if (ReferenceEquals(_objectAiCancellation, cancellation))
+                {
+                    _objectAiCancellation = null;
+                    _objectAiHelpBusy = false;
+                }
+                cancellation.Dispose();
             }
         }
         catch (Exception exception)
@@ -1289,6 +1340,7 @@
             if (!CanUseAiCouncil || kind is not ("picture" or "video" or "audio" or "template" or "blob3d"))
                 return Task.CompletedTask;
             _mediaAiKind = kind;
+            _mediaAiTeamKey = ResolveAiTeamKey(ResolvePublisherMediaTeamKey(kind));
             _mediaAiTitle = kind switch
             {
                 "picture" => LT("Create picture with AI"),
@@ -1315,7 +1367,10 @@
     {
         try
         {
-            if (!_mediaAiBusy) _mediaAiVisible = false;
+            _mediaAiGeneration++;
+            _mediaAiCancellation?.Cancel();
+            _mediaAiVisible = false;
+            _mediaAiBusy = false;
             return Task.CompletedTask;
         }
         catch (Exception exception)
@@ -1330,7 +1385,7 @@
     {
         try
         {
-            return RequestMediaAiAsync(findModels: false);
+            return RequestMediaAiAsync();
         }
         catch (Exception exception)
         {
@@ -1339,18 +1394,33 @@
         }
     }
 
-    /// <summary>Asks the Council to review installed models and propose an optional human-approved CanIRun.ai lookup.</summary>
-    private Task AskMediaModelFitAsync()
+    /// <summary>Lists Council teams explicitly advertised by the connected LocalGPT peer.</summary>
+    private IReadOnlyList<string> AvailableAiTeamKeys => AvailableAiTeams.Select(team => team.Key).ToList();
+
+    private IReadOnlyList<(string Key, string Name)> AvailableAiTeams
     {
-        try
+        get
         {
-            return RequestMediaAiAsync(findModels: true);
+            var keys = LocalGptConnection.State.RemoteCapabilities
+                .Where(capability => capability.IsEnabled && capability.IsOnline &&
+                    string.Equals(capability.Key, "council.run", StringComparison.OrdinalIgnoreCase))
+                .SelectMany(capability => capability.Skills)
+                .Where(key => !string.IsNullOrWhiteSpace(key))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+            if (!keys.Contains("general", StringComparer.OrdinalIgnoreCase)) keys.Insert(0, "general");
+            return keys.Select(key => (Key: key, Name: key == "general" ? "General Council" : key)).ToList();
         }
-        catch (Exception exception)
-        {
-            Logger.LogError(exception, "Submitting media hardware-fit request failed.");
-            throw;
-        }
+    }
+
+    /// <summary>Uses the configured global Council team when the peer actually advertises it.</summary>
+    private string StoryDefaultTeamKey => ResolveAiTeamKey("general");
+
+    private string ResolveAiTeamKey(string fallback)
+    {
+        var candidate = _globalAiTeamKey;
+        return candidate != "auto" && AvailableAiTeams.Any(team => string.Equals(team.Key, candidate, StringComparison.OrdinalIgnoreCase))
+            ? candidate : fallback;
     }
 
     /// <summary>Uses the selected media Council seed only when the linked LocalGPT actually advertises it.</summary>
@@ -1365,6 +1435,7 @@
                 "picture" => "publisher-image",
                 "video" => "publisher-video",
                 "audio" => "publisher-audio",
+                "blob3d" => "openscad-team",
                 _ => "publisher-panel"
             };
             return LocalGptConnection.State.RemoteCapabilities
@@ -1381,48 +1452,65 @@
         }
     }
 
-    /// <summary>Submits bounded media context through the existing secured 1-Wire Council bridge.</summary>
-    /// <param name="findModels">Whether the user explicitly requested model-compatibility discovery.</param>
-    private async Task RequestMediaAiAsync(bool findModels)
+    /// <summary>Submits a reviewable AI request, without treating Council prose as a generated asset.</summary>
+    private async Task RequestMediaAiAsync()
     {
         try
         {
             if (_mediaAiBusy || !_mediaAiVisible || !CanUseAiCouncil ||
-                (!findModels && string.IsNullOrWhiteSpace(_mediaAiPrompt))) return;
+                string.IsNullOrWhiteSpace(_mediaAiPrompt)) return;
             var kind = _mediaAiKind;
             var prompt = _mediaAiPrompt.Trim();
+            var generation = ++_mediaAiGeneration;
+            var cancellation = new CancellationTokenSource();
+            _mediaAiCancellation = cancellation;
             _mediaAiBusy = true;
             _mediaAiResponse = string.Empty;
             try
             {
-                var instructions = findModels
-                    ? "First inspect LocalGPT's configured provider/model inventory with initial.setup.status. If no suitable installed model exists, request a separate human-approved initial.setup.canirun.recommendations lookup using locally reviewed hardware. Never send device details or contact CanIRun.ai without that approval. Report attributed, category-relevant image/video/audio scores only from actual returned data, with exact model identities, not guesses or fixed rankings."
-                    : "Work with the exact available PublisherStudio 1-Wire capabilities and existing native Picture, Video, Audio, Panel and OpenSCAD workflows. Identify whether a real generator/tool is available. Only report a media asset as created when an actual validated output and receipt exist; otherwise provide a bounded plan or reviewable source/code. For panel templates include native-safe component structure and field choices for user review; no arbitrary JavaScript execution or remote mutation. Never bypass approval for canvas edits, file writes, generated code execution or browser automation.";
+                var instructions = kind == "blob3d"
+                    ? "The user requests an actual 3D object, not a generic model recommendation. Check advertised PublisherStudio 3D/OpenSCAD capabilities and request publisher.openscad.generate through the human-approval workflow where available. Never claim a file or geometry was generated without a verified receipt. If unavailable, explain what is missing; a default animated blob is NOT a model of the requested subject. Return any draft OpenSCAD as a reviewable proposal, never silently execute it."
+                    : "Use existing PublisherStudio 1-Wire Picture, Video, Audio or Panel capabilities. Require validated output and an authorized receipt before claiming media was created. Otherwise return a reviewable plan or source proposal. Never bypass human approval for document changes, generated code execution or file writes.";
                 var response = await AiBridge.ChatAsync(new PublisherStudio.Services.OrganicPlugins.PublisherAiChatRequest
                 {
-                    TeamKey = ResolvePublisherMediaTeamKey(kind),
-                    Prompt = findModels ? $"Find approved hardware-fit model recommendations for {_mediaAiTitle}. User request: {prompt}" : prompt,
+                    TeamKey = _mediaAiTeamKey,
+                    ModelNames = ConfiguredAiModels,
+                    Prompt = prompt,
                     SystemPrompt = $"PublisherStudio media workflow={kind}; publication={State.Document.Name}; page={State.CurrentPage.Name}; user-selected target={State.SelectedElement?.Name ?? "new object"}. {instructions}",
                     MaxRounds = 1,
-                    MaxParallelModels = 1
-                }).ConfigureAwait(true);
-                _mediaAiResponse = string.IsNullOrWhiteSpace(response.Text)
-                    ? LT("LocalGPT returned no verified output. Review the Council session before retrying.")
-                    : response.Text;
+                    MaxParallelModels = 1,
+                    RequiredCapabilities = kind == "blob3d"
+                        ? ["publisher.business-context", "publisher.openscad.generate"]
+                        : ["publisher.business-context"]
+                }, cancellation.Token).ConfigureAwait(true);
+                if (generation == _mediaAiGeneration && _mediaAiVisible)
+                    _mediaAiResponse = string.IsNullOrWhiteSpace(response.Text)
+                        ? "LocalGPT did not return a verifiable result. Inspect the Council run before retrying."
+                        : response.Text;
+            }
+            catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
+            {
+                // Closing a popup is an intentional cancellation; never reopen it from a late result.
             }
             catch (Exception exception)
             {
-                _mediaAiResponse = exception.Message;
-                Logger.LogError(exception, "PublisherStudio AI generation planning failed for {Kind}.", kind);
+                if (generation == _mediaAiGeneration && _mediaAiVisible)
+                    _mediaAiResponse = $"The LocalGPT request failed: {exception.Message}";
+                Logger.LogError(exception, "PublisherStudio AI request failed for {Kind}.", kind);
             }
             finally
             {
-                _mediaAiBusy = false;
+                if (ReferenceEquals(_mediaAiCancellation, cancellation))
+                {
+                    _mediaAiCancellation = null;
+                    _mediaAiBusy = false;
+                }
+                cancellation.Dispose();
             }
         }
         catch (Exception exception)
         {
-            Logger.LogError(exception, "PublisherStudio AI request orchestration failed.");
+            Logger.LogError(exception, "PublisherStudio media AI orchestration failed.");
             throw;
         }
     }
@@ -1432,9 +1520,9 @@
     {
         try
         {
-            if (_mediaAiBusy || !_mediaAiVisible) return;
+            if (!_mediaAiVisible) return;
             var kind = _mediaAiKind;
-            _mediaAiVisible = false;
+            await CloseMediaAiAsync().ConfigureAwait(true);
             switch (kind)
             {
                 case "picture": await CreatePicture().ConfigureAwait(true); break;
@@ -1489,6 +1577,7 @@
                     // Generic help stays within the mainframe and cannot change an object by inference.
                     _objectAiHelpResponse = string.Empty;
                     _objectAiHelpPrompt = string.Empty;
+                    _objectAiTeamKey = ResolveAiTeamKey("general");
                     _objectAiHelpVisible = State.SelectedElement is not null;
                     break;
             }
@@ -1532,7 +1621,7 @@
             var component = State.AddDevExtremeComponent(PublicationComponentKind.Chat);
             component.ChatAiMode = CanUseAiCouncil ? PublicationChatAiMode.LocalGptCouncil
                 : DirectAi.IsAvailable() ? PublicationChatAiMode.OpenAiServer : PublicationChatAiMode.None;
-            component.ChatAiTeamKey = "general";
+            component.ChatAiTeamKey = StoryDefaultTeamKey;
             component.ChatCurrentUserName = "Reader";
             component.ChatPlatform = PublicationChatPlatform.Preview;
             component.Title = CanUseAiCouncil ? "Ask LocalGPT" : DirectAi.IsAvailable() ? "Ask OpenAI" : "Chat";
@@ -5980,6 +6069,8 @@
             State.Changed -= StateChanged;
             StreamingSession.Changed -= StateChanged;
             StreamingSession.HotkeyTriggered -= HandleGlobalStreamingHotkey;
+            _mediaAiCancellation?.Cancel();
+            _objectAiCancellation?.Cancel();
             LocalGptConnection.Changed -= LocalGptConnectionChanged;
             OrganicResults.Changed -= OnAiInsertionResult;
             LocalGptDiscovery.Changed -= OnReconnectDiscoveryChanged;

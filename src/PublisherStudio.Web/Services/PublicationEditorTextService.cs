@@ -10,6 +10,27 @@ namespace PublisherStudio.Services;
 /// </summary>
 public sealed class PublicationEditorTextService
 {
+    /// <summary>Parses saved LocalGPT model identifiers into a bounded, ordered, deduplicated selection.</summary>
+    /// <param name="configuredModels">Browser-stored newline- or semicolon-separated model identifiers.</param>
+    /// <returns>At most sixteen distinct model identifiers, each no longer than 256 characters.</returns>
+    public List<string> ParsePreferredAiModels(string? configuredModels)
+    {
+        try
+        {
+            return (configuredModels ?? string.Empty)
+                .Split(['\r', '\n', ';'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Where(name => name.Length <= 256)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .Take(16)
+                .ToList();
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, "Parsing saved LocalGPT AI model preferences failed; no model selections were forwarded.");
+            return [];
+        }
+    }
+
     /// <summary>
     /// Stores the logger used to record failures while deterministic editor text keys are assembled.
     /// </summary>

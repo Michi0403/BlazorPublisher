@@ -5636,3 +5636,87 @@ dxbl-popup-root > dxbl-popup-cell > dxbl-modal .dxbl-modal-body > .new-publicati
     white-space: normal !important;
     text-align: left;
 }
+
+/* 4.4.9: The GIF frame editor is part of the canvas workspace, not a footer-only
+   control. Keep the editable canvas full-sized in the remaining flexible area. */
+.picture-studio-canvas-host.has-animation .picture-canvas-scroll { top: 100px; }
+.picture-gif-filmstrip {
+    position: absolute; z-index: 6; inset: 0 0 auto; height: 100px;
+    display: flex; align-items: stretch; gap: 6px; padding: 7px;
+    box-sizing: border-box; overflow-x: auto; overflow-y: hidden;
+    background: #202b38; border-bottom: 1px solid #44586b;
+}
+.picture-gif-frame {
+    flex: 0 0 92px; min-width: 0; display: flex; flex-direction: column;
+    justify-content: center; align-items: center; gap: 3px; padding: 4px;
+    border: 2px solid transparent; border-radius: 4px; background: #344454;
+    color: #fff; cursor: pointer; font: 11px/1.2 "Segoe UI", sans-serif;
+}
+.picture-gif-frame.is-active { border-color: #57b9fa; background: #345e81; }
+.picture-gif-frame:focus-within { outline: 2px solid #fff; outline-offset: -4px; }
+.picture-gif-frame-action { width: 100%; min-height: 25px; font: 11px/1.2 "Segoe UI", sans-serif; }
+.picture-gif-frame-action .dxbl-btn { width: 100%; }
+.picture-gif-frame img, .picture-gif-frame-placeholder {
+    display: block; max-width: 82px; height: 62px; width: auto;
+    object-fit: contain; background: #f4f4f4; color: #1b2935;
+}
+.picture-gif-frame-placeholder { display: grid; place-items: center; width: 82px; }
+@media (max-width: 680px) {
+  .picture-studio-canvas-host.has-animation .picture-canvas-scroll { top: 88px; }
+  .picture-gif-filmstrip { height: 88px; }
+  .picture-gif-frame { flex-basis: 80px; }
+  .picture-gif-frame img, .picture-gif-frame-placeholder { max-width: 70px; height: 49px; }
+}
+
+/* 4.5.0 — AI window close/viewport ownership. Popup and dialog share the same width. */
+.publisher-ai-dialog {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 0;
+    max-height: calc(85dvh - 1.5rem) !important;
+    overflow: auto !important;
+    box-shadow: none;
+}
+.publisher-ai-dialog .razor-section-layout-owner { min-width: 0; }
+.publisher-ai-dialog .organic-ai-response { max-width:100%; max-height:35dvh; overflow:auto; }
+.publisher-ai-dialog > footer {
+    position: sticky;
+    bottom: 0;
+    flex-wrap: wrap;
+    background: #f8fafc;
+    z-index: 2;
+}
+.publisher-ai-dialog .publisher-ai-close {
+    position: absolute;
+    top: 7px;
+    right: 8px;
+    z-index: 3;
+    font-size: 23px;
+    color: white;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    width: 36px;
+    height: 36px;
+}
+.publisher-ai-dialog > header { padding-right: 52px; }
+/* Variable-height AI assistants must not push the rich editor and footer off-screen. */
+.story-editor-dialog.story-ai-open {
+    grid-template-rows: 48px auto minmax(130px, 34dvh) auto minmax(260px, 1fr) 52px !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+}
+.story-editor-dialog.story-ai-open .story-ai-workspace {
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+.story-editor-dialog .story-ai-workspace textarea,
+.publisher-ai-dialog textarea { max-width: 100%; box-sizing: border-box; }
+.story-ai-request-status { padding: 4px 8px; color: #0f4b78; font-size: 12px; }
+@media (max-height: 760px) {
+    .story-editor-dialog.story-ai-open { grid-template-rows: 48px auto minmax(120px, 42dvh) auto minmax(210px, 1fr) 52px !important; }
+}

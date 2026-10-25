@@ -16,6 +16,8 @@ public sealed class PublisherAiChatRequest
     /// <summary>Gets or sets the LocalGPT Council team key selected by the publication author.</summary>
     /// <value>The team key value exposed by <see cref="PublisherAiChatRequest"/>.</value>
     public string TeamKey { get; set; } = "general";
+    /// <summary>Optional exact LocalGPT model identifiers explicitly selected by the user.</summary>
+    public List<string> ModelNames { get; set; } = [];
     /// <summary>Optional executable organic capability keys required by the user goal.</summary>
     /// <value>Catalog keys to be resolved by LocalGPT before Council dispatch.</value>
     public List<string> RequiredCapabilities { get; set; } = [];
@@ -129,6 +131,8 @@ public sealed class PublisherAiBridgeService(
             var councilRequest = new OrganicCouncilPromptRequest
             {
                 TeamKey = teamKey,
+                ModelNames = request.ModelNames.Where(name => !string.IsNullOrWhiteSpace(name) && name.Length <= 256)
+                    .Distinct(StringComparer.OrdinalIgnoreCase).Take(16).ToList(),
                 RequestedOrganicCapabilities = request.RequiredCapabilities
                     .Where(value => !string.IsNullOrWhiteSpace(value))
                     .Distinct(StringComparer.OrdinalIgnoreCase).ToList(),

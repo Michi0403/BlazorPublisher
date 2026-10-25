@@ -29,7 +29,10 @@ for (const kind of ['picture', 'video', 'audio', 'template', 'blob3d']) {
 }
 assert.match(editor, /ResolvePublisherMediaTeamKey/);
 assert.match(editor, /AiBridge\.ChatAsync/);
-assert.match(editor, /initial\.setup\.canirun\.recommendations/);
+assert.doesNotMatch(editor, /initial\.setup\.canirun\.recommendations|CanIRun\.ai/);
+assert.match(editor, /publisher\.openscad\.generate/);
+assert.match(editor, /_mediaAiCancellation\?\.Cancel\(\)/);
+assert.match(editor, /AvailableAiTeamKeys/);
 assert.match(editor, /No media is inserted without a verified result/);
 assert.match(editor, /_mediaAiBusy/);
 console.log('PASS: connected-only native media AI, panel dropdown, expanded library, team negotiation and existing security bridge');

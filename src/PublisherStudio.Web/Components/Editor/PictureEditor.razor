@@ -300,7 +300,32 @@
                     </div>
                 </aside>
 
-                <main id="picture-studio-canvas-host" class="picture-studio-canvas-host">
+                <main id="picture-studio-canvas-host" class="picture-studio-canvas-host @(State.Document.AnimationFrameDelaysMs.Count > 0 ? "has-animation" : string.Empty)">
+                    @if (State.Document.AnimationFrameDelaysMs.Count > 0)
+                    {
+                        <div class="picture-gif-filmstrip" role="group" aria-label='@LT("Editable GIF frames")'>
+                            @for (var frameIndex = 0; frameIndex < State.Document.AnimationFrameDelaysMs.Count; frameIndex++)
+                            {
+                                var index = frameIndex;
+                                var thumbnail = State.Document.Layers.OfType<RasterPictureLayer>()
+                                    .FirstOrDefault(layer => layer.AnimationFrameIndex == index)?.DataUrl;
+                                <div class="picture-gif-frame @(State.Document.ActiveAnimationFrame == index ? "is-active" : string.Empty)"
+                                     aria-current="@(State.Document.ActiveAnimationFrame == index ? "true" : "false")">
+                                    @if (!string.IsNullOrWhiteSpace(thumbnail))
+                                    {
+                                        <img src="@thumbnail" alt="" loading="lazy" />
+                                    }
+                                    else
+                                    {
+                                        <span class="picture-gif-frame-placeholder" aria-hidden="true">▧</span>
+                                    }
+                                    <DxButton CssClass="picture-gif-frame-action"
+                                              Text="@($"{LT("GIF frame")} {index + 1} · {State.Document.AnimationFrameDelaysMs[index]} ms")"
+                                              Click="@(() => State.SetActiveAnimationFrame(index))" />
+                                </div>
+                            }
+                        </div>
+                    }
                     <div class="picture-canvas-scroll">
                         <div class="picture-canvas-mat">
                             <div id="picture-studio-canvas-surface" class="picture-canvas-surface">
@@ -858,7 +883,7 @@
                 <div>
                     <DxButton Text='@LT("Cancel")' Click="Cancel" />
                     <DxButton Text="@(IsPictureExporting ? LT("Rendering…") : EditingExisting ? LT("Apply layered") : LT("Insert layered"))" Enabled="@(!IsPictureBusy)" RenderStyle="ButtonRenderStyle.Primary" Click="ApplyLayered" />
-                    <DxButton Text="@(EditingExisting ? LT("Apply merged") : LT("Insert merged"))" Enabled="@(!IsPictureBusy)" Click="ApplyMerged" />
+                    <DxButton Text="@(State.Document.AnimationFrameDelaysMs.Count > 0 ? LT("Apply animated GIF") : EditingExisting ? LT("Apply merged") : LT("Insert merged"))" Enabled="@(!IsPictureBusy)" Click="ApplyMerged" />
                 </div>
             </footer>
         </div>

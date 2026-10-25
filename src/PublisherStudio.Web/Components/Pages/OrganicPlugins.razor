@@ -15,6 +15,7 @@
 @inject ISupervisedTaskRunner TaskRunner
 @inject NavigationManager Navigation
 @inject EditorStateService EditorState
+@inject PublicationEditorTextService EditorText
 @inject PublisherAiDocumentInsertionService DocumentInsertion
 @inject IJSRuntime JS
 @inject IOptions<OrganicPluginOptions> OrganicOptions
@@ -134,6 +135,14 @@
         <Template Context="formItemContext004">
         <div class="organic-card">
             <h2>LocalGPT connection</h2>
+            <label>Preferred Council team for PublisherStudio AI tools
+                <DxComboBox TData="string" TValue="string" Data="@GlobalCouncilTeamKeys" Value="@_globalAiTeamKey" ValueChanged="SaveGlobalAiTeamAsync" />
+            </label>
+            <p class="organic-note">Saved for this browser and used by Story Editor, 3D/media AI and object AI. Select an advertised team or use Auto for workflow-specific routing.</p>
+            <label>Specific LocalGPT models (optional, one full model identifier per line)
+                <DxMemo Rows="3" Text="@_globalAiModels" TextChanged="SaveGlobalAiModelsAsync" NullText="Leave empty to let LocalGPT choose models for the team" />
+            </label>
+            <p class="organic-note">Model IDs must match LocalGPT's configured provider/model inventory. PublisherStudio does not fabricate model availability. Leave blank for the normal Council team selection; saved model choices do not grant tools or approvals.</p>
             @if (_peers.Count == 0)
             {
                 <p class="organic-empty">No LocalGPT broadcast has been received yet. LocalGPT remains available on its normal application port; organic discovery is optional.</p>
@@ -556,6 +565,11 @@
     /// Stores the internal text generation team key state used by <see cref="OrganicPlugins"/> while executing its surrounding workflow.
     /// </summary>
     private string _textGenerationTeamKey = "general";
+    private const string AiTeamPreferenceStorageKey = "publisherstudio.localgpt.preferredCouncilTeam";
+    private const string AiModelPreferenceStorageKey = "publisherstudio.localgpt.preferredModelNames";
+    private string _globalAiModels = string.Empty;
+    private List<string> ConfiguredAiModels => EditorText.ParsePreferredAiModels(_globalAiModels);
+    private string _globalAiTeamKey = "auto";
     /// <summary>
     /// Stores the internal AI assist profile state used by <see cref="OrganicPlugins"/> while executing its surrounding workflow.
     /// </summary>
@@ -625,6 +639,18 @@
         {
             if (!firstRender || _automationStateLoaded) return;
             _automationStateLoaded = true;
+            try
+            {
+                var team = await JS.InvokeAsync<string?>("localStorage.getItem", AiTeamPreferenceStorageKey).ConfigureAwait(true);
+                _globalAiTeamKey = string.IsNullOrWhiteSpace(team) ? "auto" : team.Trim();
+                _globalAiModels = await JS.InvokeAsync<string?>("localStorage.getItem", AiModelPreferenceStorageKey).ConfigureAwait(true) ?? string.Empty;
+                if (_globalAiTeamKey != "auto" && CouncilTeams.Any(item => string.Equals(item.Key, _globalAiTeamKey, StringComparison.OrdinalIgnoreCase)))
+                {
+                    _textGenerationTeamKey = _globalAiTeamKey;
+                    _councilRequest.TeamKey = _globalAiTeamKey;
+                }
+            }
+            catch (JSException exception) { Logger.LogDebug(exception, "Council team preference storage unavailable."); }
             try { _browserAutomationEnabled = await JS.InvokeAsync<bool>("publisherAutomation.isEnabled").ConfigureAwait(true); }
             catch (JSException exception) { Logger.LogDebug(exception, "Browser automation state is not available before JavaScript startup completes."); }
             if (Connection.State.IsLinked && !string.IsNullOrWhiteSpace(Connection.State.PeerId))
@@ -659,6 +685,46 @@
     /// Gets the council teams collection maintained or exposed by this organic plugins instance for downstream processing.
     /// </summary>
     /// <value>The council teams value exposed by <see cref="OrganicPlugins"/>.</value>
+    /// <summary>Saves the per-browser default for all PublisherStudio Council workflows.</summary>
+    private async Task SaveGlobalAiTeamAsync(string? value)
+    {
+        try
+        {
+            var requested = value ?? "auto";
+            _globalAiTeamKey = requested == "auto" || CouncilTeams.Any(team => string.Equals(team.Key, requested, StringComparison.OrdinalIgnoreCase))
+                ? requested : "auto";
+            await JS.InvokeVoidAsync("localStorage.setItem", AiTeamPreferenceStorageKey, _globalAiTeamKey).ConfigureAwait(true);
+            if (_globalAiTeamKey != "auto")
+            {
+                _textGenerationTeamKey = _globalAiTeamKey;
+                _councilRequest.TeamKey = _globalAiTeamKey;
+            }
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Could not save preferred PublisherStudio Council team.");
+            Notifications.Error("Could not save the preferred Council team.", source: nameof(OrganicPlugins));
+        }
+    }
+
+    /// <summary>Persists explicitly selected model names without modifying LocalGPT capabilities or approvals.</summary>
+    private async Task SaveGlobalAiModelsAsync(string? value)
+    {
+        try
+        {
+            _globalAiModels = value ?? string.Empty;
+            await JS.InvokeVoidAsync("localStorage.setItem", AiModelPreferenceStorageKey, _globalAiModels).ConfigureAwait(true);
+            _councilRequest.ModelNames = ConfiguredAiModels;
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Could not save preferred LocalGPT models.");
+            Notifications.Error("Could not save the model selection.", source: nameof(OrganicPlugins));
+        }
+    }
+
+    private IReadOnlyList<string> GlobalCouncilTeamKeys => ["auto", .. CouncilTeams.Select(team => team.Key)];
+
     private IReadOnlyList<(string Key, string Name)> CouncilTeams
     {
         get
@@ -921,6 +987,7 @@
                     "learning-round" => ["publisher.business-context"],
                     _ => ["publisher.business-context"]
                 };
+                _councilRequest.ModelNames = ConfiguredAiModels;
                 var id = await Connection.SendCouncilRequestAsync(_councilRequest).ConfigureAwait(true);
                 Notifications.Success($"Council request {id} was submitted.", "Council round started", nameof(OrganicPlugins));
                 var team = _councilRequest.TeamKey;
@@ -958,6 +1025,7 @@
                 var autoInsert = kind is "writing" or "spreadsheet";
                 var insertionTarget = autoInsert ? $"publisher-ai:{Guid.NewGuid():N}" : _textGenerationTarget.Trim();
                 var request = NewCouncilRequest(resolvedTeamKey);
+                request.ModelNames = ConfiguredAiModels;
                 request.RequestedOrganicCapabilities = ResolveAiAssistCapabilities();
                 request.ExternalProjectContextJson = System.Text.Json.JsonSerializer.Serialize(new
                 {

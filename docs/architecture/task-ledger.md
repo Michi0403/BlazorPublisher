@@ -13,3 +13,8 @@
 - **Closed (source change, Debug execution not verified):** wire the same non-optional compatibility preflight into non-design-time Visual Studio/MSBuild Web builds and the direct local-development entrypoint. Evidence: `Directory.Build.targets`, `Build-LocalDevelopment.ps1`, and the added parity assertion in `build/Assert-PowerShellCompatibility.ps1`.
 - **Deferred:** Panel/Div Studio module-level organic functions, DevExpress AI routing, Report Designer and embedded offline AI in exported sites. The separate unfinished Panel/Div Studio 4.4.2 prototype is intentionally not part of this build-fix baseline.
 - **Deferred:** reproduce the reported simultaneous LocalGPT/PublisherStudio debugger conflict with the actual Visual Studio launch configurations; the available logs prove only successful individual application startup/build.
+
+## 4.5.1 — Application tooltip appearance delay
+
+- **Closed (source, offline checked):** tripled PublisherStudio-owned hover/focus tooltip delays; captured native HTML `title` hints through the same runtime; preserved existing dismissal behavior. Evidence: `wwwroot/js/tooltipRuntime.js`, `tests/js/tooltip-delay-4.5.1.test.cjs` and `CHANGELOG-4.5.1-TOOLTIP-DELAY.md`.
+- **Deferred:** verify browser-native and DevExpress-vendor tooltip timing live in the installed application. Separate vendor-owned tooltip widgets may not follow the PublisherStudio runtime delay.

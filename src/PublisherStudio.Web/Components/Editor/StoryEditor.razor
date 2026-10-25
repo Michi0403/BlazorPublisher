@@ -27,7 +27,7 @@
          CloseOnEscape="false"
          ShowHeader="false">
     <BodyContentTemplate Context="publisherPopupContext">
-        <div id="story-editor-shell" class="story-editor-dialog" aria-label="Edit text story">
+        <div id="story-editor-shell" class="@StoryEditorDialogCssClass" aria-label="Edit text story">
             <header>
                 <div><strong>Edit story</strong><span>@TextFrame.Name</span></div>
                 <button class="window-close" @onclick="Cancel" aria-label="Close">×</button>
@@ -120,6 +120,7 @@
                         </label>
                         <button type="button" disabled="@(!CanSendAiStoryRequest)" @onclick="RequestAiStoryAsync">Generate proposal</button>
                     </div>
+                    @if (!string.IsNullOrWhiteSpace(_aiRequestStatus)) { <p class="story-ai-request-status" role="status">@_aiRequestStatus</p> }
                     <div class="story-ai-proposals" aria-live="polite">
                         <div class="story-ai-proposal-heading">
                             <strong>Reviewable proposals</strong>
@@ -407,6 +408,7 @@
     /// <summary>
     /// Stores the internal AI story panel visible state used by <see cref="StoryEditor"/> while executing its surrounding workflow.
     /// </summary>
+    private string StoryEditorDialogCssClass => _aiStoryPanelVisible && CanUseAiCouncil ? "story-editor-dialog story-ai-open" : "story-editor-dialog";
     private bool _aiStoryPanelVisible;
     /// <summary>Tracks whether the browser-side RichEdit layout bridge has been attached for the current visible editor surface.</summary>
     private bool _storyLayoutAttached;
@@ -414,10 +416,14 @@
     /// Stores the internal AI story prompt state used by <see cref="StoryEditor"/> while executing its surrounding workflow.
     /// </summary>
     private string _aiStoryPrompt = string.Empty;
+    private string _aiRequestStatus = string.Empty;
     /// <summary>
     /// Stores the internal AI team key state used by <see cref="StoryEditor"/> while executing its surrounding workflow.
     /// </summary>
     private string _aiTeamKey = "general";
+    [Parameter] public string DefaultAiTeamKey { get; set; } = "general";
+    /// <summary>Optional explicit model selection passed from the PublisherStudio connection preference.</summary>
+    [Parameter] public IReadOnlyList<string> DefaultAiModels { get; set; } = [];
     /// <summary>
     /// Stores the in-memory AI proposals collection maintained internally by <see cref="StoryEditor"/> for its current workflow state.
     /// </summary>
@@ -588,6 +594,9 @@
                 _error = null;
                 RefreshAiProposals();
                 _aiStoryPanelVisible = OpenAiOnShow && CanUseAiCouncil;
+                _aiTeamKey = AiCouncilTeams.Any(team => string.Equals(team.Key, DefaultAiTeamKey, StringComparison.OrdinalIgnoreCase))
+                    ? DefaultAiTeamKey : "general";
+                _aiRequestStatus = string.Empty;
                 _fieldData =
                 [
                     new PublicationFieldRecord
@@ -963,23 +972,24 @@
     /// Blazor renderer dispatcher, retaining the existing DevExpress RichEdit caret ownership.
     /// </summary>
     /// <returns>A task that completes when the result has been handled and the UI state refreshed.</returns>
-    private async Task OnOrganicStateChangedAsync()
+    private Task OnOrganicStateChangedAsync()
     {
         try
         {
             RefreshAiProposals();
-            if (Visible && _aiAutomaticTarget is { } expected && _selection is not null)
+            if (Visible && _aiAutomaticTarget is { } expected)
             {
                 var matched = _aiProposals.FirstOrDefault(candidate =>
                     string.Equals(candidate.Target, expected, StringComparison.Ordinal));
                 if (matched is not null)
                 {
                     _aiAutomaticTarget = null;
-                    await InsertAiProposalAsync(matched).ConfigureAwait(true);
+                    _aiRequestStatus = "A Council text proposal has arrived. Review it below and use Insert at caret to accept.";
                 }
             }
 
             StateHasChanged();
+            return Task.CompletedTask;
         }
         catch (Exception __componentMethodException)
         {
@@ -1200,6 +1210,7 @@
                 var request = new OrganicCouncilPromptRequest
                 {
                     TeamKey = _aiTeamKey,
+                    ModelNames = DefaultAiModels.ToList(),
                     MaxRounds = 1,
                     MaxOutputTokens = 262144,
                     MaxContextTokens = 262144,
@@ -1235,11 +1246,14 @@
                 var correlationId = await LocalGptConnection.SendCouncilRequestAsync(request).ConfigureAwait(true);
                 Logger.LogInformation("Submitted StoryEditor AI Council request {CorrelationId} for story {StoryId}.", correlationId, TextFrame.Id);
                 Notifications.Success($"Council request {correlationId} was submitted. You can close this editor; the run remains active.", "Story proposal requested", nameof(StoryEditor));
-                _aiStoryPrompt = string.Empty;
+                _aiRequestStatus = $"Council request {correlationId} submitted; waiting for a verified text proposal. You can refresh this list.";
+                TaskRunner.Run(nameof(StoryEditor), nameof(ObserveAiStoryResultAsync),
+                    cancellation => ObserveAiStoryResultAsync(correlationId, target, cancellation));
             }
             catch (Exception ex)
             {
                 _aiAutomaticTarget = null;
+                _aiRequestStatus = "Council submission failed: " + ex.Message;
                 Logger.LogError(ex, "Could not submit an AI Council story request for {StoryId}.", TextFrame.Id);
                 _error = ex.Message;
                 Notifications.Error(ex.Message, "Story proposal request failed", nameof(StoryEditor));
@@ -1250,6 +1264,66 @@
         {
             Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(RequestAiStoryAsync)} failed.");
             throw;
+        }
+    }
+
+    /// <summary>
+    /// Observes the Council final answer and keeps a reviewable fallback when the model did not invoke
+    /// publisher.text.proposal.request. Never inserts content into RichEdit without a user action.
+    /// </summary>
+    private async Task ObserveAiStoryResultAsync(Guid correlationId, string target, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var deadline = DateTimeOffset.UtcNow.AddMinutes(10);
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                var remaining = deadline - DateTimeOffset.UtcNow;
+                if (remaining <= TimeSpan.Zero)
+                    throw new TimeoutException("The Council did not finish within ten minutes; inspect LocalGPT's run history.");
+                var result = await LocalGptConnection.WaitForResultAsync(correlationId, remaining, cancellationToken).ConfigureAwait(false);
+                if (result.MessageType == OrganicWireMessageType.ApprovalRequired)
+                    continue;
+                if (result.MessageType == OrganicWireMessageType.Error)
+                    throw new InvalidOperationException(string.IsNullOrWhiteSpace(result.Error) ? "LocalGPT reported a Council execution error." : result.Error);
+                if (result.MessageType != OrganicWireMessageType.WorkResult)
+                    continue;
+                if (OrganicResults.GetTextProposals().Any(item => string.Equals(item.Target, target, StringComparison.Ordinal)))
+                    return;
+                if (result.Properties is null || !result.Properties.TryGetValue("ResultJson", out var value))
+                    throw new InvalidDataException("LocalGPT returned no structured Council result.");
+                var serialized = value.ValueKind == System.Text.Json.JsonValueKind.String
+                    ? value.GetString() : value.GetRawText();
+                using var document = System.Text.Json.JsonDocument.Parse(serialized ?? "{}");
+                var answer = document.RootElement.EnumerateObject()
+                    .FirstOrDefault(item => item.Name.Equals("FinalAnswer", StringComparison.OrdinalIgnoreCase));
+                if (answer.Value.ValueKind != System.Text.Json.JsonValueKind.String || string.IsNullOrWhiteSpace(answer.Value.GetString()))
+                    throw new InvalidDataException("The Council completed without a text proposal or visible final answer.");
+                OrganicResults.AddTextProposal(new OrganicTextInsertionProposal
+                {
+                    Target = target,
+                    Text = answer.Value.GetString()!,
+                    Reason = "Council final answer — review before inserting"
+                });
+                return;
+            }
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            // The host is shutting down; no incomplete result is represented as a proposal.
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Story proposal request {CorrelationId} did not return reviewable text.", correlationId);
+            try
+            {
+                if (Visible)
+                    await InvokeAsync(() => { _aiRequestStatus = $"Council request {correlationId} failed: {exception.Message}"; StateHasChanged(); }).ConfigureAwait(false);
+            }
+            catch (InvalidOperationException)
+            {
+                // The editor circuit may already be disposed; the failure remains logged.
+            }
         }
     }
 
@@ -2506,7 +2580,8 @@
             return _aiProposals
         .Where(proposal => TextFrame is not null &&
             (string.Equals(proposal.Target, TextFrame.Name, StringComparison.OrdinalIgnoreCase)
-             || string.Equals(proposal.Target, AiProposalTarget, StringComparison.OrdinalIgnoreCase)))
+             || string.Equals(proposal.Target, AiProposalTarget, StringComparison.OrdinalIgnoreCase)
+             || (proposal.Target.StartsWith($"StoryEditor:{TextFrame.Id}:", StringComparison.OrdinalIgnoreCase))))
         .OrderByDescending(proposal => proposal.CreatedUtc)
         .ToList();
         }

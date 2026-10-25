@@ -8,7 +8,11 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
 (() => { try {
     'use strict';
 
-    const selector = 'button,input,select,textarea,a[href],[role="button"],[role="tab"],[role="menuitem"],[role="option"],[role="checkbox"],[role="switch"],[data-help]';
+    const selector = 'button,input,select,textarea,a[href],[role="button"],[role="tab"],[role="menuitem"],[role="option"],[role="checkbox"],[role="switch"],[data-help],[title]';
+    // PublisherStudio tooltips: delay all hover and keyboard-focus hints to 3x the 4.5.0 timing.
+    // Normalize native title hints to this runtime so they cannot appear earlier than custom hints.
+    const HOVER_TOOLTIP_DELAY_MS = 1260; // previously 420 ms
+    const FOCUS_TOOLTIP_DELAY_MS = 660;  // previously 220 ms
     const prepared = new WeakMap();
     const catalog = new Map(Object.entries({
         'new publication': 'Create a new blank publication. Unsaved work in the current publication should be saved first.',
@@ -286,7 +290,7 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
          } catch (__javascriptError) { publisherStudioDiagnostics.report('js/tooltipRuntime.js:callback:requestAnimationFrame@276', __javascriptError); throw __javascriptError; }});
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/tooltipRuntime.js:show@267', __javascriptError); throw __javascriptError; }}
 
-    function scheduleShow(target, delay = 420) { try {
+    function scheduleShow(target, delay = HOVER_TOOLTIP_DELAY_MS) { try {
         clearTimeout(hideTimer);
         if (activeTarget === target && tooltip?.classList.contains('visible')) return;
         if (pendingTarget === target && showTimer) return;
@@ -350,7 +354,7 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
 
     document.addEventListener('focusin', event => { try {
         const target = targetFrom(event);
-        if (target) scheduleShow(target, 220);
+        if (target) scheduleShow(target, FOCUS_TOOLTIP_DELAY_MS);
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/tooltipRuntime.js:callback:document.addEventListener@345', __javascriptError); throw __javascriptError; }}, true);
 
     document.addEventListener('focusout', () => { try { return (hide()); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/tooltipRuntime.js:callback:document.addEventListener@350', __javascriptError); throw __javascriptError; } }, true);

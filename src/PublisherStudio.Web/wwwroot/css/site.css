@@ -5483,6 +5483,72 @@ dxbl-popup-root > dxbl-popup-cell > dxbl-modal .dxbl-modal-body > .new-publicati
 }
 
 
+/* 4.5.4 — Popup surface ownership repair.
+   DevExpress draws the modal frame. The PublisherStudio dialog is its direct body content,
+   not a second framed card inside a padded/always-guttered modal body. Restrict the reset
+   to known PublisherStudio dialog roots: DevExpress dropdowns, notifications, and unrelated
+   popup bodies keep their existing layout and overflow semantics. Studio roots retain their
+   own scroll/content and titlebar styles; only the external unused frame is removed. */
+dxbl-popup-root > dxbl-popup-cell > dxbl-modal dxbl-modal-dialog.dxbl-popup .dxbl-modal-body:has(> :is(
+    .publisher-dialog,
+    .story-editor-dialog,
+    .spreadsheet-editor-dialog,
+    .data-manager-dialog,
+    .data-visual-editor-dialog,
+    .picture-studio-dialog,
+    .media-studio-window,
+    .barcode-editor-dialog,
+    .component-editor-dialog,
+    .streaming-studio-window,
+    .panel-studio-dialog,
+    .media-converter-dialog,
+    .page-effect-studio,
+    .website-export-dialog,
+    .publisher-documentation-dialog,
+    .new-publication-dialog
+)) {
+    padding: 0 !important;
+    margin: 0 !important;
+    scrollbar-gutter: auto !important;
+}
+
+/* The popup content wrapper may have theme-provided interior padding as well;
+   remove it only when its body has a direct PublisherStudio-owned dialog. */
+dxbl-popup-root > dxbl-popup-cell > dxbl-modal dxbl-modal-dialog.dxbl-popup > .dxbl-modal-content:has(> .dxbl-modal-body > :is(
+    .publisher-dialog,
+    .story-editor-dialog,
+    .spreadsheet-editor-dialog,
+    .data-manager-dialog,
+    .data-visual-editor-dialog,
+    .picture-studio-dialog,
+    .media-studio-window,
+    .barcode-editor-dialog,
+    .component-editor-dialog,
+    .streaming-studio-window,
+    .panel-studio-dialog,
+    .media-converter-dialog,
+    .page-effect-studio,
+    .website-export-dialog,
+    .publisher-documentation-dialog,
+    .new-publication-dialog
+)) {
+    padding: 0 !important;
+}
+
+/* Preserve the real modal's rounded outline and clipping instead of drawing a second
+   inset border/shadow. This is limited to PublisherStudio's compact/AI/export dialogs;
+   full-screen studio windows already own their editor skin. */
+dxbl-popup-root > dxbl-popup-cell > dxbl-modal dxbl-modal-dialog.dxbl-popup .dxbl-modal-body > .publisher-dialog {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    box-sizing: border-box;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+}
+
 /* PublisherStudio 4.0.4: compatibility fallback for ordinary wrapped editor content plus inspector resilience.
    Geometry-sensitive panel/render leaves are direct-root structural renderers again; these wrapper-depth
    rules remain only for non-structural component content that legitimately owns a maintenance FormLayout. */

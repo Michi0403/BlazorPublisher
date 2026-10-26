@@ -28,7 +28,8 @@
 
     <div class="organic-toolbar organic-wrap-toolbar">
         <DxButton Text="Create identity" Enabled="@(!_status.HasSecret)" Click="CreateAsync" RenderStyle="ButtonRenderStyle.Primary" />
-        <DxButton Text="Create pairing material" Enabled="@_status.HasSecret" Click="CreatePairingMaterialAsync" />
+        <DxButton Text="Renew public pairing ticket" Enabled="@_status.HasSecret" Click="RefreshPublicPairingTicketAsync" />
+        <DxButton Text="Show authenticator enrollment" Enabled="@_status.HasSecret" Click="CreatePairingMaterialAsync" />
         <DxButton Text="Regenerate identity" Enabled="@(_status.HasSecret && _allowDestructiveReset)" Click="RegenerateAsync" RenderStyle="ButtonRenderStyle.Warning" />
         <DxButton Text="Delete identity" Enabled="@(_status.HasSecret && _allowDestructiveReset)" Click="DeleteAsync" RenderStyle="ButtonRenderStyle.Danger" />
         <label class="organic-inline-check"><input type="checkbox" @bind="_allowDestructiveReset" /> allow trust reset</label>
@@ -42,18 +43,24 @@
     @if (!string.IsNullOrWhiteSpace(_otpUri) || !string.IsNullOrWhiteSpace(_pairingTicketJson))
     {
         <div class="organic-grid organic-grid-two organic-security-material">
+            @if (!string.IsNullOrWhiteSpace(_otpUri))
+            {
             <article>
                 <h3>Authenticator enrollment</h3>
                 <p class="organic-note">Scan this once with an Authenticator app. The displayed URI contains only the enrollment seed at the moment you explicitly request it.</p>
                 <div id="organic-security-otp-qr" class="organic-security-qr" aria-label="PublisherStudio Authenticator QR code"></div>
                 <textarea rows="3" readonly>@_otpUri</textarea>
             </article>
+            }
+            @if (!string.IsNullOrWhiteSpace(_pairingTicketJson))
+            {
             <article>
                 <h3>Public pairing ticket</h3>
                 <p class="organic-note">This ticket contains public keys only and expires. Transfer it to the other application's trust panel.</p>
                 <div id="organic-security-ticket-qr" class="organic-security-qr" aria-label="PublisherStudio public pairing ticket QR code"></div>
                 <textarea rows="8" readonly>@_pairingTicketJson</textarea>
             </article>
+            }
         </div>
     }
 
@@ -155,6 +162,21 @@
         try
         {
             await RefreshAsync().ConfigureAwait(true);
+            if (_status.HasSecret)
+            {
+                // Only public, time-limited and signed pairing material is exposed on ordinary reopen.
+                // MFA enrollment is never fetched automatically.
+                try
+                {
+                    _pairingTicketJson = JsonSerializer.Serialize(
+                        await Security.CreatePairingTicketAsync(TimeSpan.FromMinutes(15)).ConfigureAwait(true), JsonOptions);
+                    _renderQr = true;
+                }
+                catch (Exception exception)
+                {
+                    Logger.LogWarning(exception, "The public pairing ticket could not be refreshed on opening the security panel.");
+                }
+            }
         }
         catch (Exception __componentMethodException)
         {
@@ -174,8 +196,10 @@
         {
             if (!_renderQr) return;
             _renderQr = false;
-            await JS.InvokeVoidAsync("publisherOrganicSecurity.renderQr", "organic-security-otp-qr", _otpUri, "PublisherStudio Authenticator enrollment").ConfigureAwait(true);
-            await JS.InvokeVoidAsync("publisherOrganicSecurity.renderQr", "organic-security-ticket-qr", _pairingTicketJson, "PublisherStudio public 1-Wire pairing ticket").ConfigureAwait(true);
+            if (!string.IsNullOrWhiteSpace(_otpUri))
+                await JS.InvokeVoidAsync("publisherOrganicSecurity.renderQr", "organic-security-otp-qr", _otpUri, "PublisherStudio Authenticator enrollment").ConfigureAwait(true);
+            if (!string.IsNullOrWhiteSpace(_pairingTicketJson))
+                await JS.InvokeVoidAsync("publisherOrganicSecurity.renderQr", "organic-security-ticket-qr", _pairingTicketJson, "PublisherStudio public 1-Wire pairing ticket").ConfigureAwait(true);
     
         }
         catch (Exception __componentMethodException)
@@ -226,6 +250,24 @@
         {
             Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicSecurityPanel)}.{nameof(CreateAsync)} failed.");
             throw;
+        }
+    }
+
+    /// <summary>Renews the signed public pairing ticket without loading the private MFA enrollment seed into the browser.</summary>
+    /// <returns>A task that completes when the renewed ticket has been rendered.</returns>
+    private async Task RefreshPublicPairingTicketAsync()
+    {
+        try
+        {
+            if (!_status.HasSecret) return;
+            _pairingTicketJson = JsonSerializer.Serialize(
+                await Security.CreatePairingTicketAsync(TimeSpan.FromMinutes(15)).ConfigureAwait(true), JsonOptions);
+            _renderQr = true;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+        }
+        catch (Exception exception)
+        {
+            Report(exception, "The public pairing ticket could not be refreshed.");
         }
     }
 

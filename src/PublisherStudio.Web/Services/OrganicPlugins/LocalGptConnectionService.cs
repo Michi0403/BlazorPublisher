@@ -536,31 +536,37 @@ public sealed class LocalGptConnectionService(
                 case OrganicWireMessageType.CapabilityResponse:
                 case OrganicWireMessageType.SkillResponse:
                 case OrganicWireMessageType.SkillStateUpdate:
-                    if (discovery.GetPeer(connectedPeerId) is { } peer)
+                    // The protected TCP message belongs to the authenticated current connection.
+                    // UDP discovery may expire or be suspended while connected; it cannot veto this directory.
+                    if (connectionId != connectedId || !State.IsConnected)
+                        break;
+                    var currentPeer = discovery.GetPeer(connectedPeerId);
+                    if (TryRead<List<OrganicCapabilityDescriptor>>(envelope, "Capabilities", out var remoteCapabilities))
+                        State.RemoteCapabilities = remoteCapabilities ?? [];
+                    if (TryRead<List<OrganicSkillDescriptor>>(envelope, "Skills", out var remoteSkills))
+                        State.RemoteSkills = remoteSkills ?? [];
+                    if (TryRead<List<OrganicUiFeatureDescriptor>>(envelope, "UiFeatures", out var remoteUiFeatures))
+                        State.RemoteUiFeatures = remoteUiFeatures ?? [];
+                    if (TryRead<List<OrganicHardwareDescriptor>>(envelope, "Hardware", out var remoteHardware))
+                        State.RemoteHardware = remoteHardware ?? [];
+                    if (currentPeer is not null)
                     {
                         if (TryRead<OrganicPeerAdvertisement>(envelope, "Peer", out var advertisedPeer) && advertisedPeer is not null)
                         {
-                            advertisedPeer.Address = string.IsNullOrWhiteSpace(advertisedPeer.Address) ? peer.Address : advertisedPeer.Address;
-                            advertisedPeer.ServicePort = advertisedPeer.ServicePort <= 0 ? peer.ServicePort : advertisedPeer.ServicePort;
-                            advertisedPeer.DiscoveryPort = advertisedPeer.DiscoveryPort <= 0 ? peer.DiscoveryPort : advertisedPeer.DiscoveryPort;
-                            peer = advertisedPeer;
+                            advertisedPeer.Address = string.IsNullOrWhiteSpace(advertisedPeer.Address) || advertisedPeer.Address == "0.0.0.0"
+                                ? currentPeer.Address : advertisedPeer.Address;
+                            advertisedPeer.ServicePort = advertisedPeer.ServicePort <= 0 ? currentPeer.ServicePort : advertisedPeer.ServicePort;
+                            advertisedPeer.DiscoveryPort = advertisedPeer.DiscoveryPort <= 0 ? currentPeer.DiscoveryPort : advertisedPeer.DiscoveryPort;
+                            currentPeer = advertisedPeer;
                         }
-                        if (TryRead<List<OrganicCapabilityDescriptor>>(envelope, "Capabilities", out var remoteCapabilities))
-                            peer.Capabilities = remoteCapabilities ?? [];
-                        if (TryRead<List<OrganicSkillDescriptor>>(envelope, "Skills", out var remoteSkills))
-                            peer.Skills = remoteSkills ?? [];
-                        if (TryRead<List<OrganicUiFeatureDescriptor>>(envelope, "UiFeatures", out var remoteUiFeatures))
-                            peer.UiFeatures = remoteUiFeatures ?? [];
-                        if (TryRead<List<OrganicHardwareDescriptor>>(envelope, "Hardware", out var remoteHardware))
-                            peer.Hardware = remoteHardware ?? [];
-                        peer.IsConnected = true;
-                        discovery.Upsert(peer);
-                        State.RemoteCapabilities = peer.Capabilities.ToList();
-                        State.RemoteSkills = peer.Skills.ToList();
-                        State.RemoteUiFeatures = peer.UiFeatures.ToList();
-                        State.RemoteHardware = peer.Hardware.ToList();
-                        Changed?.Invoke();
+                        currentPeer.Capabilities = State.RemoteCapabilities.ToList();
+                        currentPeer.Skills = State.RemoteSkills.ToList();
+                        currentPeer.UiFeatures = State.RemoteUiFeatures.ToList();
+                        currentPeer.Hardware = State.RemoteHardware.ToList();
+                        currentPeer.IsConnected = true;
+                        discovery.Upsert(currentPeer);
                     }
+                    Changed?.Invoke();
                     results.RecordEnvelope(envelope);
                     break;
                 case OrganicWireMessageType.Invoke:

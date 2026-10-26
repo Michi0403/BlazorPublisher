@@ -32,7 +32,7 @@
                 <span><i class="pub-icon pub-icon-spreadsheet"></i>DevExpress Spreadsheet Studio</span>
                 <small>XLSX, XLSM, XLS, CSV, and TXT · edited legacy/text files save as XLSX · XLSM macros are preserved but cannot run or be edited</small>
             </div>
-            @if (OpenAiOnShow && LocalGptConnection.State.HasCapability("council.run"))
+            @if (OpenAiOnShow)
             {
                 <DxFormLayout CssClass="razor-section-layout-owner">
                     <DxFormLayoutItem ColSpanMd="12">
@@ -318,8 +318,13 @@
         try
         {
             if (_aiSubmitting || !Visible || SessionId == Guid.Empty ||
-                !LocalGptConnection.State.HasCapability("council.run") || string.IsNullOrWhiteSpace(_aiSpreadsheetPrompt))
+                string.IsNullOrWhiteSpace(_aiSpreadsheetPrompt))
                 return;
+            if (!LocalGptConnection.State.HasCapability("council.run"))
+            {
+                _aiStatus = "LocalGPT council.run is unavailable. Reconnect in Organic Plugins and inspect the negotiated capabilities.";
+                return;
+            }
             _aiSubmitting = true;
             _aiStatus = "Submitting spreadsheet request to LocalGPT…";
             var target = $"SpreadsheetStudio:{SessionId:N}:{Guid.NewGuid():N}";

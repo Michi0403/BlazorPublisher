@@ -22,5 +22,5 @@ for (const marker of [
 for (const marker of ['@media (any-pointer: coarse)', 'touch-action: none;', 'publisherstudio-touch-scratch-toggle', 'publisherstudio-touch-paw'])
   assert.ok(css.includes(marker), marker);
 assert.ok(!css.includes('@media (prefers-reduced-motion: reduce), (pointer: coarse) {\n  html.publisherstudio-kawaii-docs .publisherstudio-tear-overlay'));
-assert.match(fs.readFileSync(path.join(root,'src/PublisherStudio.Web/PublisherStudio.Web.csproj'),'utf8'),/<Version>4\.6\.5<\/Version>/);
+assert.match(fs.readFileSync(path.join(root,'src/PublisherStudio.Web/PublisherStudio.Web.csproj'),'utf8'),/<Version>4\.6\.7<\/Version>/);
 console.log('PASS: responsive Mermaid node bounds/recovery and mobile touch mode contracts');

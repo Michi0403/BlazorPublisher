@@ -67,6 +67,10 @@
                     <DxFormLayoutItem ColSpanMd="12">
                         <Template Context="mediaAiFormContext">
                             <p>@LT("Describe your goal. LocalGPT may propose a model or a native Studio workflow. No media is inserted without a verified result and your approval.")</p>
+                            @if (!CanUseAiCouncil)
+                            {
+                                <p role="status">LocalGPT council.run is unavailable. Reconnect or inspect the current 1-Wire capabilities in Organic Plugins before submitting.</p>
+                            }
                             <label for="publisher-media-team">Council team</label>
                             <DxComboBox TData="string" TValue="string" Data="@AvailableAiTeamKeys" @bind-Value="_mediaAiTeamKey" />
                             <DxMemo Rows="5" @bind-Text="_mediaAiPrompt" NullText='@LT("Describe the picture, video, audio or panel you want")' />
@@ -226,11 +230,14 @@
         <span>@LT("Drag to canvas")</span>
         <button type="button" draggable="true" data-publisher-insert="panel" title='@LT("Drag a reusable panel or dashboard to the canvas")' @onclick="InsertPanel"><i class="pub-icon pub-icon-panel"></i>@LT("Panel")</button>
         <button type="button" draggable="true" data-publisher-insert="text" title='@LT("Drag a text box to an exact position, or click to insert")' @onclick="AddTextQuick"><i class="pub-icon pub-icon-text"></i>@LT("Text")</button>
-        @if (CanUseAiCouncil)
+        @if (ShowLocalGptAi)
         {
             <button type="button" title='@LT("Create a text frame and open LocalGPT AI assistance in Story Editor")' @onclick="AddAiTextQuick"><i class="pub-icon pub-icon-text"></i>@LT("AI Text")</button>
         }
-        <button type="button" title='@LT("Insert DevExtreme Chat with optional LocalGPT or server-configured OpenAI")' @onclick="InsertAiChatQuick"><i class="pub-icon pub-icon-command"></i>@LT("AI Chat")</button>
+        @if (ShowLocalGptAi || DirectAi.IsAvailable())
+        {
+            <button type="button" title='@LT("Insert DevExtreme Chat with optional LocalGPT or server-configured OpenAI")' @onclick="InsertAiChatQuick"><i class="pub-icon pub-icon-command"></i>@LT("AI Chat")</button>
+        }
         <button type="button" draggable="true" data-publisher-insert="picture" title='@LT("Drag to choose and place a picture, or click to insert")' @onclick="OpenPicturePicker"><i class="pub-icon pub-icon-picture"></i>@LT("Picture")</button>
         <button type="button" draggable="true" data-publisher-insert="spreadsheet" title='@LT("Drag to create and place a spreadsheet, or click to open a workbook")' @onclick="OpenSpreadsheetPicker"><i class="pub-icon pub-icon-spreadsheet"></i>@LT("Sheet")</button>
         <button type="button" draggable="true" data-publisher-insert="video" title='@LT("Drag to create or import and place a video, or click to insert")' @onclick="OpenVideoPicker"><i class="pub-icon pub-icon-video"></i>@LT("Video")</button>
@@ -294,7 +301,7 @@
     @if (State.Document.View.PanelLibraryVisible)
     {
         <PanelLibrary Insert="InsertPanelPreset" InsertTemplate="InsertDivTemplate" Close="ClosePanelLibrary"
-                      AiAvailable="CanUseAiCouncil" RequestAiTemplate="OpenAiPanelTemplateAsync" />
+                      AiAvailable="ShowLocalGptAi" RequestAiTemplate="OpenAiPanelTemplateAsync" />
     }
 
     <footer class="status-bar">
@@ -1361,7 +1368,8 @@
     {
         try
         {
-            if (!CanUseAiCouncil || kind is not ("picture" or "video" or "audio" or "template" or "blob3d"))
+            if (!ShowLocalGptAi) return Task.CompletedTask;
+            if (kind is not ("picture" or "video" or "audio" or "template" or "blob3d"))
                 return Task.CompletedTask;
             _mediaAiKind = kind;
             _mediaAiTeamKey = ResolveAiTeamKey(ResolvePublisherMediaTeamKey(kind));
@@ -1570,7 +1578,7 @@
     {
         try
         {
-            if (!CanUseAiCouncil) return;
+            if (!ShowLocalGptAi) return;
             switch (kind)
             {
                 case "writing":
@@ -1619,7 +1627,7 @@
     {
         try
         {
-            if (!CanUseAiCouncil) return;
+            if (!ShowLocalGptAi) return;
             var text = State.AddText();
             State.SelectElement(text.Id);
             await CancelPublisherPointerAsync().ConfigureAwait(true);
@@ -1641,9 +1649,10 @@
     {
         try
         {
+            if (!ShowLocalGptAi && !DirectAi.IsAvailable()) return;
             await CancelPublisherPointerAsync().ConfigureAwait(true);
             var component = State.AddDevExtremeComponent(PublicationComponentKind.Chat);
-            component.ChatAiMode = CanUseAiCouncil ? PublicationChatAiMode.LocalGptCouncil
+            component.ChatAiMode = ShowLocalGptAi ? PublicationChatAiMode.LocalGptCouncil
                 : DirectAi.IsAvailable() ? PublicationChatAiMode.OpenAiServer : PublicationChatAiMode.None;
             component.ChatAiTeamKey = StoryDefaultTeamKey;
             component.ChatCurrentUserName = "Reader";
@@ -5727,6 +5736,8 @@
     /// </summary>
     /// <value>The can use AI council value exposed by <see cref="Editor"/>.</value>
     private bool CanUseAiCouncil => GetCanUseAiCouncilForRender();
+    /// <summary>Keep LocalGPT AI entry points visible only while the reciprocal link is active, independently of capability refresh.</summary>
+    private bool ShowLocalGptAi => LocalGptConnection.State.IsConnected && LocalGptConnection.State.IsLinked;
     /// <summary>
     /// Performs lt for <see cref="Editor"/>, keeping the operation consistent with the state and invariants of the surrounding editor workflow.
     /// </summary>

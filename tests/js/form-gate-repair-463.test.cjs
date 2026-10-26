@@ -33,5 +33,5 @@ test('original build-blocking guards and latest project version are retained', (
   assert.match(targets, /Assert-IteratorExceptionPolicy\.ps1/);
   assert.match(read('build/Assert-ComponentSafety.ps1'), /Synchronous component lifecycle overrides are forbidden/);
   assert.match(read('build/Assert-IteratorExceptionPolicy.ps1'), /iterator contains catch/);
-  assert.match(read('src/PublisherStudio.Web/PublisherStudio.Web.csproj'), /<Version>4\.6\.5<\/Version>/);
+  assert.match(read('src/PublisherStudio.Web/PublisherStudio.Web.csproj'), /<Version>4\.6\.7<\/Version>/);
 });

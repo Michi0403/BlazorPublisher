@@ -311,7 +311,7 @@
                 <DxContextMenuItem Text="@TimelineCommandText" Click="ToggleTimeline" />
             </Items>
         </DxContextMenuItem>
-        @if (State.SelectedElement is not null && LocalGptConnection.State.HasCapability("council.run"))
+        @if (State.SelectedElement is not null && LocalGptConnection.State.IsConnected && LocalGptConnection.State.IsLinked)
         {
             <DxContextMenuItem Text='@Localization.GetText("AI Assist selected object")' IconCssClass="pub-icon pub-icon-command" BeginGroup="true">
                 <Items>
@@ -2120,7 +2120,9 @@
     {
         try
         {
-            if (!LocalGptConnection.State.HasCapability("council.run")) return;
+            // An action already queued by an old menu must not launch after link loss.
+            if (!LocalGptConnection.State.IsConnected || !LocalGptConnection.State.IsLinked) return;
+            // Opening assistance is not a remote invocation. The owning editor validates execution.
             await RequestAiAssist.InvokeAsync(kind).ConfigureAwait(true);
         }
         catch (Exception exception)

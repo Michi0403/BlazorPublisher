@@ -52,7 +52,7 @@
                         </DxRibbonItem>
                     </DxRibbonGroup>
                 </DxRibbonTab>
-                @if (CanUseAiCouncil)
+                @if (ShowAiCouncilActions)
                 {
                     <DxRibbonTab Text="LocalGPT AI">
                         <DxRibbonGroup Text="Text generation">
@@ -93,7 +93,7 @@
                     <DxRibbonGroup Text="Output"><DxRibbonItem Text="Print" IconCssClass="pub-icon pub-icon-print" Click="PrintStory" /></DxRibbonGroup>
                 </DxRibbonTab>
             </DxRibbon>
-            @if (_aiStoryPanelVisible && CanUseAiCouncil)
+            @if (_aiStoryPanelVisible)
             {
                 <DxFormLayout CssClass="razor-section-layout-owner">
     <DxFormLayoutItem ColSpanMd="12">
@@ -106,6 +106,10 @@
                         </div>
                         <button class="window-close" @onclick="CloseAiStoryPanel" aria-label="Close LocalGPT AI story assistance">×</button>
                     </header>
+                    @if (!CanUseAiCouncil)
+                    {
+                        <p class="story-ai-request-status" role="status">LocalGPT council.run is not currently available. Check the LocalGPT connection and 1-Wire capabilities; existing proposals remain accessible.</p>
+                    }
                     <div class="story-ai-request">
                         <label>Team
                             <select @bind="_aiTeamKey">
@@ -408,7 +412,7 @@
     /// <summary>
     /// Stores the internal AI story panel visible state used by <see cref="StoryEditor"/> while executing its surrounding workflow.
     /// </summary>
-    private string StoryEditorDialogCssClass => _aiStoryPanelVisible && CanUseAiCouncil ? "story-editor-dialog story-ai-open" : "story-editor-dialog";
+    private string StoryEditorDialogCssClass => _aiStoryPanelVisible ? "story-editor-dialog story-ai-open" : "story-editor-dialog";
     private bool _aiStoryPanelVisible;
     /// <summary>Tracks whether the browser-side RichEdit layout bridge has been attached for the current visible editor surface.</summary>
     private bool _storyLayoutAttached;
@@ -438,6 +442,8 @@
     /// </summary>
     /// <value>The can use AI council value exposed by <see cref="StoryEditor"/>.</value>
     private bool CanUseAiCouncil => GetCanUseAiCouncilForRender();
+    /// <summary>Show LocalGPT actions only for a live, mutually approved link; transient capabilities do not hide them.</summary>
+    private bool ShowAiCouncilActions => LocalGptConnection.State.IsConnected && LocalGptConnection.State.IsLinked;
     /// <summary>
     /// Gets a value indicating whether send AI story request applies to the story editor state.
     /// </summary>
@@ -593,7 +599,7 @@
                 _loadedId = TextFrame.Id;
                 _error = null;
                 RefreshAiProposals();
-                _aiStoryPanelVisible = OpenAiOnShow && CanUseAiCouncil;
+                _aiStoryPanelVisible = OpenAiOnShow;
                 _aiTeamKey = AiCouncilTeams.Any(team => string.Equals(team.Key, DefaultAiTeamKey, StringComparison.OrdinalIgnoreCase))
                     ? DefaultAiTeamKey : "general";
                 _aiRequestStatus = string.Empty;
@@ -1128,7 +1134,13 @@
     {
         try
         {
-            if (!CanUseAiCouncil || TextFrame is null) return;
+            if (TextFrame is null) return;
+            if (!CanUseAiCouncil)
+            {
+                _aiStoryPanelVisible = true;
+                _aiRequestStatus = "LocalGPT council.run is unavailable. Reconnect or review the 1-Wire capability directory before submitting.";
+                return;
+            }
             try
             {
                 if (!HasSelectedStoryText)

@@ -2,6 +2,7 @@
 @implements IDisposable
 @inject NavigationManager Navigation
 @inject ILocalGptConnectionService LocalGptConnection
+@inject PublisherStudio.Services.OrganicPlugins.IPublisherDirectAiService DirectAi
 @inject ILocalGptDiscoveryActivationService LocalGptDiscoveryActivation
 @inject IPublisherDocumentationViewerService DocumentationViewer
 @inject IFileLocalizationService Localization
@@ -163,7 +164,10 @@
                         <DxRibbonItem Text='@LT("Gallery")' Click="AddComponentGallery" />
                         <DxRibbonItem Text='@LT("Tile View")' Click="AddComponentTileView" />
                         <DxRibbonItem Text='@LT("Chat")' Click="AddComponentChat" />
-                <DxRibbonItem Text='@LT("AI Chat")' IconCssClass="pub-icon pub-icon-command" Click="AddAiChat" />
+                @if (CanShowAiCouncil || DirectAi.IsAvailable())
+                {
+                    <DxRibbonItem Text='@LT("AI Chat")' IconCssClass="pub-icon pub-icon-command" Click="AddAiChat" />
+                }
                 </DxRibbonItem>
             </DxRibbonItem>
         </DxRibbonGroup>
@@ -282,14 +286,8 @@
                     <DxRibbonItem Text='@LT("AI create spreadsheet")' Click='() => OpenAiAssistForSelected("spreadsheet")' />
                     <DxRibbonItem Text='@LT("AI help with selected object")' Click='() => OpenAiAssistForSelected("auto")' />
                 </DxRibbonItem>
-                @if (HasCouncilTeam("openscad-team"))
-                {
-                    <DxRibbonItem Text='@LT("OpenSCAD Team")' IconCssClass="pub-icon pub-icon-effects" Click="OpenOrganicPlugins" />
-                }
-                @if (HasCouncilTeam("spreadsheet-team"))
-                {
-                    <DxRibbonItem Text='@LT("Spreadsheet Team")' IconCssClass="pub-icon pub-icon-spreadsheet" Click='() => OpenAiAssistForSelected("spreadsheet")' />
-                }
+                <DxRibbonItem Text='@LT("OpenSCAD Team")' IconCssClass="pub-icon pub-icon-effects" Click="OpenOrganicPlugins" />
+                <DxRibbonItem Text='@LT("Spreadsheet Team")' IconCssClass="pub-icon pub-icon-spreadsheet" Click='() => OpenAiAssistForSelected("spreadsheet")' />
             </DxRibbonGroup>
             <DxRibbonGroup Text='@LT("Connection & safety")' IconCssClass="pub-icon pub-icon-info">
                 <DxRibbonItem Text='@LT("Eye/hand actions require permission")' Enabled="false" />
@@ -768,11 +766,6 @@
     {
         try
         {
-            if (!CanShowAiCouncil)
-            {
-                OpenOrganicPlugins();
-                return;
-            }
             var mode = State.SelectedElement is SpreadsheetElement ? "spreadsheet"
                 : State.SelectedElement is TextFrameElement ? "writing"
                 : State.SelectedElement is null ? "writing" : "auto";
@@ -5802,7 +5795,9 @@
     {
         try
         {
-            return LocalGptConnection.State.HasCapability("council.run");
+            // LocalGPT commands belong to a live, mutually approved link, not a transient capability directory.
+            // The owning editor and AI bridge still enforce council.run when executing a request.
+            return LocalGptConnection.State.IsConnected && LocalGptConnection.State.IsLinked;
         }
         catch (Exception __componentPropertyException)
         {

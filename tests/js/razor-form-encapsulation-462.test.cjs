@@ -24,6 +24,6 @@ test('Council form owns submission, notifier and DevExpress validation', () => {
 test('mandatory guards and audit are shipped', () => {
   assert.match(source('Directory.Build.targets'), /AssertPublisherStudioRazorFormEncapsulation/);
   assert.match(source('Build-Release.ps1'), /Assert-RazorFormEncapsulation\.ps1/);
-  assert.match(source('src/PublisherStudio.Web/PublisherStudio.Web.csproj'), /<Version>4\.6\.5<\/Version>/);
+  assert.match(source('src/PublisherStudio.Web/PublisherStudio.Web.csproj'), /<Version>4\.6\.7<\/Version>/);
   assert.match(source('FORM_AUDIT_ALL_COMPONENTS.md'), /InspectorPanel\.razor/);
 });

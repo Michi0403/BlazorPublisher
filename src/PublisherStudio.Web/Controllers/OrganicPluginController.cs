@@ -204,6 +204,18 @@ public sealed class OrganicPluginController(
     [HttpPost("council")]
     public async Task<IActionResult> Council([FromBody] OrganicCouncilPromptRequest request, CancellationToken cancellationToken)
     {
+        var form = new PublisherStudio.BusinessObjects.OrganicCouncilRequestFormModel();
+        form.ReadFrom(request);
+        var validationResults = new List<System.ComponentModel.DataAnnotations.ValidationResult>();
+        var formValid = System.ComponentModel.DataAnnotations.Validator.TryValidateObject(
+            form, new System.ComponentModel.DataAnnotations.ValidationContext(form), validationResults, validateAllProperties: true);
+        if (!formValid)
+        {
+            foreach (var failure in validationResults)
+                foreach (var member in failure.MemberNames.DefaultIfEmpty(string.Empty))
+                    ModelState.AddModelError(member, failure.ErrorMessage ?? "Invalid Council form input.");
+            return ValidationProblem(ModelState);
+        }
         if (!connection.State.IsConnected) return Conflict("PublisherStudio is not connected to LocalGPT.");
         var messageId = await connection.SendCouncilRequestAsync(request, cancellationToken).ConfigureAwait(false);
         logger.LogInformation("Submitted organic council request {MessageId} for team {TeamKey}.", messageId, request.TeamKey);

@@ -1,5 +1,22 @@
 <Project>
   <PropertyGroup>
+    <OneWireReadyNotificationsGuardScript>$(MSBuildThisFileDirectory)build/Assert-OneWireReadyNotifications.ps1</OneWireReadyNotificationsGuardScript>
+  </PropertyGroup>
+  <Target Name="AssertPublisherOneWireReadyNotifications" BeforeTargets="BeforeBuild"
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web'">
+    <Error Condition="!Exists('$(OneWireReadyNotificationsGuardScript)')" Text="Missing mandatory 1-Wire notification/ready-state guard." />
+    <Exec Command="&quot;$(RepositoryPowerShell)&quot; $(RepositoryPowerShellArguments) -File &quot;$(OneWireReadyNotificationsGuardScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
+  </Target>
+  <PropertyGroup>
+    <OneWireIdentityPersistenceGuardScript>$(MSBuildThisFileDirectory)build/Assert-OneWireIdentityPersistence.ps1</OneWireIdentityPersistenceGuardScript>
+  </PropertyGroup>
+  <Target Name="AssertPublisherOneWireIdentityPersistence" BeforeTargets="BeforeBuild"
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web'">
+    <Error Condition="!Exists('$(OneWireIdentityPersistenceGuardScript)')" Text="Missing mandatory PublisherStudio stable identity guard." />
+    <Exec Command="&quot;$(RepositoryPowerShell)&quot; $(RepositoryPowerShellArguments) -File &quot;$(OneWireIdentityPersistenceGuardScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
+  </Target>
+
+  <PropertyGroup>
     <!-- Repository policy/build scripts are required on every supported build host. -->
     <RepositoryPowerShell Condition="'$(RepositoryPowerShell)' == '' and '$(OS)' == 'Windows_NT'">powershell</RepositoryPowerShell>
     <RepositoryPowerShell Condition="'$(RepositoryPowerShell)' == '' and '$(OS)' != 'Windows_NT'">pwsh</RepositoryPowerShell>
@@ -8,6 +25,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
+    <ReciprocalOneWireTrustUiScript>$(MSBuildThisFileDirectory)build/Assert-ReciprocalOneWireTrustUI.ps1</ReciprocalOneWireTrustUiScript>
     <WireProtocolBootstrapScript>$(MSBuildThisFileDirectory)build/Ensure-WireProtocolPackage.ps1</WireProtocolBootstrapScript>
     <LoggingIntegrityScript>$(MSBuildThisFileDirectory)build/Assert-LoggingIntegrity.ps1</LoggingIntegrityScript>
     <OneWireArchitectureScript>$(MSBuildThisFileDirectory)build/Assert-OneWireArchitecture.ps1</OneWireArchitectureScript>
@@ -78,6 +96,13 @@
           Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipOneWireArchitectureGuard)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web'">
     <Error Condition="!Exists('$(OneWireArchitectureScript)')" Text="1-Wire architecture guard script is missing: $(OneWireArchitectureScript)" />
     <Exec Command="&quot;$(RepositoryPowerShell)&quot; $(RepositoryPowerShellArguments) -File &quot;$(OneWireArchitectureScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
+  </Target>
+
+  <Target Name="AssertPublisherReciprocalOneWireTrustUI"
+          BeforeTargets="BeforeBuild" AfterTargets="AssertPublisherOneWireArchitecture"
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web'">
+    <Error Condition="!Exists('$(ReciprocalOneWireTrustUiScript)')" Text="1-Wire reciprocal trust UI guard is missing: $(ReciprocalOneWireTrustUiScript)" />
+    <Exec Command="&quot;$(RepositoryPowerShell)&quot; $(RepositoryPowerShellArguments) -File &quot;$(ReciprocalOneWireTrustUiScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
   </Target>
 
   <Target Name="AssertPublisherRuntimeValueOwnership"
@@ -336,4 +361,16 @@
     <Exec Condition="Exists('$(RazorComponentAttributeExpressionsScript)')" Command="&quot;$(RepositoryPowerShell)&quot; $(RepositoryPowerShellArguments) -File &quot;$(RazorComponentAttributeExpressionsScript)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true" StandardOutputImportance="High" StandardErrorImportance="High" />
   </Target>
 
+
+  <!-- Reusable Razor subform ownership is a required, read-only maintenance gate. -->
+  <PropertyGroup>
+    <RazorFormEncapsulationGuardScript>$(MSBuildThisFileDirectory)build/Assert-RazorFormEncapsulation.ps1</RazorFormEncapsulationGuardScript>
+  </PropertyGroup>
+  <Target Name="AssertPublisherStudioRazorFormEncapsulation" BeforeTargets="BeforeBuild"
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(MSBuildProjectName)' == 'PublisherStudio.Web'">
+    <Error Condition="!Exists('$(RazorFormEncapsulationGuardScript)')" Text="Missing mandatory Razor form encapsulation guard." />
+    <Exec Command="&quot;$(RepositoryPowerShell)&quot; $(RepositoryPowerShellArguments) -File &quot;$(RazorFormEncapsulationGuardScript)&quot;"
+          WorkingDirectory="$(MSBuildThisFileDirectory)" ConsoleToMSBuild="true"
+          StandardOutputImportance="High" StandardErrorImportance="High" />
+  </Target>
 </Project>

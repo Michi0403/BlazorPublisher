@@ -74,7 +74,7 @@
             <h3>Trusted peers</h3>
             @if (_trustedPeers.Count == 0)
             {
-                <p class="organic-empty">No peer is trusted yet. Discovery and explicit link approval can still operate without encrypted payloads.</p>
+                <p class="organic-error" role="alert">No trusted LocalGPT 1-Wire peer is registered in PublisherStudio. Trusting PublisherStudio inside LocalGPT is not reciprocal: use LocalGPT's current public pairing ticket in the form on the left, enter PublisherStudio's local MFA code, and verify that the LocalGPT peer appears here before reconnecting. Never bypass signature verification to fix this.</p>
             }
             else
             {

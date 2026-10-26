@@ -1,0 +1,16 @@
+"use strict";
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const path = require("node:path");
+const root = path.resolve(__dirname, "../..");
+const editor = fs.readFileSync(path.join(root, "src/PublisherStudio.Web/Components/Pages/Editor.razor"), "utf8");
+const service = fs.readFileSync(path.join(root, "src/PublisherStudio.Web/Services/OrganicPlugins/LocalGptConnectionService.cs"), "utf8");
+const targets = fs.readFileSync(path.join(root, "Directory.Build.targets"), "utf8");
+assert.match(editor, /connection.IsConnected && connection.IsLinked && connection.RemoteCapabilities.Count > 0/);
+assert.match(editor, /Notifications.Error\(connection.LastError/);
+assert.match(editor, /Notifications.Information\("LocalGPT capability directory received; available AI functions can now be used\."/);
+assert.doesNotMatch(editor, /Notifications.Success\("LocalGPT link restored\."/);
+assert.match(service, /await security.UnprotectIncomingAsync\(envelope, cancellationToken\)/);
+assert.match(targets, /AssertPublisherOneWireReadyNotifications/);
+assert.match(targets, /Assert-OneWireReadyNotifications\.ps1/);
+console.log("PublisherStudio accepted 1-Wire capability readiness and failure notifications are build-gated");

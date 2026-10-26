@@ -89,6 +89,30 @@
         }
     }
 
+    /// <summary>Shows automation failures using the same notification service as other PublisherStudio UI errors.</summary>
+    /// <param name="context">The failing transport or browser-action stage.</param>
+    /// <param name="message">A bounded, user-safe description of the failure.</param>
+    /// <returns>A task completed after the notification has been published.</returns>
+    [JSInvokable]
+    public Task ReportAutomationFailureAsync(string context, string message)
+    {
+        try
+        {
+            var safeContext = (context ?? "Browser automation").Trim();
+            var safeMessage = (message ?? "Automation failed.").Trim();
+            if (safeContext.Length > 100) safeContext = safeContext[..100];
+            if (safeMessage.Length > 400) safeMessage = safeMessage[..400];
+            Logger.LogWarning("Browser automation error in {Context}: {Message}", safeContext, safeMessage);
+            OperationalNotifications.Error(safeMessage, "PublisherStudio automation", safeContext);
+            return Task.CompletedTask;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Could not show browser automation failure notification.");
+            return Task.CompletedTask;
+        }
+    }
+
     /// <summary>
     /// Releases resources owned by <see cref="JavaScriptDiagnosticsBridge"/> and leaves the java script diagnostics bridge workflow in a safely disposed state.
     /// </summary>

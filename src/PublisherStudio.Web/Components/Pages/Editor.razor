@@ -1042,10 +1042,26 @@
         {
             TaskRunner.Run(nameof(Editor), nameof(LocalGptConnectionChanged), async _ => await InvokeAsync(async () =>
             {
-                if (LocalGptConnection.State.IsLinked && !string.IsNullOrWhiteSpace(LocalGptConnection.State.PeerId))
+                var connection = LocalGptConnection.State;
+                // A HelloAck confirms the frontend link, but not the subsequently received capability directory.
+                // Never advertise a restored AI session until a capability response has been received and accepted.
+                if (connection.IsConnected && connection.IsLinked && connection.RemoteCapabilities.Count > 0 &&
+                    connection.ConnectedUtc is { } connectedUtc)
                 {
-                    try { await JS.InvokeVoidAsync("localStorage.setItem", "publisherstudio.localgpt.lastLinkedPeer", LocalGptConnection.State.PeerId).ConfigureAwait(true); }
-                    catch (JSException exception) { Logger.LogWarning(exception, "Could not remember the linked LocalGPT browser peer."); }
+                    if (_lastNotifiedLocalGptReadyUtc != connectedUtc)
+                    {
+                        _lastNotifiedLocalGptReadyUtc = connectedUtc;
+                        _lastNotifiedLocalGptError = string.Empty;
+                        try { await JS.InvokeVoidAsync("localStorage.setItem", "publisherstudio.localgpt.lastLinkedPeer", connection.PeerId).ConfigureAwait(true); }
+                        catch (JSException exception) { Logger.LogWarning(exception, "Could not remember the linked LocalGPT browser peer."); }
+                        Notifications.Information("LocalGPT capability directory received; available AI functions can now be used.", "LocalGPT connection", nameof(Editor));
+                    }
+                }
+                else if (!connection.IsConnected && !string.IsNullOrWhiteSpace(connection.LastError) &&
+                         !string.Equals(_lastNotifiedLocalGptError, connection.LastError, StringComparison.Ordinal))
+                {
+                    _lastNotifiedLocalGptError = connection.LastError;
+                    Notifications.Error(connection.LastError, "LocalGPT 1-Wire connection failed", nameof(Editor));
                 }
                 StateHasChanged();
             }).ConfigureAwait(true));
@@ -1138,6 +1154,10 @@
     private bool _reconnectPromptVisible;
     private string _reconnectPeerId = string.Empty;
     private bool _reconnectRequested;
+    /// <summary>Tracks the last accepted 1-Wire capability handshake already reported to the user.</summary>
+    private DateTimeOffset? _lastNotifiedLocalGptReadyUtc;
+    /// <summary>Suppresses duplicate transport or cryptographic error notifications within one connection attempt.</summary>
+    private string _lastNotifiedLocalGptError = string.Empty;
     private const string AiTeamPreferenceStorageKey = "publisherstudio.localgpt.preferredCouncilTeam";
     private const string AiModelPreferenceStorageKey = "publisherstudio.localgpt.preferredModelNames";
     private string _globalAiModels = string.Empty;
@@ -1222,10 +1242,14 @@
             try
             {
                 var result = await LocalGptConnection.ConnectAsync(peer.PeerId).ConfigureAwait(true);
-                if (result.IsLinked)
-                    Notifications.Success("LocalGPT link restored.", "LocalGPT reconnect", nameof(Editor));
-                else if (result.IsConnected)
-                    Notifications.Information("Transport connected. If requested, approve the link in LocalGPT Human Collaboration.", "LocalGPT reconnect", nameof(Editor));
+                if (result.IsConnected && !(result.IsLinked && result.RemoteCapabilities.Count > 0))
+                    Notifications.Information("1-Wire transport connected. Waiting for link approval and the LocalGPT capability directory.", "LocalGPT reconnect", nameof(Editor));
+                else if (!result.IsConnected && !string.IsNullOrWhiteSpace(result.LastError) &&
+                         !string.Equals(_lastNotifiedLocalGptError, result.LastError, StringComparison.Ordinal))
+                {
+                    _lastNotifiedLocalGptError = result.LastError;
+                    Notifications.Error(result.LastError, "LocalGPT reconnect", nameof(Editor));
+                }
             }
             finally
             {

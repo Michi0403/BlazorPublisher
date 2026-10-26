@@ -1,0 +1,44 @@
+@namespace PublisherStudio.Components.OrganicPlugins
+@inject ILocalGptConnectionService Connection
+@inject IUserNotificationService Notifications
+@inject ILogger<OrganicCouncilRequestForm> Logger
+
+<div class="razor-component-boundary">
+    <DxFormLayout CssClass="razor-component-layout-owner OrganicCouncilRequestForm">
+        <DxFormLayoutItem ColSpanMd="12">
+            <Template Context="councilLayoutContext">
+                <div class="organic-card" data-testid="organic-advanced-council-form">
+                    <h2>Start a custom AI Council round</h2>
+                    <EditForm Model="@Draft" OnValidSubmit="SubmitAsync" Context="councilEditContext">
+                        <DataAnnotationsValidator />
+                        <DxFormLayout>
+                            <DxFormLayoutItem Caption="Council team">
+                                <DxComboBox TData="string" TValue="string" Data="@TeamKeys" @bind-Value="Draft.TeamKey" Enabled="@CanRunCouncil" />
+                            </DxFormLayoutItem>
+                            <DxFormLayoutItem Caption="User assignment">
+                                <DxMemo Rows="5" @bind-Text="Draft.Prompt" NullText="Use this only when the simple AI Assist request above is not enough." />
+                                <ValidationMessage For="@(() => Draft.Prompt)" />
+                            </DxFormLayoutItem>
+                            <DxFormLayoutItem Caption="External project context (JSON)">
+                                <DxMemo Rows="3" @bind-Text="Draft.ExternalProjectContextJson" />
+                                <ValidationMessage For="@(() => Draft.ExternalProjectContextJson)" />
+                            </DxFormLayoutItem>
+                            <DxFormLayoutItem Caption="Rounds">
+                                <DxSpinEdit @bind-Value="Draft.MaxRounds" Min="1" Max="20" />
+                                <ValidationMessage For="@(() => Draft.MaxRounds)" />
+                            </DxFormLayoutItem>
+                            <DxFormLayoutItem Caption="Parallel models">
+                                <DxSpinEdit @bind-Value="Draft.MaxParallelModels" Min="1" />
+                                <ValidationMessage For="@(() => Draft.MaxParallelModels)" />
+                            </DxFormLayoutItem>
+                            <DxFormLayoutItem>
+                                <ValidationSummary />
+                                <DxButton Text="Submit with user authorization" Enabled="@(!Submitting && CanRunCouncil && !string.IsNullOrWhiteSpace(Draft.Prompt))" SubmitFormOnClick="true" RenderStyle="ButtonRenderStyle.Primary" />
+                            </DxFormLayoutItem>
+                        </DxFormLayout>
+                    </EditForm>
+                </div>
+            </Template>
+        </DxFormLayoutItem>
+    </DxFormLayout>
+</div>

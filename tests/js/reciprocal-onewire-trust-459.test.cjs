@@ -1,0 +1,13 @@
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const read = p => fs.readFileSync(p,'utf8');
+const security = read('src/PublisherStudio.Web/Services/OrganicPlugins/OrganicRuntimeSecurityService.cs');
+const panel = read('src/PublisherStudio.Web/Components/OrganicPlugins/OrganicSecurityPanel.razor');
+const page = read('src/PublisherStudio.Web/Components/Pages/OrganicPlugins.razor');
+const target = read('Directory.Build.targets');
+assert.match(read('src/PublisherStudio.Web/PublisherStudio.Web.csproj'), /<Version>4\.6\.5<\/Version>/);
+assert.ok(security.includes('IsCurrentTrust(candidate, envelope.SourcePeerId)'));
+assert.ok(panel.includes('No trusted LocalGPT 1-Wire peer is registered in PublisherStudio'));
+assert.ok(page.includes('If the last error reports an untrusted or expired peer'));
+assert.ok(target.includes('AssertPublisherReciprocalOneWireTrustUI'));
+console.log('PASS: PublisherStudio reciprocal 1-Wire trust diagnostics, guard and version');

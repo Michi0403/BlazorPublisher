@@ -30,5 +30,5 @@ assert.match(connection, /SaveGlobalAiModelsAsync/);
 assert.match(connection, /preferredCouncilTeam/);
 assert.match(connection, /preferredModelNames/);
 assert.match(bridge, /ModelNames = request.ModelNames/);
-for (const f of ['src/PublisherStudio.Web/PublisherStudio.Web.csproj','src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj']) assert.match(read(f), /<Version>4\.5\.7<\/Version>/);
+for (const f of ['src/PublisherStudio.Web/PublisherStudio.Web.csproj','src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj']) assert.match(read(f), /<Version>4\.6\.5<\/Version>/);
 console.log('PASS: 4.5.3 popup, Story review, team/model selection and authorized 3D routing source contracts');

@@ -522,16 +522,46 @@ public sealed class OrganicRuntimeSecurityService(
     {
             if (!string.IsNullOrWhiteSpace(resolvedPath)) return resolvedPath;
             var portable = Path.Combine(AppContext.BaseDirectory, "security", "onewire-secret.json");
-            if (File.Exists(portable) && CanWriteDirectory(Path.GetDirectoryName(portable)!))
+            var preferred = PublisherApplicationDataPaths.ResolveUserPath(
+                "OrganicPlugins", "Security", "onewire-secret.json");
+            // Stable per-user identity wins if both locations exist. The previous
+            // portable-first selection could resurrect an obsolete identity after a
+            // reinstall, invalidating MFA and reciprocal trust unexpectedly.
+            if (File.Exists(preferred))
             {
-                logger.LogInformation("Preserving the existing portable PublisherStudio 1-Wire secret at {SecretPath}.", portable);
+                if (!CanWriteDirectory(Path.GetDirectoryName(preferred)!))
+                    throw new UnauthorizedAccessException("The existing persistent PublisherStudio 1-Wire identity is not writable; refusing to replace it.");
+                if (File.Exists(portable))
+                    logger.LogWarning("Both persistent and portable PublisherStudio 1-Wire identities exist. Keeping the persistent user identity; the portable file was not modified.");
+                return resolvedPath = preferred;
+            }
+            if (File.Exists(portable))
+            {
+                // Carry an older portable identity into durable per-user storage without
+                // rotating its keys, MFA seed or peer trust. Never overwrite an identity.
+                if (CanWriteDirectory(Path.GetDirectoryName(preferred)!))
+                {
+                    var migrationFile = preferred + ".migration-" + Guid.NewGuid().ToString("N");
+                    try
+                    {
+                        File.Copy(portable, migrationFile, overwrite: false);
+                        TryRestrictSecretPermissions(migrationFile);
+                        if (!File.Exists(preferred))
+                            File.Move(migrationFile, preferred);
+                        TryRestrictSecretPermissions(preferred);
+                        logger.LogInformation("Preserved the existing PublisherStudio 1-Wire identity in durable per-user storage. The portable original was not modified.");
+                        return resolvedPath = preferred;
+                    }
+                    finally
+                    {
+                        if (File.Exists(migrationFile)) File.Delete(migrationFile);
+                    }
+                }
+                if (!CanWriteDirectory(Path.GetDirectoryName(portable)!))
+                    throw new UnauthorizedAccessException("The existing portable PublisherStudio 1-Wire identity is not writable; refusing to replace it.");
+                logger.LogWarning("Persistent user storage is unavailable; preserving the existing portable PublisherStudio 1-Wire identity at {SecretPath}.", portable);
                 return resolvedPath = portable;
             }
-
-            var preferred = PublisherApplicationDataPaths.ResolveUserPath(
-                "OrganicPlugins",
-                "Security",
-                "onewire-secret.json");
             if (CanWriteDirectory(Path.GetDirectoryName(preferred)!))
                 return resolvedPath = preferred;
 

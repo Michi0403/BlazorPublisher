@@ -49,7 +49,8 @@
                 : "LocalGPT discovery is idle until the frontend connection workflow requests it")</span>
         @if (!string.IsNullOrWhiteSpace(Connection.State.LastError) && !Connection.State.IsConnected)
         {
-            <span class="organic-error">@Connection.State.LastError</span>
+            <span class="organic-error" role="alert">@Connection.State.LastError</span>
+            <span class="organic-note">If the last error reports an untrusted or expired peer, open Runtime 1-Wire identity and MFA trust below and verify a current reciprocal LocalGPT trust record. Rotating either identity invalidates previously exchanged tickets; retry the explicit MFA pairing. No automatic trust bypass is performed.</span>
         }
         else if (Connection.State.IsConnected && !Connection.State.IsLinked)
         {
@@ -187,37 +188,11 @@
 
     <details class="organic-advanced-section">
         <summary>Advanced Council request</summary>
-        <DxFormLayout CssClass="razor-section-layout-owner">
-    <DxFormLayoutItem ColSpanMd="12">
-        <Template Context="formItemContext006">
-        <div class="organic-card">
-            <h2>Start a custom AI Council round</h2>
-            <label>
-                Council team
-                <select @bind="_councilRequest.TeamKey" disabled="@(!CanRunCouncil)">
-                    @foreach (var team in CouncilTeams)
-                    {
-                        <option value="@team.Key">@team.Name</option>
-                    }
-                </select>
-            </label>
-            <label>
-                User assignment
-                <textarea rows="5" @bind="_councilRequest.Prompt" @bind:event="oninput" placeholder="Use this only when the simple AI Assist request above is not enough."></textarea>
-            </label>
-            <label>
-                External project context (JSON)
-                <textarea rows="3" @bind="_councilRequest.ExternalProjectContextJson" @bind:event="oninput"></textarea>
-            </label>
-            <div class="organic-inline-fields">
-                <label>Rounds <input type="number" min="1" max="20" @bind="_councilRequest.MaxRounds" /></label>
-                <label>Parallel models <input type="number" min="1" @bind="_councilRequest.MaxParallelModels" /></label>
-            </div>
-            <button type="button" class="organic-primary" disabled="@(!CanRunCouncil || string.IsNullOrWhiteSpace(_councilRequest.Prompt))" @onclick="SendCouncilAsync">Submit with user authorization</button>
-        </div>
-    </Template>
-    </DxFormLayoutItem>
-</DxFormLayout>
+        <OrganicCouncilRequestForm Request="@_councilRequest"
+                                   Teams="@CouncilTeams"
+                                   CanRunCouncil="@CanRunCouncil"
+                                   ConfiguredModelNames="@ConfiguredAiModels"
+                                   OnSubmitted="OnAdvancedCouncilSubmitted" />
     </details>
 
     <details class="organic-advanced-section">
@@ -974,35 +949,15 @@
     /// Performs send council for <see cref="OrganicPlugins"/>, keeping the operation consistent with the state and invariants of the surrounding organic plugins workflow.
     /// </summary>
     /// <returns>A task that completes when the operation has finished.</returns>
-    private async Task SendCouncilAsync()
+    private void OnAdvancedCouncilSubmitted(string teamKey)
     {
         try
         {
-            try
-            {
-                _councilRequest.RequestedOrganicCapabilities = _councilRequest.TeamKey switch
-                {
-                    "openscad-team" => ["publisher.business-context", "publisher.openscad.generate", "publisher.screen.capture", "publisher.screen.capture.result"],
-                    "spreadsheet-team" => ["publisher.business-context", "publisher.spreadsheet.inspect", "publisher.screen.capture", "publisher.screen.capture.result", "publisher.input.execute", "publisher.input.result"],
-                    "learning-round" => ["publisher.business-context"],
-                    _ => ["publisher.business-context"]
-                };
-                _councilRequest.ModelNames = ConfiguredAiModels;
-                var id = await Connection.SendCouncilRequestAsync(_councilRequest).ConfigureAwait(true);
-                Notifications.Success($"Council request {id} was submitted.", "Council round started", nameof(OrganicPlugins));
-                var team = _councilRequest.TeamKey;
-                _councilRequest = NewCouncilRequest(team);
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError(ex, "Could not submit the LocalGPT council request.");
-                Notifications.Error(ex.Message, "Council request failed", nameof(OrganicPlugins));
-            }
-    
+            _councilRequest = NewCouncilRequest(teamKey);
         }
-        catch (Exception __componentMethodException)
+        catch (Exception exception)
         {
-            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicPlugins)}.{nameof(SendCouncilAsync)} failed.");
+            Logger.LogError(exception, "Resetting the advanced Council form after submission failed.");
             throw;
         }
     }

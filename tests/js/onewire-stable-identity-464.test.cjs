@@ -1,0 +1,16 @@
+'use strict';
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const root = path.resolve(__dirname, '../..');
+const source = fs.readFileSync(path.join(root, 'src/PublisherStudio.Web/Services/OrganicPlugins/OrganicRuntimeSecurityService.cs'),'utf8');
+const resolve = source.slice(source.indexOf('private string ResolveSecretPath()'));
+assert.ok(resolve.indexOf('if (File.Exists(preferred))') < resolve.indexOf('if (File.Exists(portable))'), 'Persisted user identity must win over stale portable copies');
+assert.match(resolve, /File.Copy\(portable, migrationFile, overwrite: false\)/);
+assert.match(resolve, /TryRestrictSecretPermissions\(migrationFile\)/);
+assert.match(resolve, /File.Move\(migrationFile, preferred\)/);
+assert.doesNotMatch(resolve.slice(0, resolve.indexOf('private bool CanWriteDirectory')), /File.Delete\(portable\)/);
+const targets=fs.readFileSync(path.join(root,'Directory.Build.targets'),'utf8');
+assert.match(targets,/AssertPublisherOneWireIdentityPersistence/);
+assert.match(targets,/Assert-OneWireIdentityPersistence.ps1/);
+console.log('PublisherStudio stable user identity and non-destructive migration source contracts passed');

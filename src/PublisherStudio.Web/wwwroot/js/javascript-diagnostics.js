@@ -3,6 +3,8 @@
 
     // javascript-diagnostics: guarded-runtime
     let dotNetReference = null;
+    // Preserve a small bounded queue of transport errors until the interactive Blazor circuit attaches.
+    const pendingAutomationErrors = [];
     let reporting = false;
     const pendingReports = new Map();
     const wrappedCallbacks = new WeakMap();
@@ -319,10 +321,28 @@
         try {
             dotNetReference = reference || null;
             flushPendingReports();
+            if (dotNetReference) {
+                for (const pending of pendingAutomationErrors.splice(0))
+                    notifyAutomationError(pending.context, pending.message);
+            }
         } catch (error) {
             report("javascript-diagnostics.bindDotNet", error);
         }
      } catch (__javascriptError) { console.error('JavaScript diagnostics runtime error in js/javascript-diagnostics.js:bindDotNet@117.', __javascriptError); throw __javascriptError; }}
+
+    // Transport and automation errors travel to the established Blazor notifier, not a parallel DOM toast.
+    function notifyAutomationError(context, message) {
+        const source = String(context || 'Browser automation').slice(0, 100);
+        const detail = String(message || 'Automation command failed.').slice(0, 400);
+        if (!dotNetReference) {
+            console.error(`${source}: ${detail}`);
+            if (pendingAutomationErrors.length >= 12) pendingAutomationErrors.shift();
+            pendingAutomationErrors.push({ context: source, message: detail });
+            return;
+        }
+        void dotNetReference.invokeMethodAsync('ReportAutomationFailureAsync', source, detail)
+            .catch(error => console.error('Could not deliver automation error notification.', error));
+    }
 
     function unbindDotNet() { try {
         try {
@@ -361,6 +381,7 @@
         guardClass,
         bindDotNet,
         unbindDotNet,
+        notifyAutomationError,
         captureLifecycleSnapshot,
         markLifecycle
     };

@@ -70,7 +70,9 @@ if (-not (Test-Path -LiteralPath $wslCommonScript -PathType Leaf)) { throw "WSL 
 & (Join-Path $root ([IO.Path]::Combine('build', 'Assert-CrossPlatformBoundaries.ps1'))) -RepositoryRoot $root
 Write-Host "Refreshing reviewed PublisherStudio frontend SHA-256 inventory before the ordered CLI build..." -ForegroundColor DarkCyan
 & (Join-Path $root 'build/Update-JavaScriptDiagnosticsManifest.ps1')
+& (Join-Path $root 'build/Assert-ReciprocalOneWireTrustUI.ps1')
 & (Join-Path $root 'build/Assert-JavaScriptDiagnostics.ps1')
+& (Join-Path $root 'build/Assert-RazorFormEncapsulation.ps1')
 & (Join-Path $root 'build/Assert-InteractiveServerRenderModes.ps1')
 & (Join-Path $root 'build/Assert-PanelStudioAuthoringGeometry.ps1')
 & (Join-Path $root 'build/Assert-PanelStudioInteractionLifecycle.ps1')

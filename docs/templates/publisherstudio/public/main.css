@@ -3367,6 +3367,37 @@ html.publisherstudio-kawaii-docs:not([data-bs-theme="dark"]) .publisherstudio-cu
 html.publisherstudio-kawaii-docs:not([data-bs-theme="dark"]) .publisherstudio-cursor-paw .publisherstudio-paw-fur-detail {
   opacity: .82;
 }
-@media (prefers-reduced-motion: reduce), (pointer: coarse) {
-  html.publisherstudio-kawaii-docs .publisherstudio-tear-overlay { display: none !important; }
+/* Touch scratching is opt-in: scrolling and document selection work normally
+   until the reader explicitly activates the temporary paper-damage mode. */
+html.publisherstudio-kawaii-docs .publisherstudio-touch-scratch-toggle { display: none; }
+@media (any-pointer: coarse) {
+  html.publisherstudio-kawaii-docs .publisherstudio-touch-scratch-toggle {
+    display: block;
+    position: fixed;
+    bottom: max(1rem, env(safe-area-inset-bottom));
+    right: max(1rem, env(safe-area-inset-right));
+    z-index: 2147483645;
+    padding: .65rem .9rem;
+    border: 1px solid rgba(160,124,195,.72);
+    border-radius: 999px;
+    background: #362342;
+    color: #fff;
+    font: 600 .95rem/1.25 system-ui, sans-serif;
+    box-shadow: 0 .2rem .8rem rgba(22,10,32,.3);
+    cursor: pointer;
+  }
+  html.publisherstudio-kawaii-docs .publisherstudio-touch-scratch-toggle[aria-pressed="true"] {
+    background: #7742aa;
+    box-shadow: 0 0 .75rem rgba(191,141,245,.62);
+  }
+  html.publisherstudio-kawaii-docs.publisherstudio-touch-scratch-active main.container-xxl > .content {
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  html.publisherstudio-kawaii-docs .publisherstudio-touch-paw { display: block !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html.publisherstudio-kawaii-docs .publisherstudio-tear-overlay,
+  html.publisherstudio-kawaii-docs .publisherstudio-touch-scratch-toggle { display: none !important; }
 }

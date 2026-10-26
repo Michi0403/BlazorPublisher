@@ -7,7 +7,49 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
 };
 (() => { try {
     const storageKey = 'publisherstudio.automation.enabled';
-    const state = { running: false, timer: 0 };
+    const state = { running: false, timer: 0, dragging: false, pointer: null, lastWarning: '', lastWarningTime: 0 };
+
+    function showAutomationError(context, error) {
+        const message = String(error?.message || error || 'Automation failed.');
+        const fingerprint = `${context}:${message}`;
+        const now = Date.now();
+        if (state.lastWarning === fingerprint && now - state.lastWarningTime < 20000) return;
+        state.lastWarning = fingerprint;
+        state.lastWarningTime = now;
+        publisherStudioDiagnostics.report(`Browser automation ${context}`, error);
+        globalThis.publisherStudioJavaScriptDiagnostics?.notifyAutomationError?.(context, message);
+    }
+
+    function moveVisiblePointer(options, active) {
+        if (!state.pointer) {
+            state.pointer = document.createElement('div');
+            state.pointer.setAttribute('data-publisher-automation-pointer', 'true');
+            state.pointer.setAttribute('aria-hidden', 'true');
+            Object.assign(state.pointer.style, {
+                position: 'fixed', zIndex: '2147483645', pointerEvents: 'none',
+                width: '17px', height: '17px', borderRadius: '50%',
+                border: '2px solid #75d6ff', background: 'rgba(110,79,218,.18)',
+                boxShadow: '0 0 0 5px rgba(117,214,255,.24), 0 0 9px rgba(110,79,218,.45)',
+                transition: 'left 120ms linear, top 120ms linear',
+                transform: 'translate(-50%,-50%)'
+            });
+            document.body.appendChild(state.pointer);
+        }
+        state.pointer.style.left = `${options.clientX}px`;
+        state.pointer.style.top = `${options.clientY}px`;
+        state.pointer.style.borderColor = active ? '#ff76ce' : '#75d6ff';
+    }
+
+    function dispatchPointerAndMouse(target, name, options) {
+        target.dispatchEvent(new PointerEvent(`pointer${name}`, {
+            ...options, pointerId: 1, pointerType: 'mouse', isPrimary: true,
+            buttons: name === 'up' ? 0 : name === 'down' || state.dragging ? 1 : 0
+        }));
+        target.dispatchEvent(new MouseEvent(`mouse${name}`, {
+            ...options, buttons: name === 'up' ? 0 : name === 'down' || state.dragging ? 1 : 0
+        }));
+    }
+
 
     function resolveTarget(selector, x, y) { try {
         if (selector) {
@@ -28,7 +70,7 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
         return {
             bubbles: true, cancelable: true, composed: true,
             clientX: x, clientY: y, screenX: x, screenY: y,
-            button: Number(command.button) || 0, buttons: 1,
+            button: Number(command.button) || 0, buttons: state.dragging ? 1 : 0,
             ctrlKey: !!command.ctrlKey, shiftKey: !!command.shiftKey,
             altKey: !!command.altKey, metaKey: !!command.metaKey,
             key: String(command.key || ''), code: String(command.code || ''),
@@ -145,9 +187,15 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
         if (kind === 'click') target.dispatchEvent(new MouseEvent('click', options));
         else if (kind === 'doubleclick') target.dispatchEvent(new MouseEvent('dblclick', { ...options, detail: 2 }));
         else if (kind === 'contextmenu') target.dispatchEvent(new MouseEvent('contextmenu', { ...options, button: 2 }));
-        else if (kind === 'mousemove') target.dispatchEvent(new PointerEvent('pointermove', options));
-        else if (kind === 'mousedown') target.dispatchEvent(new PointerEvent('pointerdown', options));
-        else if (kind === 'mouseup') target.dispatchEvent(new PointerEvent('pointerup', options));
+        else if (kind === 'mousemove') dispatchPointerAndMouse(target, 'move', options);
+        else if (kind === 'mousedown') {
+            state.dragging = true;
+            dispatchPointerAndMouse(target, 'down', options);
+        }
+        else if (kind === 'mouseup') {
+            dispatchPointerAndMouse(target, 'up', options);
+            state.dragging = false;
+        }
         else if (kind === 'wheel') target.dispatchEvent(new WheelEvent('wheel', options));
         else if (kind === 'focus') target.focus?.({ preventScroll: false });
         else if (kind === 'blur') target.blur?.();
@@ -161,7 +209,11 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
         else if (kind === 'keyup') target.dispatchEvent(new KeyboardEvent('keyup', options));
         else if (kind === 'keypress') target.dispatchEvent(new KeyboardEvent('keypress', options));
         else throw new Error(`Unsupported browser automation command: ${command.kind}`);
-        target.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
+        if (['click', 'doubleclick', 'mousemove', 'mousedown', 'mouseup'].includes(kind))
+            moveVisiblePointer(options, state.dragging);
+        // A positioned canvas must never be scrolled after each drawing stroke.
+        if (!['mousemove', 'mousedown', 'mouseup'].includes(kind))
+            target.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
         return `${command.kind} executed on ${target.tagName.toLowerCase()}${target.id ? '#' + target.id : ''}`;
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/automationInterop.js:execute@43', __javascriptError); throw __javascriptError; }}
 
@@ -186,44 +238,58 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/automationInterop.js:capture@71', __javascriptError); throw __javascriptError; }}
 
     async function completeInput(id, result, error = '') { try {
-        await fetch(`/api/automation/input/${encodeURIComponent(id)}/complete`, {
+        const response = await fetch(`/api/automation/input/${encodeURIComponent(id)}/complete`, {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ result, error })
         });
+        if (!response.ok) throw new Error(`Automation input completion failed (HTTP ${response.status}).`);
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/automationInterop.js:completeInput@85', __javascriptError); throw __javascriptError; }}
 
     async function completeScreenshot(id, completion) { try {
-        await fetch(`/api/automation/screenshots/${encodeURIComponent(id)}/complete`, {
+        const response = await fetch(`/api/automation/screenshots/${encodeURIComponent(id)}/complete`, {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(completion)
         });
+        if (!response.ok) throw new Error(`Automation screenshot completion failed (HTTP ${response.status}).`);
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/automationInterop.js:completeScreenshot@92', __javascriptError); throw __javascriptError; }}
 
     async function poll() { try {
-        if (!state.running || document.visibilityState === 'prerender') return;
+        if (!state.running) return;
+        if (document.visibilityState === 'prerender') {
+            state.timer = window.setTimeout(poll, 2000);
+            return;
+        }
         try {
             const runtimeResponse = await fetch('/api/automation/runtime/status', { cache: 'no-store' });
-            const runtime = runtimeResponse.ok ? await runtimeResponse.json() : { linked: false };
+            if (!runtimeResponse.ok) throw new Error(`Automation runtime status failed (HTTP ${runtimeResponse.status}).`);
+            const runtime = await runtimeResponse.json();
             if (!runtime.linked) {
+                showAutomationError('connection', new Error('LocalGPT connection is not trusted or linked. Automation was paused; review both peer trust settings.'));
                 window.publisherAutomation.disableForSession();
                 return;
             }
             const inputResponse = await fetch('/api/automation/input/pending?maximum=20', { cache: 'no-store' });
-            if (inputResponse.ok) {
-                for (const command of await inputResponse.json()) {
-                    try { await completeInput(command.id, await execute(command)); }
-                    catch (error) { await completeInput(command.id, '', error?.message || String(error)); }
+            if (!inputResponse.ok) throw new Error(`Automation input polling failed (HTTP ${inputResponse.status}).`);
+            for (const command of await inputResponse.json()) {
+                try { await completeInput(command.id, await execute(command)); }
+                catch (error) {
+                    showAutomationError(`command ${command.kind || 'unknown'}`, error);
+                    try { await completeInput(command.id, '', error?.message || String(error)); }
+                    catch (completionError) { showAutomationError('input completion', completionError); }
                 }
             }
             const screenshotResponse = await fetch('/api/automation/screenshots/pending?maximum=3', { cache: 'no-store' });
-            if (screenshotResponse.ok) {
-                for (const request of await screenshotResponse.json()) {
-                    try { await completeScreenshot(request.id, await capture(request)); }
-                    catch (error) { await completeScreenshot(request.id, { dataUrl: '', pixelWidth: 0, pixelHeight: 0, error: error?.message || String(error) }); }
+            if (!screenshotResponse.ok) throw new Error(`Automation screenshot polling failed (HTTP ${screenshotResponse.status}).`);
+            for (const request of await screenshotResponse.json()) {
+                try { await completeScreenshot(request.id, await capture(request)); }
+                catch (error) {
+                    showAutomationError('screenshot', error);
+                    try { await completeScreenshot(request.id, { dataUrl: '', pixelWidth: 0, pixelHeight: 0, error: error?.message || String(error) }); }
+                    catch (completionError) { showAutomationError('screenshot completion', completionError); }
                 }
             }
         } catch (error) {
-            console.debug('PublisherStudio automation polling paused.', error);
+            showAutomationError('transport', error);
         } finally {
             if (state.running) state.timer = window.setTimeout(poll, 2000);
         }
@@ -236,7 +302,13 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
             void poll();
             return true;
          } catch (__javascriptError) { publisherStudioDiagnostics.report('js/automationInterop.js:start@130', __javascriptError); throw __javascriptError; }},
-        stop() { try { state.running = false; clearTimeout(state.timer);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/automationInterop.js:stop@136', __javascriptError); throw __javascriptError; }},
+        stop() { try {
+            state.running = false;
+            state.dragging = false;
+            state.pointer?.remove();
+            state.pointer = null;
+            clearTimeout(state.timer);
+        } catch (__javascriptError) { publisherStudioDiagnostics.report('js/automationInterop.js:stop@136', __javascriptError); throw __javascriptError; }},
         enableForSession() { try {
             sessionStorage.setItem(storageKey, 'true');
             return this.start();

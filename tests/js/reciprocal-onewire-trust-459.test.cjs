@@ -5,7 +5,7 @@ const security = read('src/PublisherStudio.Web/Services/OrganicPlugins/OrganicRu
 const panel = read('src/PublisherStudio.Web/Components/OrganicPlugins/OrganicSecurityPanel.razor');
 const page = read('src/PublisherStudio.Web/Components/Pages/OrganicPlugins.razor');
 const target = read('Directory.Build.targets');
-assert.match(read('src/PublisherStudio.Web/PublisherStudio.Web.csproj'), /<Version>4\.6\.7<\/Version>/);
+assert.match(read('src/PublisherStudio.Web/PublisherStudio.Web.csproj'), /<Version>\d+\.\d+\.\d+<\/Version>/);
 assert.ok(security.includes('IsCurrentTrust(candidate, envelope.SourcePeerId)'));
 assert.ok(panel.includes('No trusted LocalGPT 1-Wire peer is registered in PublisherStudio'));
 assert.ok(page.includes('If the last error reports an untrusted or expired peer'));

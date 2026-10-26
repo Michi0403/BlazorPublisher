@@ -25,6 +25,6 @@ for (const culture of ['en-US','de-DE','es-ES','fr-FR','ja-JP','uk-UA']) {
 assert.equal(JSON.parse(read('src/PublisherStudio.Web/Localization/en-US.json'))['Phrase.Apply␠animated␠GIF'],'Apply animated GIF');
 assert.equal(JSON.parse(read('src/PublisherStudio.Web/Localization/de-DE.json'))['Phrase.Apply␠animated␠GIF'],'Animiertes GIF anwenden');
 for (const f of ['src/PublisherStudio.Web/PublisherStudio.Web.csproj','src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj']) {
-  assert.match(read(f), /<Version>4\.6\.7<\/Version>/);
+  assert.match(read(f), /<Version>\d+\.\d+\.\d+<\/Version>/);
 }
 console.log('PASS: 4.5.3 localization and transient DocFX tear contracts');

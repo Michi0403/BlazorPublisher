@@ -10,6 +10,7 @@
 @inject ILogger<StoryEditor> Logger
 @inject ISupervisedTaskRunner TaskRunner
 @inject PublicationFileService Files
+@inject IPublicationMarkupService StoryMarkup
 
 @if (Visible && TextFrame is not null)
 {
@@ -30,7 +31,7 @@
         <div id="story-editor-shell" class="@StoryEditorDialogCssClass" aria-label="Edit text story">
             <header>
                 <div><strong>Edit story</strong><span>@TextFrame.Name</span></div>
-                <button class="window-close" @onclick="Cancel" aria-label="Close">×</button>
+                <DxButton Text="×" CssClass="window-close" Click="Cancel" />
             </header>
 
             <DxRibbon CssClass="story-editor-ribbon categorized-ribbon" SizeMode="SizeMode.Small" AdaptivityAutoCollapseItemsToGroups="true">
@@ -104,7 +105,7 @@
                             <strong>LocalGPT AI text generation</strong>
                             <span>Paired with @LocalGptConnection.State.DisplayName. The Council returns a reviewable proposal; only you can insert it.</span>
                         </div>
-                        <button class="window-close" @onclick="CloseAiStoryPanel" aria-label="Close LocalGPT AI story assistance">×</button>
+                        <DxButton Text="×" CssClass="window-close" Click="CloseAiStoryPanel" />
                     </header>
                     @if (!CanUseAiCouncil)
                     {
@@ -122,13 +123,13 @@
                         <label class="story-ai-prompt">What should the story contain?
                             <textarea rows="4" @bind="_aiStoryPrompt" @bind:event="oninput" @onkeydown="HandleAiPromptKeyDown" placeholder="Describe the topic, audience, tone, facts and desired length. Press Ctrl+Enter to send."></textarea>
                         </label>
-                        <button type="button" disabled="@(!CanSendAiStoryRequest)" @onclick="RequestAiStoryAsync">Generate proposal</button>
+                        <DxButton Text="Generate proposal" Enabled="@CanSendAiStoryRequest" RenderStyle="ButtonRenderStyle.Primary" Click="RequestAiStoryAsync" />
                     </div>
                     @if (!string.IsNullOrWhiteSpace(_aiRequestStatus)) { <p class="story-ai-request-status" role="status">@_aiRequestStatus</p> }
                     <div class="story-ai-proposals" aria-live="polite">
                         <div class="story-ai-proposal-heading">
                             <strong>Reviewable proposals</strong>
-                            <button type="button" @onclick="RefreshAiProposals">Refresh</button>
+                            <DxButton Text="Refresh" RenderStyle="ButtonRenderStyle.Secondary" Click="RefreshAiProposals" />
                         </div>
                         @if (MatchingAiProposals.Count == 0)
                         {
@@ -142,12 +143,12 @@
                                     <header><strong>@proposal.Reason</strong><time>@proposal.CreatedUtc.LocalDateTime.ToString("g")</time></header>
                                     <textarea rows="6" readonly>@proposal.Text</textarea>
                                     <div>
-                                        <button type="button" @onclick="() => InsertAiProposalAsync(proposal)">Insert at caret</button>
+                                        <DxButton Text="Insert at caret" RenderStyle="ButtonRenderStyle.Primary" Click="@(() => InsertAiProposalAsync(proposal))" />
                                         @if (HasSelectedStoryText)
                                         {
-                                            <button type="button" @onclick="() => ReplaceSelectionWithAiProposalAsync(proposal)">Replace selection</button>
+                                            <DxButton Text="Replace selection" Click="@(() => ReplaceSelectionWithAiProposalAsync(proposal))" />
                                         }
-                                        <button type="button" @onclick="() => DismissAiProposal(proposal.Id)">Dismiss</button>
+                                        <DxButton Text="Dismiss" RenderStyle="ButtonRenderStyle.Secondary" Click="@(() => DismissAiProposal(proposal.Id))" />
                                     </div>
                                 </article>
                             }
@@ -167,7 +168,7 @@
                     <header>
                         <strong>Code workspace</strong>
                         <span>Language profiles, formatting, comments and token analysis are also available through <code>/api/code</code>.</span>
-                        <button class="window-close" @onclick="CloseCodeWorkspace" aria-label="Close code workspace">×</button>
+                        <DxButton Text="×" CssClass="window-close" Click="CloseCodeWorkspace" />
                     </header>
                     <div class="story-code-toolbar">
                         <label>Language
@@ -181,9 +182,9 @@
                         <label>Indent
                             <input type="number" min="1" max="8" @bind="_codeIndentSize" />
                         </label>
-                        <button type="button" @onclick="FormatCodeWorkspace">Format</button>
-                        <button type="button" @onclick="ToggleCodeComments">Toggle comments</button>
-                        <button type="button" @onclick="InsertCodeAtCaret">Insert at caret</button>
+                        <DxButton Text="Format" RenderStyle="ButtonRenderStyle.Secondary" Click="FormatCodeWorkspace" />
+                        <DxButton Text="Toggle comments" RenderStyle="ButtonRenderStyle.Secondary" Click="ToggleCodeComments" />
+                        <DxButton Text="Insert at caret" RenderStyle="ButtonRenderStyle.Primary" Click="InsertCodeAtCaret" />
                     </div>
                     <div class="story-code-grid">
                         <textarea rows="10" spellcheck="false" @bind="_codeWorkspaceText" @bind:event="oninput" aria-label="Code source"></textarea>
@@ -1224,12 +1225,12 @@
                     TeamKey = _aiTeamKey,
                     ModelNames = DefaultAiModels.ToList(),
                     MaxRounds = 1,
-                    MaxOutputTokens = 262144,
+                    MaxOutputTokens = 8192,
                     MaxContextTokens = 262144,
                     MaxParallelModels = 1,
                     IncludeMemory = true,
                     SaveToMemory = true,
-                    RequestedOrganicCapabilities = ["publisher.business-context", "publisher.text.insert.propose"],
+                    RequestedOrganicCapabilities = ["publisher.business-context", "publisher.documentation.profile", "publisher.text.insert.propose"],
                     ExternalProjectContextJson = System.Text.Json.JsonSerializer.Serialize(new
                     {
                         Source = "PublisherStudio StoryEditor",
@@ -1250,9 +1251,11 @@
     Current story: {TextFrame.Name}
 
     Required result contract:
+    0. First request the advertised read-only publisher.documentation.profile through the authorized 1-Wire capability to learn PublisherStudio RichEdit formatting. If unavailable, use PublisherStudio's supplied formatting contract below; do not invent a successful function call.
     1. Produce polished story text matching the user's topic, audience, tone and requested facts.
     2. Before completing, invoke publisher.text.proposal.request with JSON parameters containing target exactly '{target}', the final text, and a concise reason.
     3. Never mutate the publication automatically. The user reviews and explicitly inserts the proposal in PublisherStudio.
+    4. {StoryMarkup.RichEditAiFormattingContract}
     """;
                 _aiAutomaticTarget = target;
                 var correlationId = await LocalGptConnection.SendCouncilRequestAsync(request).ConfigureAwait(true);
@@ -1351,7 +1354,7 @@
             if (_selection is null) return;
             try
             {
-                await _selection.ActiveSubDocument.AddTextAsync(_selection.CaretPosition, proposal.Text).ConfigureAwait(true);
+                await _selection.ActiveSubDocument.AddHtmlAsync(_selection.CaretPosition, StoryMarkup.FormatAiStoryForRichEdit(proposal.Text)).ConfigureAwait(true);
                 OrganicResults.RemoveTextProposal(proposal.Id);
                 RefreshAiProposals();
                 Logger.LogInformation("User inserted AI Council proposal {ProposalId} into story {StoryId}.", proposal.Id, TextFrame?.Id);
@@ -1384,10 +1387,11 @@
             if (!HasSelectedStoryText) return;
             try
             {
+                var formattedHtml = StoryMarkup.FormatAiStoryForRichEdit(proposal.Text);
                 var interval = _selection.Intervals[0];
                 var start = interval.Start;
                 await _selection.ActiveSubDocument.RemoveAsync(interval).ConfigureAwait(true);
-                await _selection.ActiveSubDocument.AddTextAsync(start, proposal.Text).ConfigureAwait(true);
+                await _selection.ActiveSubDocument.AddHtmlAsync(start, formattedHtml).ConfigureAwait(true);
                 OrganicResults.RemoveTextProposal(proposal.Id);
                 RefreshAiProposals();
                 Logger.LogInformation("User replaced the selected story text with AI Council proposal {ProposalId} in story {StoryId}.", proposal.Id, TextFrame?.Id);

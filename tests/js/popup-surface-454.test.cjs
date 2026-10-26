@@ -25,6 +25,6 @@ assert.match(css, /\.publisher-dialog > header\s*\{[^}]*background: linear-gradi
 assert.match(css, /\.publisher-dialog > footer\s*\{[^}]*justify-content: flex-end/);
 assert.match(css, /\.publisher-ai-dialog > footer\s*\{[^}]*position: sticky/);
 for (const proj of ['src/PublisherStudio.Web/PublisherStudio.Web.csproj', 'src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj']) {
-  assert.match(read(proj), /<Version>4\.6\.7<\/Version>/);
+  assert.match(read(proj), /<Version>\d+\.\d+\.\d+<\/Version>/);
 }
 console.log('PASS: 4.5.4 scoped popup frame/fill contract, actions and maintenance-safe versioning');

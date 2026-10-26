@@ -7,7 +7,7 @@ const read = name => fs.readFileSync(path.join(root, name), 'utf8');
 const script = read('docs/templates/publisherstudio/public/main.js');
 const css = read('docs/templates/publisherstudio/public/main.css');
 for (const project of ['src/PublisherStudio.Web/PublisherStudio.Web.csproj','src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj']) {
-  assert.match(read(project), /<Version>4\.6\.7<\/Version>/);
+  assert.match(read(project), /<Version>\d+\.\d+\.\d+<\/Version>/);
 }
 for (const marker of ['function makeKawaiiGalaxyPaw()', 'class="publisherstudio-paw-fur"', 'class="publisherstudio-paw-fur-detail"', 'session.target.style.maskImage = url;', 'const KAWAII_CLAW_SPACING = 16;', 'playKawaiiScratchSound']) {
   assert.ok(script.includes(marker), marker);

@@ -1502,7 +1502,7 @@
             {
                 var instructions = kind == "blob3d"
                     ? "The user requests an actual 3D object, not a generic model recommendation. Check advertised PublisherStudio 3D/OpenSCAD capabilities and request publisher.openscad.generate through the human-approval workflow where available. Never claim a file or geometry was generated without a verified receipt. If unavailable, explain what is missing; a default animated blob is NOT a model of the requested subject. Return any draft OpenSCAD as a reviewable proposal, never silently execute it."
-                    : "Use existing PublisherStudio 1-Wire Picture, Video, Audio or Panel capabilities. Require validated output and an authorized receipt before claiming media was created. Otherwise return a reviewable plan or source proposal. Never bypass human approval for document changes, generated code execution or file writes.";
+                    : "A text-only Council model cannot generate image/video bytes. First verify the actual LocalGPT specialized-model inventory and registered generation DXFunctions, then invoke localai.image.generate only for an installed, ready image model with its verified modelInstallationId and normal approval gate. Other media require a corresponding real model or native PublisherStudio operation. Never substitute prose for a generated media artifact. Show a verifiable artifact receipt or explicitly report that no media was produced. Never silently mutate the publication or install models.";
                 var response = await AiBridge.ChatAsync(new PublisherStudio.Services.OrganicPlugins.PublisherAiChatRequest
                 {
                     TeamKey = _mediaAiTeamKey,

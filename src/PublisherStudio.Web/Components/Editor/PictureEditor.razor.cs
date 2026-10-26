@@ -2406,6 +2406,8 @@ public partial class PictureEditor
                         throw new InvalidOperationException(string.IsNullOrWhiteSpace(response.Error) ? "LocalGPT rejected the OCR request." : response.Error);
                     if (response.MessageType != OrganicWireMessageType.WorkResult) continue;
                     var resultJson = ReadWireString(response, "ResultJson");
+                    if (string.IsNullOrWhiteSpace(resultJson))
+                        throw new InvalidOperationException("LocalGPT returned no OCR data. Check whether the selected OCR model is installed on a reachable configured Ollama host, and review the 1-Wire work-item error in LocalGPT.");
                     var result = JsonSerializer.Deserialize<PictureOcrResult>(resultJson, new JsonSerializerOptions(JsonSerializerDefaults.Web))
                         ?? throw new JsonException("The LocalGPT OCR result was empty.");
                     if (string.IsNullOrWhiteSpace(result.Text)) throw new InvalidOperationException("LocalGPT returned no recognized text.");

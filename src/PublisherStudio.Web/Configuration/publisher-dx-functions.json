@@ -788,7 +788,7 @@
     {
       "key": "publisher.documentation.profile",
       "displayName": "PublisherStudio documentation profile",
-      "description": "Returns the active same-origin HTML, PDF and API documentation routes and availability state without opening a browser or exposing filesystem paths.",
+      "description": "Returns same-origin documentation plus the live DevExpress RichEdit story-formatting profile and supported safe proposal contract over authenticated 1-Wire.",
       "controller": "Documentation",
       "method": "GET",
       "route": "/api/documentation/profile",
@@ -816,7 +816,7 @@
       "requiresAutomatedInteractionOnTargetSystem": false,
       "interactionValueSchemaJson": "{\"type\":\"object\",\"properties\":{}}",
       "inputContract": "No parameters. The result is limited to public same-origin documentation routes and availability metadata.",
-      "outputContract": "A JSON documentation profile containing version, HTML/API/PDF routes and availability flags.",
+      "outputContract": "Documentation status/routes plus StoryEditor editor engine, supported proposal markup subset and formatting contract. No sensitive paths or unreviewed document mutation.",
       "securityContract": "Read-only and does not expose physical paths, private files or browser state.",
       "organicUseCase": "Documentation discovery for LocalGPT, linked organic clients and the PublisherStudio help frontend.",
       "suggestedCouncilRoles": [

@@ -766,6 +766,13 @@
     {
         try
         {
+            // This ribbon command doubles as the connection entry until a trusted link is active.
+            // Do not route disconnected users into a silently rejected AI-editor callback.
+            if (!LocalGptConnection.State.IsConnected || !LocalGptConnection.State.IsLinked)
+            {
+                OpenOrganicPlugins();
+                return;
+            }
             var mode = State.SelectedElement is SpreadsheetElement ? "spreadsheet"
                 : State.SelectedElement is TextFrameElement ? "writing"
                 : State.SelectedElement is null ? "writing" : "auto";

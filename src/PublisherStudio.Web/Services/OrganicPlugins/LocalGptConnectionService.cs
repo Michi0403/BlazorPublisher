@@ -2,6 +2,7 @@ using PublisherStudio.BusinessObjects;
 using PublisherStudio.Services;
 using System.Collections.Concurrent;
 using System.Net;
+using System.Net.Http.Json;
 using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
@@ -27,6 +28,7 @@ namespace PublisherStudio.Services.OrganicPlugins;
 /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class LocalGptConnectionService(
     ILocalGptDiscoveryRegistry discovery,
+    IHttpClientFactory httpClients,
     IOrganicPluginProtocolCodec codec,
     IOrganicRuntimeSecurityService security,
     IOrganicCapabilityCatalog capabilities,
@@ -112,6 +114,73 @@ public sealed class LocalGptConnectionService(
     /// </summary>
     /// <value>The state value exposed by <see cref="LocalGptConnectionService"/>.</value>
     public OrganicConnectionState State { get; } = new();
+
+    /// <summary>
+    /// Resolve a user-selected LocalGPT HTTP/HTTPS profile without relying on UDP discovery.
+    /// HTTPS certificates must pass the operating system trust check. The profile does not establish
+    /// MFA trust: the established 1-Wire transport still performs its normal reciprocal handshake.
+    /// </summary>
+    public async Task<OrganicConnectionState> ConnectByWebUrlAsync(string applicationBaseUrl, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            if (!Uri.TryCreate(applicationBaseUrl?.Trim(), UriKind.Absolute, out var baseUri)
+                || (baseUri.Scheme != Uri.UriSchemeHttp && baseUri.Scheme != Uri.UriSchemeHttps)
+                || !string.IsNullOrEmpty(baseUri.UserInfo)
+                || !string.IsNullOrEmpty(baseUri.Query)
+                || !string.IsNullOrEmpty(baseUri.Fragment)
+                || (baseUri.AbsolutePath != "/" && !string.IsNullOrEmpty(baseUri.AbsolutePath)))
+                throw new ArgumentException("Enter a LocalGPT application origin such as http://host:port or https://host:port, without credentials or paths.", nameof(applicationBaseUrl));
+
+            using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            timeout.CancelAfter(TimeSpan.FromSeconds(10));
+            using var client = httpClients.CreateClient();
+            var profileUrl = new Uri(baseUri, "/api/onewire/http-json/profile");
+            using var response = await client.GetAsync(profileUrl, HttpCompletionOption.ResponseHeadersRead, timeout.Token).ConfigureAwait(false);
+            response.EnsureSuccessStatusCode();
+            if (response.RequestMessage?.RequestUri is { } effectiveUri &&
+                (!string.Equals(effectiveUri.Host, baseUri.Host, StringComparison.OrdinalIgnoreCase) ||
+                 !string.Equals(effectiveUri.Scheme, baseUri.Scheme, StringComparison.OrdinalIgnoreCase) ||
+                 effectiveUri.Port != baseUri.Port))
+                throw new InvalidDataException("The profile request was redirected to a different application origin. Enter the redirected HTTPS/HTTP origin explicitly.");
+            var profile = await response.Content.ReadFromJsonAsync<LocalGptWebConnectionProfile>(codec.JsonOptions, timeout.Token).ConfigureAwait(false)
+                ?? throw new InvalidDataException("LocalGPT returned an empty 1-Wire profile.");
+            var advertisement = profile.Peer ?? throw new InvalidDataException("LocalGPT did not advertise its 1-Wire identity.");
+            if (!string.Equals(advertisement.Application, "LocalGPT", StringComparison.OrdinalIgnoreCase)
+                || string.IsNullOrWhiteSpace(advertisement.PeerId))
+                throw new InvalidDataException("The supplied application URL did not return a LocalGPT peer identity.");
+            var tcpPort = advertisement.ServicePort > 0 ? advertisement.ServicePort : profile.Settings?.ServicePort ?? 0;
+            if (tcpPort is < 1 or > 65535)
+                throw new InvalidDataException("LocalGPT did not advertise a usable 1-Wire TCP service port. Enable the 1-Wire transport in LocalGPT.");
+
+            // Always connect to the origin the user explicitly selected, never to an arbitrary address
+            // embedded inside a response. Both HTTP and HTTPS can resolve the same trusted peer.
+            advertisement.Address = baseUri.Host;
+            advertisement.HostName = baseUri.Host;
+            advertisement.ServicePort = tcpPort;
+            advertisement.WebBaseUrl = baseUri.GetLeftPart(UriPartial.Authority);
+            advertisement.SeenUtc = DateTimeOffset.UtcNow;
+            discovery.Upsert(advertisement);
+            logger.LogInformation("Resolved LocalGPT identity {PeerId} via {Scheme} application endpoint. Opening the normal authenticated 1-Wire transport.", advertisement.PeerId, baseUri.Scheme);
+            return await ConnectAsync(advertisement.PeerId, cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception exception)
+        {
+            logger.LogWarning(exception, "Resolving the selected LocalGPT application origin or opening its authenticated 1-Wire transport failed.");
+            throw;
+        }
+    }
+
+    public sealed class LocalGptWebConnectionProfile
+    {
+        public OrganicPeerAdvertisement? Peer { get; set; }
+        public LocalGptWebConnectionSettings? Settings { get; set; }
+    }
+
+    public sealed class LocalGptWebConnectionSettings
+    {
+        public int ServicePort { get; set; }
+    }
 
     /// <summary>
     /// Performs connect as part of the LocalGPT connection service workflow, applying the service's runtime policy, state management, and diagnostics as required.

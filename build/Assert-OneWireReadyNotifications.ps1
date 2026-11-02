@@ -15,4 +15,21 @@ if ($editor -match 'Notifications.Success\("LocalGPT link restored\."') {
 if ($link -notmatch 'await security.UnprotectIncomingAsync\(envelope, cancellationToken\)') {
     throw 'ONWIRE-READY004: cryptographic receive verification must remain fail-closed.'
 }
-Write-Host 'ONWIRE-READY: accepted capabilities, accurate user notifications, and fail-closed decryption retained.'
+$organicPage = Get-Content -LiteralPath (Join-Path $root 'src/PublisherStudio.Web/Components/Pages/OrganicPlugins.razor') -Raw
+$editorText = Get-Content -LiteralPath (Join-Path $root 'src/PublisherStudio.Web/Services/PublicationEditorTextService.cs') -Raw
+if (-not $organicPage.Contains('CheckedChanged="@((bool enabled) => SaveAutoConnectPreferenceAsync(enabled))"')) {
+    throw 'ONWIRE-READY005: OrganicPlugins.razor must bind the DxCheckBox CheckedChanged event to an explicitly typed bool callback (previously CS1503/CS1662).'
+}
+if (-not $organicPage.Contains('EditorText.ParseLocalGptApplicationOrigins(_manualLocalGptUrls)') -or
+    -not $organicPage.Contains('EditorText.FormatLocalGptConnectionErrors(errors)') -or
+    $organicPage.Contains('_manualLocalGptUrls.Split(') -or
+    $organicPage.Contains('string.Join(Environment.NewLine, errors)') -or
+    -not $editorText.Contains('string[] ParseLocalGptApplicationOrigins(') -or
+    -not $editorText.Contains('string FormatLocalGptConnectionErrors(')) {
+    throw 'ONWIRE-READY006: OrganicPlugins manual URL parsing/error formatting must remain in the injected text service.'
+}
+if ($link -notmatch '(?s)ConnectByWebUrlAsync\([^{]+\{\s*try\s*\{' -or
+    $link -notmatch '(?s)ConnectByWebUrlAsync\([\s\S]*?catch\s*\(Exception exception\)') {
+    throw 'ONWIRE-READY007: ConnectByWebUrlAsync requires method-local try/catch with diagnostics and unchanged error propagation.'
+}
+Write-Host 'ONWIRE-READY: accepted capabilities, accurate user notifications, and fail-closed decryption retained; manual LocalGPT connection callback/service contracts verified.'

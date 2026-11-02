@@ -35,3 +35,5 @@
 }
 
 .organic-protocol-table code { overflow-wrap: anywhere; white-space: normal; }
+
+.organic-manual-connect-controls { display: flex; align-items: center; flex-wrap: wrap; gap: .85rem; margin: .5rem 0; }

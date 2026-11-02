@@ -506,6 +506,8 @@ public interface ILocalGptConnectionService : IAsyncDisposable
     /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
     /// <returns>The organic connection state produced by the operation.</returns>
     Task<OrganicConnectionState> ConnectAsync(string peerId, CancellationToken cancellationToken = default);
+    /// <summary>Resolve LocalGPT through a user-selected HTTP/HTTPS application origin, then open the existing authenticated 1-Wire transport.</summary>
+    Task<OrganicConnectionState> ConnectByWebUrlAsync(string applicationBaseUrl, CancellationToken cancellationToken = default);
     /// <summary>
     /// Performs disconnect as part of the LocalGPT connection service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>

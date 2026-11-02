@@ -31,6 +31,41 @@ public sealed class PublicationEditorTextService
         }
     }
 
+    /// <summary>Parses user-entered LocalGPT application origins in their original connection-attempt order.</summary>
+    /// <param name="configuredOrigins">Newline-separated HTTP/HTTPS origins entered by the user.</param>
+    /// <returns>Distinct, non-empty candidate origins. Validation remains in the 1-Wire connection service.</returns>
+    public string[] ParseLocalGptApplicationOrigins(string? configuredOrigins)
+    {
+        try
+        {
+            return (configuredOrigins ?? string.Empty)
+                .Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToArray();
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, "Parsing the entered LocalGPT application origins failed.");
+            return [];
+        }
+    }
+
+    /// <summary>Combines individual manual LocalGPT connection failures for the frontend notification.</summary>
+    /// <param name="errors">Errors collected from the user-selected application origins.</param>
+    /// <returns>The newline-separated error summary.</returns>
+    public string FormatLocalGptConnectionErrors(IEnumerable<string>? errors)
+    {
+        try
+        {
+            return string.Join(Environment.NewLine, errors ?? Array.Empty<string>());
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, "Formatting LocalGPT connection failures failed.");
+            return "Could not connect to any entered LocalGPT application address.";
+        }
+    }
+
     /// <summary>
     /// Stores the logger used to record failures while deterministic editor text keys are assembled.
     /// </summary>

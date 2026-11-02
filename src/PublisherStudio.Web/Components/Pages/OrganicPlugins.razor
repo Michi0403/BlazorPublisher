@@ -5,6 +5,7 @@
 @inject ILocalGptDiscoveryActivationService DiscoveryActivation
 @inject ILocalGptDiscoveryRegistry Discovery
 @inject ILocalGptConnectionService Connection
+@inject IOrganicRuntimeSecurityService RuntimeSecurity
 @inject IOrganicCapabilityCatalog CapabilityCatalog
 @inject IOrganicPermissionStore PermissionStore
 @inject IOrganicWorkCoordinator WorkCoordinator
@@ -41,7 +42,7 @@
     <DxFormLayoutItem ColSpanMd="12">
         <Template Context="formItemContext002">
         <div class="organic-status-strip" aria-live="polite">
-        <strong>@(Connection.State.IsLinked ? "Connected and linked" : Connection.State.IsConnected ? "Awaiting LocalGPT approval" : "Not connected")</strong>
+        <strong>@(Connection.State.IsLinked ? "Connected and linked" : Connection.State.IsConnected ? "Awaiting LocalGPT approval" : _trustedPeerCount > 0 ? "Trusted peer saved · transport disconnected" : "Not connected")</strong>
         <span>@(Connection.State.IsConnected
             ? Connection.State.DisplayName
             : DiscoveryActivation.IsRequested
@@ -136,6 +137,15 @@
         <Template Context="formItemContext004">
         <div class="organic-card">
             <h2>LocalGPT connection</h2>
+            <p class="organic-note">Stored reciprocal 1-Wire trust and an active linked transport are separate states. @(_trustedPeerCount == 0 ? "No trusted peer records saved here." : $"{_trustedPeerCount} saved trusted peer record(s); a live session still needs to be opened.")</p>
+            <label>LocalGPT application origins · HTTP and/or HTTPS, one per line
+                <DxMemo Rows="2" @bind-Text="_manualLocalGptUrls" NullText="http://127.0.0.1:5000 or https://your-localgpt-host:port" />
+            </label>
+            <div class="organic-manual-connect-controls">
+                <DxButton Text="Connect to entered HTTP/HTTPS address" Enabled="@(!Connection.State.IsConnected && !_manualConnectionBusy)" Click="ConnectManualAsync" />
+                <DxCheckBox Checked="@_autoConnectSavedUrl" CheckedChanged="@((bool enabled) => SaveAutoConnectPreferenceAsync(enabled))" Text="Reconnect using saved origins when I open this page" />
+            </div>
+            <p class="organic-note">Manual connection resolves the public LocalGPT profile over HTTP or HTTPS, then opens the existing authenticated 1-Wire transport. HTTPS certificate checks and peer approval remain mandatory. UDP-discovered Connect buttons below still work independently.</p>
             <label>Preferred Council team for PublisherStudio AI tools
                 <DxComboBox TData="string" TValue="string" Data="@GlobalCouncilTeamKeys" Value="@_globalAiTeamKey" ValueChanged="SaveGlobalAiTeamAsync" />
             </label>
@@ -573,6 +583,12 @@
     /// Defines the discovery owner constant used by <see cref="OrganicPlugins"/> so callers and internal logic share the same stable value.
     /// </summary>
     private const string DiscoveryOwner = ILocalGptDiscoveryActivationService.FrontendConnectionWorkflowOwner;
+    private const string ManualUrlsStorageKey = "publisherstudio.localgpt.applicationUrls";
+    private const string AutoConnectUrlsStorageKey = "publisherstudio.localgpt.autoConnectUrls";
+    private string _manualLocalGptUrls = string.Empty;
+    private bool _manualConnectionBusy;
+    private bool _autoConnectSavedUrl;
+    private int _trustedPeerCount;
 
     /// <summary>
     /// Handles the initialized async lifecycle or event notification for <see cref="OrganicPlugins"/>, updating the state required by the surrounding workflow.
@@ -591,6 +607,7 @@
             ResultStore.Changed += OnServiceChanged;
             RecurringScreenReader.Changed += OnServiceChanged;
             _capabilities = await CapabilityCatalog.GetCapabilitiesAsync().ConfigureAwait(true);
+            _trustedPeerCount = (await RuntimeSecurity.GetTrustedPeersAsync().ConfigureAwait(true)).Count;
             Refresh();
             ApplyCurrentPublisherContext();
             ApplyAuthorizedProposals();
@@ -619,6 +636,8 @@
                 var team = await JS.InvokeAsync<string?>("localStorage.getItem", AiTeamPreferenceStorageKey).ConfigureAwait(true);
                 _globalAiTeamKey = string.IsNullOrWhiteSpace(team) ? "auto" : team.Trim();
                 _globalAiModels = await JS.InvokeAsync<string?>("localStorage.getItem", AiModelPreferenceStorageKey).ConfigureAwait(true) ?? string.Empty;
+                _manualLocalGptUrls = await JS.InvokeAsync<string?>("localStorage.getItem", ManualUrlsStorageKey).ConfigureAwait(true) ?? string.Empty;
+                _autoConnectSavedUrl = string.Equals(await JS.InvokeAsync<string?>("localStorage.getItem", AutoConnectUrlsStorageKey).ConfigureAwait(true), "true", StringComparison.OrdinalIgnoreCase);
                 if (_globalAiTeamKey != "auto" && CouncilTeams.Any(item => string.Equals(item.Key, _globalAiTeamKey, StringComparison.OrdinalIgnoreCase)))
                 {
                     _textGenerationTeamKey = _globalAiTeamKey;
@@ -631,6 +650,8 @@
             if (Connection.State.IsLinked && !string.IsNullOrWhiteSpace(Connection.State.PeerId))
                 await JS.InvokeVoidAsync("localStorage.setItem", "publisherstudio.localgpt.lastLinkedPeer", Connection.State.PeerId).ConfigureAwait(true);
             await InvokeAsync(StateHasChanged).ConfigureAwait(true);
+            if (_autoConnectSavedUrl && !Connection.State.IsConnected && !string.IsNullOrWhiteSpace(_manualLocalGptUrls))
+                await ConnectManualAsync().ConfigureAwait(true);
 
         }
         catch (Exception __componentMethodException)
@@ -811,6 +832,65 @@
         {
             Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicPlugins)}.{nameof(OnServiceChanged)} failed.");
             throw;
+        }
+    }
+
+    /// <summary>Opt-in reconnection preference, scoped to this browser and the explicit frontend connection page.</summary>
+    private async Task SaveAutoConnectPreferenceAsync(bool enabled)
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("localStorage.setItem", AutoConnectUrlsStorageKey, enabled ? "true" : "false").ConfigureAwait(true);
+            _autoConnectSavedUrl = enabled;
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Could not save the LocalGPT auto-connect preference.");
+            Notifications.Error("Could not save the reconnect preference.", source: nameof(OrganicPlugins));
+        }
+    }
+
+    /// <summary>Try only the user-entered application origins; preserve the existing UDP-discovered peer buttons and MFA approval flow.</summary>
+    private async Task ConnectManualAsync()
+    {
+        if (_manualConnectionBusy || Connection.State.IsConnected) return;
+        var origins = EditorText.ParseLocalGptApplicationOrigins(_manualLocalGptUrls);
+        if (origins.Length == 0)
+        {
+            Notifications.Error("Enter an HTTP or HTTPS LocalGPT application address first.", "LocalGPT connection", nameof(OrganicPlugins));
+            return;
+        }
+        _manualConnectionBusy = true;
+        try
+        {
+            await JS.InvokeVoidAsync("localStorage.setItem", ManualUrlsStorageKey, _manualLocalGptUrls).ConfigureAwait(true);
+            var errors = new List<string>();
+            foreach (var origin in origins)
+            {
+                try
+                {
+                    var state = await Connection.ConnectByWebUrlAsync(origin).ConfigureAwait(true);
+                    if (state.IsConnected)
+                    {
+                        _permission.PeerId = state.PeerId;
+                        Notifications.Information($"Transport opened to {state.DisplayName} through {origin}. Confirm the link in LocalGPT if it is not already approved.", "LocalGPT connection", nameof(OrganicPlugins));
+                        Refresh();
+                        return;
+                    }
+                    errors.Add($"{origin}: {state.LastError}");
+                }
+                catch (Exception exception)
+                {
+                    Logger.LogWarning(exception, "Could not connect through user-specified LocalGPT origin {Origin}.", origin);
+                    errors.Add($"{origin}: {exception.Message}");
+                }
+            }
+            Notifications.Error(EditorText.FormatLocalGptConnectionErrors(errors), "LocalGPT connection failed", nameof(OrganicPlugins));
+        }
+        finally
+        {
+            _manualConnectionBusy = false;
+            Refresh();
         }
     }
 

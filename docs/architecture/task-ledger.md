@@ -18,3 +18,8 @@
 
 - **Closed (source, offline checked):** tripled PublisherStudio-owned hover/focus tooltip delays; captured native HTML `title` hints through the same runtime; preserved existing dismissal behavior. Evidence: `wwwroot/js/tooltipRuntime.js`, `tests/js/tooltip-delay-4.5.1.test.cjs` and `CHANGELOG-4.5.1-TOOLTIP-DELAY.md`.
 - **Deferred:** verify browser-native and DevExpress-vendor tooltip timing live in the installed application. Separate vendor-owned tooltip widgets may not follow the PublisherStudio runtime delay.
+
+## 4.7.2 — Manual LocalGPT link build follow-up
+
+- **Closed (source fix, compiler not executed):** apply method-local service error diagnostics to `ConnectByWebUrlAsync`, move origin text parsing and error formatting into the existing text service, and bind `DxCheckBox.CheckedChanged` through a typed `bool` callback. Evidence: `LocalGptConnectionService.cs`, `PublicationEditorTextService.cs`, `OrganicPlugins.razor`, and `build/Assert-OneWireReadyNotifications.ps1`.
+- **Deferred:** verify Razor generated callbacks and full PowerShell/Visual Studio build on Windows, and exercise both HTTP/HTTPS profile discovery and authenticated 1-Wire connection on a real installation. The offline checks are not a substitute for compilation or runtime proof.

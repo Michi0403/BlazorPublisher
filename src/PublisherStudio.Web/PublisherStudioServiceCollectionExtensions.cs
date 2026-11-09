@@ -177,6 +177,7 @@ public static class PublisherStudioServiceCollectionExtensions
             provider.GetRequiredService<IOrganicCapabilityCatalog>());
         AddSingleton<IOrganicPermissionStore, OrganicPermissionStore>(services);
         AddSingleton<IOrganicResultStore, OrganicResultStore>(services);
+        AddSingleton<IAiAssistDeliveryTracker, AiAssistDeliveryTracker>(services);
         AddSingleton<IOrganicReplayPolicyDataService, OrganicReplayPolicyDataService>(services);
         AddSingleton<IOrganicReplayGuard, OrganicReplayGuard>(services);
         AddSingleton<IOrganicExecutableCapabilityHandler, MediaConversionJobsOrganicHandler>(services);

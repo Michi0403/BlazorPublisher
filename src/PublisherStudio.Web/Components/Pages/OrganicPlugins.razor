@@ -10,6 +10,7 @@
 @inject IOrganicPermissionStore PermissionStore
 @inject IOrganicWorkCoordinator WorkCoordinator
 @inject IOrganicResultStore ResultStore
+@inject IAiAssistDeliveryTracker AiAssistDelivery
 @inject IRecurringScreenReaderService RecurringScreenReader
 @inject IUserNotificationService Notifications
 @inject ILogger<OrganicPlugins> Logger
@@ -607,6 +608,7 @@
             WorkCoordinator.Changed += OnServiceChanged;
             ResultStore.Changed += OnServiceChanged;
             RecurringScreenReader.Changed += OnServiceChanged;
+            AiAssistDelivery.Changed += OnServiceChanged;
             _capabilities = await CapabilityCatalog.GetCapabilitiesAsync().ConfigureAwait(true);
             _trustedPeerCount = (await RuntimeSecurity.GetTrustedPeersAsync().ConfigureAwait(true)).Count;
             Refresh();
@@ -821,10 +823,14 @@
                         SynchronizeDiscoveryActivation();
                         Refresh();
                         ApplyAuthorizedProposals();
-                        if (Connection.State.IsLinked && !string.IsNullOrWhiteSpace(Connection.State.PeerId))
+                        ShowAiAssistDeliveryNotices();
+                        // JavaScript interop is unavailable while the page is prerendered; only the interactive
+                        // instance (after its first OnAfterRenderAsync) may persist the linked peer.
+                        if (_automationStateLoaded && Connection.State.IsLinked && !string.IsNullOrWhiteSpace(Connection.State.PeerId))
                         {
                             try { await JS.InvokeVoidAsync("localStorage.setItem", "publisherstudio.localgpt.lastLinkedPeer", Connection.State.PeerId).ConfigureAwait(true); }
                             catch (JSException exception) { Logger.LogWarning(exception, "Could not remember the linked LocalGPT browser peer."); }
+                            catch (InvalidOperationException exception) { Logger.LogDebug(exception, "Browser storage is not available for this page instance; the linked LocalGPT peer is remembered on the next interactive render."); }
                         }
                         StateHasChanged();
                 }).ConfigureAwait(true));
@@ -1099,6 +1105,9 @@
                 try
                 {
                     var id = await Connection.SendCouncilRequestAsync(request).ConfigureAwait(true);
+                    // The tracker turns a finished Council result into a proposal for this target when no
+                    // proposal call arrives, and reports failures instead of leaving the request silent.
+                    AiAssistDelivery.Track(id, insertionTarget, kind);
                     Notifications.Success($"AI Assist Council request {id} was submitted.", "AI Assist requested", nameof(OrganicPlugins));
                 }
                 catch
@@ -1119,6 +1128,36 @@
         {
             Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicPlugins)}.{nameof(GenerateTextProposalAsync)} failed.");
             throw;
+        }
+    }
+
+    /// <summary>Shows queued AI Assist delivery notices (failures, results waiting for LocalGPT approval).</summary>
+    private void ShowAiAssistDeliveryNotices()
+    {
+        try
+        {
+            foreach (var notice in AiAssistDelivery.DrainNotices())
+            {
+                switch (notice.Severity)
+                {
+                    case "Error":
+                        Notifications.Error(notice.Message, notice.Title, nameof(OrganicPlugins));
+                        break;
+                    case "Warning":
+                        Notifications.Warning(notice.Message, notice.Title, nameof(OrganicPlugins));
+                        break;
+                    case "Success":
+                        Notifications.Success(notice.Message, notice.Title, nameof(OrganicPlugins));
+                        break;
+                    default:
+                        Notifications.Information(notice.Message, notice.Title, nameof(OrganicPlugins));
+                        break;
+                }
+            }
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Could not show AI Assist delivery notices.");
         }
     }
 
@@ -1497,6 +1536,7 @@
             WorkCoordinator.Changed -= OnServiceChanged;
             ResultStore.Changed -= OnServiceChanged;
             RecurringScreenReader.Changed -= OnServiceChanged;
+            AiAssistDelivery.Changed -= OnServiceChanged;
             DiscoveryActivation.Release(DiscoveryOwner);
     
         }

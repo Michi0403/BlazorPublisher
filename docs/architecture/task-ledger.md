@@ -28,3 +28,16 @@
 
 - **Closed (source implementation, compiler and runtime not executed):** journal every 1-Wire packet sent or received over TCP, HTTP/JSON and UDP discovery, with Information metadata lines, Debug payloads, Trace raw frames, live `OrganicPlugins:Traffic` settings and an in-app traffic view. Evidence: `OrganicWireTrafficJournal.cs`, `LocalGptConnectionService.cs`, `OrganicWireHttpController.cs`, `LocalGptDiscoveryHostedService.cs`, `OrganicWireTrafficPanel.razor`; `tests/js/onewire-traffic-journal-473.test.cjs`.
 - **Deferred:** confirm on a real installation that both journals (PublisherStudio and LocalGPT 7.0.1) show matching sequences for one linked session, that `Redacted` masks the expected fields, and that a busy link keeps the traffic view responsive.
+
+## 4.7.5: AI Assist delivery and prerender guard
+
+- **Closed (source implementation, compiler and runtime not executed):**
+  - Tracking of each AI Assist request until its Council result arrives:
+    - A finished result without a proposal call becomes a proposal for the authorized target.
+    - A proposal that waits for LocalGPT approval is announced instead of being duplicated.
+    - Errors become notifications.
+  - The prerendered `/organic-plugins` instance no longer calls browser storage.
+  - Evidence: `AiAssistDeliveryTracker.cs`, `OrganicPlugins.razor`; `tests/js/ai-assist-delivery-475.test.cjs`.
+- **Deferred:** confirm on a real installation with LocalGPT 7.0.4:
+  - Story and spreadsheet AI Assist requests are inserted exactly once, both with and without a LocalGPT proposal approval.
+  - Reloading the page logs no interop errors.

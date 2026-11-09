@@ -3,6 +3,7 @@ using PublisherStudio.BusinessObjects;
 using PublisherStudio.Services.OrganicPlugins;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
 using System.Text.Json;
 
 namespace PublisherStudio.HostedServices.OrganicPlugins;
@@ -15,6 +16,7 @@ namespace PublisherStudio.HostedServices.OrganicPlugins;
 /// <param name="registry">Authoritative LocalGPT discovery directory updated from accepted peer advertisements.</param>
 /// <param name="connection">LocalGPT connection service used only when configured automatic connection is permitted for a discovered local peer.</param>
 /// <param name="codec">Organic protocol codec that owns JSON settings for discovery advertisements.</param>
+/// <param name="traffic">1-Wire traffic journal that logs and shows every discovery datagram received, including ignored ones.</param>
 /// <param name="logger">Logger used to record discovery lifecycle, transport, and validation diagnostics.</param>
 public sealed class LocalGptDiscoveryHostedService(
     IOptions<OrganicPluginOptions> options,
@@ -22,6 +24,7 @@ public sealed class LocalGptDiscoveryHostedService(
     ILocalGptDiscoveryRegistry registry,
     ILocalGptConnectionService connection,
     IOrganicPluginProtocolCodec codec,
+    IOrganicWireTrafficJournal traffic,
     ILogger<LocalGptDiscoveryHostedService> logger) : BackgroundService
 {
     /// <summary>
@@ -207,6 +210,7 @@ public sealed class LocalGptDiscoveryHostedService(
 
                 if (received.Buffer.Length > OrganicWireProtocol.MaximumDiscoveryBytes)
                 {
+                    JournalBeacon(received, string.Empty, $"Ignored: oversized discovery datagram ({received.Buffer.Length} bytes).");
                     logger.LogWarning("Ignored oversized LocalGPT discovery datagram ({Length} bytes).", received.Buffer.Length);
                     continue;
                 }
@@ -215,7 +219,11 @@ public sealed class LocalGptDiscoveryHostedService(
                 {
                     var peer = JsonSerializer.Deserialize<OrganicPeerAdvertisement>(received.Buffer, codec.JsonOptions);
                     if (peer is null || !string.Equals(peer.Application, "LocalGPT", StringComparison.OrdinalIgnoreCase))
+                    {
+                        JournalBeacon(received, peer?.PeerId ?? string.Empty, $"Ignored: not a LocalGPT advertisement (application '{peer?.Application}').");
                         continue;
+                    }
+                    JournalBeacon(received, peer.PeerId, string.Empty);
                     if (string.IsNullOrWhiteSpace(peer.Address) || peer.Address is "0.0.0.0" or "::")
                         peer.Address = received.RemoteEndPoint.Address.ToString();
                     peer.SeenUtc = DateTimeOffset.UtcNow;
@@ -256,6 +264,7 @@ public sealed class LocalGptDiscoveryHostedService(
                 }
                 catch (JsonException exception)
                 {
+                    JournalBeacon(received, string.Empty, $"Ignored: malformed discovery data ({exception.Message}).");
                     logger.LogWarning(exception, "Ignored malformed LocalGPT discovery data from {RemoteEndPoint}; listening continues while requested.", received.RemoteEndPoint);
                 }
             }
@@ -273,6 +282,33 @@ public sealed class LocalGptDiscoveryHostedService(
         {
             logger.LogError(__serviceMethodException, $"Service method {nameof(LocalGptDiscoveryHostedService)}.{nameof(RunDiscoverySessionAsync)} failed.");
             throw;
+        }
+    }
+
+    /// <summary>Journals one received discovery datagram; beacons are plaintext, so the frame is also the payload.</summary>
+    /// <param name="received">The datagram and its sender.</param>
+    /// <param name="peerId">The advertised peer id when it could be read; otherwise empty.</param>
+    /// <param name="error">Why the datagram was ignored; empty for an accepted LocalGPT advertisement.</param>
+    private void JournalBeacon(UdpReceiveResult received, string peerId, string error)
+    {
+        try
+        {
+            var text = Encoding.UTF8.GetString(received.Buffer);
+            traffic.Record(new OrganicWireTrafficRecord
+            {
+                Direction = OrganicWireTrafficDirections.Received,
+                Transport = OrganicWireTrafficTransports.UdpDiscovery,
+                PeerId = peerId,
+                RemoteEndpoint = received.RemoteEndPoint.ToString(),
+                RawFrame = text,
+                PlaintextJson = text,
+                MessageType = "DiscoveryBeacon",
+                Error = error
+            });
+        }
+        catch (Exception exception)
+        {
+            logger.LogWarning(exception, "Journaling a LocalGPT discovery datagram from {RemoteEndPoint} failed; listening continues.", received.RemoteEndPoint);
         }
     }
 }

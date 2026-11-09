@@ -22,6 +22,7 @@ namespace PublisherStudio.Controllers;
 /// <param name="envelopeFactory">Organic wire envelope factory dependency used by the organic wire HTTP workflow to provide the corresponding application capability.</param>
 /// <param name="apiSurfaces">Api surface catalog service dependency used by the organic wire HTTP workflow to provide the corresponding application capability.</param>
 /// <param name="configuredOptions">Organic plugin options dependency used by the organic wire HTTP workflow to provide the corresponding application capability.</param>
+/// <param name="traffic">1-Wire traffic journal that logs and shows every HTTP/JSON packet this endpoint receives or returns.</param>
 /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 [ApiController]
 [Route("api/organic/onewire/http-json")]
@@ -35,6 +36,7 @@ public sealed class OrganicWireHttpController(
     IOrganicWireEnvelopeFactory envelopeFactory,
     IApiSurfaceCatalogService apiSurfaces,
     IOptions<OrganicPluginOptions> configuredOptions,
+    IOrganicWireTrafficJournal traffic,
     ILogger<OrganicWireHttpController> logger) : ControllerBase
 {
     /// <summary>
@@ -48,7 +50,7 @@ public sealed class OrganicWireHttpController(
         try
         {
             var options = configuredOptions.Value;
-            return Ok(new OrganicProtocolProfile
+            var profile = new OrganicProtocolProfile
             {
                 Security = await security.GetPublicDescriptorAsync(cancellationToken).ConfigureAwait(false),
                 Capabilities = (await capabilities.GetCapabilitiesAsync(cancellationToken).ConfigureAwait(false)).ToList(),
@@ -66,7 +68,9 @@ public sealed class OrganicWireHttpController(
                     MaximumMessageBytes = options.MaximumMessageBytes,
                     MinimumRecurringScreenReaderIntervalSeconds = options.MinimumRecurringScreenReaderIntervalSeconds
                 }
-            });
+            };
+            JournalProfile(profile);
+            return Ok(profile);
         }
         catch (Exception ex)
         {
@@ -85,28 +89,35 @@ public sealed class OrganicWireHttpController(
     [RequestSizeLimit(OrganicWireProtocol.MaximumMessageBytes)]
     public async Task<IActionResult> Dispatch([FromBody] JsonElement body, CancellationToken cancellationToken)
     {
+        var json = string.Empty;
+        OrganicWireEnvelope? received = null;
+        var requestJournaled = false;
         try
         {
-            var json = body.GetRawText();
+            json = body.GetRawText();
             if (Encoding.UTF8.GetByteCount(json) > OrganicWireProtocol.MaximumMessageBytes)
+            {
+                requestJournaled = JournalHttp(OrganicWireTrafficDirections.Received, json, null, string.Empty, "The organic HTTP/JSON envelope is too large.");
                 return BadRequest(new { Error = "The organic HTTP/JSON envelope is too large." });
+            }
 
             var envelope = codec.DeserializeAndValidate(json);
+            received = envelope;
             await security.UnprotectIncomingAsync(envelope, cancellationToken).ConfigureAwait(false);
             if (envelope.MessageType is not OrganicWireMessageType.Invoke)
+            {
+                requestJournaled = JournalHttp(OrganicWireTrafficDirections.Received, json, envelope, string.Empty, "The PublisherStudio HTTP/JSON adapter currently accepts Invoke envelopes; use profile for catalog discovery.");
                 return BadRequest(new { Error = "The PublisherStudio HTTP/JSON adapter currently accepts Invoke envelopes; use profile for catalog discovery." });
+            }
             if (!transportSecurityPolicy.IsProtected(envelope))
                 throw new CryptographicException("PublisherStudio HTTP/JSON Invoke requests require an MFA-verified signed and encrypted peer.");
             if (!replayGuard.TryAccept(envelope.SourcePeerId, envelope.MessageId, envelope.CreatedUtc))
                 throw new InvalidDataException("This organic 1-Wire message id has already been processed or is outside the accepted replay window.");
+            requestJournaled = JournalHttp(OrganicWireTrafficDirections.Received, json, envelope, string.Empty, string.Empty);
 
             var item = await work.ReceiveAsync(envelope, cancellationToken).ConfigureAwait(false);
             var response = envelopeFactory.CreateWorkEnvelope(item, $"publisherstudio:{Environment.MachineName}");
-            await security.ProtectOutgoingAsync(response, cancellationToken).ConfigureAwait(false);
-            if (transportSecurityPolicy.RequiresProtectedTransport(response.MessageType) &&
-                !transportSecurityPolicy.IsProtected(response))
-                throw new CryptographicException("The PublisherStudio HTTP/JSON response requires an MFA-verified peer before application data can be returned.");
-            return Content(codec.Serialize(response), "application/json", Encoding.UTF8);
+            return await RespondAsync(response, "The PublisherStudio HTTP/JSON response requires an MFA-verified peer before application data can be returned.", cancellationToken).ConfigureAwait(false);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
@@ -117,6 +128,8 @@ public sealed class OrganicWireHttpController(
         }
         catch (Exception ex) when (ex is JsonException or InvalidDataException or CryptographicException or FormatException or ArgumentException)
         {
+            if (!requestJournaled)
+                JournalHttp(OrganicWireTrafficDirections.Received, json, received, string.Empty, ex.Message);
             logger.LogWarning(ex, "Rejected an invalid PublisherStudio organic HTTP/JSON request.");
             return BadRequest(new { Error = ex.Message });
         }
@@ -142,11 +155,7 @@ public sealed class OrganicWireHttpController(
             if (item is null)
                 return NotFound(new { CorrelationId = correlationId, Status = "NotFoundOrNotQueuedYet" });
             var response = envelopeFactory.CreateWorkEnvelope(item, $"publisherstudio:{Environment.MachineName}");
-            await security.ProtectOutgoingAsync(response, cancellationToken).ConfigureAwait(false);
-            if (transportSecurityPolicy.RequiresProtectedTransport(response.MessageType) &&
-                !transportSecurityPolicy.IsProtected(response))
-                throw new CryptographicException("The PublisherStudio HTTP/JSON work response requires an MFA-verified peer before application data can be returned.");
-            return Content(codec.Serialize(response), "application/json", Encoding.UTF8);
+            return await RespondAsync(response, "The PublisherStudio HTTP/JSON work response requires an MFA-verified peer before application data can be returned.", cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -155,4 +164,95 @@ public sealed class OrganicWireHttpController(
         }
     }
 
+    /// <summary>Protects, serializes and journals one HTTP/JSON response envelope.</summary>
+    /// <param name="response">The response envelope in plaintext.</param>
+    /// <param name="protectionRequiredMessage">Error raised when the response type needs protection the peer does not have.</param>
+    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
+    /// <returns>The JSON content result carrying the protected frame.</returns>
+    private async Task<IActionResult> RespondAsync(OrganicWireEnvelope response, string protectionRequiredMessage, CancellationToken cancellationToken)
+    {
+        var plaintext = string.Empty;
+        var frame = string.Empty;
+        try
+        {
+            plaintext = traffic.CapturePlaintext(response);
+            await security.ProtectOutgoingAsync(response, cancellationToken).ConfigureAwait(false);
+            if (transportSecurityPolicy.RequiresProtectedTransport(response.MessageType) &&
+                !transportSecurityPolicy.IsProtected(response))
+                throw new CryptographicException(protectionRequiredMessage);
+            frame = codec.Serialize(response);
+            JournalHttp(OrganicWireTrafficDirections.Sent, frame, response, plaintext, string.Empty);
+            return Content(frame, "application/json", Encoding.UTF8);
+        }
+        catch (Exception exception) when (exception is not OperationCanceledException)
+        {
+            JournalHttp(OrganicWireTrafficDirections.Sent, frame, response, plaintext, exception.Message);
+            logger.LogDebug(exception, "Sending a PublisherStudio organic HTTP/JSON response failed for message {MessageId}.", response.MessageId);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Journals a profile request and the profile returned for it. MVC writes the response frame itself, so the journal keeps
+    /// the profile serialized with the web defaults MVC uses as the payload and leaves the raw frame empty.
+    /// </summary>
+    /// <param name="profile">The profile about to be returned.</param>
+    private void JournalProfile(OrganicProtocolProfile profile)
+    {
+        try
+        {
+            var remoteEndpoint = $"{HttpContext.Connection.RemoteIpAddress}:{HttpContext.Connection.RemotePort}";
+            traffic.Record(new OrganicWireTrafficRecord
+            {
+                Direction = OrganicWireTrafficDirections.Received,
+                Transport = OrganicWireTrafficTransports.HttpJson,
+                RemoteEndpoint = remoteEndpoint,
+                RawFrame = $"GET {Request.Path}",
+                MessageType = "Profile"
+            });
+            var payload = traffic.CurrentOptions.Enabled ? JsonSerializer.Serialize(profile, JsonSerializerOptions.Web) : string.Empty;
+            traffic.Record(new OrganicWireTrafficRecord
+            {
+                Direction = OrganicWireTrafficDirections.Sent,
+                Transport = OrganicWireTrafficTransports.HttpJson,
+                RemoteEndpoint = remoteEndpoint,
+                PlaintextJson = payload,
+                MessageType = "Profile"
+            });
+        }
+        catch (Exception exception)
+        {
+            logger.LogWarning(exception, "Journaling the PublisherStudio organic HTTP/JSON profile exchange failed.");
+        }
+    }
+
+    /// <summary>Journals one HTTP/JSON packet with this request's remote endpoint.</summary>
+    /// <param name="direction">Received or Sent.</param>
+    /// <param name="frame">The frame as it crossed the wire.</param>
+    /// <param name="envelope">The envelope, decrypted when received, when one was parsed.</param>
+    /// <param name="plaintext">The plaintext captured before protection, for sent packets.</param>
+    /// <param name="error">Rejection or failure reason; empty on success.</param>
+    /// <returns>Always <see langword="true"/>, so callers can remember that the packet was journaled.</returns>
+    private bool JournalHttp(string direction, string frame, OrganicWireEnvelope? envelope, string plaintext, string error)
+    {
+        try
+        {
+            traffic.Record(new OrganicWireTrafficRecord
+            {
+                Direction = direction,
+                Transport = OrganicWireTrafficTransports.HttpJson,
+                RemoteEndpoint = $"{HttpContext.Connection.RemoteIpAddress}:{HttpContext.Connection.RemotePort}",
+                RawFrame = frame,
+                Envelope = envelope,
+                PlaintextJson = plaintext,
+                Error = error
+            });
+            return true;
+        }
+        catch (Exception exception)
+        {
+            logger.LogWarning(exception, "Journaling a PublisherStudio organic HTTP/JSON packet failed.");
+            return true;
+        }
+    }
 }

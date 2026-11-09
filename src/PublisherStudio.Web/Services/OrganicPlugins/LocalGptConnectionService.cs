@@ -14,6 +14,7 @@ namespace PublisherStudio.Services.OrganicPlugins;
 /// Coordinates LocalGPT connection behavior for the application, centralizing the workflow, policy, and diagnostics needed by its callers.
 /// </summary>
 /// <param name="discovery">Local gpt discovery registry dependency used by the LocalGPT connection workflow to provide the corresponding application capability.</param>
+/// <param name="httpClients">HTTP client factory used to read the LocalGPT 1-Wire profile when the user enters an application URL.</param>
 /// <param name="codec">Organic plugin protocol codec dependency used by the LocalGPT connection workflow to provide the corresponding application capability.</param>
 /// <param name="security">Organic runtime security service dependency used by the LocalGPT connection workflow to provide the corresponding application capability.</param>
 /// <param name="capabilities">Organic capability catalog dependency used by the LocalGPT connection workflow to provide the corresponding application capability.</param>
@@ -25,6 +26,7 @@ namespace PublisherStudio.Services.OrganicPlugins;
 /// <param name="runtimeState">Organic connection runtime state dependency used by the LocalGPT connection workflow to provide the corresponding application capability.</param>
 /// <param name="envelopeFactory">Organic wire envelope factory dependency used by the LocalGPT connection workflow to provide the corresponding application capability.</param>
 /// <param name="runtimeEndpointState">Runtime endpoint state dependency used by the LocalGPT connection workflow to provide the corresponding application capability.</param>
+/// <param name="traffic">1-Wire traffic journal that logs and shows every packet this connection sends or receives.</param>
 /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class LocalGptConnectionService(
     ILocalGptDiscoveryRegistry discovery,
@@ -40,6 +42,7 @@ public sealed class LocalGptConnectionService(
     IOrganicConnectionRuntimeState runtimeState,
     IOrganicWireEnvelopeFactory envelopeFactory,
     IRuntimeEndpointState runtimeEndpointState,
+    IOrganicWireTrafficJournal traffic,
     ILogger<LocalGptConnectionService> logger) : ILocalGptConnectionService
 {
     /// <summary>
@@ -104,6 +107,10 @@ public sealed class LocalGptConnectionService(
     /// Stores the internal local peer identifier state used by <see cref="LocalGptConnectionService"/> while executing its surrounding workflow.
     /// </summary>
     private readonly string localPeerId = $"publisherstudio:{Environment.MachineName}";
+    /// <summary>
+    /// Stores the remote TCP endpoint of the current connection, captured once at connect so the traffic journal never touches a closing socket.
+    /// </summary>
+    private string remoteEndpoint = string.Empty;
 
     /// <summary>
     /// Occurs when changed changes or completes in <see cref="LocalGptConnectionService"/>, allowing interested callers to react without polling internal state.
@@ -136,14 +143,23 @@ public sealed class LocalGptConnectionService(
             timeout.CancelAfter(TimeSpan.FromSeconds(10));
             using var client = httpClients.CreateClient();
             var profileUrl = new Uri(baseUri, "/api/onewire/http-json/profile");
+            var profileEndpoint = baseUri.GetLeftPart(UriPartial.Authority);
+            JournalProfile(OrganicWireTrafficDirections.Sent, profileEndpoint, $"GET {profileUrl.AbsolutePath}", null);
             using var response = await client.GetAsync(profileUrl, HttpCompletionOption.ResponseHeadersRead, timeout.Token).ConfigureAwait(false);
+            var profileBody = await response.Content.ReadAsStringAsync(timeout.Token).ConfigureAwait(false);
+            JournalProfile(
+                OrganicWireTrafficDirections.Received,
+                profileEndpoint,
+                profileBody,
+                response.IsSuccessStatusCode ? null : $"HTTP {(int)response.StatusCode} {response.ReasonPhrase}");
             response.EnsureSuccessStatusCode();
             if (response.RequestMessage?.RequestUri is { } effectiveUri &&
                 (!string.Equals(effectiveUri.Host, baseUri.Host, StringComparison.OrdinalIgnoreCase) ||
                  !string.Equals(effectiveUri.Scheme, baseUri.Scheme, StringComparison.OrdinalIgnoreCase) ||
                  effectiveUri.Port != baseUri.Port))
                 throw new InvalidDataException("The profile request was redirected to a different application origin. Enter the redirected HTTPS/HTTP origin explicitly.");
-            var profile = await response.Content.ReadFromJsonAsync<LocalGptWebConnectionProfile>(codec.JsonOptions, timeout.Token).ConfigureAwait(false)
+            // The body was read once for the traffic journal; parse that same text instead of reading the stream twice.
+            var profile = JsonSerializer.Deserialize<LocalGptWebConnectionProfile>(profileBody, codec.JsonOptions)
                 ?? throw new InvalidDataException("LocalGPT returned an empty 1-Wire profile.");
             var advertisement = profile.Peer ?? throw new InvalidDataException("LocalGPT did not advertise its 1-Wire identity.");
             if (!string.Equals(advertisement.Application, "LocalGPT", StringComparison.OrdinalIgnoreCase)
@@ -202,6 +218,7 @@ public sealed class LocalGptConnectionService(
             var tcp = new TcpClient();
             await tcp.ConnectAsync(address, peer.ServicePort, cancellationToken).ConfigureAwait(false);
             var remoteAddress = (tcp.Client.RemoteEndPoint as IPEndPoint)?.Address;
+            remoteEndpoint = (tcp.Client.RemoteEndPoint as IPEndPoint)?.ToString() ?? string.Empty;
             var isLoopback = remoteAddress is not null && IPAddress.IsLoopback(remoteAddress);
             var stream = tcp.GetStream();
             var connectedReader = new StreamReader(stream, Encoding.UTF8, false, 8192, leaveOpen: true);
@@ -474,18 +491,31 @@ public sealed class LocalGptConnectionService(
             {
                 var line = await connectedReader.ReadLineAsync(cancellationToken).ConfigureAwait(false);
                 if (line is null) break;
-                var envelope = codec.DeserializeAndValidate(line);
-                await security.UnprotectIncomingAsync(envelope, cancellationToken).ConfigureAwait(false);
-                if (!string.Equals(envelope.SourcePeerId, connectedPeerId, StringComparison.OrdinalIgnoreCase))
-                    throw new InvalidDataException("The organic 1-Wire SourcePeerId does not match the peer identity owned by this connection.");
-                if (string.Equals(envelope.SourcePeerId, localPeerId, StringComparison.OrdinalIgnoreCase))
-                    throw new InvalidDataException("A remote connection cannot claim PublisherStudio's local peer identity.");
-                if (!isLoopback && transportSecurityPolicy.RequiresProtectedTransport(envelope.MessageType) &&
-                    !transportSecurityPolicy.IsProtected(envelope))
-                    throw new CryptographicException("A non-loopback organic 1-Wire connection requires MFA-verified message protection before application data can be received.");
-                if (!replayGuard.TryAccept(connectedPeerId, envelope.MessageId, envelope.CreatedUtc))
-                    throw new InvalidDataException("This organic 1-Wire message id has already been processed or is outside the accepted replay window.");
-                await HandleIncomingAsync(envelope, connectedId, connectedPeerId, connectedWriter, isLoopback, cancellationToken).ConfigureAwait(false);
+                OrganicWireEnvelope? envelope = null;
+                try
+                {
+                    envelope = codec.DeserializeAndValidate(line);
+                    await security.UnprotectIncomingAsync(envelope, cancellationToken).ConfigureAwait(false);
+                    if (!string.Equals(envelope.SourcePeerId, connectedPeerId, StringComparison.OrdinalIgnoreCase))
+                        throw new InvalidDataException("The organic 1-Wire SourcePeerId does not match the peer identity owned by this connection.");
+                    if (string.Equals(envelope.SourcePeerId, localPeerId, StringComparison.OrdinalIgnoreCase))
+                        throw new InvalidDataException("A remote connection cannot claim PublisherStudio's local peer identity.");
+                    if (!isLoopback && transportSecurityPolicy.RequiresProtectedTransport(envelope.MessageType) &&
+                        !transportSecurityPolicy.IsProtected(envelope))
+                        throw new CryptographicException("A non-loopback organic 1-Wire connection requires MFA-verified message protection before application data can be received.");
+                    if (!replayGuard.TryAccept(connectedPeerId, envelope.MessageId, envelope.CreatedUtc))
+                        throw new InvalidDataException("This organic 1-Wire message id has already been processed or is outside the accepted replay window.");
+                }
+                catch (Exception rejection) when (rejection is not OperationCanceledException)
+                {
+                    // A rejected packet is journaled with its raw line before the read loop stops on it.
+                    JournalTcp(OrganicWireTrafficDirections.Received, connectedPeerId, line, envelope, string.Empty, rejection.Message);
+                    throw;
+                }
+
+                var accepted = envelope ?? throw new InvalidDataException("The organic 1-Wire frame produced no envelope.");
+                JournalTcp(OrganicWireTrafficDirections.Received, connectedPeerId, line, accepted, string.Empty, null);
+                await HandleIncomingAsync(accepted, connectedId, connectedPeerId, connectedWriter, isLoopback, cancellationToken).ConfigureAwait(false);
             }
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { }
@@ -847,18 +877,23 @@ public sealed class LocalGptConnectionService(
     /// <returns>The GUID produced by the operation.</returns>
     private async Task<Guid> SendEnvelopeCoreAsync(OrganicWireEnvelope envelope, StreamWriter connectedWriter, string targetPeerId, bool isLoopback, CancellationToken cancellationToken)
     {
+        var plaintext = string.Empty;
+        var json = string.Empty;
         try
         {
             envelope.SourcePeerId = string.IsNullOrWhiteSpace(envelope.SourcePeerId) ? localPeerId : envelope.SourcePeerId;
             envelope.TargetPeerId = string.IsNullOrWhiteSpace(envelope.TargetPeerId) ? targetPeerId : envelope.TargetPeerId;
+            // Captured before protection so the journal shows the payload that is about to be encrypted.
+            plaintext = traffic.CapturePlaintext(envelope);
             await security.ProtectOutgoingAsync(envelope, cancellationToken).ConfigureAwait(false);
             if (!isLoopback && transportSecurityPolicy.RequiresProtectedTransport(envelope.MessageType) &&
                 !transportSecurityPolicy.IsProtected(envelope))
                 throw new CryptographicException("A non-loopback organic 1-Wire connection requires MFA-verified message protection before application data can be sent.");
-            var json = codec.Serialize(envelope);
+            json = codec.Serialize(envelope);
             await writeGate.WaitAsync(cancellationToken).ConfigureAwait(false);
             try { await connectedWriter.WriteLineAsync(json.AsMemory(), cancellationToken).ConfigureAwait(false); }
             finally { writeGate.Release(); }
+            JournalTcp(OrganicWireTrafficDirections.Sent, targetPeerId, json, envelope, plaintext, null);
             return envelope.CorrelationId;
 
         }
@@ -868,8 +903,65 @@ public sealed class LocalGptConnectionService(
         }
         catch (Exception ex)
         {
+            JournalTcp(OrganicWireTrafficDirections.Sent, targetPeerId, json, envelope, plaintext, ex.Message);
             logger.LogError(ex, $"Could not send organic message {envelope.MessageId} to {targetPeerId}.");
             throw;
+        }
+    }
+
+    /// <summary>Journals one TCP 1-Wire packet of this connection; the journal itself never throws into the transport.</summary>
+    /// <param name="direction">Sent or Received.</param>
+    /// <param name="remotePeerId">The LocalGPT peer on the other end.</param>
+    /// <param name="frame">The line exactly as it crossed the wire; empty when sending failed before serialization.</param>
+    /// <param name="envelope">The envelope, decrypted for accepted incoming packets; null when the frame could not be parsed.</param>
+    /// <param name="plaintext">The plaintext captured before protection for outgoing packets; empty to derive it from the envelope.</param>
+    /// <param name="error">The rejection or failure reason; null for a packet that went through.</param>
+    private void JournalTcp(string direction, string remotePeerId, string frame, OrganicWireEnvelope? envelope, string plaintext, string? error)
+    {
+        try
+        {
+            traffic.Record(new OrganicWireTrafficRecord
+            {
+                Direction = direction,
+                Transport = OrganicWireTrafficTransports.Tcp,
+                PeerId = remotePeerId,
+                RemoteEndpoint = remoteEndpoint,
+                RawFrame = frame,
+                Envelope = envelope,
+                PlaintextJson = plaintext,
+                Error = error ?? string.Empty
+            });
+        }
+        catch (Exception exception)
+        {
+            logger.LogWarning(exception, "Journaling a {Direction} 1-Wire TCP packet for peer {PeerId} failed; the connection continues.", direction, remotePeerId);
+        }
+    }
+
+    /// <summary>Journals the HTTP profile request and response that resolve a LocalGPT origin before the TCP transport opens.</summary>
+    /// <param name="direction">Sent for the request line, Received for the response body.</param>
+    /// <param name="origin">The LocalGPT application origin.</param>
+    /// <param name="content">The request line or the response body.</param>
+    /// <param name="error">The HTTP failure; null on success.</param>
+    private void JournalProfile(string direction, string origin, string content, string? error)
+    {
+        try
+        {
+            traffic.Record(new OrganicWireTrafficRecord
+            {
+                Direction = direction,
+                Transport = OrganicWireTrafficTransports.HttpJson,
+                PeerId = string.Empty,
+                RemoteEndpoint = origin,
+                RawFrame = content,
+                PlaintextJson = content,
+                MessageType = "Profile",
+                Error = error ?? string.Empty
+            });
+        }
+        catch (Exception exception)
+        {
+            logger.LogWarning(exception, "Journaling the LocalGPT 1-Wire profile {Direction} for {RemoteEndpoint} failed.", direction, origin);
         }
     }
 

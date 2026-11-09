@@ -23,3 +23,8 @@
 
 - **Closed (source fix, compiler not executed):** apply method-local service error diagnostics to `ConnectByWebUrlAsync`, move origin text parsing and error formatting into the existing text service, and bind `DxCheckBox.CheckedChanged` through a typed `bool` callback. Evidence: `LocalGptConnectionService.cs`, `PublicationEditorTextService.cs`, `OrganicPlugins.razor`, and `build/Assert-OneWireReadyNotifications.ps1`.
 - **Deferred:** verify Razor generated callbacks and full PowerShell/Visual Studio build on Windows, and exercise both HTTP/HTTPS profile discovery and authenticated 1-Wire connection on a real installation. The offline checks are not a substitute for compilation or runtime proof.
+
+## 4.7.3 — 1-Wire traffic journal
+
+- **Closed (source implementation, compiler and runtime not executed):** journal every 1-Wire packet sent or received over TCP, HTTP/JSON and UDP discovery, with Information metadata lines, Debug payloads, Trace raw frames, live `OrganicPlugins:Traffic` settings and an in-app traffic view. Evidence: `OrganicWireTrafficJournal.cs`, `LocalGptConnectionService.cs`, `OrganicWireHttpController.cs`, `LocalGptDiscoveryHostedService.cs`, `OrganicWireTrafficPanel.razor`; `tests/js/onewire-traffic-journal-473.test.cjs`.
+- **Deferred:** confirm on a real installation that both journals (PublisherStudio and LocalGPT 7.0.1) show matching sequences for one linked session, that `Redacted` masks the expected fields, and that a busy link keeps the traffic view responsive.

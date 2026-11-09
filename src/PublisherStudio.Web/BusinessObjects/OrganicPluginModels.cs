@@ -231,6 +231,9 @@ public sealed class OrganicPluginOptions
     /// </summary>
     /// <value>The minimum recurring screen reader interval seconds value exposed by <see cref="OrganicPluginOptions"/>.</value>
     public int MinimumRecurringScreenReaderIntervalSeconds { get; set; } = 15;
+    /// <summary>Gets or sets the 1-Wire traffic journal settings (section <c>OrganicPlugins:Traffic</c>).</summary>
+    /// <value>The live traffic logging and view settings.</value>
+    public OrganicWireTrafficOptions Traffic { get; set; } = new();
 }
 
 /// <summary>

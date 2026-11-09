@@ -51,6 +51,9 @@ public static class PublisherStudioServiceCollectionExtensions
         services.AddSingleton(configurationDocument.PublisherStudio.RuntimePolicy);
         services.AddSingleton(Microsoft.Extensions.Options.Options.Create(configurationDocument.PublisherStudio.Paths));
         services.AddSingleton(Microsoft.Extensions.Options.Options.Create(configurationDocument.OrganicPlugins));
+        // The traffic journal reads its section live, so payload mode and switches change without a restart.
+        services.AddOptions<OrganicWireTrafficOptions>()
+            .Bind(configuration.GetSection(OrganicWireTrafficOptions.SectionName));
         services.AddSingleton(Microsoft.Extensions.Options.Options.Create(configurationDocument.PublisherStudio.RuntimeValueStores.PanelTextPatterns));
         var runningOnWindows = OperatingSystem.IsWindows();
         if (runningOnWindows)
@@ -159,6 +162,8 @@ public static class PublisherStudioServiceCollectionExtensions
         AddSingleton<IBusinessObjectContextService, BusinessObjectContextService>(services);
 
         AddSingleton<IOrganicPluginProtocolCodec, OrganicPluginProtocolCodec>(services);
+        AddSingleton<IOrganicWireTrafficPayloadFormatter, OrganicWireTrafficPayloadFormatter>(services);
+        AddSingleton<IOrganicWireTrafficJournal, OrganicWireTrafficJournal>(services);
         AddSingleton<IOrganicTransportSecurityPolicy, OrganicTransportSecurityPolicy>(services);
         AddSingleton<IOrganicConnectionRuntimeState, OrganicConnectionRuntimeStateService>(services);
         AddSingleton<IOrganicWireEnvelopeFactory, OrganicWireEnvelopeFactory>(services);

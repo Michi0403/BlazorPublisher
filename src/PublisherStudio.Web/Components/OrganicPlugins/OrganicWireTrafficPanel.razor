@@ -1,0 +1,338 @@
+@inject IOrganicWireTrafficJournal Traffic
+@inject IFileLocalizationService Localization
+@inject IUserNotificationService Notifications
+@inject ISupervisedTaskRunner TaskRunner
+@inject ILogger<OrganicWireTrafficPanel> Logger
+@implements IDisposable
+
+<div class="razor-component-boundary">
+<DxFormLayout CssClass="razor-component-layout-owner OrganicWireTrafficPanel">
+    <DxFormLayoutItem ColSpanMd="12">
+        <Template Context="trafficLayoutContext">
+<div class="organic-card organic-wire-traffic" role="region" aria-label='@LT("1-Wire traffic")' data-testid="organic-wire-traffic">
+    <h2>@LT("1-Wire traffic")</h2>
+    <p class="organic-note">@LT("Every packet PublisherStudio sent or received over 1-Wire, with the decrypted payload and the raw wire frame.")</p>
+    <div class="organic-wire-traffic-toolbar">
+        <label>
+            @LT("Search")
+            <DxTextBox @bind-Text="SearchText" BindValueMode="BindValueMode.OnInput" ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
+        </label>
+        <label>
+            @LT("Direction")
+            <DxComboBox TData="string" TValue="string" Data="@DirectionOptions" @bind-Value="DirectionFilter" />
+        </label>
+        <label>
+            @LT("Transport")
+            <DxComboBox TData="string" TValue="string" Data="@TransportOptions" @bind-Value="TransportFilter" />
+        </label>
+        <DxCheckBox @bind-Checked="ProblemsOnly">@LT("Problems only")</DxCheckBox>
+        <DxCheckBox @bind-Checked="Paused">@LT("Pause view")</DxCheckBox>
+        <DxButton Text='@LT("Clear view")' RenderStyle="ButtonRenderStyle.Secondary" Click="ClearAsync" />
+    </div>
+    <p class="organic-note" role="status">@summaryText</p>
+    <DxGrid Data="@visibleEntries"
+            KeyFieldName="@nameof(OrganicWireTrafficEntry.Sequence)"
+            PageSize="20"
+            HighlightRowOnHover="true"
+            FocusedRowEnabled="true"
+            FocusedRowChanged="OnFocusedRowChanged"
+            TextWrapEnabled="false">
+        <Columns>
+            <DxGridDataColumn FieldName="@nameof(OrganicWireTrafficEntry.Sequence)" Caption="#" Width="70px" />
+            <DxGridDataColumn FieldName="@nameof(OrganicWireTrafficEntry.TimestampUtc)" Caption='@LT("Time (UTC)")' DisplayFormat="HH:mm:ss.fff" Width="120px" />
+            <DxGridDataColumn FieldName="@nameof(OrganicWireTrafficEntry.Direction)" Caption='@LT("Direction")' Width="95px" />
+            <DxGridDataColumn FieldName="@nameof(OrganicWireTrafficEntry.Transport)" Caption='@LT("Transport")' Width="120px" />
+            <DxGridDataColumn FieldName="@nameof(OrganicWireTrafficEntry.PeerId)" Caption='@LT("Peer")' MinWidth="140" />
+            <DxGridDataColumn FieldName="@nameof(OrganicWireTrafficEntry.MessageType)" Caption='@LT("Type")' MinWidth="140" />
+            <DxGridDataColumn FieldName="@nameof(OrganicWireTrafficEntry.CapabilityKey)" Caption='@LT("Capability")' MinWidth="140" />
+            <DxGridDataColumn FieldName="@nameof(OrganicWireTrafficEntry.SecurityMode)" Caption='@LT("Security")' Width="120px" />
+            <DxGridDataColumn FieldName="@nameof(OrganicWireTrafficEntry.FrameBytes)" Caption='@LT("Bytes")' Width="90px" />
+            <DxGridDataColumn FieldName="@nameof(OrganicWireTrafficEntry.Outcome)" Caption='@LT("Outcome")' Width="100px" />
+        </Columns>
+    </DxGrid>
+    @if (selectedEntry is not null)
+    {
+        <div class="organic-wire-traffic-details">
+            <h3>@selectedHeading</h3>
+            <p class="organic-note">@selectedIdentity</p>
+            @if (!string.IsNullOrWhiteSpace(selectedEntry.Error))
+            {
+                <p class="organic-error">@selectedEntry.Error</p>
+            }
+            <label>
+                @payloadCaption
+                <DxMemo Text="@selectedEntry.Payload" ReadOnly="true" Rows="12" />
+            </label>
+            <label>
+                @LT("Raw frame as it crossed the wire")
+                <DxMemo Text="@selectedEntry.RawFrame" ReadOnly="true" Rows="6" />
+            </label>
+        </div>
+    }
+</div>
+    </Template>
+    </DxFormLayoutItem>
+</DxFormLayout>
+</div>
+
+
+@code {
+    /// <summary>Filter value that matches every direction or transport; the stored filter stays culture-neutral.</summary>
+    private const string AllOption = "All";
+    /// <summary>Direction filter values offered in the view.</summary>
+    private readonly IReadOnlyList<string> DirectionOptions = [AllOption, OrganicWireTrafficDirections.Received, OrganicWireTrafficDirections.Sent];
+    /// <summary>Transport filter values offered in the view.</summary>
+    private readonly IReadOnlyList<string> TransportOptions = [AllOption, OrganicWireTrafficTransports.Tcp, OrganicWireTrafficTransports.HttpJson, OrganicWireTrafficTransports.UdpDiscovery];
+
+    /// <summary>Packets currently shown, newest first.</summary>
+    private IReadOnlyList<OrganicWireTrafficEntry> visibleEntries = [];
+    /// <summary>Packet whose payload and raw frame are shown below the grid.</summary>
+    private OrganicWireTrafficEntry? selectedEntry;
+    /// <summary>Status line above the grid, prepared by <see cref="Reload"/>.</summary>
+    private string summaryText = string.Empty;
+    /// <summary>Heading of the selected packet, prepared when the focused row changes.</summary>
+    private string selectedHeading = string.Empty;
+    /// <summary>Message, correlation and remote endpoint line of the selected packet.</summary>
+    private string selectedIdentity = string.Empty;
+    /// <summary>Payload caption naming the configured payload mode.</summary>
+    private string payloadCaption = string.Empty;
+    /// <summary>Marks that packets arrived since the previous refresh.</summary>
+    private int renderPending;
+    /// <summary>Ensures only one delayed refresh worker runs for this view.</summary>
+    private int renderWorkerRunning;
+    /// <summary>Cancels a delayed refresh when the view is disposed.</summary>
+    private readonly CancellationTokenSource renderCancellation = new();
+    /// <summary>Tracks disposal so late journal events schedule no more renderer work.</summary>
+    private bool disposed;
+    /// <summary>Remembers that a refresh failure was already shown, so a failing journal does not flood notifications.</summary>
+    private bool failureNotified;
+    /// <summary>Backing field of <see cref="SearchText"/>.</summary>
+    private string searchText = string.Empty;
+    /// <summary>Backing field of <see cref="DirectionFilter"/>.</summary>
+    private string directionFilter = AllOption;
+    /// <summary>Backing field of <see cref="TransportFilter"/>.</summary>
+    private string transportFilter = AllOption;
+    /// <summary>Backing field of <see cref="ProblemsOnly"/>.</summary>
+    private bool problemsOnly;
+    /// <summary>Backing field of <see cref="Paused"/>.</summary>
+    private bool paused;
+
+    /// <summary>Gets or sets the free-text filter; changing it refreshes the view.</summary>
+    /// <value>The search text.</value>
+    private string SearchText { get => searchText; set { searchText = value ?? string.Empty; Reload(); } }
+    /// <summary>Gets or sets the direction filter; changing it refreshes the view.</summary>
+    /// <value>All, Received or Sent.</value>
+    private string DirectionFilter { get => directionFilter; set { directionFilter = value ?? AllOption; Reload(); } }
+    /// <summary>Gets or sets the transport filter; changing it refreshes the view.</summary>
+    /// <value>All or a transport name.</value>
+    private string TransportFilter { get => transportFilter; set { transportFilter = value ?? AllOption; Reload(); } }
+    /// <summary>Gets or sets whether only rejected or failed packets are shown.</summary>
+    /// <value><see langword="true"/> to show problems only.</value>
+    private bool ProblemsOnly { get => problemsOnly; set { problemsOnly = value; Reload(); } }
+    /// <summary>Gets or sets whether the view stops following new packets (the journal and logs continue); resuming catches up at once.</summary>
+    /// <value><see langword="true"/> while paused.</value>
+    private bool Paused { get => paused; set { paused = value; Reload(); } }
+
+    /// <summary>Loads the journal and follows new packets.</summary>
+    /// <returns>A task representing completion of the component lifecycle operation.</returns>
+    protected override Task OnInitializedAsync()
+    {
+        try
+        {
+            Reload();
+            Traffic.Changed += OnTrafficChanged;
+            Logger.LogDebug("The 1-Wire traffic view is following the journal.");
+        }
+        catch (Exception exception)
+        {
+            Traffic.Changed -= OnTrafficChanged;
+            Logger.LogError(exception, "Initializing the 1-Wire traffic view failed.");
+            throw;
+        }
+        return base.OnInitializedAsync();
+    }
+
+    /// <summary>Re-queries the journal with the current filters and prepares the status line.</summary>
+    private void Reload()
+    {
+        try
+        {
+            var options = Traffic.CurrentOptions;
+            if (!paused)
+            {
+                visibleEntries = Traffic.Query(new OrganicWireTrafficQuery
+                {
+                    Text = searchText,
+                    Direction = directionFilter == AllOption ? string.Empty : directionFilter,
+                    Transport = transportFilter == AllOption ? string.Empty : transportFilter,
+                    ProblemsOnly = problemsOnly,
+                    Maximum = Math.Max(1, options.JournalCapacity)
+                });
+            }
+
+            var summary = string.Format(
+                CultureInfo.CurrentCulture,
+                LT("{0} shown · {1} journaled since start · payload mode {2}"),
+                visibleEntries.Count,
+                Traffic.TotalRecorded(),
+                options.PayloadMode);
+            if (!options.Enabled)
+                summary = $"{summary} · {LT("The traffic journal is turned off (OrganicPlugins:Traffic:Enabled).")}";
+            if (paused)
+                summary = $"{summary} · {LT("View paused")}";
+            summaryText = summary;
+            payloadCaption = string.Format(CultureInfo.CurrentCulture, LT("Payload ({0})"), options.PayloadMode);
+            failureNotified = false;
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Refreshing the 1-Wire traffic view failed; the previous packets stay visible.");
+            if (!failureNotified)
+            {
+                failureNotified = true;
+                Notifications.Error(LT("The 1-Wire traffic view could not be updated."), LT("1-Wire traffic"), nameof(OrganicWireTrafficPanel));
+            }
+        }
+    }
+
+    /// <summary>Shows the payload and raw frame of the focused packet.</summary>
+    /// <param name="args">The focused-row change.</param>
+    private void OnFocusedRowChanged(GridFocusedRowChangedEventArgs args)
+    {
+        try
+        {
+            selectedEntry = args.DataItem as OrganicWireTrafficEntry;
+            if (selectedEntry is null)
+                return;
+            selectedHeading = string.Format(
+                CultureInfo.CurrentCulture,
+                LT("Packet #{0} · {1} · {2}"),
+                selectedEntry.Sequence,
+                selectedEntry.Direction,
+                selectedEntry.MessageType);
+            selectedIdentity = string.Format(
+                CultureInfo.CurrentCulture,
+                LT("Message {0} · correlation {1} · remote {2}"),
+                selectedEntry.MessageId,
+                selectedEntry.CorrelationId,
+                selectedEntry.RemoteEndpoint);
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Showing the selected 1-Wire packet failed.");
+            Notifications.Error(LT("The 1-Wire traffic view could not be updated."), LT("1-Wire traffic"), nameof(OrganicWireTrafficPanel));
+        }
+    }
+
+    /// <summary>Clears the live view; log files are unchanged.</summary>
+    /// <returns>A completed task.</returns>
+    private Task ClearAsync()
+    {
+        try
+        {
+            Traffic.Clear();
+            selectedEntry = null;
+            Reload();
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Clearing the 1-Wire traffic view failed.");
+            Notifications.Error(LT("The 1-Wire traffic view could not be updated."), LT("1-Wire traffic"), nameof(OrganicWireTrafficPanel));
+        }
+
+        return Task.CompletedTask;
+    }
+
+    /// <summary>Coalesces journal events into at most four view refreshes per second.</summary>
+    private void OnTrafficChanged()
+    {
+        try
+        {
+            if (disposed || paused)
+                return;
+            Interlocked.Exchange(ref renderPending, 1);
+            if (Interlocked.CompareExchange(ref renderWorkerRunning, 1, 0) == 0)
+                TaskRunner.Run(nameof(OrganicWireTrafficPanel), nameof(RefreshRenderAsync), _ => RefreshRenderAsync(), renderCancellation.Token);
+        }
+        catch (Exception exception)
+        {
+            Interlocked.Exchange(ref renderWorkerRunning, 0);
+            Logger.LogWarning(exception, "Scheduling a 1-Wire traffic view refresh failed.");
+        }
+    }
+
+    /// <summary>Refreshes the view while packets keep arriving.</summary>
+    /// <returns>A task that completes when the latest packets are visible.</returns>
+    private async Task RefreshRenderAsync()
+    {
+        try
+        {
+            while (!renderCancellation.IsCancellationRequested)
+            {
+                await Task.Delay(250, renderCancellation.Token).ConfigureAwait(false);
+                Interlocked.Exchange(ref renderPending, 0);
+                await InvokeAsync(() =>
+                {
+                    Reload();
+                    StateHasChanged();
+                }).ConfigureAwait(true);
+                if (Volatile.Read(ref renderPending) == 0)
+                    break;
+            }
+        }
+        catch (OperationCanceledException) when (renderCancellation.IsCancellationRequested)
+        {
+            Logger.LogDebug("A pending 1-Wire traffic view refresh was cancelled by disposal.");
+        }
+        catch (ObjectDisposedException exception)
+        {
+            Logger.LogDebug(exception, "The browser circuit closed while a 1-Wire traffic view refresh was pending.");
+        }
+        catch (Exception exception)
+        {
+            Logger.LogWarning(exception, "A 1-Wire traffic view refresh failed.");
+        }
+        finally
+        {
+            Interlocked.Exchange(ref renderWorkerRunning, 0);
+            if (!disposed
+                && Volatile.Read(ref renderPending) != 0
+                && !renderCancellation.IsCancellationRequested
+                && Interlocked.CompareExchange(ref renderWorkerRunning, 1, 0) == 0)
+                TaskRunner.Run(nameof(OrganicWireTrafficPanel), nameof(RefreshRenderAsync), _ => RefreshRenderAsync(), renderCancellation.Token);
+        }
+    }
+
+    /// <summary>Localizes a maintained UI phrase with a stable English fallback.</summary>
+    /// <param name="text">English source phrase.</param>
+    /// <returns>The localized phrase.</returns>
+    private string LT(string text)
+    {
+        try { return Localization.GetText(text); }
+        catch (Exception exception)
+        {
+            Logger.LogDebug(exception, "1-Wire traffic view localization fallback used for {Text}.", text);
+            return text;
+        }
+    }
+
+    /// <summary>Stops following the journal and cancels a pending refresh.</summary>
+    public void Dispose()
+    {
+        try
+        {
+            if (disposed)
+                return;
+            disposed = true;
+            Traffic.Changed -= OnTrafficChanged;
+            renderCancellation.Cancel();
+            renderCancellation.Dispose();
+            GC.SuppressFinalize(this);
+            Logger.LogDebug("The 1-Wire traffic view stopped following the journal.");
+        }
+        catch (ObjectDisposedException exception)
+        {
+            Logger.LogDebug(exception, "The 1-Wire traffic view was disposed concurrently.");
+        }
+    }
+}

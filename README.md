@@ -38,3 +38,11 @@ The release setup uses the canonical per-user PublisherStudio root, exact runtim
 ## License
 
 PublisherStudio project-owned source is Apache-2.0. The maintained UI uses proprietary DevExpress components under DevExpress's separate terms. The repository grants no DevExpress license and does not ship the private developer license. See `LICENSE`, `LICENSE.MD`, and `THIRD-PARTY-NOTICES.md` for the exact project/third-party boundary.
+
+## Provenance and acknowledgments
+
+PublisherStudio was created and is maintained by **Michael Fleischer (`Michi0403`)**.
+
+The project also reflects repeated co-development sessions with OpenAI's ChatGPT and Anthropic's Claude, and many LocalGPT Council reviews and missing-feature reports that were inspected and used as engineering input.
+Claude contributed from 4.7.3 onward: the 1-Wire traffic journal with its configurable logging and live in-app traffic view.
+Assistance is acknowledged openly; design decisions, repository ownership, release decisions, and responsibility remain with the maintainer.

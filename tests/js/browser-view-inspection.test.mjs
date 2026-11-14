@@ -35,6 +35,8 @@ const sandbox = {
   setTimeout: () => 1, clearTimeout() {}
 };
 sandbox.globalThis = sandbox;
+sandbox.document.defaultView = sandbox.window;
+sandbox.window.location.pathname = '/';
 const source = fs.readFileSync(new URL('../../src/PublisherStudio.Web/wwwroot/js/automationInterop.js', import.meta.url), 'utf8');
 vm.runInNewContext(source, sandbox, { filename: 'automationInterop.js' });
 assert.equal(sandbox.window.publisherAutomation.enableForSession(), true);

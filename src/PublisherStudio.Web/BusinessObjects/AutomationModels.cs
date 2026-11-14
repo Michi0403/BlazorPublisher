@@ -14,8 +14,13 @@ public enum BrowserAutomationCommandKind
     /// <summary>Read-only list of executable functions exposed by visible Panel/Div Studio modules.</summary>
     InspectModules,
     /// <summary>Executes one approved Panel/Div Studio module method within the opted-in browser tab.</summary>
-    InvokeModule
+    InvokeModule,
+    /// <summary>Draws one continuous stroke using the selected Picture Studio Brush tool.</summary>
+    BrushStroke
 }
+
+/// <summary>A point normalized to the full Picture Studio canvas bounds.</summary>
+public sealed record BrowserAutomationPoint(double X, double Y);
 
 /// <summary>
 /// Defines the supported automation request status values used to select or describe behavior in the surrounding workflow.
@@ -32,6 +37,10 @@ public sealed class BrowserAutomationCommand
     /// </summary>
     /// <value>The identifier value exposed by <see cref="BrowserAutomationCommand"/>.</value>
     public Guid Id { get; set; } = Guid.NewGuid();
+    /// <summary>Identifies the enabled browser document that owns this command.</summary>
+    public Guid? TabId { get; set; }
+    /// <summary>Ordered canvas coordinates for a brush stroke.</summary>
+    public IReadOnlyList<BrowserAutomationPoint> Points { get; set; } = [];
     /// <summary>
     /// Gets or sets the kind value that forms part of the browser automation command state consumed or produced by the surrounding workflow.
     /// </summary>

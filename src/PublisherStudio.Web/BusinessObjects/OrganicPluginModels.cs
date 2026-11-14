@@ -216,6 +216,10 @@ public sealed class OrganicPluginOptions
     /// </summary>
     /// <value>The peer expiry seconds value exposed by <see cref="OrganicPluginOptions"/>.</value>
     public int PeerExpirySeconds { get; set; } = 30;
+    /// <summary>Seconds without a browser input poll before that tab and its unfinished commands expire.</summary>
+    public int BrowserAutomationTabExpirySeconds { get; set; } = 30;
+    /// <summary>Maximum number of coordinates in one Picture Studio automation stroke.</summary>
+    public int BrowserAutomationMaximumBrushPoints { get; set; } = 128;
     /// <summary>
     /// Gets or sets the discovery receive poll seconds value that forms part of the organic plugin state consumed or produced by the surrounding workflow.
     /// </summary>
@@ -226,6 +230,8 @@ public sealed class OrganicPluginOptions
     /// </summary>
     /// <value>The maximum message bytes value exposed by <see cref="OrganicPluginOptions"/>.</value>
     public int MaximumMessageBytes { get; set; } = OrganicWireProtocol.MaximumMessageBytes;
+    /// <summary>Maximum generated asset size in bytes that the publication editor can retrieve through 1-Wire.</summary>
+    public int MaximumGeneratedMediaBytes { get; set; } = 128 * 1024 * 1024;
     /// <summary>
     /// Gets or sets the minimum recurring screen reader interval seconds value that forms part of the organic plugin state consumed or produced by the surrounding workflow.
     /// </summary>

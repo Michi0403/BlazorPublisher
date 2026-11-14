@@ -48,9 +48,9 @@ public sealed class OrganicCapabilityCatalog(
                 Capability("publisher.screen.capture.result", "Eyes: screen capture result", "Reads the bounded status and result of a previously queued browser screenshot for the next council heartbeat.", "eyes", true, false, true),
                 Capability("publisher.screenreader.start", "Start recurring screen-reader help", "Starts one debounced single-flight screen-reader session. The interval is clamped to at least 15 seconds.", "eyes", false, true, true),
                 Capability("publisher.screenreader.stop", "Stop recurring screen-reader help", "Stops a recurring screen-reader session by id.", "eyes", false, true, true),
-                Capability("publisher.input.execute", "Hands: browser input", "Queues one bounded mouse, keyboard, hover, focus or gesture command through the existing automation service.", "hands", false, true, true),
-                Capability("publisher.browser.view.inspect", "Eyes: visible browser view", "Queues a bounded read-only view of visible PublisherStudio controls, document geometry and selected elements. Passwords and entered field values are excluded. Requires an enabled browser automation tab and frontend approval; retrieve the result with publisher.input.result.", "eyes", true, true, true),
-                Capability("publisher.input.result", "Hands: browser input result", "Reads the status and bounded result of a previously queued browser input command.", "eyes", true, false, true),
+                Capability("publisher.input.execute", "Hands: browser input", "Queues mouse, keyboard, focus or a gesture in an enabled PublisherStudio browser tab. BrushStroke draws one path with the visible Picture Studio Brush tool. Reuse the tabId from publisher.browser.view.inspect.", "hands", false, true, true),
+                Capability("publisher.browser.view.inspect", "Eyes: visible browser view", "Queues a bounded read-only view of visible PublisherStudio controls, document geometry and selected elements. Passwords and entered field values are excluded. Requires an enabled browser automation tab and frontend approval; retrieve the result and tabId with publisher.input.result.", "eyes", true, true, true),
+                Capability("publisher.input.result", "Hands: browser input result", "Reads the status, bound tabId and bounded result of a previously queued browser input command.", "eyes", true, false, true),
                 Capability("publisher.openscad.generate", "OpenSCAD canonical project generation", "Validates and renders a canonical OpenScadDocument/OpenScadNode graph through the existing registered renderer path.", "hands", false, true, false),
                 Capability("publisher.spreadsheet.inspect", "Spreadsheet session inspection", "Returns bounded metadata and preview evidence for an existing workbook session without mutation.", "eyes", true, true, true),
                 Capability("publisher.text.insert.propose", "Propose text insertion", "Creates a reviewable text insertion proposal. It never mutates a publication automatically.", "hands", false, true, true),
@@ -335,8 +335,9 @@ public sealed class OrganicCapabilityCatalog(
         "publisher.screen.record" => "{\"type\":\"object\",\"properties\":{\"maximumSeconds\":{\"type\":\"integer\",\"minimum\":1,\"maximum\":15},\"includeAudio\":{\"type\":\"boolean\"}}}",
         "publisher.screenreader.start" => "{\"type\":\"object\",\"properties\":{\"selector\":{\"type\":\"string\"},\"prompt\":{\"type\":\"string\"},\"intervalSeconds\":{\"type\":\"integer\",\"minimum\":15}}}",
         "publisher.screenreader.stop" => "{\"type\":\"object\",\"required\":[\"sessionId\"],\"properties\":{\"sessionId\":{\"type\":\"string\"}}}",
-        "publisher.input.execute" => "{\"type\":\"object\",\"required\":[\"kind\"],\"properties\":{\"kind\":{\"type\":\"string\"},\"selector\":{\"type\":\"string\"},\"text\":{\"type\":\"string\"},\"key\":{\"type\":\"string\"},\"x\":{\"type\":\"number\"},\"y\":{\"type\":\"number\"}}}",
-        "publisher.input.result" => "{\"type\":\"object\",\"required\":[\"requestId\"],\"properties\":{\"requestId\":{\"type\":\"string\"}}}",
+        "publisher.input.execute" => "{\"type\":\"object\",\"required\":[\"kind\"],\"properties\":{\"points\":{\"type\":\"array\",\"minItems\":2,\"description\":\"Ordered points for kind BrushStroke only. Select Brush in Picture Studio and use selector #picture-studio-canvas. Coordinates refer to the full canvas bounds.\",\"items\":{\"type\":\"object\",\"required\":[\"x\",\"y\"],\"properties\":{\"x\":{\"type\":\"number\",\"minimum\":0,\"exclusiveMaximum\":1},\"y\":{\"type\":\"number\",\"minimum\":0,\"exclusiveMaximum\":1}}}},\"tabId\":{\"type\":\"string\",\"format\":\"uuid\"},\"kind\":{\"type\":\"string\"},\"selector\":{\"type\":\"string\"},\"text\":{\"type\":\"string\"},\"key\":{\"type\":\"string\"},\"x\":{\"type\":\"number\"},\"y\":{\"type\":\"number\"}}}",
+        "publisher.browser.view.inspect" => "{\"type\":\"object\",\"properties\":{\"tabId\":{\"type\":\"string\",\"format\":\"uuid\"},\"selector\":{\"type\":\"string\",\"maxLength\":160}}}",
+        "publisher.input.result" => "{\"type\":\"object\",\"required\":[\"requestId\"],\"properties\":{\"tabId\":{\"type\":\"string\",\"format\":\"uuid\"},\"requestId\":{\"type\":\"string\"}}}",
         "publisher.openscad.generate" => "{\"type\":\"object\",\"required\":[\"document\"],\"properties\":{\"document\":{\"type\":\"object\"}}}",
         "publisher.spreadsheet.inspect" => "{\"type\":\"object\",\"required\":[\"sessionId\"],\"properties\":{\"sessionId\":{\"type\":\"string\"}}}",
         "publisher.text.insert.propose" => "{\"type\":\"object\",\"required\":[\"text\"],\"properties\":{\"target\":{\"type\":\"string\"},\"text\":{\"type\":\"string\"},\"reason\":{\"type\":\"string\"}}}",
@@ -784,10 +785,11 @@ public sealed class OrganicWorkExecutor(
             var command = input.Enqueue(new BrowserAutomationCommand
             {
                 Kind = BrowserAutomationCommandKind.InspectView,
+                TabId = ReadTabId(parameters),
                 Selector = GetString(parameters, "selector", "body")
             });
             logger.LogInformation("Queued permitted read-only browser view {RequestId}.", command.Id);
-            return new { command.Id, command.Status, ResultCapability = "publisher.input.result" };
+            return new { command.Id, command.TabId, command.Status, ResultCapability = "publisher.input.result" };
         }
         catch (Exception exception)
         {
@@ -806,11 +808,15 @@ public sealed class OrganicWorkExecutor(
             // Capability-specific commands must never be reachable through the older,
             // more permissive generic browser-input capability. The dedicated organic
             // handlers own approval and typed module identity validation.
-            if (kind is BrowserAutomationCommandKind.InspectModules or BrowserAutomationCommandKind.InvokeModule)
-                throw new ArgumentException("Module operations require their dedicated organic capability and its approval policy.");
+            if (!Enum.IsDefined(kind))
+                throw new ArgumentException("A valid browser automation kind is required.");
+            if (kind is BrowserAutomationCommandKind.InspectView or BrowserAutomationCommandKind.InspectModules or BrowserAutomationCommandKind.InvokeModule)
+                throw new ArgumentException("Browser view and module operations require their dedicated organic capability and approval policy.");
             var command = new BrowserAutomationCommand
             {
-                Kind = kind, Selector = GetString(parameters, "selector", string.Empty), Text = GetString(parameters, "text", string.Empty),
+                Kind = kind, TabId = ReadTabId(parameters),
+                Points = kind == BrowserAutomationCommandKind.BrushStroke ? ReadBrushPoints(parameters) : [],
+                Selector = GetString(parameters, "selector", string.Empty), Text = GetString(parameters, "text", string.Empty),
                 Key = GetString(parameters, "key", string.Empty), Code = GetString(parameters, "code", string.Empty),
                 Button = GetInt(parameters, "button", 0), X = GetDouble(parameters, "x", 0), Y = GetDouble(parameters, "y", 0),
                 DeltaX = GetDouble(parameters, "deltaX", 0), DeltaY = GetDouble(parameters, "deltaY", 0),
@@ -818,7 +824,7 @@ public sealed class OrganicWorkExecutor(
                 AltKey = GetBoolean(parameters, "altKey", false), MetaKey = GetBoolean(parameters, "metaKey", false)
             };
             var queued = input.Enqueue(command);
-            return new { queued.Id, queued.Status, GestureOwner = "PublisherStudio browser automation queue" };
+            return new { queued.Id, queued.TabId, queued.Status, ResultCapability = "publisher.input.result", GestureOwner = "PublisherStudio browser automation queue" };
     
     }
     catch (Exception __serviceMethodException)
@@ -878,11 +884,13 @@ public sealed class OrganicWorkExecutor(
     {
             if (!Guid.TryParse(GetString(parameters, "requestId", string.Empty), out var requestId))
                 throw new ArgumentException("requestId is required.");
-            var command = input.GetAll().FirstOrDefault(candidate => candidate.Id == requestId)
-                ?? throw new KeyNotFoundException("Browser input request not found or expired.");
+            var tabId = ReadTabId(parameters);
+            var command = input.GetAll().FirstOrDefault(candidate =>
+                candidate.Id == requestId && (tabId is null || candidate.TabId == tabId))
+                ?? throw new KeyNotFoundException("Browser input request not found for the supplied identifiers or expired.");
             return new
             {
-                command.Id, command.Kind, command.Selector, command.Status, command.Result, command.Error,
+                command.Id, command.TabId, command.Kind, command.Selector, command.Status, command.Result, command.Error,
                 ReadyForNextHeartbeat = command.Status is AutomationRequestStatus.Completed or AutomationRequestStatus.Failed or AutomationRequestStatus.Cancelled
             };
     
@@ -896,6 +904,50 @@ public sealed class OrganicWorkExecutor(
         throw;
     }
 }
+
+    /// <summary>Reads structured Picture Studio stroke points from the work request.</summary>
+    private IReadOnlyList<BrowserAutomationPoint> ReadBrushPoints(JsonElement parameters)
+    {
+        try
+        {
+            if (!parameters.TryGetProperty("points", out var points) || points.ValueKind != JsonValueKind.Array)
+                throw new ArgumentException("BrushStroke requires points as an array of {x,y} objects.");
+
+            var result = new List<BrowserAutomationPoint>(points.GetArrayLength());
+            foreach (var point in points.EnumerateArray())
+            {
+                if (point.ValueKind != JsonValueKind.Object ||
+                    !point.TryGetProperty("x", out var x) || x.ValueKind != JsonValueKind.Number || !x.TryGetDouble(out var pointX) ||
+                    !point.TryGetProperty("y", out var y) || y.ValueKind != JsonValueKind.Number || !y.TryGetDouble(out var pointY))
+                    throw new ArgumentException("Every BrushStroke point requires numeric x and y coordinates.");
+                result.Add(new BrowserAutomationPoint(pointX, pointY));
+            }
+            return result;
+        }
+        catch (Exception exception)
+        {
+            logger.LogDebug(exception, "Invalid Picture Studio brush stroke.");
+            throw;
+        }
+    }
+
+    /// <summary>Reads the optional, previously resolved identifier of the browser document.</summary>
+    private Guid? ReadTabId(JsonElement parameters)
+    {
+        try
+        {
+            if (parameters.ValueKind != JsonValueKind.Object || !parameters.TryGetProperty("tabId", out var value))
+                return null;
+            if (value.ValueKind != JsonValueKind.String || !Guid.TryParse(value.GetString(), out var tabId) || tabId == Guid.Empty)
+                throw new ArgumentException("tabId must be a valid browser tab UUID.");
+            return tabId;
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Invalid browser automation tab parameter.");
+            throw;
+        }
+    }
 
     /// <summary>
     /// Generates open OpenSCAD for <see cref="OrganicWorkExecutor"/>, keeping the operation consistent with the state and invariants of the surrounding organic work executor workflow.

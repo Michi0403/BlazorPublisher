@@ -192,6 +192,7 @@ public static class PublisherStudioServiceCollectionExtensions
         AddSingleton<IOrganicWorkCoordinator, OrganicWorkCoordinator>(services);
         AddSingleton<ILocalGptConnectionService, LocalGptConnectionService>(services);
         AddSingleton<IPublisherAiBridgeService, PublisherAiBridgeService>(services);
+        services.AddSingleton<PublisherGeneratedMediaService>();
         AddSingleton<IPublisherDirectAiService, PublisherDirectAiService>(services);
         AddSingleton<IRecurringScreenReaderService, RecurringScreenReaderService>(services);
 

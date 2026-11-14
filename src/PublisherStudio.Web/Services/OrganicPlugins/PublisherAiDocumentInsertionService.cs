@@ -12,11 +12,13 @@ namespace PublisherStudio.Services.OrganicPlugins;
 /// <param name="editor">Original scoped publication state and undo operations.</param>
 /// <param name="richText">Native OpenXML story creator.</param>
 /// <param name="spreadsheets">Native spreadsheet parser and validator.</param>
+/// <param name="organicOptions">Configured 1-Wire transport limits.</param>
 /// <param name="logger">Structured diagnostics for insertion and skipped proposals.</param>
 public sealed class PublisherAiDocumentInsertionService(
     EditorStateService editor,
     RichTextDocumentFactory richText,
     SpreadsheetDocumentService spreadsheets,
+    Microsoft.Extensions.Options.IOptions<OrganicPluginOptions> organicOptions,
     ILogger<PublisherAiDocumentInsertionService> logger)
 {
     private sealed record PendingInsertion(Guid DocumentId, Guid PageId, Guid? ElementId, string Kind);
@@ -182,14 +184,20 @@ public sealed class PublisherAiDocumentInsertionService(
             // Validate and build the document bytes before mutating the publication.
             if (kind == "spreadsheet")
             {
-                bytes = Encoding.UTF8.GetBytes(NormalizeCsv(request.Content));
-                spreadsheets.ValidateWorkbookContent(bytes, SpreadsheetStorageFormat.Csv);
+                var spreadsheetFormat = SpreadsheetStorageFormat.Xlsx;
+                bytes = spreadsheets.CreateXlsxFromCsv(NormalizeCsv(request.Content));
+                spreadsheets.ValidateWorkbookContent(bytes, spreadsheetFormat);
             }
             else
             {
                 storyContent = richText.CreateOpenXmlFromPlainText(request.Content);
                 storyPreview = "<p>" + WebUtility.HtmlEncode(request.Content).Replace("\r\n", "\n", StringComparison.Ordinal).Replace("\n", "<br/>", StringComparison.Ordinal) + "</p>";
             }
+
+            var documentBytes = kind == "spreadsheet" ? bytes : storyContent;
+            var wireLimit = Math.Min(OneWireProtocol.MaximumMessageBytes, organicOptions.Value.MaximumMessageBytes);
+            if (documentBytes.Length > wireLimit / 4)
+                return CreateFailure("The document exceeds the 1-Wire file budget. Reduce the content or review OrganicPlugins:MaximumMessageBytes.");
 
             var previousPageId = editor.SelectedPageId;
             var previousElementId = editor.SelectedElementId;
@@ -198,7 +206,7 @@ public sealed class PublisherAiDocumentInsertionService(
             if (kind == "spreadsheet")
             {
                 var fileName = new string(title.Where(character => char.IsLetterOrDigit(character) || character is ' ' or '-' or '_').ToArray()).Trim();
-                created = editor.AddSpreadsheet(bytes, (fileName.Length == 0 ? "AI spreadsheet" : fileName) + ".csv", SpreadsheetStorageFormat.Csv);
+                created = editor.AddSpreadsheet(bytes, (fileName.Length == 0 ? "AI spreadsheet" : fileName) + ".xlsx", SpreadsheetStorageFormat.Xlsx);
             }
             else
             {
@@ -215,6 +223,7 @@ public sealed class PublisherAiDocumentInsertionService(
             return new PublisherDocumentCreateResult
             {
                 Success = true, ObjectId = created.Id, Kind = kind, Title = title, Page = targetIndex + 1, Presentation = presentation,
+                DocumentBytes = documentBytes,
                 Message = presentation == "visible"
                     ? "Created and selected in the open publication. The native editor dialog is not opened automatically."
                     : "Created silently on the requested page; the user's page and selection were kept."

@@ -21,16 +21,18 @@ public interface IUserInputAutomationService
     /// <summary>
     /// Performs claim pending as part of the user input automation service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="tabId">Browser document asking for commands bound to it.</param>
     /// <param name="maximum">Maximum value supplied to the user input automation operation and used when producing its result.</param>
     /// <returns>The collection produced by the operation.</returns>
-    IReadOnlyList<BrowserAutomationCommand> ClaimPending(int maximum = 25);
+    IReadOnlyList<BrowserAutomationCommand> ClaimPending(Guid tabId, int maximum = 25);
     /// <summary>
     /// Performs complete as part of the user input automation service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="tabId">Browser document completing its own claimed command.</param>
     /// <param name="completion">Completion value supplied to the user input automation operation and used when producing its result.</param>
     /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
-    bool Complete(Guid id, AutomationCompletion completion);
+    bool Complete(Guid id, Guid tabId, AutomationCompletion completion);
     /// <summary>
     /// Determines whether cel as part of the user input automation service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>

@@ -672,7 +672,9 @@ public sealed class LocalGptConnectionService(
                     StartInvoke(envelope, connectedId, connectedWriter, isLoopback, cancellationToken);
                     break;
                 default:
-                    results.RecordEnvelope(envelope);
+                    // Media chunks go to the requesting waiter. Do not keep copies in the work history.
+                    if (!string.Equals(envelope.CapabilityKey, PublisherGeneratedMediaService.CapabilityKey, StringComparison.Ordinal))
+                        results.RecordEnvelope(envelope);
                     break;
             }
 

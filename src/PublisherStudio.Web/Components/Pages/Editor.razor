@@ -29,6 +29,7 @@
 @inject PublisherStudio.Services.OrganicPlugins.ILocalGptDiscoveryRegistry LocalGptDiscovery
 @inject PublisherStudio.Services.OrganicPlugins.ILocalGptDiscoveryActivationService LocalGptDiscoveryActivation
 @inject PublisherStudio.Services.OrganicPlugins.IPublisherAiBridgeService AiBridge
+@inject PublisherStudio.Services.OrganicPlugins.PublisherGeneratedMediaService GeneratedMedia
 @inject PublisherStudio.Services.OrganicPlugins.IPublisherDirectAiService DirectAi
 
 <div class="razor-component-boundary">
@@ -86,6 +87,14 @@
                 <footer class="publisher-dialog-actions">
                     <DxButton Text='@LT("Close")' Click="CloseMediaAiAsync" />
                     <DxButton Text="Insert default 3D blob / Open Studio" Click="ContinueMediaAiInStudioAsync" />
+                    @if (_generatedMediaRequest != Guid.Empty)
+                    {
+                        <DxButton Text='@LT("Retrieve and insert generated media")' Enabled="@(!_mediaAiBusy)" Click="InsertGeneratedMediaAsync" />
+                    }
+                    @if (!string.IsNullOrWhiteSpace(_generatedMediaStatus))
+                    {
+                        <p role="status">@_generatedMediaStatus</p>
+                    }
                     <DxButton Text='@LT("Ask LocalGPT")' Enabled="@(!_mediaAiBusy && !string.IsNullOrWhiteSpace(_mediaAiPrompt))"
                               RenderStyle="ButtonRenderStyle.Primary" Click="AskMediaAiAsync" />
                 </footer>
@@ -1383,6 +1392,8 @@
             };
             _mediaAiPrompt = string.Empty;
             _mediaAiResponse = string.Empty;
+            _generatedMediaRequest = Guid.Empty;
+            _generatedMediaStatus = string.Empty;
             _mediaAiVisible = true;
             State.SetPanelLibraryVisible(false);
             return Task.CompletedTask;
@@ -1493,6 +1504,11 @@
                 string.IsNullOrWhiteSpace(_mediaAiPrompt)) return;
             var kind = _mediaAiKind;
             var prompt = _mediaAiPrompt.Trim();
+            var peerId = LocalGptConnection.State.PeerId;
+            var documentId = State.Document.Id;
+            var pageId = State.CurrentPage.Id;
+            _generatedMediaRequest = Guid.Empty;
+            _generatedMediaStatus = string.Empty;
             var generation = ++_mediaAiGeneration;
             var cancellation = new CancellationTokenSource();
             _mediaAiCancellation = cancellation;
@@ -1502,12 +1518,13 @@
             {
                 var instructions = kind == "blob3d"
                     ? "The user requests an actual 3D object, not a generic model recommendation. Check advertised PublisherStudio 3D/OpenSCAD capabilities and request publisher.openscad.generate through the human-approval workflow where available. Never claim a file or geometry was generated without a verified receipt. If unavailable, explain what is missing; a default animated blob is NOT a model of the requested subject. Return any draft OpenSCAD as a reviewable proposal, never silently execute it."
-                    : "A text-only Council model cannot generate image/video bytes. First verify the actual LocalGPT specialized-model inventory and registered generation DXFunctions, then invoke localai.image.generate only for an installed, ready image model with its verified modelInstallationId and normal approval gate. Other media require a corresponding real model or native PublisherStudio operation. Never substitute prose for a generated media artifact. Show a verifiable artifact receipt or explicitly report that no media was produced. Never silently mutate the publication or install models.";
+                    : "A text-only Council model cannot generate image/video bytes. First verify the actual LocalGPT specialized-model inventory and registered generation DXFunctions, then invoke localai.image.generate for pictures or localai.video.generate for video, using an installed, ready model with its verified modelInstallationId and normal approval gate. Other media require a corresponding real model or native PublisherStudio operation. Never substitute prose for a generated media artifact. Show a verifiable artifact receipt or explicitly report that no media was produced. Never silently mutate the publication or install models.";
                 var response = await AiBridge.ChatAsync(new PublisherStudio.Services.OrganicPlugins.PublisherAiChatRequest
                 {
                     TeamKey = _mediaAiTeamKey,
                     ModelNames = ConfiguredAiModels,
                     Prompt = prompt,
+                    PublisherMediaKind = kind is "picture" or "video" ? kind : string.Empty,
                     SystemPrompt = $"PublisherStudio media workflow={kind}; publication={State.Document.Name}; page={State.CurrentPage.Name}; user-selected target={State.SelectedElement?.Name ?? "new object"}. {instructions}",
                     MaxRounds = 1,
                     MaxParallelModels = 1,
@@ -1516,9 +1533,18 @@
                         : ["publisher.business-context"]
                 }, cancellation.Token).ConfigureAwait(true);
                 if (generation == _mediaAiGeneration && _mediaAiVisible)
+                {
                     _mediaAiResponse = string.IsNullOrWhiteSpace(response.Text)
                         ? "LocalGPT did not return a verifiable result. Inspect the Council run before retrying."
                         : response.Text;
+                    if (kind is "picture" or "video" && LocalGptConnection.State.HasCapability("localgpt.media.delivery.read"))
+                    {
+                        _generatedMediaRequest = response.CorrelationId;
+                        _generatedMediaPeer = peerId;
+                        _generatedMediaDocument = documentId;
+                        _generatedMediaPage = pageId;
+                    }
+                }
             }
             catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
             {

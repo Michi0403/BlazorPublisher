@@ -41,6 +41,7 @@
                                 <strong>LocalGPT AI spreadsheet</strong>
                                 <DxMemo Rows="2" @bind-Text="_aiSpreadsheetPrompt" NullText="Describe columns, data, formulas and layout for the workbook." />
                                 <DxButton Text="Create with AI" Click="RequestAiSpreadsheetAsync" Enabled="@(!_aiSubmitting && !string.IsNullOrWhiteSpace(_aiSpreadsheetPrompt))" />
+                                <DxButton Text="Edit this workbook with AI" Click="RequestAiWorkbookEditAsync" Enabled="@(_ready && !_opening && !_saving && !_aiSubmitting && !string.IsNullOrWhiteSpace(_aiSpreadsheetPrompt))" />
                                 @if (!string.IsNullOrWhiteSpace(_aiStatus))
                                 {
                                     <span role="status">@_aiStatus</span>
@@ -367,6 +368,63 @@
         {
             _aiStatus = exception.Message;
             Logger.LogError(exception, "Native spreadsheet AI request failed.");
+        }
+        finally
+        {
+            _aiSubmitting = false;
+        }
+    }
+
+    /// <summary>Requests edits to the workbook open in this browser tab.</summary>
+    private async Task RequestAiWorkbookEditAsync()
+    {
+        if (_aiSubmitting || !_ready || _opening || _saving || string.IsNullOrWhiteSpace(_aiSpreadsheetPrompt))
+            return;
+
+        _aiSubmitting = true;
+        try
+        {
+            if (!LocalGptConnection.State.HasCapability("council.run"))
+            {
+                _aiStatus = "Reconnect LocalGPT in Organic Plugins to edit this workbook with AI.";
+                return;
+            }
+
+            var tabId = await JS.InvokeAsync<string?>("publisherAutomation.getTabId");
+            if (string.IsNullOrWhiteSpace(tabId))
+            {
+                _aiStatus = "Enable browser automation for this tab in Organic Plugins.";
+                return;
+            }
+
+            var request = new OrganicCouncilPromptRequest
+            {
+                TeamKey = LocalGptConnection.State.RemoteCapabilities
+                    .Where(item => item.IsOnline && item.IsEnabled && item.Key == "council.run")
+                    .SelectMany(item => item.Skills)
+                    .FirstOrDefault(team => team.Contains("spreadsheet", StringComparison.OrdinalIgnoreCase))
+                    ?? "general",
+                MaxRounds = 1,
+                MaxParallelModels = 1,
+                RequestedOrganicCapabilities = ["publisher.browser.view.inspect", "publisher.input.execute", "publisher.input.result"],
+                Prompt = $"""
+                    Edit the workbook already open in PublisherStudio. Perform the requested changes using the visible browser controls.
+                    Use organic.plugin.invoke with publisher.browser.view.inspect, publisher.input.execute and publisher.input.result.
+                    Pass tabId '{tabId}' on all three capabilities. The workbook iframe selector is '#{FrameId}'.
+                    Inspect its controls with selector '#{FrameId} >> body'. Prefix selectors inside the iframe with '#{FrameId} >> '.
+                    Retrieve completed command results before dependent actions. Keep the workbook open for user review and Apply to frame.
+                    User request:
+                    {_aiSpreadsheetPrompt.Trim()}
+                    """
+            };
+            var correlationId = await LocalGptConnection.SendCouncilRequestAsync(request);
+            _aiStatus = $"Workbook edit request submitted ({correlationId}). Review changes in the open spreadsheet.";
+            _aiSpreadsheetPrompt = string.Empty;
+        }
+        catch (Exception exception)
+        {
+            _aiStatus = exception.Message;
+            Logger.LogError(exception, "Sending the workbook edit request failed.");
         }
         finally
         {

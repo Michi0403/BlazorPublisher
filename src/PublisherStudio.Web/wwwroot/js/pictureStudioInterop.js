@@ -1845,7 +1845,7 @@ function resizeLayer(interaction, point) { try {
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:resizeLayer@1595', __javascriptError); throw __javascriptError; }}
 
 function releaseEditorPointer(editor, pointerId) { try {
-    if (!editor?.canvas || pointerId == null) return;
+    if (!editor?.canvas || pointerId == null || !editor.canvas.hasPointerCapture(pointerId)) return;
     try { editor.canvas.releasePointerCapture(pointerId); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:suppressed-catch@1623', __caughtJavaScriptError);  }
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:releaseEditorPointer@1621', __javascriptError); throw __javascriptError; }}
 
@@ -2047,7 +2047,10 @@ function beginDrawing(editor, event) { try {
         selectionTool: isAreaFillTool(settings.tool) ? "rectangleselect" : settings.tool,
         points: [point, { ...point }]
     };
-    try { editor.canvas.setPointerCapture(event.pointerId); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:suppressed-catch@1820', __caughtJavaScriptError);  }
+    // Synthetic browser automation dispatches the full gesture synchronously on this canvas.
+    if (event.isTrusted) {
+        try { editor.canvas.setPointerCapture(event.pointerId); } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:suppressed-catch@1820', __caughtJavaScriptError);  }
+    }
     scheduleEditorRender(editor);
     event.preventDefault();
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:beginDrawing@1778', __javascriptError); throw __javascriptError; }}
@@ -2171,6 +2174,7 @@ function hidePictureGesturePointer(editor) { try {
 function updateCanvasCursor(editor) { try {
     if (!editor.canvas) return;
     const tool = editor.toolSettings?.tool || "select";
+    editor.canvas.dataset.pictureStudioTool = tool;
     editor.canvas.style.cursor = isAreaSelectionTool(tool) ? "none" : tool === "select" ? "default" : tool === "eyedropper" ? "copy" : "crosshair";
     updatePictureGestureMode(editor);
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/pictureStudioInterop.js:updateCanvasCursor@1941', __javascriptError); throw __javascriptError; }}

@@ -9,6 +9,7 @@ const events = [];
 let pointer = null;
 class Element { constructor(tag='CANVAS') { this.tagName=tag; this.id='drawing'; this.style={}; this.bounds={ left:10,top:10,width:200,height:100 }; } dispatchEvent(ev){events.push(ev);} getBoundingClientRect(){return this.bounds;} scrollIntoView(){} }
 const canvas = new Element();
+canvas.closest = () => null;
 const document = { body: new Element('BODY'), querySelector: () => canvas, elementFromPoint: () => canvas, createElement: () => { pointer = new Element('DIV'); pointer.setAttribute=()=>{}; pointer.remove=()=>{};return pointer; }, addEventListener(){} };
 document.body.appendChild = () => {};
 const messages=[];

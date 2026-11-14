@@ -146,6 +146,57 @@ public sealed class SpreadsheetDocumentService
     }
 }
 
+    /// <summary>Creates an XLSX workbook from the same delimited data used by the publication preview.</summary>
+    /// <param name="csv">Normalized CSV content, including the header row.</param>
+    /// <returns>The complete XLSX file.</returns>
+    public byte[] CreateXlsxFromCsv(string csv)
+    {
+        try
+        {
+            var rows = ParseDelimited(csv, ',');
+            using var stream = new MemoryStream();
+            stream.Write(CreateBlankXlsx());
+            stream.Position = 0;
+            using (var archive = new ZipArchive(stream, ZipArchiveMode.Update, leaveOpen: true))
+            {
+                var sheet = LoadEntry(archive, "xl/worksheets/sheet1.xml");
+                var data = sheet.Root!.Element(Main + "sheetData")!;
+                for (var rowIndex = 0; rowIndex < rows.Count; rowIndex++)
+                {
+                    var rowNumber = rowIndex + 1;
+                    var row = new XElement(Main + "row", new XAttribute("r", rowNumber));
+                    for (var columnIndex = 0; columnIndex < rows[rowIndex].Count; columnIndex++)
+                    {
+                        var value = rows[rowIndex][columnIndex];
+                        var reference = ColumnName(columnIndex + 1) + rowNumber.ToString(CultureInfo.InvariantCulture);
+                        var cell = new XElement(Main + "c", new XAttribute("r", reference));
+                        if (decimal.TryParse(value, NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var number) &&
+                            string.Equals(value, number.ToString(CultureInfo.InvariantCulture), StringComparison.Ordinal))
+                        {
+                            cell.Add(new XElement(Main + "v", number));
+                        }
+                        else
+                        {
+                            cell.SetAttributeValue("t", "inlineStr");
+                            cell.Add(new XElement(Main + "is", new XElement(Main + "t", new XAttribute(XNamespace.Xml + "space", "preserve"), value)));
+                        }
+                        row.Add(cell);
+                    }
+                    data.Add(row);
+                }
+                sheet.Root!.Element(Main + "dimension")?.Remove();
+                archive.GetEntry("xl/worksheets/sheet1.xml")!.Delete();
+                WriteEntry(archive, "xl/worksheets/sheet1.xml", sheet.ToString(SaveOptions.DisableFormatting));
+            }
+            return stream.ToArray();
+        }
+        catch (Exception exception)
+        {
+            System.Diagnostics.Trace.TraceError($"Spreadsheet XLSX creation failed: {exception}");
+            throw;
+        }
+    }
+
     /// <summary>
     /// Performs detect format as part of the spreadsheet document service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>

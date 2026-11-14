@@ -42,6 +42,9 @@ public sealed class PublisherAiChatRequest
     /// <summary>Whether the human explicitly requested a Council-generated implementation artifact.</summary>
     /// <value>Whether Council should generate a project artifact.</value>
     public bool GenerateImplementationArtifact { get; set; }
+
+    /// <summary>PublisherStudio media format requested for authenticated return to the originating editor.</summary>
+    public string PublisherMediaKind { get; set; } = string.Empty;
 }
 
 /// <summary>
@@ -179,6 +182,7 @@ public sealed class PublisherAiBridgeService(
                 {
                     Source = "PublisherStudio DevExtreme Chat",
                     ComponentRuntime = "standalone-compatible",
+                    publisherMediaKind = request.PublisherMediaKind,
                     TeamKey = teamKey
                 }, codec.JsonOptions)
             };

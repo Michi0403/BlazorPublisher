@@ -7,7 +7,7 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
 };
 (() => { try {
     const storageKey = 'publisherstudio.automation.enabled';
-    const state = { running: false, timer: 0, dragging: false, pointer: null, lastWarning: '', lastWarningTime: 0 };
+    const state = { tabId: null, running: false, timer: 0, dragging: false, pointer: null, lastWarning: '', lastWarningTime: 0 };
 
     function showAutomationError(context, error) {
         const message = String(error?.message || error || 'Automation failed.');
@@ -51,22 +51,37 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
     }
 
 
-    function resolveTarget(selector, x, y) { try {
+    function browserScope(selector) { try {
+        const separator = String(selector || '').indexOf(' >> ');
+        if (separator < 0) return { document, selector, offsetX: 0, offsetY: 0 };
+        const frame = document.querySelector(selector.slice(0, separator));
+        if (!(frame instanceof HTMLIFrameElement) || !frame.id.startsWith('spreadsheet-frame-') ||
+            !frame.contentDocument || !frame.contentWindow.location.pathname.startsWith('/spreadsheet/editor/'))
+            throw new Error('The requested Spreadsheet Studio frame is unavailable.');
+        const bounds = frame.getBoundingClientRect();
+        const visible = document.elementFromPoint(bounds.left + bounds.width / 2, bounds.top + bounds.height / 2);
+        if (visible !== frame) throw new Error('The spreadsheet frame is not currently visible.');
+        return {
+            document: frame.contentDocument,
+            selector: selector.slice(separator + 4),
+            offsetX: bounds.left + frame.clientLeft,
+            offsetY: bounds.top + frame.clientTop
+        };
+    } catch (error) { publisherStudioDiagnostics.report('automation.browserScope', error); throw error; }}
+
+    function resolveTarget(selector, x, y, owner = document) { try {
         if (selector) {
-            try {
-                const target = document.querySelector(selector);
-                if (target) return target;
-            } catch (__caughtJavaScriptError) { publisherStudioDiagnostics.report('js/automationInterop.js:suppressed-catch@11', __caughtJavaScriptError);  }
+            return owner.querySelector(selector);
         }
         if (Number.isFinite(Number(x)) && Number.isFinite(Number(y)))
-            return document.elementFromPoint(Number(x), Number(y));
-        return document.activeElement || document.body;
+            return owner.elementFromPoint(Number(x), Number(y));
+        return owner.activeElement || owner.body;
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/automationInterop.js:resolveTarget@6', __javascriptError); throw __javascriptError; }}
 
     function eventOptions(command, target) { try {
         const rect = target?.getBoundingClientRect?.();
-        const x = Number.isFinite(Number(command.x)) ? Number(command.x) : (rect ? rect.left + rect.width / 2 : 0);
-        const y = Number.isFinite(Number(command.y)) ? Number(command.y) : (rect ? rect.top + rect.height / 2 : 0);
+        const x = command.x != null && Number.isFinite(Number(command.x)) ? Number(command.x) : (rect ? rect.left + rect.width / 2 : 0);
+        const y = command.y != null && Number.isFinite(Number(command.y)) ? Number(command.y) : (rect ? rect.top + rect.height / 2 : 0);
         return {
             bubbles: true, cancelable: true, composed: true,
             clientX: x, clientY: y, screenX: x, screenY: y,
@@ -79,7 +94,8 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/automationInterop.js:eventOptions@18', __javascriptError); throw __javascriptError; }}
 
     function setNativeValue(target, value) { try {
-        const prototype = target instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype : target instanceof HTMLInputElement ? HTMLInputElement.prototype : null;
+        const owner = target.ownerDocument.defaultView;
+        const prototype = target instanceof owner.HTMLTextAreaElement ? owner.HTMLTextAreaElement.prototype : target instanceof owner.HTMLInputElement ? owner.HTMLInputElement.prototype : null;
         const setter = prototype && Object.getOwnPropertyDescriptor(prototype, 'value')?.set;
         if (setter) setter.call(target, value);
         else if ('value' in target) target.value = value;
@@ -94,18 +110,21 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
     function inspectView(selector) { try {
         if (sessionStorage.getItem(storageKey) !== 'true' || !state.running)
             throw new Error('Browser automation is not enabled for this PublisherStudio session.');
-        const root = selector ? document.querySelector(selector) : document.body;
-        if (!(root instanceof Element)) throw new Error('No visible browser view matches the selector.');
+        const scope = browserScope(selector);
+        const owner = scope.document;
+        const ownerWindow = owner.defaultView;
+        const root = scope.selector ? owner.querySelector(scope.selector) : owner.body;
+        if (!root) throw new Error('No visible browser view matches the selector.');
         const maxElements = 100, maxBytes = 18000;
-        const width = window.innerWidth, height = window.innerHeight;
-        const candidates = root.querySelectorAll('button,a,input,textarea,select,[role="button"],[role="tab"],[role="menuitem"],[role="dialog"],[role="textbox"],[data-publication-element],h1,h2,h3,h4,label,[aria-label],.dxbl-popup');
+        const width = ownerWindow.innerWidth, height = ownerWindow.innerHeight;
+        const candidates = root.querySelectorAll('button,a,input,textarea,select,canvas,iframe,[role="button"],[role="tab"],[role="menuitem"],[role="dialog"],[role="textbox"],[data-publication-element],h1,h2,h3,h4,label,[aria-label],.dxbl-popup');
         const nodes = [];
         const compact = (value, length = 100) => String(value || '').replace(/\s+/g, ' ').trim().slice(0, length);
         for (const element of candidates) {
             if (nodes.length >= maxElements) break;
             if (element.closest('[data-sensitive],[data-private],[aria-hidden="true"],input[type="password"],input[type="hidden"]')) continue;
             if (element.matches('[contenteditable], [contenteditable="true"], [type="password"], [type="hidden"]')) continue;
-            const style = window.getComputedStyle(element);
+            const style = ownerWindow.getComputedStyle(element);
             if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) continue;
             const bounds = element.getBoundingClientRect();
             if (!bounds.width || !bounds.height || bounds.right <= 0 || bounds.bottom <= 0 || bounds.left >= width || bounds.top >= height) continue;
@@ -115,15 +134,17 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
             const label = compact(element.getAttribute('aria-label') || element.getAttribute('title') || permittedText || element.getAttribute('placeholder'));
             const id = compact(element.id, 90);
             const elementId = compact(element.getAttribute('data-element-id'), 90);
-            if (!label && !id && !elementId && !element.getAttribute('role')) continue;
+            if (!label && !id && !elementId && !element.getAttribute('role') && tag !== 'canvas') continue;
+            const pictureCanvas = id === 'picture-studio-canvas' && element.dataset?.pictureStudioBound === 'true';
             nodes.push({ tag, role: compact(element.getAttribute('role'), 35), label, id, elementId,
+                ...(pictureCanvas ? { selector: '#picture-studio-canvas', drawingTool: element.dataset.pictureStudioTool } : {}),
                 kind: compact(element.getAttribute('data-element-kind'), 45),
                 selected: element.getAttribute('data-selected') === 'true',
                 disabled: element.matches(':disabled, [aria-disabled="true"]'),
                 rect: [Math.round(bounds.x),Math.round(bounds.y),Math.round(bounds.width),Math.round(bounds.height)] });
         }
         const documentNode = document.querySelector('[data-page-id]');
-        const snapshot = { path: location.pathname, title: compact(document.title),
+        const snapshot = { path: ownerWindow.location.pathname, title: compact(owner.title),
             viewport: { width, height },
             publication: documentNode ? { pageId: compact(documentNode.getAttribute('data-page-id'), 90),
                 widthMm: compact(documentNode.getAttribute('data-page-width-mm'), 16),
@@ -176,13 +197,62 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
         return JSON.stringify({ elementId, method, applied: true });
     } catch (__javascriptError) { publisherStudioDiagnostics.report('js/automationInterop.js:invokeModule', __javascriptError); throw __javascriptError; }}
 
+    function drawBrushStroke(command) { try {
+        if (sessionStorage.getItem(storageKey) !== 'true' || !state.running)
+            throw new Error('Browser automation is not enabled for this PublisherStudio session.');
+        if (document.hidden || state.dragging || command.selector !== '#picture-studio-canvas')
+            throw new Error('BrushStroke requires the visible Picture Studio canvas and an idle pointer.');
+        const canvas = document.querySelector(command.selector);
+        if (!canvas || canvas.dataset.pictureStudioBound !== 'true' || canvas.matches(':active'))
+            throw new Error('The Picture Studio canvas is unavailable or busy.');
+        if (canvas.dataset.pictureStudioTool !== 'brush')
+            throw new Error('Select Brush in the Picture Studio toolbar before drawing.');
+        if (!Array.isArray(command.points) || command.points.length < 2)
+            throw new Error('BrushStroke requires at least two canvas points.');
+
+        const bounds = canvas.getBoundingClientRect();
+        if (!bounds.width || !bounds.height) throw new Error('The Picture Studio canvas is hidden.');
+        const positions = [];
+        for (const { x, y } of command.points) {
+            if (!Number.isFinite(x) || !Number.isFinite(y) || x < 0 || x >= 1 || y < 0 || y >= 1)
+                throw new Error('BrushStroke point coordinates must be finite and in [0, 1).');
+            const clientX = bounds.left + x * bounds.width;
+            const clientY = bounds.top + y * bounds.height;
+            if (document.elementFromPoint(clientX, clientY) !== canvas)
+                throw new Error('A brush point is outside the visible canvas or covered by another control.');
+            positions.push(eventOptions({ x: clientX, y: clientY }, canvas));
+        }
+
+        const first = positions[0];
+        const last = positions.at(-1);
+        try {
+            state.dragging = true;
+            dispatchPointerAndMouse(canvas, 'down', first);
+            for (const position of positions.slice(1)) dispatchPointerAndMouse(canvas, 'move', position);
+            dispatchPointerAndMouse(canvas, 'up', last);
+        } finally {
+            state.dragging = false;
+        }
+        moveVisiblePointer(last, false);
+        return 'Brush stroke dispatched to the Picture Studio canvas. Verify the visible result in PublisherStudio.';
+    } catch (error) { publisherStudioDiagnostics.report('automation.drawBrushStroke', error); throw error; }}
+
     async function execute(command) { try {
+        if (String(command.kind || '').toLowerCase() === 'brushstroke') return drawBrushStroke(command);
         if (String(command.kind || '').toLowerCase() === 'inspectview') return inspectView(command.selector || 'body');
         if (String(command.kind || '').toLowerCase() === 'inspectmodules') return inspectModules();
         if (String(command.kind || '').toLowerCase() === 'invokemodule') return await invokeModule(command);
-        const target = resolveTarget(command.selector, command.x, command.y);
-        if (!(target instanceof Element)) throw new Error('No browser element matched the automation command.');
-        const options = eventOptions(command, target);
+        const scope = browserScope(command.selector);
+        const target = resolveTarget(scope.selector, command.x, command.y, scope.document);
+        if (!target) throw new Error('No browser element matched the automation command.');
+        if (target.closest('[inert],[data-sensitive],[data-private],[aria-hidden="true"],input[type="password"],input[type="hidden"]'))
+            throw new Error('The requested browser control is unavailable for automation.');
+        const targetCommand = command.x === 0 && command.y === 0 && scope.selector
+            ? { ...command, x: null, y: null } : command;
+        const options = eventOptions(targetCommand, target);
+        const hit = scope.document.elementFromPoint(options.clientX, options.clientY);
+        if (!hit || (hit !== target && !target.contains(hit)))
+            throw new Error('The requested browser control is covered or outside the viewport.');
         const kind = String(command.kind || '').toLowerCase();
         if (kind === 'click') target.dispatchEvent(new MouseEvent('click', options));
         else if (kind === 'doubleclick') target.dispatchEvent(new MouseEvent('dblclick', { ...options, detail: 2 }));
@@ -210,7 +280,7 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
         else if (kind === 'keypress') target.dispatchEvent(new KeyboardEvent('keypress', options));
         else throw new Error(`Unsupported browser automation command: ${command.kind}`);
         if (['click', 'doubleclick', 'mousemove', 'mousedown', 'mouseup'].includes(kind))
-            moveVisiblePointer(options, state.dragging);
+            moveVisiblePointer({clientX: options.clientX + scope.offsetX, clientY: options.clientY + scope.offsetY}, state.dragging);
         // A positioned canvas must never be scrolled after each drawing stroke.
         if (!['mousemove', 'mousedown', 'mouseup'].includes(kind))
             target.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
@@ -238,7 +308,7 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/automationInterop.js:capture@71', __javascriptError); throw __javascriptError; }}
 
     async function completeInput(id, result, error = '') { try {
-        const response = await fetch(`/api/automation/input/${encodeURIComponent(id)}/complete`, {
+        const response = await fetch(`/api/automation/input/${encodeURIComponent(id)}/complete?tabId=${state.tabId}`, {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ result, error })
         });
@@ -268,9 +338,18 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
                 window.publisherAutomation.disableForSession();
                 return;
             }
-            const inputResponse = await fetch('/api/automation/input/pending?maximum=20', { cache: 'no-store' });
+            if (!state.running) return;
+            // Duplicated tabs can inherit sessionStorage but have separate documents.
+            const browserCrypto = globalThis.crypto;
+            state.tabId ??= browserCrypto.randomUUID?.() ??
+                Array.from(browserCrypto.getRandomValues(new Uint8Array(16)), byte => byte.toString(16).padStart(2, '0')).join('');
+            const inputResponse = await fetch('/api/automation/input/pending?maximum=20&tabId=' + state.tabId, { cache: 'no-store' });
             if (!inputResponse.ok) throw new Error(`Automation input polling failed (HTTP ${inputResponse.status}).`);
             for (const command of await inputResponse.json()) {
+                if (command.tabId?.replaceAll('-', '') !== state.tabId.replaceAll('-', '')) {
+                    showAutomationError('routing', new Error('PublisherStudio returned a command for another browser tab.'));
+                    continue;
+                }
                 try { await completeInput(command.id, await execute(command)); }
                 catch (error) {
                     showAutomationError(`command ${command.kind || 'unknown'}`, error);
@@ -319,6 +398,7 @@ var publisherStudioDiagnostics = globalThis.publisherStudioJavaScriptDiagnostics
             return false;
          } catch (__javascriptError) { publisherStudioDiagnostics.report('js/automationInterop.js:disableForSession@141', __javascriptError); throw __javascriptError; }},
         isEnabled() { try { return sessionStorage.getItem(storageKey) === 'true' && state.running;  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/automationInterop.js:isEnabled@146', __javascriptError); throw __javascriptError; }},
+        getTabId() { return state.running ? state.tabId : null; },
         execute,
         capture
     };

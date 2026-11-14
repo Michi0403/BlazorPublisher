@@ -254,11 +254,11 @@
     {
       "key": "publisher.input.execute",
       "displayName": "Hands: browser input",
-      "description": "Queues one bounded mouse, keyboard, hover, focus or gesture command through the existing automation service.",
+      "description": "Queues mouse, keyboard, focus or a gesture in an enabled PublisherStudio browser tab. BrushStroke draws one path with the visible Picture Studio Brush tool.",
       "controller": "OrganicPlugins",
       "method": "POST",
       "route": "/api/organic/capabilities/publisher.input.execute",
-      "parameterSchemaJson": "{\"type\":\"object\",\"required\":[\"kind\"],\"properties\":{\"kind\":{\"type\":\"string\"},\"selector\":{\"type\":\"string\"},\"text\":{\"type\":\"string\"},\"key\":{\"type\":\"string\"},\"x\":{\"type\":\"number\"},\"y\":{\"type\":\"number\"}}}",
+      "parameterSchemaJson": "{\"type\":\"object\",\"required\":[\"kind\"],\"properties\":{\"points\":{\"type\":\"array\",\"minItems\":2,\"description\":\"Ordered points for kind BrushStroke only. Select Brush in Picture Studio and use selector #picture-studio-canvas. Coordinates refer to the full canvas bounds.\",\"items\":{\"type\":\"object\",\"required\":[\"x\",\"y\"],\"properties\":{\"x\":{\"type\":\"number\",\"minimum\":0,\"exclusiveMaximum\":1},\"y\":{\"type\":\"number\",\"minimum\":0,\"exclusiveMaximum\":1}}}},\"tabId\":{\"type\":\"string\",\"format\":\"uuid\"},\"kind\":{\"type\":\"string\"},\"selector\":{\"type\":\"string\"},\"text\":{\"type\":\"string\"},\"key\":{\"type\":\"string\"},\"x\":{\"type\":\"number\"},\"y\":{\"type\":\"number\"}}}",
       "organs": [
         "hands"
       ],
@@ -284,8 +284,8 @@
       "requiresHumanInteractionOnTargetSystem": true,
       "requiresAutomatedInteractionOnTargetSystem": true,
       "interactionValueSchemaJson": "{\"type\":\"object\",\"properties\":{}}",
-      "inputContract": "Parameters matching: {\"type\":\"object\",\"required\":[\"kind\"],\"properties\":{\"kind\":{\"type\":\"string\"},\"selector\":{\"type\":\"string\"},\"text\":{\"type\":\"string\"},\"key\":{\"type\":\"string\"},\"x\":{\"type\":\"number\"},\"y\":{\"type\":\"number\"}}}",
-      "outputContract": "A bounded JSON WorkResult associated with the original CorrelationId.",
+      "inputContract": "Pass the tabId returned by publisher.browser.view.inspect to keep input in the inspected tab. Automatic selection requires exactly one enabled tab. For BrushStroke, select Brush in Picture Studio, target #picture-studio-canvas and provide ordered normalized points.",
+      "outputContract": "A queued request id, tabId and status. Read the outcome with publisher.input.result.",
       "securityContract": "Requires an explicitly linked peer and the PublisherStudio exposure/invocation permission matrix.",
       "organicUseCase": "PublisherStudio organic capability.",
       "suggestedCouncilRoles": [
@@ -304,11 +304,11 @@
     {
       "key": "publisher.browser.view.inspect",
       "displayName": "Eyes: inspect visible PublisherStudio view",
-      "description": "Queue a bounded read-only browser DOM view including visible controls, geometry and publication element identifiers. Excludes field values/passwords and requires enabled browser automation in the linked tab.",
+      "description": "Queues a bounded read-only view of visible PublisherStudio controls, geometry and publication element identifiers in an enabled tab. Field values and passwords are excluded.",
       "controller": "OrganicPlugins",
       "method": "POST",
       "route": "/api/organic/capabilities/publisher.browser.view.inspect",
-      "parameterSchemaJson": "{\"type\":\"object\",\"properties\":{\"selector\":{\"type\":\"string\",\"maxLength\":160}}}",
+      "parameterSchemaJson": "{\"type\":\"object\",\"properties\":{\"tabId\":{\"type\":\"string\",\"format\":\"uuid\"},\"selector\":{\"type\":\"string\",\"maxLength\":160}}}",
       "organs": [
         "eyes"
       ],
@@ -329,8 +329,8 @@
       "requiresHumanInteractionOnTargetSystem": true,
       "requiresAutomatedInteractionOnTargetSystem": true,
       "interactionValueSchemaJson": "{\"type\":\"object\",\"properties\":{}}",
-      "inputContract": "Optional selector for an explicitly enabled PublisherStudio browser tab. Returns a requestId; obtain bounded view JSON with publisher.input.result.",
-      "outputContract": "A queued requestId and status; the paired input.result returns bounded visible UI roles, labels, element ids, bounds and viewport, without form values.",
+      "inputContract": "Optional selector and tabId. Omitting tabId requires exactly one enabled tab.",
+      "outputContract": "A queued request id, tabId and status. Retrieve visible roles, labels, element ids, bounds and viewport with publisher.input.result. Reuse tabId for follow-up input.",
       "securityContract": "Requires an explicitly linked peer and the PublisherStudio exposure/invocation permission matrix.",
       "organicUseCase": "PublisherStudio organic capability.",
       "suggestedCouncilRoles": [
@@ -346,11 +346,11 @@
     {
       "key": "publisher.input.result",
       "displayName": "Hands: browser input result",
-      "description": "Reads the status and bounded result of a previously queued browser input command.",
+      "description": "Reads the status, bound tabId and bounded result of a previously queued browser input command.",
       "controller": "OrganicPlugins",
       "method": "POST",
       "route": "/api/organic/capabilities/publisher.input.result",
-      "parameterSchemaJson": "{\"type\":\"object\",\"required\":[\"requestId\"],\"properties\":{\"requestId\":{\"type\":\"string\"}}}",
+      "parameterSchemaJson": "{\"type\":\"object\",\"required\":[\"requestId\"],\"properties\":{\"tabId\":{\"type\":\"string\",\"format\":\"uuid\"},\"requestId\":{\"type\":\"string\"}}}",
       "organs": [
         "eyes"
       ],
@@ -376,8 +376,8 @@
       "requiresHumanInteractionOnTargetSystem": false,
       "requiresAutomatedInteractionOnTargetSystem": false,
       "interactionValueSchemaJson": "{\"type\":\"object\",\"properties\":{}}",
-      "inputContract": "Parameters matching: {\"type\":\"object\",\"required\":[\"requestId\"],\"properties\":{\"requestId\":{\"type\":\"string\"}}}",
-      "outputContract": "A bounded JSON WorkResult associated with the original CorrelationId.",
+      "inputContract": "Pass requestId. Optionally include the tabId returned with the queue receipt to check the target.",
+      "outputContract": "The command status, bound tabId and any result or error.",
       "securityContract": "Requires an explicitly linked peer and the PublisherStudio exposure/invocation permission matrix.",
       "organicUseCase": "PublisherStudio organic capability.",
       "suggestedCouncilRoles": [

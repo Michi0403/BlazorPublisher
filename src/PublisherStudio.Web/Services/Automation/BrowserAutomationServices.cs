@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using Microsoft.Extensions.Options;
 using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services.Automation;
@@ -7,12 +8,17 @@ namespace PublisherStudio.Services.Automation;
 /// Coordinates user input automation behavior for the application, centralizing the workflow, policy, and diagnostics needed by its callers.
 /// </summary>
 /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
-public sealed class UserInputAutomationService(ILogger<UserInputAutomationService> logger) : IUserInputAutomationService
+/// <param name="options">Browser automation configuration.</param>
+public sealed class UserInputAutomationService(
+    ILogger<UserInputAutomationService> logger,
+    IOptions<OrganicPluginOptions> options) : IUserInputAutomationService
 {
     /// <summary>
     /// Stores the in-memory commands collection maintained internally by <see cref="UserInputAutomationService"/> for its current workflow state.
     /// </summary>
     private readonly ConcurrentDictionary<Guid, BrowserAutomationCommand> _commands = new();
+    private readonly Dictionary<Guid, DateTimeOffset> _tabLastSeen = new();
+    private readonly object _gate = new();
 
     /// <summary>
     /// Performs enqueue as part of the user input automation service workflow, applying the service's runtime policy, state management, and diagnostics as required.
@@ -24,12 +30,37 @@ public sealed class UserInputAutomationService(ILogger<UserInputAutomationServic
     try
     {
             ArgumentNullException.ThrowIfNull(command);
-            command.Id = command.Id == Guid.Empty ? Guid.NewGuid() : command.Id;
-            command.CreatedUtc = DateTimeOffset.UtcNow;
-            command.Status = AutomationRequestStatus.Pending;
-            _commands[command.Id] = command;
-            logger.LogInformation("Queued browser input command {CommandId} ({Kind}) for selector {Selector}.", command.Id, command.Kind, command.Selector);
-            TrimCompleted();
+            if (command.Kind == BrowserAutomationCommandKind.BrushStroke)
+            {
+                if (command.Selector != "#picture-studio-canvas")
+                    throw new InvalidOperationException("BrushStroke requires the #picture-studio-canvas selector.");
+                if (command.Points is null || command.Points.Count < 2 ||
+                    command.Points.Count > options.Value.BrowserAutomationMaximumBrushPoints)
+                    throw new InvalidOperationException("BrushStroke requires at least two points within OrganicPlugins:BrowserAutomationMaximumBrushPoints.");
+                if (command.Points.Any(point => point is null || !double.IsFinite(point.X) || !double.IsFinite(point.Y) ||
+                    point.X < 0 || point.X >= 1 || point.Y < 0 || point.Y >= 1))
+                    throw new InvalidOperationException("BrushStroke point coordinates must be finite and in [0, 1).");
+            }
+            lock (_gate)
+            {
+                var now = DateTimeOffset.UtcNow;
+                ExpireTabs(now);
+                var tabId = command.TabId ?? SelectOnlyEnabledTab();
+                if (!_tabLastSeen.ContainsKey(tabId))
+                    throw new InvalidOperationException("The requested tabId does not match a live PublisherStudio tab with browser automation enabled.");
+
+                command.TabId = tabId;
+                command.CreatedUtc = now;
+                command.CompletedUtc = null;
+                command.Status = AutomationRequestStatus.Pending;
+                command.Result = string.Empty;
+                command.Error = string.Empty;
+                if (command.Id == Guid.Empty) command.Id = Guid.NewGuid();
+                if (!_commands.TryAdd(command.Id, command))
+                    throw new InvalidOperationException("This browser input command id has already been queued.");
+                TrimCompleted();
+            }
+            logger.LogInformation("Queued browser input command {CommandId} ({Kind}) for tab {TabId}.", command.Id, command.Kind, command.TabId);
             return command;
     
     }
@@ -50,7 +81,11 @@ public sealed class UserInputAutomationService(ILogger<UserInputAutomationServic
     public IReadOnlyList<BrowserAutomationCommand> GetAll() {
     try
     {
-        return _commands.Values.OrderByDescending(command => command.CreatedUtc).Take(500).ToList().AsReadOnly();
+        lock (_gate)
+        {
+            ExpireTabs(DateTimeOffset.UtcNow);
+            return _commands.Values.OrderByDescending(command => command.CreatedUtc).Take(500).ToList().AsReadOnly();
+        }
     }
     catch (Exception __serviceMethodException)
     {
@@ -65,23 +100,29 @@ public sealed class UserInputAutomationService(ILogger<UserInputAutomationServic
     /// <summary>
     /// Performs claim pending as part of the user input automation service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
+    /// <param name="tabId">Browser document asking for commands bound to it.</param>
     /// <param name="maximum">Maximum value supplied to the user input automation operation and used when producing its result.</param>
     /// <returns>The collection produced by the operation.</returns>
-    public IReadOnlyList<BrowserAutomationCommand> ClaimPending(int maximum = 25)
+    public IReadOnlyList<BrowserAutomationCommand> ClaimPending(Guid tabId, int maximum = 25)
     {
     try
     {
-            var claimed = new List<BrowserAutomationCommand>();
-            foreach (var command in _commands.Values.Where(command => command.Status == AutomationRequestStatus.Pending).OrderBy(command => command.CreatedUtc).Take(Math.Clamp(maximum, 1, 100)))
+            if (tabId == Guid.Empty) return Array.Empty<BrowserAutomationCommand>();
+            lock (_gate)
             {
-                if (_commands.TryGetValue(command.Id, out var current) && current.Status == AutomationRequestStatus.Pending)
-                {
-                    current.Status = AutomationRequestStatus.Claimed;
-                    claimed.Add(current);
-                }
+                var now = DateTimeOffset.UtcNow;
+                ExpireTabs(now);
+                _tabLastSeen[tabId] = now;
+                var claimed = _commands.Values
+                    .Where(command => command.TabId == tabId && command.Status == AutomationRequestStatus.Pending)
+                    .OrderBy(command => command.CreatedUtc)
+                    .Take(Math.Clamp(maximum, 1, 100))
+                    .ToList();
+                foreach (var command in claimed) command.Status = AutomationRequestStatus.Claimed;
+                if (claimed.Count > 0)
+                    logger.LogDebug("Claimed {Count} browser input command(s) for tab {TabId}.", claimed.Count, tabId);
+                return claimed.AsReadOnly();
             }
-            if (claimed.Count > 0) logger.LogDebug("Claimed {Count} browser input command(s).", claimed.Count);
-            return claimed.AsReadOnly();
     
     }
     catch (Exception __serviceMethodException)
@@ -98,20 +139,26 @@ public sealed class UserInputAutomationService(ILogger<UserInputAutomationServic
     /// Performs complete as part of the user input automation service workflow, applying the service's runtime policy, state management, and diagnostics as required.
     /// </summary>
     /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="tabId">Browser document completing its own claimed command.</param>
     /// <param name="completion">Completion value supplied to the user input automation operation and used when producing its result.</param>
     /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
-    public bool Complete(Guid id, AutomationCompletion completion)
+    public bool Complete(Guid id, Guid tabId, AutomationCompletion completion)
     {
     try
     {
-            if (!_commands.TryGetValue(id, out var command)) return false;
-            command.Result = completion.Result ?? string.Empty;
-            command.Error = completion.Error ?? string.Empty;
-            command.Status = string.IsNullOrWhiteSpace(command.Error) ? AutomationRequestStatus.Completed : AutomationRequestStatus.Failed;
-            command.CompletedUtc = DateTimeOffset.UtcNow;
-            if (command.Status == AutomationRequestStatus.Failed) logger.LogWarning("Browser input command {CommandId} failed: {Error}", id, command.Error);
-            else logger.LogInformation("Browser input command {CommandId} completed.", id);
-            return true;
+            lock (_gate)
+            {
+                if (!_commands.TryGetValue(id, out var command) || command.TabId != tabId ||
+                    command.Status != AutomationRequestStatus.Claimed)
+                    return false;
+                command.Result = completion.Result ?? string.Empty;
+                command.Error = completion.Error ?? string.Empty;
+                command.Status = string.IsNullOrWhiteSpace(command.Error) ? AutomationRequestStatus.Completed : AutomationRequestStatus.Failed;
+                command.CompletedUtc = DateTimeOffset.UtcNow;
+                if (command.Status == AutomationRequestStatus.Failed) logger.LogWarning("Browser input command {CommandId} failed: {Error}", id, command.Error);
+                else logger.LogInformation("Browser input command {CommandId} completed.", id);
+                return true;
+            }
     
     }
     catch (Exception __serviceMethodException)
@@ -133,11 +180,15 @@ public sealed class UserInputAutomationService(ILogger<UserInputAutomationServic
     {
     try
     {
-            if (!_commands.TryGetValue(id, out var command)) return false;
-            command.Status = AutomationRequestStatus.Cancelled;
-            command.CompletedUtc = DateTimeOffset.UtcNow;
-            logger.LogInformation("Browser input command {CommandId} was cancelled.", id);
-            return true;
+            lock (_gate)
+            {
+                if (!_commands.TryGetValue(id, out var command) || command.Status != AutomationRequestStatus.Pending)
+                    return false;
+                command.Status = AutomationRequestStatus.Cancelled;
+                command.CompletedUtc = DateTimeOffset.UtcNow;
+                logger.LogInformation("Browser input command {CommandId} was cancelled.", id);
+                return true;
+            }
     
     }
     catch (Exception __serviceMethodException)
@@ -149,6 +200,53 @@ public sealed class UserInputAutomationService(ILogger<UserInputAutomationServic
         throw;
     }
 }
+
+    /// <summary>Resolves implicit routing only when one live browser document has enabled automation.</summary>
+    private Guid SelectOnlyEnabledTab()
+    {
+        try
+        {
+            return _tabLastSeen.Count switch
+            {
+                0 => throw new InvalidOperationException("Enable browser automation in the intended PublisherStudio tab and retry."),
+                1 => _tabLastSeen.Keys.Single(),
+                _ => throw new InvalidOperationException("Multiple PublisherStudio tabs have browser automation enabled. Pass the tabId from the earlier inspection, or enable automation only in the intended tab.")
+            };
+        }
+        catch (Exception exception)
+        {
+            logger.LogDebug(exception, "Browser automation could not select a single enabled tab.");
+            throw;
+        }
+    }
+
+    /// <summary>Expires disconnected tabs without transferring their commands to another document.</summary>
+    private void ExpireTabs(DateTimeOffset now)
+    {
+        try
+        {
+            var cutoff = now.AddSeconds(-Math.Max(1, options.Value.BrowserAutomationTabExpirySeconds));
+            var expired = _tabLastSeen.Where(tab => tab.Value < cutoff).Select(tab => tab.Key).ToHashSet();
+            if (expired.Count == 0) return;
+
+            foreach (var tabId in expired) _tabLastSeen.Remove(tabId);
+            foreach (var command in _commands.Values)
+            {
+                if (command.TabId is not { } tabId || !expired.Contains(tabId) ||
+                    command.Status is not (AutomationRequestStatus.Pending or AutomationRequestStatus.Claimed))
+                    continue;
+
+                command.Error = "The PublisherStudio browser tab stopped polling within OrganicPlugins:BrowserAutomationTabExpirySeconds. Inspect the intended tab again before retrying.";
+                command.CompletedUtc = now;
+                command.Status = AutomationRequestStatus.Failed;
+            }
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Expiring inactive browser automation tabs failed.");
+            throw;
+        }
+    }
 
     /// <summary>
     /// Performs trim completed as part of the user input automation service workflow, applying the service's runtime policy, state management, and diagnostics as required.

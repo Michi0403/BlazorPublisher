@@ -30,26 +30,43 @@ public sealed class AutomationInputController(IUserInputAutomationService input,
     public ActionResult<BrowserAutomationCommand> Enqueue([FromBody] BrowserAutomationCommand command)
     {
         if (!connection.State.IsLinked) return Conflict("Browser automation requires an explicitly linked LocalGPT peer.");
-        return Accepted(input.Enqueue(command));
+        try
+        {
+            return Accepted(input.Enqueue(command));
+        }
+        catch (InvalidOperationException exception)
+        {
+            return Conflict(exception.Message);
+        }
     }
 
     /// <summary>
     /// Returns the pending projection for the automation input API surface, obtaining current application state from the controller's collaborators and translating it into the HTTP-facing result.
     /// </summary>
+    /// <param name="tabId">Unique identifier of the enabled browser document.</param>
     /// <param name="maximum">Maximum value supplied to the automation input operation and used when producing its result.</param>
     /// <returns>The HTTP-facing result produced for the caller.</returns>
     [HttpGet("pending")]
-    public ActionResult<IReadOnlyList<BrowserAutomationCommand>> Pending([FromQuery] int maximum = 25) =>
-        connection.State.IsLinked ? Ok(input.ClaimPending(maximum)) : Ok(Array.Empty<BrowserAutomationCommand>());
+    public ActionResult<IReadOnlyList<BrowserAutomationCommand>> Pending([FromQuery] Guid tabId, [FromQuery] int maximum = 25)
+    {
+        if (tabId == Guid.Empty) return BadRequest("A browser tabId is required.");
+        return connection.State.IsLinked ? Ok(input.ClaimPending(tabId, maximum)) : Ok(Array.Empty<BrowserAutomationCommand>());
+    }
 
     /// <summary>
     /// Returns the complete projection for the automation input API surface, obtaining current application state from the controller's collaborators and translating it into the HTTP-facing result.
     /// </summary>
     /// <returns>The HTTP-facing result produced for the caller.</returns>
     /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="tabId">Browser document completing its own claimed command.</param>
     /// <param name="completion">Completion value supplied to the automation input operation and used when producing its result.</param>
     [HttpPost("{id:guid}/complete")]
-    public IActionResult Complete(Guid id, [FromBody] AutomationCompletion completion) => input.Complete(id, completion) ? NoContent() : NotFound();
+    public IActionResult Complete(Guid id, [FromQuery] Guid tabId, [FromBody] AutomationCompletion completion)
+    {
+        if (!connection.State.IsLinked) return Conflict("Browser automation requires an explicitly linked LocalGPT peer.");
+        if (tabId == Guid.Empty) return BadRequest("A browser tabId is required.");
+        return input.Complete(id, tabId, completion) ? NoContent() : NotFound();
+    }
 
     /// <summary>
     /// Determines whether cel for the automation input API operation, delegating application logic to the controller's services and returning the resulting HTTP-facing value.

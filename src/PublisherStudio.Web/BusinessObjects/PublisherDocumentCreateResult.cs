@@ -29,6 +29,10 @@ public sealed class PublisherDocumentCreateResult
     /// <value>The applied presentation name.</value>
     public string Presentation { get; set; } = string.Empty;
 
+    /// <summary>Gets or sets the complete XLSX or DOCX returned to the approved requester.</summary>
+    /// <value>Open XML document bytes.</value>
+    public byte[]? DocumentBytes { get; set; }
+
     /// <summary>Gets or sets a human-readable explanation of the outcome, including what the user must do after a failure.</summary>
     /// <value>The outcome message.</value>
     public string Message { get; set; } = string.Empty;

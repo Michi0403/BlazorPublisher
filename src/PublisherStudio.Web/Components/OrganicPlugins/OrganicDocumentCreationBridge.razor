@@ -1,0 +1,104 @@
+@namespace PublisherStudio.Components
+@implements IDisposable
+@inject IPublisherEditorSessionRegistry SessionRegistry
+@inject PublisherAiDocumentInsertionService DocumentInsertion
+@inject ILogger<OrganicDocumentCreationBridge> Logger
+
+@code {
+
+    /// <summary>
+    /// Stores the identifier under which this interactive circuit is registered as an open editor session.
+    /// </summary>
+    private Guid _sessionId;
+    /// <summary>
+    /// Stores whether the component was disposed so late callbacks are ignored.
+    /// </summary>
+    private bool _disposed;
+
+    /// <summary>
+    /// Registers this interactive circuit as an editor session after the first interactive render; prerendered instances never register.
+    /// </summary>
+    /// <param name="firstRender">Value indicating whether this is the first interactive render.</param>
+    /// <returns>A task that completes when the operation has finished.</returns>
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        try
+        {
+            if (firstRender && !_disposed && _sessionId == Guid.Empty)
+                _sessionId = SessionRegistry.Register(DescribeSessionAsync, CreateDocumentAsync);
+            return base.OnAfterRenderAsync(firstRender);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicDocumentCreationBridge)}.{nameof(OnAfterRenderAsync)} failed.");
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Builds the session snapshot on this circuit's synchronization context.
+    /// </summary>
+    /// <param name="sessionId">Identifier under which the session is registered.</param>
+    /// <returns>The current session snapshot.</returns>
+    private async Task<PublisherEditorSessionSnapshot> DescribeSessionAsync(Guid sessionId)
+    {
+        try
+        {
+            PublisherEditorSessionSnapshot? snapshot = null;
+            await InvokeAsync(() => { snapshot = DocumentInsertion.DescribeSession(sessionId); }).ConfigureAwait(true);
+            return snapshot ?? throw new InvalidOperationException("The editor session produced no snapshot.");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicDocumentCreationBridge)}.{nameof(DescribeSessionAsync)} failed.");
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Creates the approved document on this circuit's synchronization context and refreshes the layout.
+    /// </summary>
+    /// <param name="request">The approved creation request.</param>
+    /// <returns>The creation result.</returns>
+    private async Task<PublisherDocumentCreateResult> CreateDocumentAsync(PublisherDocumentCreateRequest request)
+    {
+        try
+        {
+            PublisherDocumentCreateResult? created = null;
+            await InvokeAsync(() =>
+            {
+                created = DocumentInsertion.CreateDocument(request);
+                if (created.Success)
+                    OperationalNotifications.Success($"A {created.Kind} named '{created.Title}' was added to page {created.Page} of the publication by an approved 1-Wire request.", "Organic document", nameof(OrganicDocumentCreationBridge));
+                else
+                    OperationalNotifications.Warning(created.Message, "Organic document", nameof(OrganicDocumentCreationBridge));
+                if (!_disposed) StateHasChanged();
+            }).ConfigureAwait(true);
+            return created ?? throw new InvalidOperationException("The editor session produced no result.");
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicDocumentCreationBridge)}.{nameof(CreateDocumentAsync)} failed.");
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Removes the session registration when the circuit or layout goes away.
+    /// </summary>
+    public void Dispose()
+    {
+        try
+        {
+            if (_disposed) return;
+            _disposed = true;
+            if (_sessionId != Guid.Empty) SessionRegistry.Unregister(_sessionId);
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicDocumentCreationBridge)}.{nameof(Dispose)} failed.");
+            throw;
+        }
+    }
+
+}

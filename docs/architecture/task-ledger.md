@@ -41,3 +41,9 @@
 - **Deferred:** confirm on a real installation with LocalGPT 7.0.4:
   - Story and spreadsheet AI Assist requests are inserted exactly once, both with and without a LocalGPT proposal approval.
   - Reloading the page logs no interop errors.
+
+## 4.8.1: Create wire (publisher.document.create, publisher.sessions.list)
+
+- **Closed (source implementation, compiler and runtime not executed):** approved creation of a native spreadsheet or text object from LocalGPT, and a read-only list of open editor sessions. Evidence: `PublisherEditorSessionRegistry.cs`, `PublisherDocumentCreateOrganicHandler.cs`, `PublisherSessionsListOrganicHandler.cs`, `PublisherAiDocumentInsertionService.CreateDocument`, `publisher-dx-functions.json`.
+- **Partial:** `presentation: visible` selects the new object and its page but does not open the spreadsheet or story editor dialog; `silent` keeps the user's page and selection. Text content is plain text (the existing proposal path); no Markdown/HTML conversion.
+- **Deferred:** confirm on a real installation with LocalGPT 7.2.0 that both approvals appear, the object is created once, undo removes it, and two open browser tabs require a sessionId.

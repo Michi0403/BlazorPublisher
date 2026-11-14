@@ -1185,7 +1185,7 @@ public sealed class OrganicWorkCoordinator(
                     advertised.ConfigurationKey, codec.JsonOptions);
             }
             var requiresFreshCaptureConsent = envelope.CapabilityKey is "publisher.screen.capture" or "publisher.screen.record";
-            var requiresFreshModuleConsent = string.Equals(envelope.CapabilityKey, "publisher.panel.module.invoke", StringComparison.OrdinalIgnoreCase);
+            var requiresFreshModuleConsent = envelope.CapabilityKey is "publisher.panel.module.invoke" or "publisher.document.create";
             if (requiresFreshCaptureConsent || requiresFreshModuleConsent)
             {
                 // Fresh screen capture and consequential module mutation are non-persistable.

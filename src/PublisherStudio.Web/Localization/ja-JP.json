@@ -3481,5 +3481,8 @@
   "Text.View␠paused": "表示を一時停止中",
   "Text.Packet␠#{0}␠·␠{1}␠·␠{2}": "パケット #{0} · {1} · {2}",
   "Text.Message␠{0}␠·␠correlation␠{1}␠·␠remote␠{2}": "メッセージ {0} · 相関 {1} · リモート {2}",
-  "Text.The␠1-Wire␠traffic␠view␠could␠not␠be␠updated.": "1-Wire 通信ビューを更新できませんでした。"
+  "Text.The␠1-Wire␠traffic␠view␠could␠not␠be␠updated.": "1-Wire 通信ビューを更新できませんでした。",
+  "Text.Create␠document": "ドキュメントを作成",
+  "Text.Create␠spreadsheet␠or␠text␠document": "スプレッドシートまたはテキスト文書を作成",
+  "Text.List␠open␠PublisherStudio␠sessions": "開いているPublisherStudioセッションを一覧表示"
 }

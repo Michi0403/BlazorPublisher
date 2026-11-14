@@ -185,6 +185,9 @@ public static class PublisherStudioServiceCollectionExtensions
         AddSingleton<IOrganicExecutableCapabilityHandler, MediaConversionCancelOrganicHandler>(services);
         AddSingleton<IOrganicExecutableCapabilityHandler, PanelModuleInspectOrganicHandler>(services);
         AddSingleton<IOrganicExecutableCapabilityHandler, PanelModuleInvokeOrganicHandler>(services);
+        AddSingleton<IPublisherEditorSessionRegistry, PublisherEditorSessionRegistry>(services);
+        AddSingleton<IOrganicExecutableCapabilityHandler, PublisherSessionsListOrganicHandler>(services);
+        AddSingleton<IOrganicExecutableCapabilityHandler, PublisherDocumentCreateOrganicHandler>(services);
         AddSingleton<IOrganicWorkExecutor, OrganicWorkExecutor>(services);
         AddSingleton<IOrganicWorkCoordinator, OrganicWorkCoordinator>(services);
         AddSingleton<ILocalGptConnectionService, LocalGptConnectionService>(services);

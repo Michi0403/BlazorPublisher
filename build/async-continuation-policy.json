@@ -219,6 +219,10 @@
       "ApproveCurrentAsync",
       "DeclineCurrentAsync"
     ],
+    "Components/OrganicPlugins/OrganicDocumentCreationBridge.razor": [
+      "CreateDocumentAsync",
+      "DescribeSessionAsync"
+    ],
     "Components/OrganicPlugins/OrganicSecurityPanel.razor": [
       "CreateAsync",
       "CreatePairingMaterialAsync",

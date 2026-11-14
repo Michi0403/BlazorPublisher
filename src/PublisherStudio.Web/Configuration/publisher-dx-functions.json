@@ -1079,6 +1079,105 @@
       "interactionEditor": 1,
       "configurationKey": "publisher:publisher.panel.module.invoke",
       "source": "PublisherStudio object store"
+    },
+    {
+      "key": "publisher.document.create",
+      "displayName": "Create spreadsheet or text document",
+      "description": "Creates one new native spreadsheet (CSV content) or text object in the open PublisherStudio publication after the user approves it in PublisherStudio. Approval is required every time. Use publisher.sessions.list first to see open sessions instead of asking a human for ids.",
+      "controller": "OrganicPlugins",
+      "method": "POST",
+      "route": "/api/organic/capabilities/publisher.document.create",
+      "parameterSchemaJson": "{\"type\":\"object\",\"required\":[\"kind\",\"content\"],\"properties\":{\"kind\":{\"enum\":[\"spreadsheet\",\"text\"]},\"title\":{\"type\":\"string\",\"maxLength\":120},\"content\":{\"type\":\"string\"},\"presentation\":{\"enum\":[\"visible\",\"silent\"]},\"page\":{\"type\":\"integer\",\"minimum\":1},\"sessionId\":{\"type\":\"string\"}},\"additionalProperties\":false}",
+      "organs": [
+        "hands"
+      ],
+      "skills": [
+        "document",
+        "spreadsheet",
+        "text",
+        "create"
+      ],
+      "requiredSkillKeys": [
+        "document",
+        "spreadsheet",
+        "text",
+        "create"
+      ],
+      "uiActivationKeys": [
+        "publisherstudio.spreadsheet.ai"
+      ],
+      "isOnline": true,
+      "isEnabled": true,
+      "isReadOnly": false,
+      "requiresHumanConfirmation": true,
+      "supportsScheduling": false,
+      "supportsRecurringExecution": false,
+      "requiresHumanInteractionOnTargetSystem": true,
+      "requiresAutomatedInteractionOnTargetSystem": false,
+      "interactionValueSchemaJson": "{\"type\":\"object\",\"properties\":{}}",
+      "inputContract": "kind spreadsheet or text; content (CSV for a spreadsheet, plain text for text); optional title, presentation visible (default) or silent, page (1-based) and sessionId (required only when several editors are open).",
+      "outputContract": "created object id, kind, title, page and presentation, or a clear failure that says what the user must open. Visible selects the new object; it does not open the editor dialog.",
+      "securityContract": "Existing linked-peer permission matrix plus a fresh PublisherStudio approval for every request; saved permission cannot bypass it. Content is validated by the native spreadsheet and story validators.",
+      "organicUseCase": "Create a new spreadsheet or text document in the connected PublisherStudio publication.",
+      "suggestedCouncilRoles": [
+        "spreadsheet author",
+        "writer",
+        "human collaboration coordinator"
+      ],
+      "isExposedToPeer": true,
+      "allowPeerInvocation": true,
+      "requiresFrontendUserConfirmation": true,
+      "interactionEditor": 1,
+      "configurationKey": "publisher:publisher.document.create",
+      "source": "PublisherStudio object store"
+    },
+    {
+      "key": "publisher.sessions.list",
+      "displayName": "List open PublisherStudio sessions",
+      "description": "Read-only list of the open PublisherStudio editor sessions with id, publication title, page count and the spreadsheet and text objects (id, kind, title, page). Use this instead of asking the user for session ids.",
+      "controller": "OrganicPlugins",
+      "method": "POST",
+      "route": "/api/organic/capabilities/publisher.sessions.list",
+      "parameterSchemaJson": "{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}",
+      "organs": [
+        "eyes"
+      ],
+      "skills": [
+        "session",
+        "document",
+        "spreadsheet",
+        "text"
+      ],
+      "requiredSkillKeys": [
+        "session",
+        "document",
+        "spreadsheet",
+        "text"
+      ],
+      "uiActivationKeys": [],
+      "isOnline": true,
+      "isEnabled": true,
+      "isReadOnly": true,
+      "requiresHumanConfirmation": false,
+      "supportsScheduling": false,
+      "supportsRecurringExecution": false,
+      "requiresHumanInteractionOnTargetSystem": false,
+      "requiresAutomatedInteractionOnTargetSystem": false,
+      "interactionValueSchemaJson": "{\"type\":\"object\",\"properties\":{}}",
+      "inputContract": "No parameters.",
+      "outputContract": "sessions[] with id, title, pageCount, currentPage and objects[] (id, kind, title, page); empty when no editor is open.",
+      "securityContract": "Read-only; requires an explicitly linked peer and the PublisherStudio exposure/invocation permission matrix. Lists only titles and ids, no document content.",
+      "organicUseCase": "Discover open PublisherStudio sessions and documents without asking a human for ids.",
+      "suggestedCouncilRoles": [
+        "spreadsheet author",
+        "writer"
+      ],
+      "isExposedToPeer": true,
+      "allowPeerInvocation": true,
+      "requiresFrontendUserConfirmation": false,
+      "interactionEditor": 0,
+      "configurationKey": "publisher:publisher.sessions.list",
+      "source": "PublisherStudio object store"
     }
   ]
 }

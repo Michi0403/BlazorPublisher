@@ -3481,5 +3481,8 @@
   "Text.View␠paused": "Ansicht angehalten",
   "Text.Packet␠#{0}␠·␠{1}␠·␠{2}": "Paket Nr. {0} · {1} · {2}",
   "Text.Message␠{0}␠·␠correlation␠{1}␠·␠remote␠{2}": "Nachricht {0} · Korrelation {1} · Gegenstelle {2}",
-  "Text.The␠1-Wire␠traffic␠view␠could␠not␠be␠updated.": "Die 1-Wire-Verkehrsansicht konnte nicht aktualisiert werden."
+  "Text.The␠1-Wire␠traffic␠view␠could␠not␠be␠updated.": "Die 1-Wire-Verkehrsansicht konnte nicht aktualisiert werden.",
+  "Text.Create␠document": "Dokument erstellen",
+  "Text.Create␠spreadsheet␠or␠text␠document": "Tabellenkalkulation oder Textdokument erstellen",
+  "Text.List␠open␠PublisherStudio␠sessions": "Offene PublisherStudio-Sitzungen auflisten"
 }

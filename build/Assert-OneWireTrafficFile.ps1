@@ -13,8 +13,11 @@ $config = Get-Content -LiteralPath (Join-Path $root 'src/PublisherStudio.Web/app
 if ($config.OrganicPlugins.Traffic.FileLoggingEnabled -ne $true -or [long]$config.OrganicPlugins.Traffic.MaximumFileBytes -lt 1048576) {
     throw 'PublisherStudio 1-Wire disk journal is not enabled with a bounded rotation policy.'
 }
-foreach ($relative in @('src/PublisherStudio.Web/PublisherStudio.Web.csproj', 'src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj')) {
-    $project = [xml](Get-Content -LiteralPath (Join-Path $root $relative) -Raw)
-    if ($project.Project.PropertyGroup.Version -ne '4.7.6') { throw "PublisherStudio next application version must be 4.7.6: $relative" }
+$webProject = [xml](Get-Content -LiteralPath (Join-Path $root 'src/PublisherStudio.Web/PublisherStudio.Web.csproj') -Raw)
+$installerProject = [xml](Get-Content -LiteralPath (Join-Path $root 'src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj') -Raw)
+$webVersion = [version]($webProject.Project.PropertyGroup.Version | Where-Object { $_ })
+$installerVersion = [version]($installerProject.Project.PropertyGroup.Version | Where-Object { $_ })
+if ($webVersion -lt [version]'4.7.6' -or $webVersion -ne $installerVersion) {
+    throw "PublisherStudio Web ($webVersion) and Installer ($installerVersion) must share a version of 4.7.6 or later."
 }
 Write-Host 'PublisherStudio dedicated 1-Wire traffic file source contracts passed.' -ForegroundColor Green

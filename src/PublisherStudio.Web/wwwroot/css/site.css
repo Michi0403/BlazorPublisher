@@ -1823,7 +1823,12 @@ body.publisher-printing [role="menu"], body.publisher-printing [class*="ribbon"]
 .publisher-insert-drag-ghost.kind-spreadsheet,.publisher-external-drop-ghost.kind-spreadsheet { width:210px; height:125px; display:grid; place-items:center; background:repeating-linear-gradient(0deg,#fff 0 20px,#d8e0e8 21px),repeating-linear-gradient(90deg,transparent 0 55px,#d8e0e8 56px); color:#176493; font-size:20px; }
 .publisher-external-drop-ghost.kind-spreadsheet { align-content:center; gap:6px; padding:10px; }
 .publisher-external-drop-ghost.kind-spreadsheet b { padding:4px 8px; border-radius:3px; background:#e5f2fc; color:#145f91; font-size:13px; }
-.spreadsheet-editor-dialog { position:relative; z-index:1; display:grid; grid-template-rows:48px 35px minmax(0,1fr) 56px; width:min(1380px,97vw); height:min(920px,95vh); overflow:hidden; border-radius:5px; background:#fff; box-shadow:0 20px 70px #0009; }
+.spreadsheet-editor-dialog { position:relative; z-index:1; display:grid; grid-template:"header" 48px "toolbar" 35px "assist" auto "workbook" minmax(0,1fr) "footer" minmax(56px,auto) / minmax(0,1fr); width:min(1380px,97vw); height:min(920px,95vh); overflow:hidden; border-radius:5px; background:#fff; box-shadow:0 20px 70px #0009; }
+.spreadsheet-editor-dialog > header { grid-area:header; }
+.spreadsheet-editor-dialog > .spreadsheet-editor-toolbar { grid-area:toolbar; }
+.spreadsheet-editor-dialog .spreadsheet-ai-workspace { grid-area:assist; }
+.spreadsheet-editor-dialog > .spreadsheet-editor-host { grid-area:workbook; }
+.spreadsheet-editor-dialog > footer { grid-area:footer; }
 .spreadsheet-editor-dialog > header,.spreadsheet-editor-dialog > footer { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:8px 12px; border-color:#d5d9de; }
 .spreadsheet-editor-dialog > header { border-bottom:1px solid #d5d9de; }
 .spreadsheet-editor-dialog > header div { min-width:0; display:flex; flex-direction:column; }
@@ -1835,7 +1840,7 @@ body.publisher-printing [role="menu"], body.publisher-printing [class*="ribbon"]
 .spreadsheet-editor-toolbar span { display:flex; align-items:center; gap:6px; font-size:12px; font-weight:650; color:#173e5c; }
 .spreadsheet-editor-toolbar small { color:#667483; }
 .spreadsheet-editor-host { position:relative; min-height:0; overflow:hidden; background:#fff; }
-.spreadsheet-editor-host iframe { width:100%; height:100%; border:0; background:#fff; }
+.spreadsheet-editor-host iframe { display:block; width:100%; height:100%; border:0; background:#fff; }
 .spreadsheet-editor-loading { position:absolute; inset:0; display:grid; place-content:center; justify-items:center; gap:8px; background:#fffffff0; color:#34495a; }
 .spreadsheet-editor-loading i { width:34px; height:34px; border:3px solid #c8d8e5; border-top-color:#1787d4; border-radius:50%; animation:spreadsheet-spin .8s linear infinite; }
 .spreadsheet-editor-loading span { color:#6c7b88; font-size:11px; }
@@ -5086,6 +5091,12 @@ body.publisher-printing [role="menu"], body.publisher-printing [class*="ribbon"]
 
 
 /* final15: modal selection isolation and reliable Panel/Div Studio interaction. */
+/* Keep mainframe overlays inside the canvas stacking context and suspend hit testing for modal workflows. */
+.publication-stage { isolation: isolate; }
+.publication-stage.canvas-interaction-suspended,
+.publication-stage.canvas-interaction-suspended * { pointer-events: none !important; }
+.publication-stage.selection-visuals-suppressed :is(.spreadsheet-frame, .connector-line) { outline-color: transparent !important; }
+.publication-stage.selection-visuals-suppressed .pub-connector.selected .connector-line { filter: none; }
 .publication-stage.selection-visuals-suppressed :is(.pub-element.selected,.pub-connector.selected){outline-color:transparent!important;box-shadow:none!important}
 .publication-stage.selection-visuals-suppressed :is(.selection-handle,.publisher-selection-visual-frame,.connector-control-guide,.connector-endpoint,.connector-control-point,.connector-route-handle){display:none!important}
 .publication-stage.selection-visuals-suppressed .publication-page.selection-visual-active .pub-element.selection-primary{outline-color:transparent!important}

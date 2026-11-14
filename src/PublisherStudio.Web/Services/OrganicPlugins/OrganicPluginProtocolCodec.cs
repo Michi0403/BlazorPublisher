@@ -2,7 +2,6 @@ using PublisherStudio.BusinessObjects;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace PublisherStudio.Services.OrganicPlugins;
 
@@ -15,12 +14,7 @@ public sealed class OrganicPluginProtocolCodec : IOrganicPluginProtocolCodec
     /// Gets the JSON options value that forms part of the organic plugin protocol codec state consumed or produced by the surrounding workflow.
     /// </summary>
     /// <value>The JSON options value exposed by <see cref="OrganicPluginProtocolCodec"/>.</value>
-    private readonly JsonSerializerOptions jsonOptions = new()
-    {
-        PropertyNameCaseInsensitive = true,
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-        Converters = { new JsonStringEnumConverter() }
-    };
+    private readonly JsonSerializerOptions jsonOptions = new FamilyWireJsonConventions().CreateOneWireOptions();
 
     /// <summary>
     /// Gets the JSON options value that forms part of the organic plugin protocol codec state consumed or produced by the surrounding workflow.

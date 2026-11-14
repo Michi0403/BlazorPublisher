@@ -280,4 +280,5 @@ if ($failures.Count -gt 0) {
     throw "PowerShell compatibility validation failed:`n - $($failures -join "`n - ")"
 }
 
+& (Join-Path $root 'build/Assert-FamilyProtocolCompatibility.ps1')
 Write-Host 'PowerShell compatibility validation passed for Windows PowerShell 5.1 and modern pwsh parser/runtime API usage, cross-platform path handling, and protected platform automatic-variable assignments.'

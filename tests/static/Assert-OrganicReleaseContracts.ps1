@@ -10,6 +10,11 @@ function Require([string]$Source, [string]$Token) {
 }
 $bridge = [IO.File]::ReadAllText((Join-Path $web 'Services/OrganicPlugins/PublisherAiBridgeService.cs'))
 foreach ($token in @('public List<string> RequiredCapabilities { get; set; } = [];', 'RequestedOrganicCapabilities = request.RequiredCapabilities', 'Distinct(StringComparer.OrdinalIgnoreCase).ToList()', 'UserConfirmedArtifactBuild = false', 'ResultJson = resultJson', 'public string GoalId { get; set; }', 'property.Name.Equals("GoalExecution"', 'detail.Name.Equals("GoalId"', 'GoalId = goalId, ResultJson = resultJson', 'localGpt.SendCouncilRequestAsync(', 'Math.Clamp(request.MaxRounds', 'Math.Clamp(request.MaxParallelModels', 'SaveToMemory = request.SaveToMemory')) { Require $bridge $token }
+# CapabilityResponse uses protocol-defined JSON string enums; never parse it using
+# JsonSerializerDefaults.Web without the shared OneWire enum converter.
+Require $bridge 'IOrganicPluginProtocolCodec codec,'
+Require $bridge 'rawCapabilities.GetRawText(), codec.JsonOptions'
+if ($bridge -match 'rawCapabilities\.GetRawText\(\)\s*,\s*new JsonSerializerOptions') { throw 'Council capability refresh bypasses the shared 1-Wire enum-aware serializer.' }
 if ($bridge.Contains('Return only the final human-visible answer')) { throw 'The legacy answer-only Council bridge prompt was restored.' }
 $catalog = Get-Content -LiteralPath (Join-Path $web 'Configuration/publisher-dx-functions.json') -Raw | ConvertFrom-Json
 $source = [IO.File]::ReadAllText((Join-Path $web 'Services/OrganicPlugins/MediaConversionOrganicHandlers.cs'))

@@ -92,6 +92,7 @@ public interface IPublisherAiBridgeService
 /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class PublisherAiBridgeService(
     ILocalGptConnectionService localGpt,
+    IOrganicPluginProtocolCodec codec,
     ILogger<PublisherAiBridgeService> logger) : IPublisherAiBridgeService
 {
     /// <summary>
@@ -120,8 +121,33 @@ public sealed class PublisherAiBridgeService(
         try
         {
             ArgumentNullException.ThrowIfNull(request);
-            if (!IsAvailable())
+            if (!localGpt.State.IsLinked)
                 throw new InvalidOperationException("LocalGPT is not linked or does not currently advertise Council execution.");
+            // Team definitions/capability exposure can change while the TCP link stays
+            // authenticated. Refresh that directory before checking council.run. The
+            // receiving LocalGPT goal planner separately probes live provider models.
+            var refreshId = await localGpt.SendEnvelopeAsync(new OrganicWireEnvelope
+            {
+                MessageType = OrganicWireMessageType.CapabilityRequest
+            }, cancellationToken).ConfigureAwait(false);
+            var refresh = await localGpt.WaitForResultAsync(refreshId, TimeSpan.FromSeconds(15), cancellationToken)
+                .ConfigureAwait(false);
+            if (refresh.MessageType != OrganicWireMessageType.CapabilityResponse)
+                throw new InvalidOperationException(string.IsNullOrWhiteSpace(refresh.Error)
+                    ? "LocalGPT did not return a current 1-Wire capability directory."
+                    : refresh.Error);
+            // Read the acknowledged snapshot directly: the TCP reader notifies response
+            // waiters before publishing the updated State.RemoteCapabilities collection.
+            if (refresh.Properties is null ||
+                !refresh.Properties.TryGetValue("Capabilities", out var rawCapabilities))
+                throw new InvalidDataException("LocalGPT returned a capability response without a capability directory.");
+            // Capability descriptors contain wire-protocol string enums (e.g. InteractionEditor).
+            // Use the same enum-aware codec as the authenticated TCP connection reader.
+            var currentCapabilities = JsonSerializer.Deserialize<List<OrganicCapabilityDescriptor>>(
+                rawCapabilities.GetRawText(), codec.JsonOptions) ?? [];
+            if (!currentCapabilities.Any(capability => capability.IsEnabled && capability.IsOnline &&
+                string.Equals(capability.Key, "council.run", StringComparison.OrdinalIgnoreCase)))
+                throw new InvalidOperationException("LocalGPT does not currently advertise Council execution after the live capability refresh.");
             var prompt = (request.Prompt ?? string.Empty).Trim();
             if (string.IsNullOrWhiteSpace(prompt))
                 throw new ArgumentException("A chat message is required.", nameof(request));
@@ -154,7 +180,7 @@ public sealed class PublisherAiBridgeService(
                     Source = "PublisherStudio DevExtreme Chat",
                     ComponentRuntime = "standalone-compatible",
                     TeamKey = teamKey
-                })
+                }, codec.JsonOptions)
             };
             // Keep the author's goal intact. The former answer-only wrapper suppressed tool-oriented work.
             // Author instructions originate from the request, not an internal hardcoded Council prompt.
@@ -179,6 +205,23 @@ public sealed class PublisherAiBridgeService(
                     throw new InvalidOperationException(string.IsNullOrWhiteSpace(response.Error) ? "LocalGPT returned an AI execution error." : response.Error);
                 if (response.MessageType != OrganicWireMessageType.WorkResult)
                     continue;
+
+                // A failed WorkResult is a completed transport exchange, not an empty
+                // successful Council answer. Preserve the receiving host's exact reason.
+                var status = ReadPropertyString(response, "Status");
+                if (status.Equals("Failed", StringComparison.OrdinalIgnoreCase) ||
+                    status.Equals("Cancelled", StringComparison.OrdinalIgnoreCase) ||
+                    status.Equals("Canceled", StringComparison.OrdinalIgnoreCase))
+                {
+                    var reason = string.IsNullOrWhiteSpace(response.Error)
+                        ? ReadPropertyString(response, "Error") : response.Error;
+                    throw new InvalidOperationException(string.IsNullOrWhiteSpace(reason)
+                        ? $"LocalGPT Council execution ended with status {status}."
+                        : $"LocalGPT Council execution {status}: {reason}");
+                }
+                if (!string.IsNullOrWhiteSpace(status) &&
+                    !status.Equals("Completed", StringComparison.OrdinalIgnoreCase))
+                    throw new InvalidOperationException($"LocalGPT Council returned unexpected work status {status}.");
 
                 var resultJson = ReadPropertyString(response, "ResultJson");
                 if (string.IsNullOrWhiteSpace(resultJson))

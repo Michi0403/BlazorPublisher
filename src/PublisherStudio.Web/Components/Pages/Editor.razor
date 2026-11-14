@@ -72,7 +72,7 @@
                                 <p role="status">LocalGPT council.run is unavailable. Reconnect or inspect the current 1-Wire capabilities in Organic Plugins before submitting.</p>
                             }
                             <label for="publisher-media-team">Council team</label>
-                            <DxComboBox TData="string" TValue="string" Data="@AvailableAiTeamKeys" @bind-Value="_mediaAiTeamKey" />
+                            <DxComboBox TData="string" TValue="string" InputId="publisher-media-team" Data="@AvailableAiTeamKeys" @bind-Value="_mediaAiTeamKey" />
                             <DxMemo Rows="5" @bind-Text="_mediaAiPrompt" NullText='@LT("Describe the picture, video, audio or panel you want")' />
                             @if (_mediaAiBusy) { <p role="status">@LT("LocalGPT Council is thinking...")</p> }
                             @if (!string.IsNullOrWhiteSpace(_mediaAiResponse))
@@ -106,7 +106,7 @@
                         <Template Context="objectAiHelpFormContext">
                             <p>@(State.SelectedElement?.Name) · @(State.SelectedElement?.Kind)</p>
                             <label for="publisher-object-team">Council team</label>
-                            <DxComboBox TData="string" TValue="string" Data="@AvailableAiTeamKeys" @bind-Value="_objectAiTeamKey" />
+                            <DxComboBox TData="string" TValue="string" InputId="publisher-object-team" Data="@AvailableAiTeamKeys" @bind-Value="_objectAiTeamKey" />
                             <DxMemo Rows="4" @bind-Text="_objectAiHelpPrompt" NullText='@LT("Ask LocalGPT about this object")' />
                             @if (_objectAiHelpBusy) { <p role="status">@LT("LocalGPT Council is thinking...")</p> }
                             @if (!string.IsNullOrWhiteSpace(_objectAiHelpResponse))

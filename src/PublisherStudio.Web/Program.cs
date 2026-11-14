@@ -10,10 +10,12 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting.StaticWebAssets;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Localization;
+using PublisherStudio.BusinessObjects;
 using PublisherStudio.Components;
 using PublisherStudio.Diagnostics;
 using PublisherStudio.Services;
 using PublisherStudio.Services.Configuration;
+using PublisherStudio.Services.OrganicPlugins;
 using PublisherStudio.Services.Publication;
 
 namespace PublisherStudio;
@@ -157,6 +159,11 @@ public static class Program
         builder.Services.AddScoped<ControllerRequestLoggingFilter>();
         builder.Services.AddControllersWithViews(options =>
             options.Filters.AddService<ControllerRequestLoggingFilter>());
+        // The family JSON input/enum contract applies to HTTP APIs; leave MVC's existing
+        // camel-case naming, numeric serialization and cycle handling unchanged.
+        var familyWireJsonConventions = new FamilyWireJsonConventions();
+        builder.Services.Configure<Microsoft.AspNetCore.Mvc.JsonOptions>(options =>
+            familyWireJsonConventions.ApplyEnumCompatibility(options.JsonSerializerOptions));
         builder.Services.AddLocalization();
         builder.Services.Configure<FormOptions>(options =>
         {

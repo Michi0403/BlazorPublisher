@@ -2,6 +2,7 @@ using PublisherStudio.BusinessObjects;
 using Microsoft.Extensions.Options;
 using System.Collections.Concurrent;
 using System.Text;
+using System.Text.Json;
 
 namespace PublisherStudio.Services.OrganicPlugins;
 
@@ -23,6 +24,9 @@ public sealed class OrganicWireTrafficJournal(
 {
     /// <summary>Recent packets for the live view, oldest first.</summary>
     private readonly ConcurrentQueue<OrganicWireTrafficEntry> entries = new();
+
+    /// <summary>Serializes rotation and append operations for the dedicated disk journal.</summary>
+    private readonly object fileSync = new();
 
     /// <summary>Total packets journaled since start; also the sequence of the latest entry.</summary>
     private long recorded;
@@ -92,6 +96,7 @@ public sealed class OrganicWireTrafficJournal(
                 formatter.Bound(rawFrame, traffic.MaximumStoredCharacters));
 
             WriteLog(entry, payload, rawFrame, traffic);
+            WriteFile(entry, traffic);
             entries.Enqueue(entry);
             var capacity = Math.Max(10, traffic.JournalCapacity);
             while (entries.Count > capacity)
@@ -189,6 +194,39 @@ public sealed class OrganicWireTrafficJournal(
         catch (Exception exception)
         {
             logger.LogWarning(exception, "Writing the 1-Wire traffic log lines failed.");
+        }
+    }
+
+    /// <summary>Appends the bounded packet as JSON Lines to the dedicated per-user disk log, independently of ILogger category filtering.</summary>
+    /// <param name="entry">Captured packet with the same bounded payload/raw frame used by the UI.</param>
+    /// <param name="traffic">Live file logging and rotation policy.</param>
+    private void WriteFile(OrganicWireTrafficEntry entry, OrganicWireTrafficOptions traffic)
+    {
+        if (!traffic.FileLoggingEnabled)
+            return;
+        try
+        {
+            var path = string.IsNullOrWhiteSpace(traffic.FilePath)
+                ? PublisherApplicationDataPaths.ResolveUserPath("OneWire-traffic.jsonl")
+                : Path.IsPathRooted(traffic.FilePath)
+                    ? Path.GetFullPath(traffic.FilePath)
+                    : PublisherApplicationDataPaths.ResolveUserPath(traffic.FilePath);
+            var line = JsonSerializer.Serialize(entry) + Environment.NewLine;
+            lock (fileSync)
+            {
+                var directory = Path.GetDirectoryName(path);
+                if (!string.IsNullOrWhiteSpace(directory))
+                    Directory.CreateDirectory(directory);
+                var limit = Math.Max(1024L * 1024, traffic.MaximumFileBytes);
+                if (File.Exists(path) && new FileInfo(path).Length + Encoding.UTF8.GetByteCount(line) > limit)
+                    File.Move(path, path + ".previous", overwrite: true);
+                File.AppendAllText(path, line, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+            }
+        }
+        catch (Exception exception)
+        {
+            // A disk failure must never prevent receipt display or transport delivery.
+            logger.LogWarning(exception, "The dedicated 1-Wire traffic file could not be updated; in-memory journaling continues.");
         }
     }
 

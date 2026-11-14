@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using Microsoft.Extensions.Options;
 using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services.OrganicPlugins;
@@ -7,8 +8,9 @@ namespace PublisherStudio.Services.OrganicPlugins;
 /// Singleton registry of open editor sessions. Each interactive circuit registers callbacks that run on its own
 /// synchronization context, so no circuit-scoped state is read or changed from another thread.
 /// </summary>
+/// <param name="options">Organic plugin settings; the editor timeouts are read from <c>OrganicPlugins:DocumentCreation</c>.</param>
 /// <param name="logger">Structured diagnostics for registration, listing and creation.</param>
-public sealed class PublisherEditorSessionRegistry(ILogger<PublisherEditorSessionRegistry> logger) : IPublisherEditorSessionRegistry
+public sealed class PublisherEditorSessionRegistry(IOptions<OrganicPluginOptions> options, ILogger<PublisherEditorSessionRegistry> logger) : IPublisherEditorSessionRegistry
 {
     /// <summary>One registered circuit.</summary>
     /// <param name="DescribeAsync">Builds the session snapshot on the owning circuit.</param>
@@ -66,7 +68,7 @@ public sealed class PublisherEditorSessionRegistry(ILogger<PublisherEditorSessio
                 try
                 {
                     var answer = pair.Value.DescribeAsync(pair.Key);
-                    var finished = await Task.WhenAny(answer, Task.Delay(TimeSpan.FromSeconds(10), cancellationToken)).ConfigureAwait(false);
+                    var finished = await Task.WhenAny(answer, Task.Delay(TimeSpan.FromSeconds(Math.Max(1, options.Value.DocumentCreation.SessionDescriptionTimeoutSeconds)), cancellationToken)).ConfigureAwait(false);
                     if (finished == answer) result.Add(await answer.ConfigureAwait(false));
                     else logger.LogWarning("Editor session {SessionId} did not answer the session list in time.", pair.Key);
                 }
@@ -113,9 +115,10 @@ public sealed class PublisherEditorSessionRegistry(ILogger<PublisherEditorSessio
                 return Failure($"{open.Length} editor sessions are open; call publisher.sessions.list and pass a sessionId.");
 
             var work = target.Value.CreateAsync(request);
-            var finished = await Task.WhenAny(work, Task.Delay(TimeSpan.FromSeconds(30), cancellationToken)).ConfigureAwait(false);
+            var creationTimeoutSeconds = Math.Max(1, options.Value.DocumentCreation.EditorCreationTimeoutSeconds);
+            var finished = await Task.WhenAny(work, Task.Delay(TimeSpan.FromSeconds(creationTimeoutSeconds), cancellationToken)).ConfigureAwait(false);
             if (finished != work)
-                return Failure("The PublisherStudio editor did not answer within 30 seconds; nothing was confirmed.");
+                return Failure($"The PublisherStudio editor did not answer within {creationTimeoutSeconds} seconds; nothing was confirmed.");
             return await work.ConfigureAwait(false);
         }
         catch (Exception exception)

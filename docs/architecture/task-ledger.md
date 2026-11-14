@@ -47,3 +47,7 @@
 - **Closed (source implementation, compiler and runtime not executed):** approved creation of a native spreadsheet or text object from LocalGPT, and a read-only list of open editor sessions. Evidence: `PublisherEditorSessionRegistry.cs`, `PublisherDocumentCreateOrganicHandler.cs`, `PublisherSessionsListOrganicHandler.cs`, `PublisherAiDocumentInsertionService.CreateDocument`, `publisher-dx-functions.json`.
 - **Partial:** `presentation: visible` selects the new object and its page but does not open the spreadsheet or story editor dialog; `silent` keeps the user's page and selection. Text content is plain text (the existing proposal path); no Markdown/HTML conversion.
 - **Deferred:** confirm on a real installation with LocalGPT 7.2.0 that both approvals appear, the object is created once, undo removes it, and two open browser tabs require a sessionId.
+
+## 4.8.2 - Document creation settings
+
+- **Closed (source implementation, compiler and runtime not executed):** the fixed content limit, title length and editor timeouts of 4.8.1 moved to `OrganicPlugins:DocumentCreation` (`OrganicDocumentCreationOptions`); no constant remains in the handler or registry.

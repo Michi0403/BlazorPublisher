@@ -1,16 +1,15 @@
 using System.Text.Json;
+using Microsoft.Extensions.Options;
 using PublisherStudio.BusinessObjects;
 
 namespace PublisherStudio.Services.OrganicPlugins;
 
 /// <summary>Creates a new native spreadsheet or text object in an open publication after the user approved the request in PublisherStudio.</summary>
 /// <param name="registry">Registry of open interactive editor sessions that owns the circuit-scoped editor state.</param>
+/// <param name="options">Organic plugin settings; the document creation limits are read from <c>OrganicPlugins:DocumentCreation</c>.</param>
 /// <param name="logger">Service-owned structured diagnostics for the capability operation.</param>
-public sealed class PublisherDocumentCreateOrganicHandler(IPublisherEditorSessionRegistry registry, ILogger<PublisherDocumentCreateOrganicHandler> logger) : IOrganicExecutableCapabilityHandler
+public sealed class PublisherDocumentCreateOrganicHandler(IPublisherEditorSessionRegistry registry, IOptions<OrganicPluginOptions> options, ILogger<PublisherDocumentCreateOrganicHandler> logger) : IOrganicExecutableCapabilityHandler
 {
-    /// <summary>Maximum accepted content length in characters, bounding the 1-Wire payload.</summary>
-    private const int MaximumContentCharacters = 400_000;
-
     /// <summary>Gets the catalog identifier served by this execution handler.</summary>
     /// <value>Exact capability key.</value>
     public string CapabilityKey => "publisher.document.create";
@@ -35,9 +34,12 @@ public sealed class PublisherDocumentCreateOrganicHandler(IPublisherEditorSessio
                 Presentation = ReadString(parameters, "presentation"),
                 TargetPage = parameters.TryGetProperty("page", out var page) && page.ValueKind == JsonValueKind.Number && page.TryGetInt32(out var pageNumber) ? pageNumber : null
             };
-            if (request.Content.Length > MaximumContentCharacters)
-                throw new ArgumentException("The content exceeds the bounded document size.");
-            if (request.Title.Length > 120) request.Title = request.Title[..120];
+            var limits = options.Value.DocumentCreation;
+            var maximumContentCharacters = Math.Max(1, limits.MaximumContentCharacters);
+            if (request.Content.Length > maximumContentCharacters)
+                throw new ArgumentException($"The content has {request.Content.Length} characters; the configured limit OrganicPlugins:DocumentCreation:MaximumContentCharacters is {maximumContentCharacters}.");
+            var maximumTitleCharacters = Math.Max(1, limits.MaximumTitleCharacters);
+            if (request.Title.Length > maximumTitleCharacters) request.Title = request.Title[..maximumTitleCharacters];
             var result = await registry.CreateAsync(ReadString(parameters, "sessionId"), request, cancellationToken).ConfigureAwait(false);
             if (!result.Success)
                 throw new InvalidOperationException(result.Message);

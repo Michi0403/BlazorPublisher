@@ -1254,7 +1254,9 @@ public sealed class OrganicWorkCoordinator(
                     ? OrganicWorkStatus.Declined
                     : (requiresFreshCaptureConsent || requiresFreshModuleConsent)
                         ? OrganicWorkStatus.PendingApproval
-                        : permissions.IsAllowed(envelope)
+                        : permissions.IsAllowed(envelope) ||
+                          (permission is null && advertised is { IsReadOnly: true } && !envelope.RequiresHumanInteractionOnTargetSystem)
+                            // A read-only capability that asks for no confirmation and has no saved rule runs without an approval nobody can give.
                             ? OrganicWorkStatus.Queued
                             : OrganicWorkStatus.PendingApproval
             };

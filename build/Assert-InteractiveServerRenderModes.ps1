@@ -13,6 +13,10 @@ $expected = [ordered]@{
     'Components/Pages/OrganicPlugins.razor' = '@rendermode InteractiveServer'
     # This tiny diagnostics island intentionally does not prerender because its only purpose is browser attachment.
     'Components/Layout/JavaScriptDiagnosticsBridge.razor' = '@rendermode @(new InteractiveServerRenderMode(prerender: false))'
+    # The layout is rendered statically, so these two layout-level islands need their own interactive boundary:
+    # without it the approval buttons do nothing and no editor session is registered for 1-Wire requests.
+    'Components/OrganicPlugins/OrganicApprovalBar.razor' = '@rendermode @(new InteractiveServerRenderMode(prerender: false))'
+    'Components/OrganicPlugins/OrganicDocumentCreationBridge.razor' = '@rendermode @(new InteractiveServerRenderMode(prerender: false))'
 }
 $utf8 = New-Object System.Text.UTF8Encoding($false)
 

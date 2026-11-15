@@ -675,7 +675,7 @@ function Complete-ReleaseBundle {
         Move-OrReuseReleaseFile -SourcePath $zipPath -DestinationDirectory $versionDirectory -Move | Out-Null
     }
     Move-OrReuseReleaseFile -SourcePath $DocumentationPdfPath -DestinationDirectory $versionDirectory -Move | Out-Null
-    foreach ($supportFile in @($ReadmePath, $LicensePath, $WireProtocolPackagePath, $SetupIconPath)) {
+    foreach ($supportFile in @($ReadmePath, $LicensePath, (Join-Path $root 'THIRD-PARTY-NOTICES.md'), $WireProtocolPackagePath, $SetupIconPath)) {
         if (-not (Test-Path -LiteralPath $supportFile -PathType Leaf)) { throw "Required upload-ready release file is missing: $supportFile" }
         Move-OrReuseReleaseFile -SourcePath $supportFile -DestinationDirectory $versionDirectory | Out-Null
     }

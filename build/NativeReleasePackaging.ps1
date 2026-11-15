@@ -44,6 +44,20 @@ function Test-TargetMatchesHostArchitecture([string]$RuntimeIdentifier) {
     if ($RuntimeIdentifier.EndsWith('x64')) { return $hostArchitecture -eq 'x64' }
     return $false
 }
+function Assert-PublisherMacPackageResources([string]$ResourcesDirectory) {
+    foreach ($name in @('README.txt', 'LICENSE.txt', 'background.png')) {
+        $path = Join-Path $ResourcesDirectory $name
+        if (-not (Test-Path -LiteralPath $path -PathType Leaf)) { throw "macOS Installer resource missing: $path" }
+        if ((Get-Item -LiteralPath $path).Length -eq 0) { throw "macOS Installer resource empty: $path" }
+    }
+    $backgroundPath = Join-Path $ResourcesDirectory 'background.png'
+    $header = [IO.File]::ReadAllBytes($backgroundPath)
+    $pngSignature = [byte[]]@(137,80,78,71,13,10,26,10)
+    if ($header.Length -lt $pngSignature.Length) { throw "macOS Installer background is not PNG: $backgroundPath" }
+    for ($i=0; $i -lt $pngSignature.Length; $i++) {
+        if ($header[$i] -ne $pngSignature[$i]) { throw "macOS Installer background has an invalid PNG signature: $backgroundPath" }
+    }
+}
 function Write-Utf8NoBom([string]$Path, [string]$Text) {
     [IO.File]::WriteAllText($Path, $Text, [Text.UTF8Encoding]::new($false))
 }
@@ -1409,6 +1423,8 @@ function New-MacPkg([string]$AppPath,[string]$Destination) {
     $pkgScripts = Join-Path ([IO.Path]::GetTempPath()) ("pkg-scripts-" + [Guid]::NewGuid().ToString('N'))
     $componentPackage = Join-Path ([IO.Path]::GetTempPath()) ("pkg-component-" + [Guid]::NewGuid().ToString('N') + '.pkg')
     $expandedPackage = Join-Path ([IO.Path]::GetTempPath()) ("pkg-expanded-" + [Guid]::NewGuid().ToString('N'))
+    $distributionPath = Join-Path ([IO.Path]::GetTempPath()) ("pkg-distribution-" + [Guid]::NewGuid().ToString('N') + '.xml')
+    $pkgResources = Join-Path ([IO.Path]::GetTempPath()) ("pkg-resources-" + [Guid]::NewGuid().ToString('N'))
     $applicationsRoot = Join-Path $pkgRoot 'Applications'
     New-Item -ItemType Directory -Path $applicationsRoot -Force | Out-Null
     New-Item -ItemType Directory -Path $pkgScripts -Force | Out-Null
@@ -1556,8 +1572,58 @@ exit 0
 
         Write-Host "Validated component PKG payload root /Applications/$appName with Info.plist and executable content." -ForegroundColor Green
 
+        # Installer pages (welcome, read me, license, background) come from repository files, as in LocalGPT.
+        New-Item -ItemType Directory -Path $pkgResources -Force | Out-Null
+        $repositoryRoot = Split-Path -Parent $PSScriptRoot
+        $readmeSource = Join-Path $repositoryRoot 'README.md'
+        $licenseSource = Join-Path $repositoryRoot 'LICENSE.MD'
+        if (-not (Test-Path -LiteralPath $licenseSource -PathType Leaf)) { $licenseSource = Join-Path $repositoryRoot 'LICENSE' }
+        $noticesSource = Join-Path $repositoryRoot 'THIRD-PARTY-NOTICES.md'
+        $backgroundSource = if ([string]::IsNullOrWhiteSpace($DmgBackgroundPath)) {
+            Join-Path $repositoryRoot 'assets/PublisherStudio.png'
+        } else { $DmgBackgroundPath }
+        foreach ($resourceSource in @($readmeSource, $licenseSource, $noticesSource, $backgroundSource)) {
+            if (-not (Test-Path -LiteralPath $resourceSource -PathType Leaf) -or
+                (Get-Item -LiteralPath $resourceSource).Length -eq 0) {
+                throw "Missing or empty macOS Installer resource: $resourceSource"
+            }
+        }
+        Write-Utf8NoBom (Join-Path $pkgResources 'README.txt') ([IO.File]::ReadAllText($readmeSource))
+        Write-Utf8NoBom (Join-Path $pkgResources 'LICENSE.txt') (([IO.File]::ReadAllText($licenseSource)) + [Environment]::NewLine + [Environment]::NewLine + ([IO.File]::ReadAllText($noticesSource)))
+        Copy-Item -LiteralPath $backgroundSource -Destination (Join-Path $pkgResources 'background.png') -Force
+        Assert-PublisherMacPackageResources -ResourcesDirectory $pkgResources
+
+        $componentPackageName = [IO.Path]::GetFileName($componentPackage)
+        $distributionTitle = "$ProductName $Version"
+        $escapedDistributionTitle = [Security.SecurityElement]::Escape($distributionTitle)
+        $escapedIdentifier = [Security.SecurityElement]::Escape($identifier)
+        $escapedComponentPackageName = [Security.SecurityElement]::Escape($componentPackageName)
+        $distributionXml = @"
+<?xml version="1.0" encoding="utf-8"?>
+<installer-gui-script minSpecVersion="1">
+  <title>$escapedDistributionTitle</title>
+  <welcome file="README.txt" mime-type="text/plain"/>
+  <readme file="README.txt" mime-type="text/plain"/>
+  <license file="LICENSE.txt" mime-type="text/plain"/>
+  <background file="background.png" mime-type="image/png" alignment="center" scaling="proportional"/>
+  <options customize="never" require-scripts="false"/>
+  <choices-outline>
+    <line choice="default"/>
+  </choices-outline>
+  <choice id="default" visible="false">
+    <pkg-ref id="$escapedIdentifier"/>
+  </choice>
+  <pkg-ref id="$escapedIdentifier" version="$Version" onConclusion="none">$escapedComponentPackageName</pkg-ref>
+</installer-gui-script>
+"@
+        Write-Utf8NoBom $distributionPath $distributionXml
+
         Remove-Item -LiteralPath $Destination -Force -ErrorAction SilentlyContinue
-        $productBuildArguments = @('--package', $componentPackage)
+        $productBuildArguments = @(
+            '--distribution', $distributionPath,
+            '--resources', $pkgResources,
+            '--package-path', ([IO.Path]::GetDirectoryName($componentPackage))
+        )
         if ($script:MacInstallerSigningIdentity) { $productBuildArguments += @('--sign', $script:MacInstallerSigningIdentity) }
         $productBuildArguments += $Destination
         & $productbuild @productBuildArguments 2>&1 | ForEach-Object { Write-Host $_ }
@@ -1579,6 +1645,24 @@ exit 0
             Write-Warning "The final distribution PKG $Destination expanded without readable package content. The package was removed."
             Remove-Item -LiteralPath $Destination -Force -ErrorAction SilentlyContinue
             return $false
+        }
+        # Check the shipped package, not the staging input: every Installer page must be packaged and referenced.
+        $expandedDistributionPath = Join-Path $expandedPackage 'Distribution'
+        if (-not (Test-Path -LiteralPath $expandedDistributionPath -PathType Leaf)) {
+            Write-Warning "The final distribution PKG $Destination did not contain Installer distribution metadata. The package was removed."
+            Remove-Item -LiteralPath $Destination -Force -ErrorAction SilentlyContinue
+            return $false
+        }
+        [xml]$expandedDistributionXml = Get-Content -LiteralPath $expandedDistributionPath -Raw -ErrorAction Stop
+        foreach ($resourceName in @('README.txt','LICENSE.txt','background.png')) {
+            $expandedResource = Join-Path (Join-Path $expandedPackage 'Resources') $resourceName
+            if (-not (Test-Path -LiteralPath $expandedResource -PathType Leaf) -or
+                (Get-Item -LiteralPath $expandedResource).Length -eq 0) {
+                throw "macOS Installer package resource '$resourceName' is missing/empty in $Destination."
+            }
+            if ($null -eq $expandedDistributionXml.SelectSingleNode("/installer-gui-script/*[@file='$resourceName']")) {
+                throw "macOS Installer distribution does not reference packaged resource '$resourceName'."
+            }
         }
         if ($script:MacInstallerSigningIdentity) {
             & $pkgutil --check-signature $Destination 2>&1 | ForEach-Object { Write-Host $_ }
@@ -1611,6 +1695,8 @@ exit 0
         Remove-Item -LiteralPath $pkgScripts -Recurse -Force -ErrorAction SilentlyContinue
         Remove-Item -LiteralPath $componentPackage -Force -ErrorAction SilentlyContinue
         Remove-Item -LiteralPath $expandedPackage -Recurse -Force -ErrorAction SilentlyContinue
+        Remove-Item -LiteralPath $distributionPath -Force -ErrorAction SilentlyContinue
+        Remove-Item -LiteralPath $pkgResources -Recurse -Force -ErrorAction SilentlyContinue
     }
 }
 function New-AppImage([string]$Source,[string]$Destination) {

@@ -35,6 +35,12 @@ function Test-MacNotaryTransientServiceRecoveryRequired([string]$Details) {
     if ([string]::IsNullOrWhiteSpace($Details)) { return $false }
     return $Details -match '(?i)(NSURLError|internet connection[^\r\n]*(?:offline|lost)|network[^\r\n]*(?:offline|unavailable|failed|error)|could not connect to (?:the )?server|connection[^\r\n]*(?:reset|refused|lost)|request[^\r\n]*timed out|operation[^\r\n]*timed out|HTTP[^\r\n]*(?:408|425|429|500|502|503|504)|service[^\r\n]*(?:temporarily unavailable|unavailable|busy)|server[^\r\n]*(?:temporarily unavailable|unavailable|busy))'
 }
+function Test-MacNotaryAgreementPropagationRecoveryRequired([string]$Details) {
+    if ([string]::IsNullOrWhiteSpace($Details)) { return $false }
+    # Apple can intermittently return this exact agreement error for an otherwise usable profile.
+    # A generic HTTP 403 is not retryable: do not hide unrelated authorization failures.
+    return (($Details -match '(?i)HTTP status code:\s*403\b') -and ($Details -match '(?i)A required agreement is missing or has expired'))
+}
 function Test-CompleteApiNotaryCredentials {
     return [bool]((Get-EnvironmentText 'APPLE_NOTARY_KEY_ID') -and (Get-EnvironmentText 'APPLE_NOTARY_ISSUER') -and (Get-EnvironmentText 'APPLE_NOTARY_KEY_PATH'))
 }
@@ -103,6 +109,7 @@ if ($profile) {
     if ($keychainPath) { $profileArguments += @('--keychain', $keychainPath) }
     $probeSucceeded = $false
     $lastDetails = ''
+    $attemptDiagnostics = @()
     for ($attempt = 1; $attempt -le 5; $attempt++) {
         $nativePreferenceVariable = Get-Variable -Name PSNativeCommandUseErrorActionPreference -ErrorAction SilentlyContinue
         $previousNativePreference = $null
@@ -119,7 +126,8 @@ if ($profile) {
         }
         if ($probeExitCode -eq 0) { $probeSucceeded = $true; break }
         $lastDetails = (($probe | Select-Object -Last 12) -join [Environment]::NewLine)
-        if ((Test-MacNotaryCredentialRecoveryRequired -Details $lastDetails) -or (Test-MacNotaryTransientServiceRecoveryRequired -Details $lastDetails)) {
+        $attemptDiagnostics += "Attempt ${attempt}:$([Environment]::NewLine)$lastDetails"
+        if ((Test-MacNotaryCredentialRecoveryRequired -Details $lastDetails) -or (Test-MacNotaryTransientServiceRecoveryRequired -Details $lastDetails) -or (Test-MacNotaryAgreementPropagationRecoveryRequired -Details $lastDetails)) {
             if ($attempt -lt 5) {
                 Write-Warning "Apple notarization startup probe attempt $attempt failed transiently; retrying in 10 seconds before any expensive build work starts."
                 Write-Warning $lastDetails
@@ -132,7 +140,7 @@ if ($profile) {
     if (-not $probeSucceeded) {
         $diagnostic = "xcrun notarytool history --keychain-profile '$profile'"
         if ($keychainPath) { $diagnostic += " --keychain '$keychainPath'" }
-        throw "The Apple notarization profile '$profile' is not readable before the release starts. No expensive build work has been performed. Read-only diagnostic: $diagnostic$([Environment]::NewLine)$lastDetails"
+        throw "The Apple notarization profile '$profile' is not readable before the release starts. No expensive build work has been performed. Read-only diagnostic: $diagnostic$([Environment]::NewLine)$($attemptDiagnostics -join ([Environment]::NewLine + [Environment]::NewLine))"
     }
     Write-Host "Apple notarization credentials are ready through keychain profile '$profile'." -ForegroundColor Green
 }

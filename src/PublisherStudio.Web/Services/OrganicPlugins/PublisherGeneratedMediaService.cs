@@ -46,6 +46,8 @@ public sealed class PublisherGeneratedMediaService(ILocalGptConnectionService lo
                 }
             }, cancellationToken).ConfigureAwait(false);
             var response = await localGpt.WaitForResultAsync(requestId, TimeSpan.FromSeconds(30), cancellationToken).ConfigureAwait(false);
+            if (response.MessageType == OrganicWireMessageType.ApprovalRequired)
+                throw new InvalidOperationException("LocalGPT requested approval for the media transfer. Its peer-scoped media delivery capability must be available before retrying.");
             if (response.MessageType == OrganicWireMessageType.Error)
                 throw new InvalidOperationException(string.IsNullOrWhiteSpace(response.Error) ? "LocalGPT could not return the generated media." : response.Error);
             if (response.MessageType != OrganicWireMessageType.WorkResult || !string.Equals(response.SourcePeerId, peerId, StringComparison.OrdinalIgnoreCase) ||

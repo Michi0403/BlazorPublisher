@@ -9,7 +9,14 @@ const handlers = read('src/PublisherStudio.Web/Services/OrganicPlugins/PanelModu
 const serviceCollection = read('src/PublisherStudio.Web/PublisherStudioServiceCollectionExtensions.cs');
 const descriptors = JSON.parse(read('src/PublisherStudio.Web/Configuration/publisher-dx-functions.json')).functions;
 for(const key of ['InspectModules','InvokeModule']) assert(model.includes(key));
-assert(executable.includes('kind is BrowserAutomationCommandKind.InspectModules or BrowserAutomationCommandKind.InvokeModule'), 'Generic browser input must not bypass module policy');
+const queueInput = executable.match(/private object QueueInput\(JsonElement parameters\)([\s\S]*?)var command = new BrowserAutomationCommand/);
+assert(queueInput, 'Generic browser input must validate before creating a command');
+const genericInputGuard = queueInput[1].match(/if\s*\(kind is ([^\n]+)\)\s*throw new ArgumentException\(/);
+assert(genericInputGuard, 'Generic browser input must reject dedicated commands');
+const dedicatedKinds = genericInputGuard[1].split(/\s+or\s+/);
+for (const kind of ['InspectView', 'InspectModules', 'InvokeModule']) {
+ assert(dedicatedKinds.includes(`BrowserAutomationCommandKind.${kind}`), `Generic browser input must reject ${kind}`);
+}
 assert(executable.includes('requiresFreshModuleConsent || requiresFreshCaptureConsent') || executable.includes('requiresFreshCaptureConsent || requiresFreshModuleConsent'), 'Consequential invocation must force fresh approval');
 for(const key of ['publisher.panel.modules.inspect','publisher.panel.module.invoke']) {
  const c = descriptors.find(x=>x.key===key);

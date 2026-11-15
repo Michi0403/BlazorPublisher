@@ -796,10 +796,8 @@ function Assert-PublisherStudioGeneratedHtmlPreflight {
     if (-not (Test-Path -LiteralPath $validator -PathType Leaf)) { throw "PowerShell documentation HTML preflight is missing: $validator" }
 
     Write-Host "Validating generated DocFX HTML accessibility and local links before the long PDF render..." -ForegroundColor DarkCyan
+    # The PowerShell validator throws on failure and does not set a native exit code.
     & $validator -Source $SiteRoot -HtmlOnly
-    if ($LASTEXITCODE -ne 0) {
-        throw "Generated DocFX HTML failed the pre-PDF accessibility/link validation. PDF rendering was skipped so the release fails fast."
-    }
     Write-Host "Generated DocFX HTML preflight passed before PDF rendering." -ForegroundColor DarkGreen
 }
 

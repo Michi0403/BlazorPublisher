@@ -59,7 +59,9 @@
     <Content Update="Configuration\panel-text-patterns.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Update="Configuration\**\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <None Update="Configuration\**\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
-    <Content Update="wwwroot\help-docs\**\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <!-- Directory.Build.targets publishes the generated Help tree from the build output. -->
+    <Content Remove="wwwroot\help-docs\**\*" />
+    <None Remove="wwwroot\help-docs\**\*" />
   </ItemGroup>
 
   <!--

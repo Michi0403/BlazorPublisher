@@ -6,7 +6,7 @@ namespace PublisherStudio.Services.OrganicPlugins;
 
 /// <summary>Reads approved generated media through the existing paired 1-Wire connection.</summary>
 public sealed class PublisherGeneratedMediaService(ILocalGptConnectionService localGpt, IOrganicPluginProtocolCodec codec,
-    IOptionsMonitor<OrganicPluginOptions> options, ILogger<PublisherGeneratedMediaService> logger)
+    IOptions<OrganicPluginOptions> options, ILogger<PublisherGeneratedMediaService> logger)
 {
     internal const string CapabilityKey = "localgpt.media.delivery.read";
 
@@ -16,7 +16,7 @@ public sealed class PublisherGeneratedMediaService(ILocalGptConnectionService lo
         try
         {
         var expectedType = kind switch { "picture" => "image/png", "video" => "video/mp4", _ => throw new ArgumentException("Unsupported generated media kind.", nameof(kind)) };
-        var configuredFrameSize = Math.Min(options.CurrentValue.MaximumMessageBytes, OrganicWireProtocol.MaximumMessageBytes);
+        var configuredFrameSize = Math.Min(options.Value.MaximumMessageBytes, OrganicWireProtocol.MaximumMessageBytes);
         var chunkSize = (configuredFrameSize - 2048) / 4;
         if (chunkSize <= 0) throw new InvalidOperationException("The configured 1-Wire message size is too small for media delivery.");
 
@@ -58,7 +58,7 @@ public sealed class PublisherGeneratedMediaService(ILocalGptConnectionService lo
             if (chunk.Status == "Waiting" && stream.Length == 0) return null;
             if (chunk.Status == "Unavailable") throw new InvalidOperationException("The generated media request has expired or is unavailable.");
             if (chunk.Status != "Ready" || chunk.ContentType != expectedType || chunk.Offset != stream.Length ||
-                chunk.Length <= 0 || chunk.Length > options.CurrentValue.MaximumGeneratedMediaBytes ||
+                chunk.Length <= 0 || chunk.Length > options.Value.MaximumGeneratedMediaBytes ||
                 chunk.Data is not { Length: > 0 } data || data.Length > chunkSize || data.Length > chunk.Length - stream.Length ||
                 string.IsNullOrWhiteSpace(chunk.ArtifactId) || string.IsNullOrWhiteSpace(chunk.FileName))
                 throw new InvalidDataException("LocalGPT returned an incompatible or oversized media artifact.");

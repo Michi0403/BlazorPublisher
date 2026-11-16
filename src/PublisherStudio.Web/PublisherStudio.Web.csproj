@@ -6,7 +6,7 @@
     <InvariantGlobalization>false</InvariantGlobalization>
     <RootNamespace>PublisherStudio</RootNamespace>
     <AssemblyName>PublisherStudio.Web</AssemblyName>
-    <Version>4.8.8</Version>
+    <Version>4.8.9</Version>
     <Product>PublisherStudio</Product>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);1591</NoWarn>
@@ -100,7 +100,9 @@
     <PublisherStudioDocumentationPublishFile Include="wwwroot\help-docs\index.html;wwwroot\help-docs\api\index.html;wwwroot\help-docs\documentation-status.json;wwwroot\help-docs\public\docfx.min.css;wwwroot\help-docs\public\docfx.min.js;wwwroot\help-docs\styles\publisherstudio-kawaii.css;wwwroot\help-docs\styles\publisherstudio-kawaii.js" />
   </ItemGroup>
 
-  <Target Name="ValidatePublisherStudioDocumentationFilesForPublish" AfterTargets="Publish" Condition="'$(DesignTimeBuild)' != 'true' and '$(PublishDir)' != ''">
+  <!-- Build-Release.ps1 publishes RID payloads without docs, then copies the verified shared docs and runs
+       Assert-PublisherStudioDocumentationPayload itself; it passes PublisherStudioDocumentationValidatedByReleaseScript=true. -->
+  <Target Name="ValidatePublisherStudioDocumentationFilesForPublish" AfterTargets="Publish" Condition="'$(DesignTimeBuild)' != 'true' and '$(PublishDir)' != '' and '$(PublisherStudioDocumentationValidatedByReleaseScript)' != 'true'">
     <ItemGroup>
       <MissingPublisherStudioDocumentationPublishFile Include="@(PublisherStudioDocumentationPublishFile)" Condition="!Exists('$(PublishDir)%(Identity)')" />
     </ItemGroup>

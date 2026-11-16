@@ -878,7 +878,7 @@ function Publish-UnixRuntime {
             'publish', $webProject, '-c', $Configuration, '-r', $Rid, '--no-restore', '-o', $publishFolder,
             '--self-contained', $selfContained, '-p:PublishSingleFile=false',
             '-p:BuildPublisherStudioDocumentation=false', '-p:SeedPublisherStudioGitHubPagesSnapshotOnBuild=false',
-            '-p:RequirePublisherStudioDocumentationPdf=false', '-maxcpucount:1'
+            '-p:RequirePublisherStudioDocumentationPdf=false', '-p:PublisherStudioDocumentationValidatedByReleaseScript=true', '-maxcpucount:1'
         ) + $wireProperties) -FailureMessage "PublisherStudio application publish failed for $Rid $mode."
         $appExecutable = 'PublisherStudio.Web'
         if (-not (Test-Path -LiteralPath (Join-Path $publishFolder $appExecutable) -PathType Leaf)) { throw "Published PublisherStudio apphost is missing for $Rid $mode." }
@@ -932,6 +932,7 @@ function Publish-Runtime {
         "-p:BuildPublisherStudioDocumentation=false",
         "-p:SeedPublisherStudioGitHubPagesSnapshotOnBuild=false",
         "-p:RequirePublisherStudioDocumentationPdf=false",
+        "-p:PublisherStudioDocumentationValidatedByReleaseScript=true",
         "--no-restore",
         "-maxcpucount:1"
     ) + $wireProperties) -FailureMessage "PublisherStudio application publish failed for $Rid."

@@ -498,6 +498,7 @@ public sealed class OrganicCapabilityCatalog(
 /// <param name="spreadsheetSessions">Spreadsheet session store dependency used by the organic work executor workflow to provide the corresponding application capability.</param>
 /// <param name="businessContext">Business object context service dependency used by the organic work executor workflow to provide the corresponding application capability.</param>
 /// <param name="documentation">Publisher documentation catalog service dependency used by the organic work executor workflow to provide the corresponding application capability.</param>
+/// <param name="richEditMarkup">Publication markup service for normalizing rich-text document content.</param>
 /// <param name="mediaConversion">Media conversion service dependency used by the organic work executor workflow to provide the corresponding application capability.</param>
 /// <param name="fileFormats">Authoritative format-capability service used when executing the read-only PublisherStudio file-format capability route.</param>
 /// <param name="resultStore">Organic result store dependency used by the organic work executor workflow to provide the corresponding application capability.</param>

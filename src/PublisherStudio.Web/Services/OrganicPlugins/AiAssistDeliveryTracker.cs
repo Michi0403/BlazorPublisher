@@ -9,8 +9,6 @@ namespace PublisherStudio.Services.OrganicPlugins;
 /// the Council deliverable becomes a proposal for the tracked target; the page's existing authorization check then
 /// inserts it (or keeps it reviewable). Failures and pending LocalGPT approvals become user notices instead of silence.
 /// </summary>
-/// <param name="results">Shared 1-Wire result and proposal store.</param>
-/// <param name="logger">Logger for delivery diagnostics.</param>
 public sealed class AiAssistDeliveryTracker : IAiAssistDeliveryTracker, IDisposable
 {
     /// <summary>Hours after which an unanswered request is no longer tracked.</summary>

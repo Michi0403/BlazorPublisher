@@ -92,6 +92,7 @@ public interface IPublisherAiBridgeService
 /// Keeps AI-enabled publication components provider-neutral by adapting their requests to PublisherStudio's secured LocalGPT 1-Wire connection.
 /// </summary>
 /// <param name="localGpt">Local gpt connection service dependency used by the publisher AI bridge workflow to provide the corresponding application capability.</param>
+/// <param name="codec">Organic plugin protocol codec for the secured 1-Wire request and response contracts.</param>
 /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class PublisherAiBridgeService(
     ILocalGptConnectionService localGpt,

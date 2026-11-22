@@ -204,6 +204,9 @@
     /// <summary>Whether the user specifically opened this workbook for connected LocalGPT assistance.</summary>
     /// <value>Native AI panel visibility request.</value>
     [Parameter] public bool OpenAiOnShow { get; set; }
+
+    /// <summary>Gets or sets the PublisherStudio model preferences for spreadsheet creation and edits.</summary>
+    [Parameter] public IReadOnlyList<string> DefaultAiModels { get; set; } = [];
     /// <summary>Current user-authored spreadsheet request, never model-generated policy.</summary>
     private string _aiSpreadsheetPrompt = string.Empty;
     /// <summary>Whether submission to the trusted paired LocalGPT connection is being performed.</summary>
@@ -334,6 +337,7 @@
             {
                 var request = new OrganicCouncilPromptRequest
                 {
+                    ModelNames = DefaultAiModels.ToList(),
                     TeamKey = LocalGptConnection.State.RemoteCapabilities
                         .Where(capability => capability.IsOnline && capability.IsEnabled &&
                             string.Equals(capability.Key, "council.run", StringComparison.OrdinalIgnoreCase))
@@ -399,6 +403,7 @@
 
             var request = new OrganicCouncilPromptRequest
             {
+                ModelNames = DefaultAiModels.ToList(),
                 TeamKey = LocalGptConnection.State.RemoteCapabilities
                     .Where(item => item.IsOnline && item.IsEnabled && item.Key == "council.run")
                     .SelectMany(item => item.Skills)

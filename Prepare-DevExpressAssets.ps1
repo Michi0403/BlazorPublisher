@@ -19,6 +19,16 @@ $runtimeLicenseGeneratedPath = Join-Path $licenseTempDirectory "devextreme-licen
 $previousDevExtremeSourceRoot = $env:PUBLISHERSTUDIO_DEVEXTREME_SOURCE_ROOT
 
 
+function Get-AssetSha256([string]$Path) {
+    $stream = [System.IO.File]::OpenRead($Path)
+    try {
+        $sha = [System.Security.Cryptography.SHA256]::Create()
+        try { return [BitConverter]::ToString($sha.ComputeHash($stream)).Replace('-', '').ToLowerInvariant() }
+        finally { $sha.Dispose() }
+    }
+    finally { $stream.Dispose() }
+}
+
 function Resolve-ExpectedDevExpressVersion {
     if (-not [string]::IsNullOrWhiteSpace($ExpectedVersion)) {
         return $ExpectedVersion.Trim()
@@ -75,7 +85,7 @@ function Test-PreparedDevExpressAssetsCurrent {
             $licenseMetadata.generatorPackageVersion -ne $Version) {
             return $false
         }
-        $actualLicenseHash = (Get-FileHash -LiteralPath $runtimeLicensePath -Algorithm SHA256).Hash.ToLowerInvariant()
+        $actualLicenseHash = Get-AssetSha256 $runtimeLicensePath
         if (([string]$licenseMetadata.sha256) -ne $actualLicenseHash) {
             return $false
         }
@@ -119,7 +129,7 @@ function Test-PreparedDevExpressAssetsCurrent {
             if ([long]$entries[0].bytes -ne [long]$assetFile.Length) {
                 return $false
             }
-            $actualHash = (Get-FileHash -LiteralPath $assetPath -Algorithm SHA256).Hash.ToLowerInvariant()
+            $actualHash = Get-AssetSha256 $assetPath
             if (([string]$entries[0].sha256) -ne $actualHash) {
                 return $false
             }
@@ -420,7 +430,7 @@ An existing generated runtime key was left untouched.
     Remove-GeneratedPathWithRetry -Path $runtimeLicensePath
     Copy-Item -LiteralPath $runtimeLicenseGeneratedPath -Destination $runtimeLicensePath -Force
 
-    $licenseHash = (Get-FileHash -LiteralPath $runtimeLicensePath -Algorithm SHA256).Hash.ToLowerInvariant()
+    $licenseHash = Get-AssetSha256 $runtimeLicensePath
     $licenseMetadata = [ordered]@{
         schemaVersion = 2
         generatorPackage = "devextreme"
@@ -470,7 +480,7 @@ if ($metadata.schemaVersion -ne 2 -or
     $versionMarker -ne $devExtremeVersion) {
     throw "The generated runtime-key metadata does not match the exact devextreme@$devExtremeVersion generator package."
 }
-$actualLicenseHash = (Get-FileHash -LiteralPath $runtimeLicensePath -Algorithm SHA256).Hash.ToLowerInvariant()
+$actualLicenseHash = Get-AssetSha256 $runtimeLicensePath
 if ($metadata.sha256 -ne $actualLicenseHash) {
     throw "The generated DevExtreme runtime-key hash does not match its preparation metadata."
 }
@@ -529,7 +539,7 @@ foreach ($expectedAsset in $expectedAssetEntries) {
         throw "The DevExtreme client-asset size does not match its metadata: $($expectedAsset.ManifestPath)."
     }
 
-    $actualHash = (Get-FileHash -LiteralPath $assetPath -Algorithm SHA256).Hash.ToLowerInvariant()
+    $actualHash = Get-AssetSha256 $assetPath
     if ($entries[0].sha256 -ne $actualHash) {
         throw "The DevExtreme client-asset hash does not match its metadata: $($expectedAsset.ManifestPath)."
     }

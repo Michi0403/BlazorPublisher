@@ -64,6 +64,9 @@ public sealed class AiAssistDeliveryTracker : IAiAssistDeliveryTracker, IDisposa
                 tracked[correlationId] = new AiAssistDeliveryTracking { CorrelationId = correlationId, Target = target, Kind = kind };
             }
             logger.LogInformation("Tracking delivery of AI Assist request {CorrelationId} ({Kind}) for target {Target}.", correlationId, kind, target);
+            // A fast peer can finish before SendCouncilRequestAsync returns and Track is called.
+            // Reconcile the already-recorded result as well as later Changed events.
+            OnResultsChanged();
         }
         catch (Exception exception)
         {
@@ -159,6 +162,12 @@ public sealed class AiAssistDeliveryTracker : IAiAssistDeliveryTracker, IDisposa
             if (tracking.ProposalSeen)
             {
                 logger.LogInformation("AI Assist request {CorrelationId} delivered its result through the proposal function.", tracking.CorrelationId);
+                return;
+            }
+            if (!string.IsNullOrWhiteSpace(item.Error))
+            {
+                AddNotice(tracking, "Error", "AI Assist failed", item.Error);
+                logger.LogWarning("AI Assist request {CorrelationId} reported a failed work result; no content was inserted.", tracking.CorrelationId);
                 return;
             }
             var council = ReadCouncilResult(item.Request);

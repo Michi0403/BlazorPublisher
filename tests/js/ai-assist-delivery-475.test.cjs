@@ -38,3 +38,13 @@ test('4.7.5 the AI Assist page never calls browser storage from a prerendered in
     assert.match(changed, /catch \(InvalidOperationException exception\)/);
     assert.match(changed, /ShowAiAssistDeliveryNotices\(\);/);
 });
+
+
+test('4.9.2 reconciles pre-tracking replies and never inserts a failed work result', () => {
+    const tracker = web('Services/OrganicPlugins/AiAssistDeliveryTracker.cs');
+    const track = tracker.slice(tracker.indexOf('public void Track('), tracker.indexOf('public IReadOnlyList<AiAssistDeliveryNotice> DrainNotices('));
+    assert.match(track, /OnResultsChanged\(\);/, 'a result that raced ahead of Track must be processed');
+    const deliver = tracker.slice(tracker.indexOf('private void Deliver('), tracker.indexOf('private (string Deliverable, bool ProposalAwaitingApproval) ReadCouncilResult'));
+    assert.ok(deliver.indexOf('if (!string.IsNullOrWhiteSpace(item.Error))') < deliver.indexOf('results.AddTextProposal('),
+        'a failed WorkResult must never become a fallback insertion proposal');
+});

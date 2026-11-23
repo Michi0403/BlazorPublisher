@@ -12,6 +12,25 @@ namespace PublisherStudio.Services;
 /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 public sealed class RichTextDocumentFactory(ILogger<RichTextDocumentFactory> logger)
 {
+    /// <summary>Renders an Open XML story as a PDF using the server-side RichEdit engine.</summary>
+    public byte[] ExportPdf(byte[] openXml)
+    {
+        try
+        {
+            using var source = new MemoryStream(openXml, writable: false);
+            using var document = new DevExpress.XtraRichEdit.RichEditDocumentServer();
+            document.LoadDocument(source, DevExpress.XtraRichEdit.DocumentFormat.OpenXml);
+            using var output = new MemoryStream();
+            document.ExportToPdf(output);
+            return output.ToArray();
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Could not render the PublisherStudio story as PDF.");
+            throw;
+        }
+    }
+
     /// <summary>
     /// Creates open XML using the configuration and dependencies owned by <see cref="RichTextDocumentFactory"/>.
     /// </summary>

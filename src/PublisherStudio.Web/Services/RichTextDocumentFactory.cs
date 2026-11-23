@@ -33,7 +33,7 @@ public sealed class RichTextDocumentFactory(ILogger<RichTextDocumentFactory> log
 
     /// <summary>
     /// Renders an Open XML story in another document format with the server-side RichEdit engine.
-    /// Supported kinds: <c>pdf</c>, <c>rtf</c>, <c>odt</c>, <c>html</c>, <c>epub</c>; <c>text</c> returns the Open XML unchanged.
+    /// Supported kinds: <c>pdf</c>, <c>rtf</c>, <c>odt</c>, <c>html</c>, <c>epub</c>, <c>doc</c> (Word 97-2003), <c>mht</c> (single-file web archive); <c>text</c> returns the Open XML unchanged.
     /// </summary>
     /// <param name="openXml">Story content as Open XML (DOCX).</param>
     /// <param name="kind">Requested document kind.</param>
@@ -52,6 +52,8 @@ public sealed class RichTextDocumentFactory(ILogger<RichTextDocumentFactory> log
                 "odt" => DevExpress.XtraRichEdit.DocumentFormat.OpenDocument,
                 "html" => DevExpress.XtraRichEdit.DocumentFormat.Html,
                 "epub" => DevExpress.XtraRichEdit.DocumentFormat.ePub,
+                "doc" => DevExpress.XtraRichEdit.DocumentFormat.Doc,
+                "mht" => DevExpress.XtraRichEdit.DocumentFormat.Mht,
                 _ => throw new NotSupportedException($"Document kind '{kind}' cannot be exported.")
             };
             using var source = new MemoryStream(openXml, writable: false);

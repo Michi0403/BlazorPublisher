@@ -170,22 +170,26 @@ public sealed class PublisherAiDocumentInsertionService(
             var presentation = string.Equals((request.Presentation ?? string.Empty).Trim(), "silent", StringComparison.OrdinalIgnoreCase) ? "silent" : "visible";
             var pages = editor.Document.Pages;
             var targetIndex = request.TargetPage is { } requested ? requested - 1 : pages.FindIndex(page => page.Id == editor.SelectedPageId);
-            if (kind is not ("spreadsheet" or "text" or "pdf" or "rtf" or "odt" or "html" or "txt" or "epub"))
-                return CreateFailure("kind must be 'spreadsheet', 'text' (Word), 'pdf', 'rtf', 'odt', 'html', 'txt', or 'epub'.");
+            if (kind is not ("spreadsheet" or "text" or "pdf" or "rtf" or "odt" or "html" or "txt" or "epub" or "doc" or "mht" or "xls" or "csv"))
+                return CreateFailure("kind must be 'spreadsheet', 'text' (Word), 'pdf', 'rtf', 'odt', 'html', 'txt', 'epub', 'doc', 'mht', 'xls', or 'csv'.");
             if (string.IsNullOrWhiteSpace(request.Content))
                 return CreateFailure("content is required.");
             if (targetIndex < 0 || targetIndex >= pages.Count)
                 return CreateFailure($"The publication has {pages.Count} page(s); page {request.TargetPage} does not exist.");
 
-            var title = string.IsNullOrWhiteSpace(request.Title) ? (kind == "spreadsheet" ? "AI spreadsheet" : "AI text") : request.Title.Trim();
+            // xls and csv are spreadsheet downloads: the publication always receives the native XLSX spreadsheet object.
+            var isSpreadsheet = kind is "spreadsheet" or "xls" or "csv";
+            var title = string.IsNullOrWhiteSpace(request.Title) ? (isSpreadsheet ? "AI spreadsheet" : "AI text") : request.Title.Trim();
+            var normalizedCsv = string.Empty;
             byte[] bytes = [];
             byte[] storyContent = [];
             var storyPreview = string.Empty;
             // Validate and build the document bytes before mutating the publication.
-            if (kind == "spreadsheet")
+            if (isSpreadsheet)
             {
                 var spreadsheetFormat = SpreadsheetStorageFormat.Xlsx;
-                bytes = spreadsheets.CreateXlsxFromCsv(NormalizeCsv(request.Content));
+                normalizedCsv = NormalizeCsv(request.Content);
+                bytes = spreadsheets.CreateXlsxFromCsv(normalizedCsv);
                 spreadsheets.ValidateWorkbookContent(bytes, spreadsheetFormat);
             }
             else
@@ -197,6 +201,8 @@ public sealed class PublisherAiDocumentInsertionService(
             var documentBytes = kind switch
             {
                 "spreadsheet" => bytes,
+                "xls" => spreadsheets.ConvertXlsxToXls(bytes),
+                "csv" => new System.Text.UTF8Encoding(encoderShouldEmitUTF8Identifier: false).GetBytes(normalizedCsv),
                 // Plain text is returned exactly as requested (UTF-8) instead of round-tripping through the layout engine.
                 "txt" => new System.Text.UTF8Encoding(encoderShouldEmitUTF8Identifier: false).GetBytes(request.Content),
                 _ => richText.Export(storyContent, kind)
@@ -209,7 +215,7 @@ public sealed class PublisherAiDocumentInsertionService(
             var previousElementId = editor.SelectedElementId;
             if (pages[targetIndex].Id != editor.SelectedPageId) editor.SelectPage(pages[targetIndex].Id);
             PublicationElement created;
-            if (kind == "spreadsheet")
+            if (isSpreadsheet)
             {
                 var fileName = new string(title.Where(character => char.IsLetterOrDigit(character) || character is ' ' or '-' or '_').ToArray()).Trim();
                 created = editor.AddSpreadsheet(bytes, (fileName.Length == 0 ? "AI spreadsheet" : fileName) + ".xlsx", SpreadsheetStorageFormat.Xlsx);

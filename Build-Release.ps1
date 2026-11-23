@@ -531,6 +531,7 @@ function New-PublisherStudioReleaseArchive {
 
 $appVersion = Resolve-ProjectVersion -ProjectPath $webProject
 $setupVersion = Resolve-ProjectVersion -ProjectPath $setupProject
+# Every publish below passes these versions explicitly, so a csproj edit during a long release run cannot mix versions between RIDs.
 if ($appVersion -ne $setupVersion) { throw "PublisherStudio application version $appVersion does not match setup version $setupVersion." }
 
 
@@ -876,6 +877,7 @@ function Publish-UnixRuntime {
         Invoke-DotNet -Arguments (@('restore', $webProject, '-r', $Rid, '--disable-parallel', '--force-evaluate') + $wireProperties) -FailureMessage "PublisherStudio application restore failed for $Rid $mode."
         Invoke-DotNet -Arguments (@(
             'publish', $webProject, '-c', $Configuration, '-r', $Rid, '--no-restore', '-o', $publishFolder,
+            "-p:Version=$appVersion",
             '--self-contained', $selfContained, '-p:PublishSingleFile=false',
             '-p:BuildPublisherStudioDocumentation=false', '-p:SeedPublisherStudioGitHubPagesSnapshotOnBuild=false',
             '-p:RequirePublisherStudioDocumentationPdf=false', '-p:PublisherStudioDocumentationValidatedByReleaseScript=true', '-maxcpucount:1'
@@ -928,6 +930,7 @@ function Publish-Runtime {
     Invoke-DotNet -Arguments (@(
         "publish", $webProject,
         "-c", $Configuration,
+        "-p:Version=$appVersion",
         "-p:PublishProfile=$($profile.AppProfile)",
         "-p:BuildPublisherStudioDocumentation=false",
         "-p:SeedPublisherStudioGitHubPagesSnapshotOnBuild=false",
@@ -944,6 +947,7 @@ function Publish-Runtime {
     Invoke-DotNet -Arguments @(
         "publish", $setupProject,
         "-c", $Configuration,
+        "-p:Version=$setupVersion",
         "-p:PublishProfile=$($profile.SetupProfile)",
         "--no-restore",
         "-maxcpucount:1",

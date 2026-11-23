@@ -170,8 +170,8 @@ public sealed class PublisherAiDocumentInsertionService(
             var presentation = string.Equals((request.Presentation ?? string.Empty).Trim(), "silent", StringComparison.OrdinalIgnoreCase) ? "silent" : "visible";
             var pages = editor.Document.Pages;
             var targetIndex = request.TargetPage is { } requested ? requested - 1 : pages.FindIndex(page => page.Id == editor.SelectedPageId);
-            if (kind is not ("spreadsheet" or "text"))
-                return CreateFailure("kind must be 'spreadsheet' or 'text'.");
+            if (kind is not ("spreadsheet" or "text" or "pdf"))
+                return CreateFailure("kind must be 'spreadsheet', 'text', or 'pdf'.");
             if (string.IsNullOrWhiteSpace(request.Content))
                 return CreateFailure("content is required.");
             if (targetIndex < 0 || targetIndex >= pages.Count)
@@ -194,7 +194,12 @@ public sealed class PublisherAiDocumentInsertionService(
                 storyPreview = "<p>" + WebUtility.HtmlEncode(request.Content).Replace("\r\n", "\n", StringComparison.Ordinal).Replace("\n", "<br/>", StringComparison.Ordinal) + "</p>";
             }
 
-            var documentBytes = kind == "spreadsheet" ? bytes : storyContent;
+            var documentBytes = kind switch
+            {
+                "spreadsheet" => bytes,
+                "pdf" => richText.ExportPdf(storyContent),
+                _ => storyContent
+            };
             var wireLimit = Math.Min(OneWireProtocol.MaximumMessageBytes, organicOptions.Value.MaximumMessageBytes);
             if (documentBytes.Length > wireLimit / 4)
                 return CreateFailure("The document exceeds the 1-Wire file budget. Reduce the content or review OrganicPlugins:MaximumMessageBytes.");

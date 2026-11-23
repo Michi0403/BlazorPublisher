@@ -32,6 +32,48 @@ public sealed class RichTextDocumentFactory(ILogger<RichTextDocumentFactory> log
     }
 
     /// <summary>
+    /// Renders an Open XML story in another document format with the server-side RichEdit engine.
+    /// Supported kinds: <c>pdf</c>, <c>rtf</c>, <c>odt</c>, <c>html</c>, <c>epub</c>; <c>text</c> returns the Open XML unchanged.
+    /// </summary>
+    /// <param name="openXml">Story content as Open XML (DOCX).</param>
+    /// <param name="kind">Requested document kind.</param>
+    /// <returns>The rendered document bytes.</returns>
+    public byte[] Export(byte[] openXml, string kind)
+    {
+        try
+        {
+            if (kind == "text")
+                return openXml;
+            if (kind == "pdf")
+                return ExportPdf(openXml);
+            var format = kind switch
+            {
+                "rtf" => DevExpress.XtraRichEdit.DocumentFormat.Rtf,
+                "odt" => DevExpress.XtraRichEdit.DocumentFormat.OpenDocument,
+                "html" => DevExpress.XtraRichEdit.DocumentFormat.Html,
+                "epub" => DevExpress.XtraRichEdit.DocumentFormat.ePub,
+                _ => throw new NotSupportedException($"Document kind '{kind}' cannot be exported.")
+            };
+            using var source = new MemoryStream(openXml, writable: false);
+            using var document = new DevExpress.XtraRichEdit.RichEditDocumentServer();
+            document.LoadDocument(source, DevExpress.XtraRichEdit.DocumentFormat.OpenXml);
+            if (format == DevExpress.XtraRichEdit.DocumentFormat.Html)
+            {
+                // A downloaded HTML file must stand alone: inline the images instead of pointing at a server.
+                document.Options.Export.Html.EmbedImages = true;
+            }
+            using var output = new MemoryStream();
+            document.SaveDocument(output, format);
+            return output.ToArray();
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Could not render the PublisherStudio story as {Kind}.", kind);
+            throw;
+        }
+    }
+
+    /// <summary>
     /// Creates open XML using the configuration and dependencies owned by <see cref="RichTextDocumentFactory"/>.
     /// </summary>
     /// <param name="title">Title value supplied to the rich text document operation and used when producing its result.</param>

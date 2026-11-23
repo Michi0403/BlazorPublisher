@@ -170,8 +170,8 @@ public sealed class PublisherAiDocumentInsertionService(
             var presentation = string.Equals((request.Presentation ?? string.Empty).Trim(), "silent", StringComparison.OrdinalIgnoreCase) ? "silent" : "visible";
             var pages = editor.Document.Pages;
             var targetIndex = request.TargetPage is { } requested ? requested - 1 : pages.FindIndex(page => page.Id == editor.SelectedPageId);
-            if (kind is not ("spreadsheet" or "text" or "pdf"))
-                return CreateFailure("kind must be 'spreadsheet', 'text', or 'pdf'.");
+            if (kind is not ("spreadsheet" or "text" or "pdf" or "rtf" or "odt" or "html" or "txt" or "epub"))
+                return CreateFailure("kind must be 'spreadsheet', 'text' (Word), 'pdf', 'rtf', 'odt', 'html', 'txt', or 'epub'.");
             if (string.IsNullOrWhiteSpace(request.Content))
                 return CreateFailure("content is required.");
             if (targetIndex < 0 || targetIndex >= pages.Count)
@@ -197,8 +197,9 @@ public sealed class PublisherAiDocumentInsertionService(
             var documentBytes = kind switch
             {
                 "spreadsheet" => bytes,
-                "pdf" => richText.ExportPdf(storyContent),
-                _ => storyContent
+                // Plain text is returned exactly as requested (UTF-8) instead of round-tripping through the layout engine.
+                "txt" => new System.Text.UTF8Encoding(encoderShouldEmitUTF8Identifier: false).GetBytes(request.Content),
+                _ => richText.Export(storyContent, kind)
             };
             var wireLimit = Math.Min(OneWireProtocol.MaximumMessageBytes, organicOptions.Value.MaximumMessageBytes);
             if (documentBytes.Length > wireLimit / 4)

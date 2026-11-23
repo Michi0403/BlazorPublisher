@@ -1082,12 +1082,12 @@
     },
     {
       "key": "publisher.document.create",
-      "displayName": "Create spreadsheet, Word document or PDF",
+      "displayName": "Create spreadsheet or document (Word, PDF, RTF, ODT, HTML, TXT, EPUB)",
       "description": "Creates one new native spreadsheet (CSV content) or text object in the open PublisherStudio publication after the user approves it in PublisherStudio. Approval is required every time. Use publisher.sessions.list first to see open sessions instead of asking a human for ids.",
       "controller": "OrganicPlugins",
       "method": "POST",
       "route": "/api/organic/capabilities/publisher.document.create",
-      "parameterSchemaJson": "{\"type\":\"object\",\"required\":[\"kind\",\"content\"],\"properties\":{\"kind\":{\"enum\":[\"spreadsheet\",\"text\",\"pdf\"]},\"title\":{\"type\":\"string\",\"maxLength\":120},\"content\":{\"type\":\"string\"},\"presentation\":{\"enum\":[\"visible\",\"silent\"]},\"page\":{\"type\":\"integer\",\"minimum\":1},\"sessionId\":{\"type\":\"string\"}},\"additionalProperties\":false}",
+      "parameterSchemaJson": "{\"type\":\"object\",\"required\":[\"kind\",\"content\"],\"properties\":{\"kind\":{\"enum\":[\"spreadsheet\",\"text\",\"pdf\",\"rtf\",\"odt\",\"html\",\"txt\",\"epub\"]},\"title\":{\"type\":\"string\",\"maxLength\":120},\"content\":{\"type\":\"string\"},\"presentation\":{\"enum\":[\"visible\",\"silent\"]},\"page\":{\"type\":\"integer\",\"minimum\":1},\"sessionId\":{\"type\":\"string\"}},\"additionalProperties\":false}",
       "organs": [
         "hands"
       ],
@@ -1115,7 +1115,7 @@
       "requiresHumanInteractionOnTargetSystem": true,
       "requiresAutomatedInteractionOnTargetSystem": false,
       "interactionValueSchemaJson": "{\"type\":\"object\",\"properties\":{}}",
-      "inputContract": "kind spreadsheet, text or pdf; content (CSV for a spreadsheet, plain text for Word and PDF); optional title, presentation visible (default) or silent, page (1-based) and sessionId (required only when several editors are open).",
+      "inputContract": "kind spreadsheet, text (Word DOCX), pdf, rtf, odt, html, txt or epub; content (CSV for a spreadsheet, plain text for every document kind); optional title, presentation visible (default) or silent, page (1-based) and sessionId (required only when several editors are open).",
       "outputContract": "created object id, kind, title, page and presentation, or a clear failure that says what the user must open. Visible selects the new object; it does not open the editor dialog.",
       "securityContract": "Existing linked-peer permission matrix plus a fresh PublisherStudio approval for every request; saved permission cannot bypass it. Content is validated by the native spreadsheet and story validators.",
       "organicUseCase": "Create a new spreadsheet or text document in the connected PublisherStudio publication.",

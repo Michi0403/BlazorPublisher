@@ -161,8 +161,10 @@ public sealed class PublisherAiDocumentInsertionService(
     /// synchronization context. "visible" selects the new object (and its page) for the user; "silent" restores the previous page and selection.
     /// </summary>
     /// <param name="request">The approved creation request.</param>
+    /// <param name="exportStoryAsync">Exports a story through the owning circuit’s embedded editor.</param>
     /// <returns>A result describing the created object, or the reason nothing was created.</returns>
-    public PublisherDocumentCreateResult CreateDocument(PublisherDocumentCreateRequest request)
+    public async Task<PublisherDocumentCreateResult> CreateDocumentAsync(
+        PublisherDocumentCreateRequest request, Func<byte[], string, Task<byte[]>> exportStoryAsync)
     {
         try
         {
@@ -170,15 +172,15 @@ public sealed class PublisherAiDocumentInsertionService(
             var presentation = string.Equals((request.Presentation ?? string.Empty).Trim(), "silent", StringComparison.OrdinalIgnoreCase) ? "silent" : "visible";
             var pages = editor.Document.Pages;
             var targetIndex = request.TargetPage is { } requested ? requested - 1 : pages.FindIndex(page => page.Id == editor.SelectedPageId);
-            if (kind is not ("spreadsheet" or "text" or "pdf" or "rtf" or "odt" or "html" or "txt" or "epub" or "doc" or "mht" or "xls" or "csv"))
-                return CreateFailure("kind must be 'spreadsheet', 'text' (Word), 'pdf', 'rtf', 'odt', 'html', 'txt', 'epub', 'doc', 'mht', 'xls', or 'csv'.");
+            if (kind is not ("spreadsheet" or "text" or "rtf" or "html" or "txt" or "csv"))
+                return CreateFailure("kind must be 'spreadsheet', 'text' (Word), 'rtf', 'html', 'txt', or 'csv'.");
             if (string.IsNullOrWhiteSpace(request.Content))
                 return CreateFailure("content is required.");
             if (targetIndex < 0 || targetIndex >= pages.Count)
                 return CreateFailure($"The publication has {pages.Count} page(s); page {request.TargetPage} does not exist.");
 
-            // xls and csv are spreadsheet downloads: the publication always receives the native XLSX spreadsheet object.
-            var isSpreadsheet = kind is "spreadsheet" or "xls" or "csv";
+            // CSV is a spreadsheet download: the publication always receives the native XLSX spreadsheet object.
+            var isSpreadsheet = kind is "spreadsheet" or "csv";
             var title = string.IsNullOrWhiteSpace(request.Title) ? (isSpreadsheet ? "AI spreadsheet" : "AI text") : request.Title.Trim();
             var normalizedCsv = string.Empty;
             byte[] bytes = [];
@@ -198,18 +200,24 @@ public sealed class PublisherAiDocumentInsertionService(
                 storyPreview = "<p>" + WebUtility.HtmlEncode(request.Content).Replace("\r\n", "\n", StringComparison.Ordinal).Replace("\n", "<br/>", StringComparison.Ordinal) + "</p>";
             }
 
+            var publicationId = editor.Document.Id;
+            var targetPageId = pages[targetIndex].Id;
             var documentBytes = kind switch
             {
                 "spreadsheet" => bytes,
-                "xls" => spreadsheets.ConvertXlsxToXls(bytes),
                 "csv" => new System.Text.UTF8Encoding(encoderShouldEmitUTF8Identifier: false).GetBytes(normalizedCsv),
                 // Plain text is returned exactly as requested (UTF-8) instead of round-tripping through the layout engine.
                 "txt" => new System.Text.UTF8Encoding(encoderShouldEmitUTF8Identifier: false).GetBytes(request.Content),
-                _ => richText.Export(storyContent, kind)
+                "text" => storyContent,
+                _ => await exportStoryAsync(storyContent, kind).ConfigureAwait(true)
             };
             var wireLimit = Math.Min(OneWireProtocol.MaximumMessageBytes, organicOptions.Value.MaximumMessageBytes);
             if (documentBytes.Length > wireLimit / 4)
                 return CreateFailure("The document exceeds the 1-Wire file budget. Reduce the content or review OrganicPlugins:MaximumMessageBytes.");
+
+            if (editor.Document.Id != publicationId || targetIndex >= editor.Document.Pages.Count ||
+                editor.Document.Pages[targetIndex].Id != targetPageId)
+                return CreateFailure("The publication or target page changed while exporting the document.");
 
             var previousPageId = editor.SelectedPageId;
             var previousElementId = editor.SelectedElementId;

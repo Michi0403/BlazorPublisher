@@ -146,27 +146,6 @@ public sealed class SpreadsheetDocumentService
     }
 }
 
-    /// <summary>Converts an XLSX workbook to the legacy Excel 97-2003 (XLS) format with the DevExpress spreadsheet engine.</summary>
-    /// <param name="xlsx">Complete XLSX file.</param>
-    /// <returns>The XLS file.</returns>
-    public byte[] ConvertXlsxToXls(byte[] xlsx)
-    {
-        try
-        {
-            using var source = new MemoryStream(xlsx, writable: false);
-            using var workbook = new DevExpress.Spreadsheet.Workbook();
-            workbook.LoadDocument(source, DevExpress.Spreadsheet.DocumentFormat.Xlsx);
-            using var output = new MemoryStream();
-            workbook.SaveDocument(output, DevExpress.Spreadsheet.DocumentFormat.Xls);
-            return output.ToArray();
-        }
-        catch (Exception exception)
-        {
-            System.Diagnostics.Trace.TraceError($"Spreadsheet XLS conversion failed: {exception}");
-            throw;
-        }
-    }
-
     /// <summary>Creates an XLSX workbook from the same delimited data used by the publication preview.</summary>
     /// <param name="csv">Normalized CSV content, including the header row.</param>
     /// <returns>The complete XLSX file.</returns>

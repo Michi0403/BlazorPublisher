@@ -1,11 +1,37 @@
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
+@using DevExpress.Blazor.RichEdit
 @namespace PublisherStudio.Components
 @implements IDisposable
 @inject IPublisherEditorSessionRegistry SessionRegistry
 @inject PublisherAiDocumentInsertionService DocumentInsertion
 @inject ILogger<OrganicDocumentCreationBridge> Logger
 
+@* razor-structural-renderer | reason: The off-screen RichEdit needs a sized host for document export without affecting the publication layout. *@
+<div aria-hidden="true" style="position:fixed;left:-10000px;top:0;width:800px;height:400px" inert>
+    <DxRichEdit @ref="_exportEditor" />
+</div>
+
 @code {
+    private DxRichEdit? _exportEditor;
+    private readonly SemaphoreSlim _exportGate = new(1);
+
+    private async Task<byte[]> ExportStoryAsync(byte[] content, string kind)
+    {
+        await _exportGate.WaitAsync().ConfigureAwait(true);
+        try
+        {
+            var editor = _exportEditor ?? throw new InvalidOperationException("The story export editor is unavailable.");
+            var format = kind == "rtf" ? DocumentFormat.Rtf : DocumentFormat.Html;
+            using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+            await editor.LoadDocumentAsync(content, DocumentFormat.OpenXml, timeout.Token).ConfigureAwait(true);
+            return await editor.ExportDocumentAsync(format, timeout.Token).ConfigureAwait(true);
+        }
+        finally
+        {
+            _exportGate.Release();
+        }
+    }
+
 
     /// <summary>
     /// Stores the identifier under which this interactive circuit is registered as an open editor session.
@@ -66,9 +92,9 @@
         try
         {
             PublisherDocumentCreateResult? created = null;
-            await InvokeAsync(() =>
+            await InvokeAsync(async () =>
             {
-                created = DocumentInsertion.CreateDocument(request);
+                created = await DocumentInsertion.CreateDocumentAsync(request, ExportStoryAsync).ConfigureAwait(true);
                 if (created.Success)
                     OperationalNotifications.Success($"A {created.Kind} named '{created.Title}' was added to page {created.Page} of the publication by an approved 1-Wire request.", "Organic document", nameof(OrganicDocumentCreationBridge));
                 else

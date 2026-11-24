@@ -40,7 +40,7 @@
             var html = PublisherStudio.Components.Editor.StoryEditor.StandaloneStoryHtml(
                 Files, Logger, preview, "Council document", Files.ExtractOpenXmlPageLayout(content),
                 printPreview: true, returnPdf: true);
-            var maximumBytes = Math.Min(OrganicWireProtocol.MaximumMessageBytes, OrganicOptions.Value.MaximumMessageBytes) / 4;
+            var maximumBytes = Math.Max(1, OrganicOptions.Value.MediaTools.MaximumTransferFileBytes);
             await using var pdf = await JS.InvokeAsync<IJSStreamReference>(
                 "publisherStudio.renderStoryPdf", timeout.Token, html, maximumBytes);
             await using var input = await pdf.OpenReadStreamAsync(maximumBytes, timeout.Token);

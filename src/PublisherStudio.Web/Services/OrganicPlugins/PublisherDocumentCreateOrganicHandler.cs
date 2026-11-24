@@ -7,8 +7,9 @@ namespace PublisherStudio.Services.OrganicPlugins;
 /// <summary>Creates a new native spreadsheet or text object in an open publication after the user approved the request in PublisherStudio.</summary>
 /// <param name="registry">Registry of open interactive editor sessions that owns the circuit-scoped editor state.</param>
 /// <param name="options">Organic plugin settings; the document creation limits are read from <c>OrganicPlugins:DocumentCreation</c>.</param>
+/// <param name="transfers">Stores large results for approved 1-Wire downloads.</param>
 /// <param name="logger">Service-owned structured diagnostics for the capability operation.</param>
-public sealed class PublisherDocumentCreateOrganicHandler(IPublisherEditorSessionRegistry registry, IOptions<OrganicPluginOptions> options, ILogger<PublisherDocumentCreateOrganicHandler> logger) : IOrganicExecutableCapabilityHandler
+public sealed class PublisherDocumentCreateOrganicHandler(IPublisherEditorSessionRegistry registry, IOptions<OrganicPluginOptions> options, OrganicFileTransferStore transfers, ILogger<PublisherDocumentCreateOrganicHandler> logger) : IOrganicExecutableCapabilityHandler
 {
     /// <summary>Gets the catalog identifier served by this execution handler.</summary>
     /// <value>Exact capability key.</value>
@@ -44,7 +45,17 @@ public sealed class PublisherDocumentCreateOrganicHandler(IPublisherEditorSessio
             if (!result.Success)
                 throw new InvalidOperationException(result.Message);
             logger.LogInformation("Approved organic document creation produced a {Kind} object on page {Page}.", result.Kind, result.Page);
-            return result;
+            if (result.DocumentBytes is not { Length: > 0 } bytes)
+                return result;
+            var offered = transfers.Offer(envelope.SourcePeerId, bytes, result.Kind,
+                "application/octet-stream", string.Empty);
+            offered["Success"] = result.Success;
+            offered["ObjectId"] = result.ObjectId;
+            offered["Title"] = result.Title;
+            offered["Page"] = result.Page;
+            offered["Presentation"] = result.Presentation;
+            offered["Message"] = result.Message;
+            return offered;
         }
         catch (Exception exception)
         {

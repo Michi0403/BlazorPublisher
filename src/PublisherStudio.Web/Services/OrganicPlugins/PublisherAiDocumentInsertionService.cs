@@ -211,9 +211,9 @@ public sealed class PublisherAiDocumentInsertionService(
                 "text" => storyContent,
                 _ => await exportStoryAsync(storyContent, kind).ConfigureAwait(true)
             };
-            var wireLimit = Math.Min(OneWireProtocol.MaximumMessageBytes, organicOptions.Value.MaximumMessageBytes);
-            if (documentBytes.Length > wireLimit / 4)
-                return CreateFailure("The document exceeds the 1-Wire file budget. Reduce the content or review OrganicPlugins:MaximumMessageBytes.");
+            var fileLimit = Math.Max(1, organicOptions.Value.MediaTools.MaximumTransferFileBytes);
+            if (documentBytes.Length > fileLimit)
+                return CreateFailure("The document exceeds OrganicPlugins:MediaTools:MaximumTransferFileBytes. Reduce the content or review the configured limit.");
 
             if (editor.Document.Id != publicationId || targetIndex >= editor.Document.Pages.Count ||
                 editor.Document.Pages[targetIndex].Id != targetPageId)

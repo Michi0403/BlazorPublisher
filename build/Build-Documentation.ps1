@@ -16,6 +16,10 @@ $ErrorActionPreference = "Stop"
 $ProgressPreference = "SilentlyContinue"
 Set-StrictMode -Version Latest
 
+if (-not (Get-Command Get-FileHash -ErrorAction SilentlyContinue)) {
+    Import-Module ([IO.Path]::Combine($PSHOME, 'Modules', 'Microsoft.PowerShell.Utility', 'Microsoft.PowerShell.Utility.psd1')) -ErrorAction Stop
+}
+
 $namespaceRepairScript = Join-Path $PSScriptRoot "Repair-DocfxNamespacePages.ps1"
 if (-not (Test-Path -LiteralPath $namespaceRepairScript -PathType Leaf)) {
     throw "PublisherStudio DocFX namespace repair script was not found: $namespaceRepairScript"

@@ -46,3 +46,19 @@ test('4.9.4 the 1-Wire function catalog advertises the same kinds the service ac
     const advertised = JSON.parse(create.parameterSchemaJson).properties.kind.enum;
     assert.deepEqual([...advertised].sort(), [...documentKinds, ...spreadsheetKinds].sort());
 });
+
+test('1-Wire file generation avoids the standalone DevExpress Office File API', () => {
+    const project = web('PublisherStudio.Web.csproj');
+    assert.doesNotMatch(project, /<PackageReference\s+Include="DevExpress\.Document\.Processor(?:\.|")/i);
+
+    for (const file of [
+        'Services/OrganicPlugins/PublisherAiDocumentInsertionService.cs',
+        'Services/RichTextDocumentFactory.cs',
+        'Services/SpreadsheetDocumentService.cs',
+        'Components/OrganicPlugins/OrganicDocumentCreationBridge.razor'
+    ]) {
+        const source = web(file);
+        assert.doesNotMatch(source, /\b(?:RichEditDocumentServer|PdfDocumentProcessor)\b/, file);
+        assert.doesNotMatch(source, /\bnew\s+(?:DevExpress\.Spreadsheet\.)?Workbook\s*\(/, file);
+    }
+});

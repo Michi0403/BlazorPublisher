@@ -244,6 +244,10 @@ public sealed class OrganicPluginOptions
     /// <summary>Gets or sets the 1-Wire document creation limits and timeouts (section <c>OrganicPlugins:DocumentCreation</c>).</summary>
     /// <value>The document creation settings; defaults apply when the section is absent.</value>
     public OrganicDocumentCreationOptions DocumentCreation { get; set; } = new();
+
+    /// <summary>Gets or sets the 1-Wire media and export tool limits (section <c>OrganicPlugins:MediaTools</c>).</summary>
+    /// <value>The media tool settings; defaults apply when the section is absent.</value>
+    public OrganicMediaToolOptions MediaTools { get; set; } = new();
 }
 
 /// <summary>

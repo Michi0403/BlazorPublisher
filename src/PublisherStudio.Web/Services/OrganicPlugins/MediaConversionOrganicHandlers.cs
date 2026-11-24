@@ -6,8 +6,9 @@ namespace PublisherStudio.Services.OrganicPlugins;
 
 /// <summary>Returns bounded media conversion job information through the normal 1-Wire permission gateway.</summary>
 /// <param name="media">Authoritative media conversion service.</param>
+/// <param name="support">Shared 1-Wire media tool support; the list length is read from <c>OrganicPlugins:MediaTools:MaximumListedJobs</c>.</param>
 /// <param name="logger">Service-owned structured diagnostics for the capability operation.</param>
-public sealed class MediaConversionJobsOrganicHandler(IMediaConversionService media, ILogger<MediaConversionJobsOrganicHandler> logger) : IOrganicExecutableCapabilityHandler
+public sealed class MediaConversionJobsOrganicHandler(IMediaConversionService media, OrganicMediaToolSupport support, ILogger<MediaConversionJobsOrganicHandler> logger) : IOrganicExecutableCapabilityHandler
 {
     /// <summary>Gets the persisted-catalog identifier served by this execution handler.</summary>
     /// <value>Exact capability key.</value>
@@ -16,13 +17,13 @@ public sealed class MediaConversionJobsOrganicHandler(IMediaConversionService me
     /// <summary>Reads bounded job progress without exposing user-local physical file paths.</summary>
     /// <param name="envelope">Approved work envelope.</param>
     /// <param name="cancellationToken">Cancels the read.</param>
-    /// <returns>Up to fifty recent conversion job summaries.</returns>
+    /// <returns>The configured number of recent conversion job summaries.</returns>
     public Task<object> ExecuteAsync(OrganicWireEnvelope envelope, CancellationToken cancellationToken = default)
     {
         try
         {
             cancellationToken.ThrowIfCancellationRequested();
-            object result = media.GetJobs().OrderByDescending(job => job.CreatedUtc).Take(50)
+            object result = media.GetJobs().OrderByDescending(job => job.CreatedUtc).Take(Math.Max(1, support.Settings.MaximumListedJobs))
                 .Select(job => new
                 {
                     job.Id, job.PresetId, job.Status, job.Progress, job.OutputMimeType,

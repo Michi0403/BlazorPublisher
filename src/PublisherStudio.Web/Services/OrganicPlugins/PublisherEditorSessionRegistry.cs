@@ -8,16 +8,18 @@ namespace PublisherStudio.Services.OrganicPlugins;
 /// Singleton registry of open editor sessions. Each interactive circuit registers callbacks that run on its own
 /// synchronization context, so no circuit-scoped state is read or changed from another thread.
 /// </summary>
-/// <param name="options">Organic plugin settings; the editor timeouts are read from <c>OrganicPlugins:DocumentCreation</c>.</param>
+/// <param name="options">Organic plugin settings; the editor timeouts are read from <c>OrganicPlugins:DocumentCreation</c> and <c>OrganicPlugins:MediaTools</c>.</param>
 /// <param name="logger">Structured diagnostics for registration, listing and creation.</param>
 public sealed class PublisherEditorSessionRegistry(IOptions<OrganicPluginOptions> options, ILogger<PublisherEditorSessionRegistry> logger) : IPublisherEditorSessionRegistry
 {
     /// <summary>One registered circuit.</summary>
     /// <param name="DescribeAsync">Builds the session snapshot on the owning circuit.</param>
     /// <param name="CreateAsync">Creates a document on the owning circuit.</param>
+    /// <param name="ExportAsync">Exports the publication on the owning circuit.</param>
     private sealed record SessionEntry(
         Func<Guid, Task<PublisherEditorSessionSnapshot>> DescribeAsync,
-        Func<PublisherDocumentCreateRequest, Task<PublisherDocumentCreateResult>> CreateAsync);
+        Func<PublisherDocumentCreateRequest, Task<PublisherDocumentCreateResult>> CreateAsync,
+        Func<PublisherPublicationExportRequest, Task<PublisherPublicationExportResult>> ExportAsync);
 
     /// <summary>Registered sessions by identifier.</summary>
     private readonly ConcurrentDictionary<Guid, SessionEntry> sessions = new();
@@ -25,12 +27,13 @@ public sealed class PublisherEditorSessionRegistry(IOptions<OrganicPluginOptions
     /// <inheritdoc/>
     public Guid Register(
         Func<Guid, Task<PublisherEditorSessionSnapshot>> describeAsync,
-        Func<PublisherDocumentCreateRequest, Task<PublisherDocumentCreateResult>> createAsync)
+        Func<PublisherDocumentCreateRequest, Task<PublisherDocumentCreateResult>> createAsync,
+        Func<PublisherPublicationExportRequest, Task<PublisherPublicationExportResult>> exportAsync)
     {
         try
         {
             var id = Guid.NewGuid();
-            sessions[id] = new SessionEntry(describeAsync, createAsync);
+            sessions[id] = new SessionEntry(describeAsync, createAsync, exportAsync);
             logger.LogInformation("Registered PublisherStudio editor session {SessionId}; {Count} open.", id, sessions.Count);
             return id;
         }
@@ -99,22 +102,10 @@ public sealed class PublisherEditorSessionRegistry(IOptions<OrganicPluginOptions
     {
         try
         {
-            KeyValuePair<Guid, SessionEntry>[] open = sessions.ToArray();
-            if (open.Length == 0)
-                return Failure("No PublisherStudio editor is open. Ask the user to open PublisherStudio in the browser (a publication must be loaded in the editor), then retry.");
-            KeyValuePair<Guid, SessionEntry> target;
-            if (!string.IsNullOrWhiteSpace(sessionId))
-            {
-                if (!Guid.TryParse(sessionId, out var wanted) || !sessions.TryGetValue(wanted, out var found))
-                    return Failure("The sessionId does not match an open PublisherStudio editor session. Call publisher.sessions.list for current ids.");
-                target = new KeyValuePair<Guid, SessionEntry>(wanted, found);
-            }
-            else if (open.Length == 1)
-                target = open[0];
-            else
-                return Failure($"{open.Length} editor sessions are open; call publisher.sessions.list and pass a sessionId.");
+            if (SelectSession(sessionId, out var failure) is not { } target)
+                return Failure(failure);
 
-            var work = target.Value.CreateAsync(request);
+            var work = target.CreateAsync(request);
             var creationTimeoutSeconds = Math.Max(1, options.Value.DocumentCreation.EditorCreationTimeoutSeconds);
             var finished = await Task.WhenAny(work, Task.Delay(TimeSpan.FromSeconds(creationTimeoutSeconds), cancellationToken)).ConfigureAwait(false);
             if (finished != work)
@@ -127,6 +118,77 @@ public sealed class PublisherEditorSessionRegistry(IOptions<OrganicPluginOptions
                 logger.LogDebug(exception, "Document creation was canceled.");
             else
                 logger.LogError(exception, "Creating a document through the editor session failed.");
+            throw;
+        }
+    }
+
+    /// <inheritdoc/>
+    public async Task<PublisherPublicationExportResult> ExportAsync(string? sessionId, PublisherPublicationExportRequest request, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            if (SelectSession(sessionId, out var failure) is not { } target)
+            {
+                logger.LogInformation("Publication export not performed: {Message}", failure);
+                return new PublisherPublicationExportResult { Success = false, Scope = request.Scope, Message = failure };
+            }
+
+            var work = target.ExportAsync(request);
+            var exportTimeoutSeconds = Math.Max(1, options.Value.MediaTools.EditorExportTimeoutSeconds);
+            var finished = await Task.WhenAny(work, Task.Delay(TimeSpan.FromSeconds(exportTimeoutSeconds), cancellationToken)).ConfigureAwait(false);
+            if (finished != work)
+            {
+                logger.LogWarning("The editor did not finish the {Scope} export within {Seconds} seconds.", request.Scope, exportTimeoutSeconds);
+                return new PublisherPublicationExportResult
+                {
+                    Success = false,
+                    Scope = request.Scope,
+                    Message = $"The PublisherStudio editor did not finish the export within {exportTimeoutSeconds} seconds (OrganicPlugins:MediaTools:EditorExportTimeoutSeconds)."
+                };
+            }
+            return await work.ConfigureAwait(false);
+        }
+        catch (Exception exception)
+        {
+            if (exception is OperationCanceledException)
+                logger.LogDebug(exception, "Publication export was canceled.");
+            else
+                logger.LogError(exception, "Exporting the publication through the editor session failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Selects the session addressed by a request without guessing between several open editors.</summary>
+    /// <param name="sessionId">Optional session identifier text.</param>
+    /// <param name="failure">Explains what the caller must open or specify when no session is selected.</param>
+    /// <returns>The selected session, or <see langword="null"/>.</returns>
+    private SessionEntry? SelectSession(string? sessionId, out string failure)
+    {
+        try
+        {
+            failure = string.Empty;
+            KeyValuePair<Guid, SessionEntry>[] open = sessions.ToArray();
+            if (open.Length == 0)
+            {
+                failure = "No PublisherStudio editor is open. Ask the user to open PublisherStudio in the browser (a publication must be loaded in the editor), then retry.";
+                return null;
+            }
+            if (!string.IsNullOrWhiteSpace(sessionId))
+            {
+                if (Guid.TryParse(sessionId, out var wanted) && sessions.TryGetValue(wanted, out var found))
+                    return found;
+                failure = "The sessionId does not match an open PublisherStudio editor session. Call publisher.sessions.list for current ids.";
+                return null;
+            }
+            if (open.Length == 1)
+                return open[0].Value;
+            failure = $"{open.Length} editor sessions are open; call publisher.sessions.list and pass a sessionId.";
+            logger.LogDebug("Editor session selection needs a sessionId because {Count} sessions are open.", open.Length);
+            return null;
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Could not select the PublisherStudio editor session.");
             throw;
         }
     }

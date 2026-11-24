@@ -8910,6 +8910,148 @@ async function buildPublisherStructuredSite(title, rawOptions = {}) { try {
         return true;
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:bindMediaConverterDrop@7805', __javascriptError); throw __javascriptError; }}
 
+// 1-Wire exports: these producers own the export output; the UI download and the approved 1-Wire
+// transfer both consume them, so a format is implemented once.
+const publisherWireExports = new Map();
+
+async function producePageExport(exportSource, format, dpi, jpegQuality = .92) { try {
+    refreshContentFit(exportSource);
+    await new Promise(resolve => { try { return (requestAnimationFrame(resolve)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:ArrowFunction@producePageExport', __javascriptError); throw __javascriptError; } });
+    const normalized = String(format).toLowerCase();
+    const scale = clamp(number(dpi, 150) / 96, .5, 12);
+    const canvas = await rasterizePageElement(exportSource, scale);
+    if (normalized === 'svg') {
+        const metrics = pageExportMetrics(exportSource);
+        const svg = canvasToEmbeddedSvg(canvas, metrics.widthMm, metrics.heightMm);
+        return { blob: new Blob([svg], { type: 'image/svg+xml;charset=utf-8' }), extension: 'svg' };
+    }
+
+    const jpeg = normalized === 'jpeg' || normalized === 'jpg';
+    if (!jpeg && normalized !== 'png') throw new Error('Only PNG, JPEG, and SVG page export are supported.');
+    const output = prepareOutputCanvas(canvas, jpeg);
+    const blob = await canvasBlob(output, jpeg ? 'image/jpeg' : 'image/png', jpeg ? clamp(number(jpegQuality, .92), .35, 1) : undefined);
+    return { blob, extension: jpeg ? 'jpg' : 'png' };
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:producePageExport', __javascriptError); throw __javascriptError; }}
+
+async function produceElementExport(elementId, format, dpi) { try {
+    const id = String(elementId || '');
+    if (!id) throw new Error('No publication object was selected.');
+    const element = document.querySelector(`.print-publication [data-element-id="${CSS.escape(id)}"]`);
+    if (!element) throw new Error('The selected object is not available on the export surface.');
+    if (element.classList.contains('print-connector')) throw new Error('Connector-only export is not supported yet.');
+    const page = element.closest('.print-page');
+    if (!page) throw new Error('The selected object is not attached to a publication page.');
+    refreshContentFit(page);
+    await new Promise(resolve => { try { return (requestAnimationFrame(resolve)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:ArrowFunction@produceElementExport', __javascriptError); throw __javascriptError; } });
+    const scale = clamp(number(dpi, 150) / 96, .5, 12);
+    const pageCanvas = await rasterizeIsolatedPublicationElement(page, element, scale);
+    const objectCanvas = cropCanvasToElement(pageCanvas, page, element, Math.max(2, Math.ceil(scale * 1.5)));
+    const normalized = String(format).toLowerCase();
+    if (normalized === 'svg') {
+        const svg = canvasToEmbeddedSvg(objectCanvas);
+        return { blob: new Blob([svg], { type: 'image/svg+xml;charset=utf-8' }), extension: 'svg' };
+    }
+    if (normalized !== 'png') throw new Error('Selected objects can be exported as PNG or SVG.');
+    return { blob: await canvasBlob(objectCanvas, 'image/png'), extension: 'png' };
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:produceElementExport', __javascriptError); throw __javascriptError; }}
+
+async function producePublicationPagesExport(containerSelector, baseName, format, dpi, compressArchive = true, jpegQuality = .92) { try {
+    const container = document.querySelector(containerSelector);
+    if (!container) throw new Error('The publication export surface is not available.');
+    const pages = [...container.querySelectorAll('.print-page[data-page-id]')];
+    if (!pages.length) throw new Error('The publication does not contain any pages.');
+    refreshContentFit(container);
+    await new Promise(resolve => { try { return (requestAnimationFrame(resolve)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:ArrowFunction@producePublicationPagesExport', __javascriptError); throw __javascriptError; } });
+    const normalized = String(format).toLowerCase();
+    const jpeg = normalized === 'jpeg' || normalized === 'jpg';
+    if (!jpeg && normalized !== 'png') throw new Error('Only PNG and JPEG page export are supported here.');
+    const extension = jpeg ? 'jpg' : 'png';
+    const mimeType = jpeg ? 'image/jpeg' : 'image/png';
+    const scale = clamp(number(dpi, 150) / 96, .5, 12);
+    const safeBase = String(baseName || 'publication').replace(/[<>:"/\\|?*\u0000-\u001f]+/g, '-').replace(/[. ]+$/g, '') || 'publication';
+    const files = [];
+    for (let index = 0; index < pages.length; index++) {
+        try {
+            if (index > 0) await new Promise(resolve => { try { return (requestAnimationFrame(resolve)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:ArrowFunction@producePublicationPagesExport.next', __javascriptError); throw __javascriptError; } });
+            const canvas = await rasterizePageElement(pages[index], scale);
+            const output = prepareOutputCanvas(canvas, jpeg);
+            const blob = await canvasBlob(output, mimeType, jpeg ? clamp(number(jpegQuality, .92), .35, 1) : undefined);
+            files.push({ name: `${safeBase}-page-${index + 1}.${extension}`, blob });
+        } catch (error) {
+            console.error(`Page ${index + 1} raster export failed.`, error);
+            throw new Error(`Page ${index + 1} could not be exported: ${error?.message || error}`);
+        }
+    }
+    if (files.length === 1) return { count: 1, fileName: files[0].name, blob: files[0].blob };
+    const archiveName = `${safeBase}-${extension}-pages.zip`;
+    return { count: files.length, fileName: archiveName, blob: await createZip(files, { compress: compressArchive !== false }) };
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:producePublicationPagesExport', __javascriptError); throw __javascriptError; }}
+
+async function produceSingleHtmlExport(mode, title, options = {}) { try {
+    const html = await buildPublisherSingleHtml(mode, title, options);
+    const stats = window.__publisherSingleExportStats || {};
+    return {
+        blob: new Blob([html], { type: 'text/html;charset=utf-8' }),
+        sourceBytes: Number(stats.sourceBytes || 0),
+        outputBytes: Number(stats.outputBytes || 0),
+        warnings: Array.isArray(stats.warnings) ? stats.warnings : []
+    };
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:produceSingleHtmlExport', __javascriptError); throw __javascriptError; }}
+
+async function produceStructuredWebsiteExport(title, options = {}) { try {
+    const result = await buildPublisherStructuredSite(title, options);
+    const archive = await createZip(result.files, { compress: result.options.compressArchive });
+    return { archive, assetCount: result.assetCount, sourceBytes: result.sourceBytes, warnings: result.warnings };
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:produceStructuredWebsiteExport', __javascriptError); throw __javascriptError; }}
+
+async function preparePublisherWireExport(request, maximumBytes) { try {
+    const scope = String(request?.scope || '').toLowerCase();
+    const format = String(request?.format || '').toLowerCase();
+    const title = String(request?.title || 'publication');
+    const baseName = title.replace(/[<>:"/\\|?*\u0000-\u001f]+/g, '-').replace(/[. ]+$/g, '') || 'publication';
+    let produced;
+    if (scope === 'page') {
+        const pages = [...document.querySelectorAll('.print-publication .print-page[data-page-id]')];
+        const pageNumber = Math.trunc(number(request?.page, 1));
+        if (pageNumber < 1 || pageNumber > pages.length) throw new Error(`The publication has ${pages.length} page(s); page ${pageNumber} does not exist.`);
+        const page = await producePageExport(pages[pageNumber - 1], format, request?.dpi, request?.jpegQuality);
+        produced = { blob: page.blob, fileName: `${baseName}-page-${pageNumber}.${page.extension}`, pageCount: 1 };
+    }
+    else if (scope === 'element') {
+        const element = await produceElementExport(request?.elementId, format, request?.dpi);
+        produced = { blob: element.blob, fileName: `${baseName}-object.${element.extension}`, pageCount: 1 };
+    }
+    else if (scope === 'pages') {
+        const pages = await producePublicationPagesExport('.print-publication', baseName, format, request?.dpi, true, request?.jpegQuality);
+        produced = { blob: pages.blob, fileName: pages.fileName, pageCount: pages.count };
+    }
+    else if (scope === 'presentation' || scope === 'site') {
+        if (format !== 'html') throw new Error(`The ${scope} export produces html, not ${format}.`);
+        const single = await produceSingleHtmlExport(scope, title, request?.options || {});
+        produced = { blob: single.blob, fileName: `${baseName}-${scope}.html`, pageCount: 0 };
+    }
+    else if (scope === 'structured-site') {
+        if (format !== 'zip') throw new Error(`The structured website export produces zip, not ${format}.`);
+        const site = await produceStructuredWebsiteExport(title, request?.options || {});
+        produced = { blob: site.archive, fileName: `${baseName}-website.zip`, pageCount: 0 };
+    }
+    else throw new Error(`The 1-Wire export scope '${scope}' is not supported by this editor.`);
+
+    const budget = number(maximumBytes, 0);
+    if (produced.blob.size > budget) throw new Error(`The ${scope} export is ${produced.blob.size} bytes; the configured limit is ${budget} bytes (OrganicPlugins:MediaTools:MaximumTransferFileBytes).`);
+    const token = (globalThis.crypto && typeof globalThis.crypto.randomUUID === 'function') ? globalThis.crypto.randomUUID() : `${Date.now()}-${Math.random()}`;
+    publisherWireExports.set(token, produced.blob);
+    return { token, fileName: produced.fileName, mimeType: String(produced.blob.type || '').split(';')[0], size: produced.blob.size, pageCount: produced.pageCount };
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:preparePublisherWireExport', __javascriptError); throw __javascriptError; }}
+
+function takePublisherWireExport(token) { try {
+    const key = String(token || '');
+    const blob = publisherWireExports.get(key);
+    publisherWireExports.delete(key);
+    if (!blob) throw new Error('The prepared 1-Wire export is no longer available.');
+    return blob;
+ } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:takePublisherWireExport', __javascriptError); throw __javascriptError; }}
+
 window.publisherStudio = {
     setDocumentDirty(value) { try { publisherDocumentDirty = Boolean(value);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:setDocumentDirty@7855', __javascriptError); throw __javascriptError; }},
     restorePublisherWorkspaceAfterExport(stageId = 'publisher-stage') { try {
@@ -9058,84 +9200,21 @@ window.publisherStudio = {
         if (!page) throw new Error('The publication page is not available.');
         const pageKey = page.dataset.pageId || '';
         const exportSource = pageKey
-            ? document.querySelector(`.print-publication > .print-page[data-page-id="${CSS.escape(pageKey)}"]`) || page
+            ? document.querySelector(`.print-publication .print-page[data-page-id="${CSS.escape(pageKey)}"]`) || page
             : page;
-        refreshContentFit(exportSource);
-        await new Promise(resolve => { try { return (requestAnimationFrame(resolve)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:ArrowFunction@7961', __javascriptError); throw __javascriptError; } });
-        const normalized = String(format).toLowerCase();
-        const scale = clamp(number(dpi, 150) / 96, .5, 12);
-        const canvas = await rasterizePageElement(exportSource, scale);
-        if (normalized === 'svg') {
-            const metrics = pageExportMetrics(exportSource);
-            const svg = canvasToEmbeddedSvg(canvas, metrics.widthMm, metrics.heightMm);
-            downloadBlob(fileName, new Blob([svg], { type: 'image/svg+xml;charset=utf-8' }));
-            return;
-        }
-
-        const jpeg = normalized === 'jpeg' || normalized === 'jpg';
-        if (!jpeg && normalized !== 'png') throw new Error('Only PNG, JPEG, and SVG page export are supported.');
-        const output = prepareOutputCanvas(canvas, jpeg);
-        const blob = await canvasBlob(output, jpeg ? 'image/jpeg' : 'image/png', jpeg ? clamp(number(jpegQuality, .92), .35, 1) : undefined);
-        downloadBlob(fileName, blob);
+        const produced = await producePageExport(exportSource, format, dpi, jpegQuality);
+        downloadBlob(fileName, produced.blob);
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:exportPage@7953', __javascriptError); throw __javascriptError; }},
 
     async exportPublicationElement(elementId, fileName, format, dpi) { try {
-        const id = String(elementId || '');
-        if (!id) throw new Error('No publication object was selected.');
-        const element = document.querySelector(`.print-publication [data-element-id="${CSS.escape(id)}"]`);
-        if (!element) throw new Error('The selected object is not available on the export surface.');
-        if (element.classList.contains('print-connector')) throw new Error('Connector-only export is not supported yet.');
-        const page = element.closest('.print-page');
-        if (!page) throw new Error('The selected object is not attached to a publication page.');
-        refreshContentFit(page);
-        await new Promise(resolve => { try { return (requestAnimationFrame(resolve)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:ArrowFunction@7988', __javascriptError); throw __javascriptError; } });
-        const scale = clamp(number(dpi, 150) / 96, .5, 12);
-        const pageCanvas = await rasterizeIsolatedPublicationElement(page, element, scale);
-        const objectCanvas = cropCanvasToElement(pageCanvas, page, element, Math.max(2, Math.ceil(scale * 1.5)));
-        const normalized = String(format).toLowerCase();
-        if (normalized === 'svg') {
-            const svg = canvasToEmbeddedSvg(objectCanvas);
-            downloadBlob(fileName, new Blob([svg], { type: 'image/svg+xml;charset=utf-8' }));
-            return;
-        }
-        if (normalized !== 'png') throw new Error('Selected objects can be exported as PNG or SVG.');
-        downloadBlob(fileName, await canvasBlob(objectCanvas, 'image/png'));
+        const produced = await produceElementExport(elementId, format, dpi);
+        downloadBlob(fileName, produced.blob);
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:exportPublicationElement@7979', __javascriptError); throw __javascriptError; }},
 
     async exportPublicationPages(containerSelector, baseName, format, dpi, compressArchive = true, jpegQuality = .92) { try {
-        const container = document.querySelector(containerSelector);
-        if (!container) throw new Error('The publication export surface is not available.');
-        const pages = [...container.querySelectorAll('.print-page[data-page-id]')];
-        if (!pages.length) throw new Error('The publication does not contain any pages.');
-        refreshContentFit(container);
-        await new Promise(resolve => { try { return (requestAnimationFrame(resolve)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:ArrowFunction@8008', __javascriptError); throw __javascriptError; } });
-        const normalized = String(format).toLowerCase();
-        const jpeg = normalized === 'jpeg' || normalized === 'jpg';
-        if (!jpeg && normalized !== 'png') throw new Error('Only PNG and JPEG page export are supported here.');
-        const extension = jpeg ? 'jpg' : 'png';
-        const mimeType = jpeg ? 'image/jpeg' : 'image/png';
-        const scale = clamp(number(dpi, 150) / 96, .5, 12);
-        const safeBase = String(baseName || 'publication').replace(/[<>:"/\\|?*\u0000-\u001f]+/g, '-').replace(/[. ]+$/g, '') || 'publication';
-        const files = [];
-        for (let index = 0; index < pages.length; index++) {
-            try {
-                if (index > 0) await new Promise(resolve => { try { return (requestAnimationFrame(resolve)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:ArrowFunction@8019', __javascriptError); throw __javascriptError; } });
-                const canvas = await rasterizePageElement(pages[index], scale);
-                const output = prepareOutputCanvas(canvas, jpeg);
-                const blob = await canvasBlob(output, mimeType, jpeg ? clamp(number(jpegQuality, .92), .35, 1) : undefined);
-                files.push({ name: `${safeBase}-page-${index + 1}.${extension}`, blob });
-            } catch (error) {
-                console.error(`Page ${index + 1} raster export failed.`, error);
-                throw new Error(`Page ${index + 1} could not be exported: ${error?.message || error}`);
-            }
-        }
-        if (files.length === 1) {
-            downloadBlob(files[0].name, files[0].blob);
-            return { count: 1, fileName: files[0].name };
-        }
-        const archiveName = `${safeBase}-${extension}-pages.zip`;
-        downloadBlob(archiveName, await createZip(files, { compress: compressArchive !== false }));
-        return { count: files.length, fileName: archiveName };
+        const produced = await producePublicationPagesExport(containerSelector, baseName, format, dpi, compressArchive, jpegQuality);
+        downloadBlob(produced.fileName, produced.blob);
+        return { count: produced.count, fileName: produced.fileName };
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:exportPublicationPages@8002', __javascriptError); throw __javascriptError; }},
 
     async verifyPageRaster(pageId) { try {
@@ -9168,33 +9247,31 @@ window.publisherStudio = {
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:makeColorTransparent@8045', __javascriptError); throw __javascriptError; }},
 
     async exportWebsite(fileName, title, options = {}) { try {
-        const html = await buildPublisherSingleHtml('presentation', title, options);
-        const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-        downloadBlob(fileName, blob);
-        const stats = window.__publisherSingleExportStats || {};
-        return { fileName, sourceBytes: Number(stats.sourceBytes || 0), outputBytes: Number(stats.outputBytes || 0), warnings: Array.isArray(stats.warnings) ? stats.warnings : [] };
+        const produced = await produceSingleHtmlExport('presentation', title, options);
+        downloadBlob(fileName, produced.blob);
+        return { fileName, sourceBytes: produced.sourceBytes, outputBytes: produced.outputBytes, warnings: produced.warnings };
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:exportWebsite@8067', __javascriptError); throw __javascriptError; }},
 
     async exportSite(fileName, title, options = {}) { try {
-        const html = await buildPublisherSingleHtml('site', title, options);
-        const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-        downloadBlob(fileName, blob);
-        const stats = window.__publisherSingleExportStats || {};
-        return { fileName, sourceBytes: Number(stats.sourceBytes || 0), outputBytes: Number(stats.outputBytes || 0), warnings: Array.isArray(stats.warnings) ? stats.warnings : [] };
+        const produced = await produceSingleHtmlExport('site', title, options);
+        downloadBlob(fileName, produced.blob);
+        return { fileName, sourceBytes: produced.sourceBytes, outputBytes: produced.outputBytes, warnings: produced.warnings };
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:exportSite@8072', __javascriptError); throw __javascriptError; }},
 
     async exportStructuredWebsite(fileName, title, options = {}) { try {
-        const result = await buildPublisherStructuredSite(title, options);
-        const archive = await createZip(result.files, { compress: result.options.compressArchive });
-        downloadBlob(fileName, archive);
+        const produced = await produceStructuredWebsiteExport(title, options);
+        downloadBlob(fileName, produced.archive);
         return {
             fileName,
-            assetCount: result.assetCount,
-            sourceBytes: result.sourceBytes,
-            archiveBytes: archive.size,
-            warnings: result.warnings
+            assetCount: produced.assetCount,
+            sourceBytes: produced.sourceBytes,
+            archiveBytes: produced.archive.size,
+            warnings: produced.warnings
         };
      } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:exportStructuredWebsite@8077', __javascriptError); throw __javascriptError; }},
+
+    async prepareWireExport(request, maximumBytes) { try { return await preparePublisherWireExport(request, maximumBytes);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:prepareWireExport', __javascriptError); throw __javascriptError; }},
+    takeWireExport(token) { try { return takePublisherWireExport(token);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:takeWireExport', __javascriptError); throw __javascriptError; }},
 
     async printPublication() { try {
         const active = document.activeElement;

@@ -833,7 +833,7 @@
     {
       "key": "publisher.media.jobs",
       "displayName": "Media conversion jobs",
-      "description": "Inspect up to fifty active/recent media conversion jobs without disclosing local source paths.",
+      "description": "Inspect the most recent media conversion jobs (count set by OrganicPlugins:MediaTools:MaximumListedJobs) without disclosing local source paths.",
       "controller": "OrganicPlugins",
       "method": "POST",
       "route": "/api/organic/capabilities/publisher.media.jobs",
@@ -978,6 +978,308 @@
       "requiresFrontendUserConfirmation": true,
       "interactionEditor": 0,
       "configurationKey": "publisher:publisher.media.cancel",
+      "source": "PublisherStudio object store"
+    },
+    {
+      "key": "publisher.file.read",
+      "displayName": "Read announced export or media file",
+      "description": "Returns one chunk of a large file announced by an approved publisher.publication.export or publisher.media.output request. Only the peer that requested the file can read it; the file is discarded after its last chunk or when its retention ends.",
+      "controller": "OrganicPlugins",
+      "method": "POST",
+      "route": "/api/organic/capabilities/publisher.file.read",
+      "parameterSchemaJson": "{\"type\":\"object\",\"required\":[\"transferId\"],\"properties\":{\"transferId\":{\"type\":\"string\",\"format\":\"uuid\"},\"offset\":{\"type\":\"integer\",\"minimum\":0}},\"additionalProperties\":false}",
+      "organs": [
+        "hands"
+      ],
+      "skills": [
+        "export",
+        "file-transfer"
+      ],
+      "requiredSkillKeys": [
+        "export",
+        "file-transfer"
+      ],
+      "uiActivationKeys": [],
+      "isOnline": true,
+      "isEnabled": true,
+      "isReadOnly": true,
+      "requiresHumanConfirmation": false,
+      "supportsScheduling": false,
+      "supportsRecurringExecution": false,
+      "requiresHumanInteractionOnTargetSystem": false,
+      "requiresAutomatedInteractionOnTargetSystem": false,
+      "interactionValueSchemaJson": "{\"type\":\"object\",\"properties\":{}}",
+      "inputContract": "transferId from a Transfer announcement and the byte offset to continue from (0 for the first chunk).",
+      "outputContract": "transferId, offset, length, done and documentChunk (at most the 1-Wire file budget).",
+      "securityContract": "Read-only continuation of a file the user already approved. Only the requesting peer can read it; retention, file size and total retained bytes are bounded by OrganicPlugins:MediaTools settings.",
+      "organicUseCase": "Move website exports, multi-page archives and converted video to LocalGPT without a 1-Wire message size limit.",
+      "suggestedCouncilRoles": [
+        "export reviewer"
+      ],
+      "isExposedToPeer": true,
+      "allowPeerInvocation": true,
+      "requiresFrontendUserConfirmation": false,
+      "interactionEditor": 0,
+      "configurationKey": "publisher:publisher.file.read",
+      "source": "PublisherStudio object store"
+    },
+    {
+      "key": "publisher.export.formats",
+      "displayName": "Export formats and media presets",
+      "description": "Lists every PublisherStudio export path for linked agents: document kinds, publication and website export scopes and formats, the render export catalog, installed FFmpeg presets, saved conversion profiles, importable file families and the 1-Wire file budget.",
+      "controller": "OrganicPlugins",
+      "method": "POST",
+      "route": "/api/organic/capabilities/publisher.export.formats",
+      "parameterSchemaJson": "{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}",
+      "organs": [
+        "eyes"
+      ],
+      "skills": [
+        "ffmpeg",
+        "video",
+        "audio",
+        "conversion",
+        "export",
+        "document",
+        "website",
+        "publication"
+      ],
+      "requiredSkillKeys": [
+        "ffmpeg",
+        "video",
+        "audio",
+        "conversion",
+        "export",
+        "document",
+        "website",
+        "publication"
+      ],
+      "uiActivationKeys": [],
+      "isOnline": true,
+      "isEnabled": true,
+      "isReadOnly": true,
+      "requiresHumanConfirmation": false,
+      "supportsScheduling": false,
+      "supportsRecurringExecution": false,
+      "requiresHumanInteractionOnTargetSystem": false,
+      "requiresAutomatedInteractionOnTargetSystem": false,
+      "interactionValueSchemaJson": "{\"type\":\"object\",\"properties\":{}}",
+      "inputContract": "No parameters.",
+      "outputContract": "Document kinds, publication scopes and formats, render catalog, FFmpeg availability, presets, profiles, import families and fileBudgetBytes. FFmpeg executable paths are not included.",
+      "securityContract": "Read-only discovery through the linked-peer permission matrix.",
+      "organicUseCase": "Discover which document, publication, website and media formats a media agent can request before choosing a capability.",
+      "suggestedCouncilRoles": [
+        "media producer",
+        "export planner",
+        "format reviewer"
+      ],
+      "isExposedToPeer": true,
+      "allowPeerInvocation": true,
+      "requiresFrontendUserConfirmation": false,
+      "interactionEditor": 0,
+      "configurationKey": "publisher:publisher.export.formats",
+      "source": "PublisherStudio object store"
+    },
+    {
+      "key": "publisher.media.convert",
+      "displayName": "Convert media with FFmpeg",
+      "description": "Queues one FFmpeg conversion of a file sent by the linked peer with an installed preset or an operator-saved profile after the user approves it in PublisherStudio. Read preset and profile ids from publisher.export.formats.",
+      "controller": "OrganicPlugins",
+      "method": "POST",
+      "route": "/api/organic/capabilities/publisher.media.convert",
+      "parameterSchemaJson": "{\"type\":\"object\",\"required\":[\"fileName\",\"mimeType\",\"contentBase64\"],\"properties\":{\"presetId\":{\"type\":\"string\"},\"profileId\":{\"type\":\"string\",\"format\":\"uuid\"},\"fileName\":{\"type\":\"string\"},\"mimeType\":{\"type\":\"string\"},\"contentBase64\":{\"type\":\"string\",\"contentEncoding\":\"base64\"},\"options\":{\"type\":\"object\",\"description\":\"Optional conversion options such as startSeconds, durationSeconds, width, height, scaleMode, frameRate, crf, videoBitrateKbps, audioBitrateKbps, audioSampleRate, audioChannels, disableAudio, disableVideo, normalizeAudio, deinterlace and outputFileName.\"}},\"additionalProperties\":false}",
+      "organs": [
+        "hands"
+      ],
+      "skills": [
+        "ffmpeg",
+        "video",
+        "audio",
+        "conversion",
+        "export"
+      ],
+      "requiredSkillKeys": [
+        "ffmpeg",
+        "video",
+        "audio",
+        "conversion",
+        "export"
+      ],
+      "uiActivationKeys": [],
+      "isOnline": true,
+      "isEnabled": true,
+      "isReadOnly": false,
+      "requiresHumanConfirmation": true,
+      "supportsScheduling": false,
+      "supportsRecurringExecution": false,
+      "requiresHumanInteractionOnTargetSystem": true,
+      "requiresAutomatedInteractionOnTargetSystem": false,
+      "interactionValueSchemaJson": "{\"type\":\"object\",\"properties\":{}}",
+      "inputContract": "presetId (or profileId), fileName, mimeType and the source file as contentBase64 within fileBudgetBytes; optional options. Filter graphs and advanced FFmpeg arguments are refused unless OrganicPlugins:MediaTools:AllowPeerFilterAndAdvancedArguments is enabled.",
+      "outputContract": "jobId, presetId, status, progress, message, output file name and MIME type. Poll publisher.media.job, then read the file with publisher.media.output.",
+      "securityContract": "Linked-peer permission matrix plus a fresh PublisherStudio approval for every request. The source is bounded by the 1-Wire file budget and the preset must be installed.",
+      "organicUseCase": "Convert, trim, scale or transcode audio, video and image media for other media agents.",
+      "suggestedCouncilRoles": [
+        "media converter",
+        "video editor",
+        "audio editor"
+      ],
+      "isExposedToPeer": true,
+      "allowPeerInvocation": true,
+      "requiresFrontendUserConfirmation": true,
+      "interactionEditor": 1,
+      "configurationKey": "publisher:publisher.media.convert",
+      "source": "PublisherStudio object store"
+    },
+    {
+      "key": "publisher.media.job",
+      "displayName": "Read media conversion job",
+      "description": "Returns status, progress and output metadata of one PublisherStudio conversion job.",
+      "controller": "OrganicPlugins",
+      "method": "POST",
+      "route": "/api/organic/capabilities/publisher.media.job",
+      "parameterSchemaJson": "{\"type\":\"object\",\"required\":[\"jobId\"],\"properties\":{\"jobId\":{\"type\":\"string\",\"format\":\"uuid\"}},\"additionalProperties\":false}",
+      "organs": [
+        "eyes"
+      ],
+      "skills": [
+        "ffmpeg",
+        "video",
+        "audio",
+        "conversion",
+        "export"
+      ],
+      "requiredSkillKeys": [
+        "ffmpeg",
+        "video",
+        "audio",
+        "conversion",
+        "export"
+      ],
+      "uiActivationKeys": [],
+      "isOnline": true,
+      "isEnabled": true,
+      "isReadOnly": true,
+      "requiresHumanConfirmation": false,
+      "supportsScheduling": false,
+      "supportsRecurringExecution": false,
+      "requiresHumanInteractionOnTargetSystem": false,
+      "requiresAutomatedInteractionOnTargetSystem": false,
+      "interactionValueSchemaJson": "{\"type\":\"object\",\"properties\":{}}",
+      "inputContract": "jobId returned by publisher.media.convert or publisher.media.jobs.",
+      "outputContract": "jobId, status, progress, message, output file name, MIME type and size, and the next capability to call.",
+      "securityContract": "Read-only; physical paths are never returned.",
+      "organicUseCase": "Follow a queued conversion until it completes.",
+      "suggestedCouncilRoles": [
+        "media converter",
+        "result reviewer"
+      ],
+      "isExposedToPeer": true,
+      "allowPeerInvocation": true,
+      "requiresFrontendUserConfirmation": false,
+      "interactionEditor": 0,
+      "configurationKey": "publisher:publisher.media.job",
+      "source": "PublisherStudio object store"
+    },
+    {
+      "key": "publisher.media.output",
+      "displayName": "Read converted media file",
+      "description": "Returns the converted file of one completed PublisherStudio conversion job to the approved peer, within the 1-Wire file budget.",
+      "controller": "OrganicPlugins",
+      "method": "POST",
+      "route": "/api/organic/capabilities/publisher.media.output",
+      "parameterSchemaJson": "{\"type\":\"object\",\"required\":[\"jobId\"],\"properties\":{\"jobId\":{\"type\":\"string\",\"format\":\"uuid\"}},\"additionalProperties\":false}",
+      "organs": [
+        "hands"
+      ],
+      "skills": [
+        "ffmpeg",
+        "video",
+        "audio",
+        "conversion",
+        "export"
+      ],
+      "requiredSkillKeys": [
+        "ffmpeg",
+        "video",
+        "audio",
+        "conversion",
+        "export"
+      ],
+      "uiActivationKeys": [],
+      "isOnline": true,
+      "isEnabled": true,
+      "isReadOnly": true,
+      "requiresHumanConfirmation": true,
+      "supportsScheduling": false,
+      "supportsRecurringExecution": false,
+      "requiresHumanInteractionOnTargetSystem": true,
+      "requiresAutomatedInteractionOnTargetSystem": false,
+      "interactionValueSchemaJson": "{\"type\":\"object\",\"properties\":{}}",
+      "inputContract": "jobId of a completed conversion job.",
+      "outputContract": "kind (file extension), mimeType, fileName and either documentBytes or, above the 1-Wire file budget, a Transfer announcement (transferId, length, sha256) that is read through publisher.file.read. LocalGPT reads transfers itself, verifies the file and offers it as a Chat download.",
+      "securityContract": "Linked-peer permission matrix plus a fresh PublisherStudio approval because the file leaves PublisherStudio. Files above the 1-Wire file budget are refused with the setting name.",
+      "organicUseCase": "Hand converted media to LocalGPT Chat or another media agent.",
+      "suggestedCouncilRoles": [
+        "media converter",
+        "result reviewer"
+      ],
+      "isExposedToPeer": true,
+      "allowPeerInvocation": true,
+      "requiresFrontendUserConfirmation": true,
+      "interactionEditor": 1,
+      "configurationKey": "publisher:publisher.media.output",
+      "source": "PublisherStudio object store"
+    },
+    {
+      "key": "publisher.publication.export",
+      "displayName": "Export publication, page, object or website",
+      "description": "Exports the open publication through the editor's own export path after the user approves it in PublisherStudio: one page or object as PNG, JPG or SVG, all pages as PNG/JPG (ZIP when several), a single-file HTML presentation or site, or a structured website ZIP.",
+      "controller": "OrganicPlugins",
+      "method": "POST",
+      "route": "/api/organic/capabilities/publisher.publication.export",
+      "parameterSchemaJson": "{\"type\":\"object\",\"required\":[\"scope\",\"format\"],\"properties\":{\"scope\":{\"enum\":[\"page\",\"element\",\"pages\",\"presentation\",\"site\",\"structured-site\"]},\"format\":{\"enum\":[\"png\",\"jpg\",\"svg\",\"html\",\"zip\"]},\"page\":{\"type\":\"integer\",\"minimum\":1},\"elementId\":{\"type\":\"string\"},\"dpi\":{\"type\":\"integer\",\"minimum\":1},\"sessionId\":{\"type\":\"string\"}},\"additionalProperties\":false}",
+      "organs": [
+        "hands"
+      ],
+      "skills": [
+        "export",
+        "publication",
+        "website",
+        "image",
+        "document"
+      ],
+      "requiredSkillKeys": [
+        "export",
+        "publication",
+        "website",
+        "image",
+        "document"
+      ],
+      "uiActivationKeys": [],
+      "isOnline": true,
+      "isEnabled": true,
+      "isReadOnly": true,
+      "requiresHumanConfirmation": true,
+      "supportsScheduling": false,
+      "supportsRecurringExecution": false,
+      "requiresHumanInteractionOnTargetSystem": true,
+      "requiresAutomatedInteractionOnTargetSystem": false,
+      "interactionValueSchemaJson": "{\"type\":\"object\",\"properties\":{}}",
+      "inputContract": "scope page (png, jpg, svg; optional page), element (png, svg; elementId), pages (png, jpg), presentation or site (html), structured-site (zip); optional dpi and sessionId (required only when several editors are open).",
+      "outputContract": "kind, mimeType, fileName, pageCount and either documentBytes or, above the 1-Wire file budget, a Transfer announcement (transferId, length, sha256) that is read through publisher.file.read; or a clear failure that says what the user must open. LocalGPT reads transfers itself, verifies the file and offers it as a Chat download.",
+      "securityContract": "Linked-peer permission matrix plus a fresh PublisherStudio approval for every export. The export runs in the user's open editor, whose browser tab must stay visible while it renders, and is bounded by the 1-Wire file budget.",
+      "organicUseCase": "Deliver publication pages, objects and websites to LocalGPT and other media agents.",
+      "suggestedCouncilRoles": [
+        "publisher",
+        "web builder",
+        "export reviewer"
+      ],
+      "isExposedToPeer": true,
+      "allowPeerInvocation": true,
+      "requiresFrontendUserConfirmation": true,
+      "interactionEditor": 1,
+      "configurationKey": "publisher:publisher.publication.export",
       "source": "PublisherStudio object store"
     },
     {

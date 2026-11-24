@@ -27,7 +27,7 @@
         {
             var editor = _exportEditor ?? throw new InvalidOperationException("The story export editor is unavailable.");
             var format = kind == "rtf" ? DocumentFormat.Rtf : DocumentFormat.Html;
-            using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+            using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(Math.Max(1, OrganicOptions.Value.DocumentCreation.EditorCreationTimeoutSeconds)));
             await editor.LoadDocumentAsync(content, DocumentFormat.OpenXml, timeout.Token).ConfigureAwait(true);
             var exported = await editor.ExportDocumentAsync(format, timeout.Token).ConfigureAwait(true);
             if (kind != "pdf") return exported;
@@ -74,7 +74,7 @@
         try
         {
             if (firstRender && !_disposed && _sessionId == Guid.Empty)
-                _sessionId = SessionRegistry.Register(DescribeSessionAsync, CreateDocumentAsync);
+                _sessionId = SessionRegistry.Register(DescribeSessionAsync, CreateDocumentAsync, ExportPublicationAsync);
             return base.OnAfterRenderAsync(firstRender);
         }
         catch (Exception __componentMethodException)
@@ -131,6 +131,74 @@
             throw;
         }
     }
+
+    /// <summary>
+    /// Exports the open publication through the editor's own export producers on this circuit and returns the file.
+    /// The browser prepares the file first, so a format or budget problem is reported before any bytes move.
+    /// </summary>
+    /// <param name="request">The approved and validated export request.</param>
+    /// <returns>The exported file, or a failure that says what the user must change.</returns>
+    private async Task<PublisherPublicationExportResult> ExportPublicationAsync(PublisherPublicationExportRequest request)
+    {
+        try
+        {
+            PublisherPublicationExportResult? exported = null;
+            await InvokeAsync(async () =>
+            {
+                var snapshot = DocumentInsertion.DescribeSession(_sessionId);
+                using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(Math.Max(1, OrganicOptions.Value.MediaTools.EditorExportTimeoutSeconds)));
+                var prepared = await JS.InvokeAsync<PreparedWireExport>("publisherStudio.prepareWireExport", timeout.Token, new
+                {
+                    scope = request.Scope,
+                    format = request.Format,
+                    page = request.Page,
+                    elementId = request.ElementId,
+                    dpi = request.Dpi,
+                    title = snapshot.Title
+                }, request.MaximumBytes).ConfigureAwait(true);
+                var file = await JS.InvokeAsync<IJSStreamReference>("publisherStudio.takeWireExport", timeout.Token, prepared.Token).ConfigureAwait(true);
+                using var output = new MemoryStream();
+                await using (file.ConfigureAwait(true))
+                {
+                    var input = await file.OpenReadStreamAsync(request.MaximumBytes, timeout.Token).ConfigureAwait(true);
+                    await using (input.ConfigureAwait(true))
+                        await input.CopyToAsync(output, timeout.Token).ConfigureAwait(true);
+                }
+                exported = new PublisherPublicationExportResult
+                {
+                    Success = true,
+                    Scope = request.Scope,
+                    Kind = Path.GetExtension(prepared.FileName).TrimStart('.').ToLowerInvariant(),
+                    MimeType = prepared.MimeType,
+                    FileName = prepared.FileName,
+                    PageCount = prepared.PageCount,
+                    DocumentBytes = output.ToArray(),
+                    Message = $"Exported {prepared.FileName} from the open publication."
+                };
+                OperationalNotifications.Success($"An approved 1-Wire request exported {prepared.FileName} ({request.Scope}).", "Organic export", nameof(OrganicDocumentCreationBridge));
+            }).ConfigureAwait(true);
+            return exported ?? throw new InvalidOperationException("The editor session produced no export result.");
+        }
+        catch (JSException exception)
+        {
+            Logger.LogWarning(exception, "The browser could not produce the approved {Scope} export.", request.Scope);
+            OperationalNotifications.Warning(exception.Message, "Organic export", nameof(OrganicDocumentCreationBridge));
+            return new PublisherPublicationExportResult { Success = false, Scope = request.Scope, Message = exception.Message };
+        }
+        catch (Exception __componentMethodException)
+        {
+            Logger.LogError(__componentMethodException, $"Component method {nameof(OrganicDocumentCreationBridge)}.{nameof(ExportPublicationAsync)} failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Describes a file the browser prepared for one approved 1-Wire export.</summary>
+    /// <param name="Token">Browser-side handle used to take the prepared file exactly once.</param>
+    /// <param name="FileName">Suggested file name.</param>
+    /// <param name="MimeType">MIME type of the prepared file.</param>
+    /// <param name="Size">File size in bytes.</param>
+    /// <param name="PageCount">Number of exported publication pages.</param>
+    private sealed record PreparedWireExport(string Token, string FileName, string MimeType, long Size, int PageCount);
 
     /// <summary>
     /// Removes the session registration when the circuit or layout goes away.

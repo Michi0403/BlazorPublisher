@@ -261,6 +261,12 @@ if ($documentationSystemMemoryBytes -gt 0) {
         $docfxBuildMaxParallelism = 10
     }
 }
+# Windows workstations with 12-16 GB print 32-page parts reliably; larger tiers above are unchanged.
+# FUTURE2_DOCUMENTATION_BROWSER_PDF_CHUNK_PAGES still overrides this choice.
+if ([Runtime.InteropServices.RuntimeInformation]::IsOSPlatform([Runtime.InteropServices.OSPlatform]::Windows) -and
+    $documentationSystemMemoryBytes -gt 12GB -and $documentationSystemMemoryBytes -le 16GB) {
+    $browserPdfChunkPages = 32
+}
 if ([string]::Equals([string]$env:FUTURE2_DOCUMENTATION_LOW_MEMORY, '1', [StringComparison]::OrdinalIgnoreCase) -or
     [string]::Equals([string]$env:FUTURE2_DOCUMENTATION_LOW_MEMORY, 'true', [StringComparison]::OrdinalIgnoreCase)) {
     $documentationLowMemoryMode = $true

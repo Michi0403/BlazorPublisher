@@ -6,7 +6,7 @@ const path = require('node:path');
 const root = path.resolve(__dirname, '../..');
 const web = relative => fs.readFileSync(path.join(root, 'src/PublisherStudio.Web', relative), 'utf8');
 
-const documentKinds = ['text', 'rtf', 'html', 'txt'];
+const documentKinds = ['text', 'pdf', 'rtf', 'html', 'txt'];
 const spreadsheetKinds = ['spreadsheet', 'csv'];
 
 test('4.9.4 accepts supported document kinds and keeps XLSX as the native spreadsheet object', () => {
@@ -61,4 +61,16 @@ test('1-Wire file generation avoids the standalone DevExpress Office File API', 
         assert.doesNotMatch(source, /\b(?:RichEditDocumentServer|PdfDocumentProcessor)\b/, file);
         assert.doesNotMatch(source, /\bnew\s+(?:DevExpress\.Spreadsheet\.)?Workbook\s*\(/, file);
     }
+});
+
+test('Council PDF uses the same renderer as the Story preview and streams the result', () => {
+    const story = web('Components/Editor/StoryEditor.razor');
+    const bridge = web('Components/OrganicPlugins/OrganicDocumentCreationBridge.razor');
+    const browser = web('wwwroot/js/publisherInterop.js');
+    assert.match(story, /const pdf = createImagePdf\(images, pageWidthMm, pageHeightMm\);\s*if \(returnPdf\)/);
+    assert.match(story, /parent\.postMessage\(\{ publisherStoryPdf: pdf \}/);
+    assert.match(bridge, /printPreview: true, returnPdf: true/);
+    assert.match(bridge, /pdf\.OpenReadStreamAsync\(maximumBytes, timeout\.Token\)/);
+    assert.match(browser, /event\.source !== frame\.contentWindow \|\| event\.origin !== location\.origin/);
+    assert.match(browser, /DotNet\.createJSStreamReference\(publisherStoryPdf\)/);
 });

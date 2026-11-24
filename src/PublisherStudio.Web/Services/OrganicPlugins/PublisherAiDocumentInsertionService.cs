@@ -172,8 +172,8 @@ public sealed class PublisherAiDocumentInsertionService(
             var presentation = string.Equals((request.Presentation ?? string.Empty).Trim(), "silent", StringComparison.OrdinalIgnoreCase) ? "silent" : "visible";
             var pages = editor.Document.Pages;
             var targetIndex = request.TargetPage is { } requested ? requested - 1 : pages.FindIndex(page => page.Id == editor.SelectedPageId);
-            if (kind is not ("spreadsheet" or "text" or "rtf" or "html" or "txt" or "csv"))
-                return CreateFailure("kind must be 'spreadsheet', 'text' (Word), 'rtf', 'html', 'txt', or 'csv'.");
+            if (kind is not ("spreadsheet" or "text" or "pdf" or "rtf" or "html" or "txt" or "csv"))
+                return CreateFailure("kind must be 'spreadsheet', 'text' (Word), 'pdf', 'rtf', 'html', 'txt', or 'csv'.");
             if (string.IsNullOrWhiteSpace(request.Content))
                 return CreateFailure("content is required.");
             if (targetIndex < 0 || targetIndex >= pages.Count)

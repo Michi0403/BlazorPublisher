@@ -1,5 +1,10 @@
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
 @using DevExpress.Blazor.RichEdit
+@using Microsoft.JSInterop
+@using Microsoft.Extensions.Options
+@inject IJSRuntime JS
+@inject PublicationFileService Files
+@inject IOptions<OrganicPluginOptions> OrganicOptions
 @namespace PublisherStudio.Components
 @implements IDisposable
 @inject IPublisherEditorSessionRegistry SessionRegistry
@@ -24,7 +29,24 @@
             var format = kind == "rtf" ? DocumentFormat.Rtf : DocumentFormat.Html;
             using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(30));
             await editor.LoadDocumentAsync(content, DocumentFormat.OpenXml, timeout.Token).ConfigureAwait(true);
-            return await editor.ExportDocumentAsync(format, timeout.Token).ConfigureAwait(true);
+            var exported = await editor.ExportDocumentAsync(format, timeout.Token).ConfigureAwait(true);
+            if (kind != "pdf") return exported;
+
+            var preview = new PublisherStudio.Components.Editor.StoryEditor.StoryPreviewResult
+            {
+                Html = Files.ExtractHtmlBody(exported),
+                Background = Files.ExtractOpenXmlDocumentBackground(content) ?? "transparent"
+            };
+            var html = PublisherStudio.Components.Editor.StoryEditor.StandaloneStoryHtml(
+                Files, Logger, preview, "Council document", Files.ExtractOpenXmlPageLayout(content),
+                printPreview: true, returnPdf: true);
+            var maximumBytes = Math.Min(OrganicWireProtocol.MaximumMessageBytes, OrganicOptions.Value.MaximumMessageBytes) / 4;
+            await using var pdf = await JS.InvokeAsync<IJSStreamReference>(
+                "publisherStudio.renderStoryPdf", timeout.Token, html, maximumBytes);
+            await using var input = await pdf.OpenReadStreamAsync(maximumBytes, timeout.Token);
+            using var output = new MemoryStream();
+            await input.CopyToAsync(output, timeout.Token);
+            return output.ToArray();
         }
         finally
         {

@@ -8962,6 +8962,50 @@ window.publisherStudio = {
     reserveStoryPrintPreviewFromEvent(event) { try { reserveStoryPrintPreviewFromEvent(event);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:reserveStoryPrintPreviewFromEvent@7900', __javascriptError); throw __javascriptError; }},
     claimStoryPrintPreview(title) { try { return claimStoryPrintPreview(title);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:claimStoryPrintPreview@7901', __javascriptError); throw __javascriptError; }},
     openStoryPrintPreview(title) { try { return openStoryPrintPreview(title);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:openStoryPrintPreview@7902', __javascriptError); throw __javascriptError; }},
+    renderStoryPdf(html, maximumBytes) {
+        return new Promise((resolve, reject) => {
+            const frame = document.createElement('iframe');
+            frame.title = 'Council story PDF export';
+            frame.setAttribute('aria-hidden', 'true');
+            frame.style.cssText = 'position:fixed;left:-10000px;top:0;width:1000px;height:1200px;pointer-events:none';
+            const rendererUrl = new URL('js/vendor/html2canvas.min.js', document.baseURI).href
+                .replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll("'", '&#39;');
+            const cleanup = () => {
+                clearTimeout(timer);
+                removeEventListener('message', receive);
+                frame.remove();
+            };
+            const fail = error => {
+                cleanup();
+                publisherStudioDiagnostics.report('js/publisherInterop.js:renderStoryPdf', error);
+                reject(error);
+            };
+            const receive = event => {
+                if (event.source !== frame.contentWindow || event.origin !== location.origin) return;
+                const { publisherStoryPdf, publisherStoryPdfError } = event.data ?? {};
+                if (!publisherStoryPdf && !publisherStoryPdfError) return;
+                if (publisherStoryPdfError) fail(new Error(publisherStoryPdfError));
+                else if (!(publisherStoryPdf instanceof Blob) || publisherStoryPdf.type !== 'application/pdf')
+                    fail(new Error('PublisherStudio returned an invalid PDF.'));
+                else if (publisherStoryPdf.size > maximumBytes)
+                    fail(new Error('The PDF exceeds the 1-Wire file budget.'));
+                else {
+                    cleanup();
+                    try {
+                        resolve(DotNet.createJSStreamReference(publisherStoryPdf));
+                    } catch (error) {
+                        fail(error);
+                    }
+                }
+            };
+            const timer = setTimeout(() => {
+                fail(new Error('PublisherStudio timed out rendering the story PDF.'));
+            }, 25000);
+            addEventListener('message', receive);
+            frame.srcdoc = html.replaceAll('__PUBLISHER_HTML2CANVAS_URL__', rendererUrl);
+            document.body.append(frame);
+        });
+    },
     completeStoryPrintPreview(id, html) { try { return completeStoryPrintPreview(id, html);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:completeStoryPrintPreview@7903', __javascriptError); throw __javascriptError; }},
     failStoryPrintPreview(id, message) { try { failStoryPrintPreview(id, message);  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:failStoryPrintPreview@7904', __javascriptError); throw __javascriptError; }},
     printStoryHtml(html) { try {

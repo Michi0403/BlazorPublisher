@@ -103,7 +103,19 @@ public sealed class PublisherDxFunctionCatalogDataService(
                 {
                     ValidateDocument(user, "user-local");
                     foreach (var item in user.Functions)
-                        merged[GetStorageKey(item)] = item;
+                    {
+                        var key = GetStorageKey(item);
+                        if (merged.TryGetValue(key, out var deployed))
+                        {
+                            // A persisted policy can restrict an executable, but its contract comes from the installed implementation.
+                            item.Method = deployed.Method;
+                            item.Route = deployed.Route;
+                            item.ParameterSchemaJson = deployed.ParameterSchemaJson;
+                            item.InputContract = deployed.InputContract;
+                            item.OutputContract = deployed.OutputContract;
+                        }
+                        merged[key] = item;
+                    }
                 }
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)

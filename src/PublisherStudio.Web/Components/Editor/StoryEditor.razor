@@ -1837,7 +1837,7 @@
                         content,
                         Files.ExtractOpenXmlDocumentBackground(openXml)).ConfigureAwait(true);
                     var pageLayout = Files.ExtractOpenXmlPageLayout(openXml);
-                    content = System.Text.Encoding.UTF8.GetBytes(StandaloneStoryHtml(
+                    content = System.Text.Encoding.UTF8.GetBytes(StandaloneStoryHtml(Files, Logger,
                         prepared,
                         $"{PublicationName} – {TextFrame.Name}",
                         pageLayout));
@@ -1907,7 +1907,7 @@
                 await JS.InvokeVoidAsync(
                     "publisherStudio.completeStoryPrintPreview",
                     previewId,
-                    StandaloneStoryHtml(prepared, title, pageLayout, printPreview: true)).ConfigureAwait(true);
+                    StandaloneStoryHtml(Files, Logger, prepared, title, pageLayout, printPreview: true)).ConfigureAwait(true);
             }
             catch (Exception ex)
             {
@@ -2104,21 +2104,27 @@
     /// <summary>
     /// Performs standalone story HTML for <see cref="StoryEditor"/>, keeping the operation consistent with the state and invariants of the surrounding story editor workflow.
     /// </summary>
+    /// <param name="files">Provides the story HTML and background normalization.</param>
+    /// <param name="logger">Records a failure building the preview.</param>
     /// <param name="prepared">Prepared value supplied to the story editor operation and used when producing its result.</param>
     /// <param name="title">Title value supplied to the story editor operation and used when producing its result.</param>
     /// <param name="pageLayout">Page layout value supplied to the story editor operation and used when producing its result.</param>
     /// <param name="printPreview">Value indicating whether print preview should apply to this operation.</param>
+    /// <param name="returnPdf">Returns the rendered PDF to the invoking tab instead of opening it.</param>
     /// <returns>The string produced by the operation.</returns>
-    private string StandaloneStoryHtml(
+    internal static string StandaloneStoryHtml(
+        PublicationFileService files,
+        ILogger logger,
         StoryPreviewResult prepared,
         string title,
         StoryPageLayout pageLayout,
-        bool printPreview = false)
+        bool printPreview = false,
+        bool returnPdf = false)
     {
         try
         {
             var safeTitle = System.Net.WebUtility.HtmlEncode(title);
-            var background = Files.NormalizeCssBackground(prepared.Background);
+            var background = files.NormalizeCssBackground(prepared.Background);
             var pageBackground = IsVisibleBackground(background) ? background : "#ffffff";
             var pageWidth = CssMillimeters(pageLayout.PageWidthMm);
             var pageHeight = CssMillimeters(pageLayout.PageHeightMm);
@@ -2132,6 +2138,7 @@
                 $"{FormatMeasurement(pageLayout.PageWidthMm)} × {FormatMeasurement(pageLayout.PageHeightMm)} mm, "
                 + (pageLayout.IsLandscape ? "landscape" : "portrait"));
             var previewMode = printPreview ? "true" : "false";
+            var returnPdfMode = returnPdf ? "true" : "false";
             var toolbar = printPreview
                 ? $$"""<nav class="publisher-print-toolbar" aria-label="Story PDF preview status"><strong>Preparing exact story PDF…</strong><span id="publisher-print-status">Document page: {{pageDescription}}. The generated PDF is the print preview.</span><button type="button" onclick="window.close()">Close</button></nav>"""
                 : string.Empty;
@@ -2195,6 +2202,7 @@
                     (() => {
                       'use strict';
                       const previewMode = {{previewMode}};
+                      const returnPdf = {{returnPdfMode}};
                       const sourceHost = document.getElementById('publisher-story-source');
                       const sourceDocument = sourceHost?.querySelector('.publisher-story-document');
                       const measure = document.getElementById('publisher-story-measure');
@@ -2374,6 +2382,10 @@
                         }
                         if (status) status.textContent = 'Opening the exact PDF print preview…';
                         const pdf = createImagePdf(images, pageWidthMm, pageHeightMm);
+                        if (returnPdf) {
+                          parent.postMessage({ publisherStoryPdf: pdf }, '*');
+                          return;
+                        }
                         const pdfUrl = URL.createObjectURL(pdf);
                         globalThis.__publisherStoryPdfUrl = pdfUrl;
                         location.replace(pdfUrl);
@@ -2381,6 +2393,7 @@
 
                       const fail = error => {
                         console.error('Story PDF preview failed.', error);
+                        if (returnPdf) parent.postMessage({ publisherStoryPdfError: error?.message || String(error) }, '*');
                         toolbar?.classList.add('error');
                         const strong = toolbar?.querySelector('strong');
                         if (strong) strong.textContent = 'Story PDF preview failed';
@@ -2405,7 +2418,7 @@
         }
         catch (Exception __componentMethodException)
         {
-            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(StandaloneStoryHtml)} failed.");
+            logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(StandaloneStoryHtml)} failed.");
             throw;
         }
     }
@@ -2415,16 +2428,9 @@
     /// </summary>
     /// <param name="value">Value value supplied to the story editor operation and used when producing its result.</param>
     /// <returns>The string produced by the operation.</returns>
-    private string CssMillimeters(double value) {
-        try
-        {
-            return FormatMeasurement(value) + "mm";
-        }
-        catch (Exception __componentMethodException)
-        {
-            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(CssMillimeters)} failed.");
-            throw;
-        }
+    private static string CssMillimeters(double value)
+    {
+        return FormatMeasurement(value) + "mm";
     }
 
     /// <summary>
@@ -2432,16 +2438,9 @@
     /// </summary>
     /// <param name="value">Value value supplied to the story editor operation and used when producing its result.</param>
     /// <returns>The string produced by the operation.</returns>
-    private string FormatMeasurement(double value) {
-        try
-        {
-            return value.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture);
-        }
-        catch (Exception __componentMethodException)
-        {
-            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(FormatMeasurement)} failed.");
-            throw;
-        }
+    private static string FormatMeasurement(double value)
+    {
+        return value.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture);
     }
 
     /// <summary>
@@ -2449,23 +2448,14 @@
     /// </summary>
     /// <param name="value">Value value supplied to the story editor operation and used when producing its result.</param>
     /// <returns>A value indicating whether the requested condition or operation succeeded.</returns>
-    private bool IsVisibleBackground(string? value)
+    private static bool IsVisibleBackground(string? value)
     {
-        try
-        {
-            if (string.IsNullOrWhiteSpace(value)) return false;
-            var normalized = value.Trim();
-            return !string.Equals(normalized, "transparent", StringComparison.OrdinalIgnoreCase)
-                && !string.Equals(normalized, "none", StringComparison.OrdinalIgnoreCase)
-                && !string.Equals(normalized, "rgba(0, 0, 0, 0)", StringComparison.OrdinalIgnoreCase)
-                && !string.Equals(normalized, "rgba(0,0,0,0)", StringComparison.OrdinalIgnoreCase);
-    
-        }
-        catch (Exception __componentMethodException)
-        {
-            Logger.LogError(__componentMethodException, $"Component method {nameof(StoryEditor)}.{nameof(IsVisibleBackground)} failed.");
-            throw;
-        }
+        if (string.IsNullOrWhiteSpace(value)) return false;
+        var normalized = value.Trim();
+        return !string.Equals(normalized, "transparent", StringComparison.OrdinalIgnoreCase)
+            && !string.Equals(normalized, "none", StringComparison.OrdinalIgnoreCase)
+            && !string.Equals(normalized, "rgba(0, 0, 0, 0)", StringComparison.OrdinalIgnoreCase)
+            && !string.Equals(normalized, "rgba(0,0,0,0)", StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>

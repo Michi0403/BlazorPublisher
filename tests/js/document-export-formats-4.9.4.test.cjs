@@ -72,5 +72,6 @@ test('Council PDF uses the same renderer as the Story preview and streams the re
     assert.match(bridge, /printPreview: true, returnPdf: true/);
     assert.match(bridge, /pdf\.OpenReadStreamAsync\(maximumBytes, timeout\.Token\)/);
     assert.match(browser, /event\.source !== frame\.contentWindow \|\| event\.origin !== location\.origin/);
-    assert.match(browser, /DotNet\.createJSStreamReference\(publisherStoryPdf\)/);
+    assert.match(browser, /resolve\(publisherStoryPdf\)/);
+    assert.doesNotMatch(browser, /DotNet\.createJSStreamReference\(publisherStoryPdf\)/);
 });

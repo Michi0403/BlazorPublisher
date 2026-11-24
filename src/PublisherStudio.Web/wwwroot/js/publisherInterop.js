@@ -8991,11 +8991,8 @@ window.publisherStudio = {
                     fail(new Error('The PDF exceeds the 1-Wire file budget.'));
                 else {
                     cleanup();
-                    try {
-                        resolve(DotNet.createJSStreamReference(publisherStoryPdf));
-                    } catch (error) {
-                        fail(error);
-                    }
+                    // Blazor wraps the Blob when the caller requests IJSStreamReference.
+                    resolve(publisherStoryPdf);
                 }
             };
             const timer = setTimeout(() => {

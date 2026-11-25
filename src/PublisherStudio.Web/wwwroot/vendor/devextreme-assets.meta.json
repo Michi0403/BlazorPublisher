@@ -10,7 +10,7 @@
   "lockVerification": "exact-version-resolved-url-plus-prepared-sha256",
   "restoredPackageMetadataVersion": "25.2.10",
   "copiedPackageMetadataVersion": "25.2.10",
-  "preparedAtUtc": "2026-11-23T10:07:16.484Z",
+  "preparedAtUtc": "2026-11-24T23:56:46.127Z",
   "package": "devextreme-dist",
   "assets": [
     {

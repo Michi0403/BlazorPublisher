@@ -43,8 +43,7 @@ public sealed class OrganicWireTrafficJournal(
         try
         {
             var traffic = CurrentOptions;
-            if ((envelope.MessageType == OrganicWireMessageType.WorkResult &&
-                 string.Equals(envelope.CapabilityKey, PublisherGeneratedMediaService.CapabilityKey, StringComparison.OrdinalIgnoreCase)) ||
+            if (ContainsFileBytes(envelope) ||
                 !traffic.Enabled || string.Equals(traffic.PayloadMode, OrganicWireTrafficPayloadModes.None, StringComparison.OrdinalIgnoreCase))
                 return string.Empty;
             return codec.Serialize(envelope, seal: false);
@@ -67,15 +66,14 @@ public sealed class OrganicWireTrafficJournal(
                 return;
 
             var envelope = record.Envelope;
-            var generatedMedia = envelope?.MessageType == OrganicWireMessageType.WorkResult &&
-                string.Equals(envelope.CapabilityKey, PublisherGeneratedMediaService.CapabilityKey, StringComparison.OrdinalIgnoreCase);
-            var plaintext = generatedMedia ? string.Empty : !string.IsNullOrEmpty(record.PlaintextJson)
+            var containsFileBytes = envelope is not null && ContainsFileBytes(envelope);
+            var plaintext = containsFileBytes ? string.Empty : !string.IsNullOrEmpty(record.PlaintextJson)
                 ? record.PlaintextJson
                 : envelope is not null && !string.Equals(traffic.PayloadMode, OrganicWireTrafficPayloadModes.None, StringComparison.OrdinalIgnoreCase)
                     ? codec.Serialize(envelope, seal: false)
                     : string.Empty;
             var payload = formatter.Format(plaintext, traffic);
-            var rawFrame = traffic.IncludeRawFrame && !generatedMedia ? record.RawFrame ?? string.Empty : string.Empty;
+            var rawFrame = traffic.IncludeRawFrame && !containsFileBytes ? record.RawFrame ?? string.Empty : string.Empty;
             var received = string.Equals(record.Direction, OrganicWireTrafficDirections.Received, StringComparison.Ordinal);
             var failed = !string.IsNullOrWhiteSpace(record.Error);
             var sequence = Interlocked.Increment(ref recorded);
@@ -114,6 +112,26 @@ public sealed class OrganicWireTrafficJournal(
         catch (Exception exception)
         {
             logger.LogWarning(exception, "Journaling a 1-Wire {Direction} {Transport} packet failed; the transport continues.", record?.Direction, record?.Transport);
+        }
+    }
+
+    /// <summary>Identifies frames that must be journaled without file contents.</summary>
+    /// <param name="envelope">Frame before its payload is formatted for logging.</param>
+    /// <returns>Whether to omit plaintext and raw frame contents.</returns>
+    private bool ContainsFileBytes(OrganicWireEnvelope envelope)
+    {
+        try
+        {
+            return (envelope.MessageType == OrganicWireMessageType.WorkResult &&
+                    string.Equals(envelope.CapabilityKey, PublisherGeneratedMediaService.CapabilityKey, StringComparison.OrdinalIgnoreCase)) ||
+                   (envelope.MessageType == OrganicWireMessageType.Invoke &&
+                    envelope.Properties?.TryGetValue("Parameters", out var parameters) == true &&
+                    parameters.ValueKind == JsonValueKind.Object && parameters.TryGetProperty("contentBase64", out _));
+        }
+        catch (Exception exception)
+        {
+            logger.LogWarning(exception, "Could not classify 1-Wire payload for the journal. Frame contents were omitted.");
+            return true;
         }
     }
 

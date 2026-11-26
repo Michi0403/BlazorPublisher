@@ -1083,11 +1083,11 @@
     {
       "key": "publisher.media.convert",
       "displayName": "Convert media with FFmpeg",
-      "description": "Queues one FFmpeg conversion of a file sent by the linked peer with an installed preset or an operator-saved profile after the user approves it in PublisherStudio. Read preset and profile ids from publisher.export.formats.",
+      "description": "Queues an FFmpeg conversion or extracts a selected time range from an audio or video file after PublisherStudio approval. Read installed preset and profile ids from publisher.export.formats. Ask for timestamps if the requested scene cannot be located.",
       "controller": "OrganicPlugins",
       "method": "POST",
       "route": "/api/organic/capabilities/publisher.media.convert",
-      "parameterSchemaJson": "{\"type\":\"object\",\"required\":[\"fileName\",\"mimeType\",\"contentBase64\"],\"properties\":{\"presetId\":{\"type\":\"string\"},\"profileId\":{\"type\":\"string\",\"format\":\"uuid\"},\"fileName\":{\"type\":\"string\"},\"mimeType\":{\"type\":\"string\"},\"contentBase64\":{\"type\":\"string\",\"contentEncoding\":\"base64\"},\"options\":{\"type\":\"object\",\"description\":\"Optional conversion options such as startSeconds, durationSeconds, width, height, scaleMode, frameRate, crf, videoBitrateKbps, audioBitrateKbps, audioSampleRate, audioChannels, disableAudio, disableVideo, normalizeAudio, deinterlace and outputFileName.\"}},\"additionalProperties\":false}",
+      "parameterSchemaJson": "{\"type\":\"object\",\"required\":[\"fileName\",\"mimeType\",\"contentBase64\"],\"properties\":{\"presetId\":{\"type\":\"string\"},\"profileId\":{\"type\":\"string\",\"format\":\"uuid\"},\"fileName\":{\"type\":\"string\"},\"mimeType\":{\"type\":\"string\"},\"contentBase64\":{\"type\":\"string\",\"contentEncoding\":\"base64\"},\"range\":{\"type\":\"object\",\"description\":\"Extract this audio or video interval. The end must be after the start. This range takes precedence over the conversion profile's trim settings.\",\"required\":[\"startSeconds\",\"endSeconds\"],\"properties\":{\"startSeconds\":{\"type\":\"number\",\"minimum\":0},\"endSeconds\":{\"type\":\"number\",\"exclusiveMinimum\":0}},\"additionalProperties\":false},\"options\":{\"type\":\"object\",\"description\":\"Optional conversion options such as startSeconds, durationSeconds, width, height, scaleMode, frameRate, crf, videoBitrateKbps, audioBitrateKbps, audioSampleRate, audioChannels, disableAudio, disableVideo, normalizeAudio, deinterlace and outputFileName.\"}},\"additionalProperties\":false}",
       "organs": [
         "hands"
       ],
@@ -1115,7 +1115,7 @@
       "requiresHumanInteractionOnTargetSystem": true,
       "requiresAutomatedInteractionOnTargetSystem": false,
       "interactionValueSchemaJson": "{\"type\":\"object\",\"properties\":{}}",
-      "inputContract": "presetId (or profileId), fileName, mimeType and the source file as contentBase64 within fileBudgetBytes; optional options. Filter graphs and advanced FFmpeg arguments are refused unless OrganicPlugins:MediaTools:AllowPeerFilterAndAdvancedArguments is enabled.",
+      "inputContract": "presetId (or profileId), fileName, mimeType and the source file as contentBase64 within fileBudgetBytes. Optional range uses startSeconds and endSeconds for clip extraction. Optional options set conversion parameters. Filter graphs and advanced FFmpeg arguments are refused unless OrganicPlugins:MediaTools:AllowPeerFilterAndAdvancedArguments is enabled.",
       "outputContract": "jobId, presetId, status, progress, message, output file name and MIME type. Poll publisher.media.job, then read the file with publisher.media.output.",
       "securityContract": "Linked-peer permission matrix plus a fresh PublisherStudio approval for every request. The source is bounded by the 1-Wire file budget and the preset must be installed.",
       "organicUseCase": "Convert, trim, scale or transcode audio, video and image media for other media agents.",

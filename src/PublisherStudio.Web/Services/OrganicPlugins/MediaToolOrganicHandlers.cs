@@ -192,6 +192,23 @@ public sealed class MediaConversionConvertOrganicHandler(IMediaConversionService
                 throw new ArgumentException($"contentBase64 is not valid Base64 or exceeds the 1-Wire file budget of {budget} bytes (OrganicPlugins:MaximumMessageBytes).");
 
             var (presetId, conversionOptions) = ResolveConversion(parameters);
+            if (parameters.TryGetProperty("range", out var range))
+            {
+                if (!mimeType.StartsWith("audio/", StringComparison.OrdinalIgnoreCase) &&
+                    !mimeType.StartsWith("video/", StringComparison.OrdinalIgnoreCase))
+                    throw new ArgumentException("A clip range requires an audio or video source.");
+                if (range.ValueKind != JsonValueKind.Object ||
+                    !range.TryGetProperty("startSeconds", out var start) || start.ValueKind != JsonValueKind.Number ||
+                    !range.TryGetProperty("endSeconds", out var end) || end.ValueKind != JsonValueKind.Number ||
+                    !start.TryGetDouble(out var startSeconds) || !end.TryGetDouble(out var endSeconds) ||
+                    !double.IsFinite(startSeconds) || !double.IsFinite(endSeconds) || startSeconds < 0 || endSeconds <= startSeconds)
+                    throw new ArgumentException("range requires finite startSeconds and endSeconds with 0 ≤ start < end.");
+                if (string.Equals(conversionOptions.VideoCodec?.Trim(), "copy", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(conversionOptions.AudioCodec?.Trim(), "copy", StringComparison.OrdinalIgnoreCase))
+                    throw new ArgumentException("A clip range needs an encoding preset or profile without stream copy.");
+                conversionOptions.StartSeconds = startSeconds;
+                conversionOptions.DurationSeconds = endSeconds - startSeconds;
+            }
             var capabilities = await media.GetCapabilitiesAsync(cancellationToken).ConfigureAwait(false);
             if (!capabilities.Available)
                 throw new InvalidOperationException("FFmpeg is not available in PublisherStudio. " + capabilities.InstallationHint);

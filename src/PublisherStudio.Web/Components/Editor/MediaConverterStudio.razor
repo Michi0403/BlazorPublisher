@@ -5,12 +5,14 @@
 @inject PublicationMediaAssetStore MediaAssets
 @inject IPublisherRuntimePolicyDataService RuntimePolicy
 @inject PublicationEditorTextService EditorText
+@inject IUserNotificationService Notifications
 
 @inject ILogger<MediaConverterStudio> Logger
 @inject ISupervisedTaskRunner TaskRunner
+<div class="razor-component-boundary">
+<InputFile id="media-converter-source-input" class="hidden-file-input" OnChange="SelectFile" accept="image/*,video/*,audio/*,.mkv,.mxf,.avi,.tif,.tiff,.heic,.heif,.flac,.wav,.mov,.mp4,.webm,.ogg,.m4v,.mts,.m2ts,.vob,.gif,.bmp,.exr" />
 @if (Visible)
 {
-<div class="razor-component-boundary">
 <DxFormLayout CssClass="razor-component-layout-owner MediaConverterStudio">
     <DxFormLayoutItem ColSpanMd="12">
         <Template Context="formItemContext001">
@@ -95,7 +97,6 @@
                 </DxRibbonTab>
             </DxRibbon>
 
-            <InputFile id="media-converter-source-input" class="hidden-file-input" OnChange="SelectFile" accept="image/*,video/*,audio/*,.mkv,.mxf,.avi,.tif,.tiff,.heic,.heif,.flac,.wav,.mov,.mp4,.webm,.ogg,.m4v,.mts,.m2ts,.vob,.gif,.bmp,.exr" />
 
             <div class="media-converter-layout">
                 <aside class="media-converter-sidebar visual-settings">
@@ -119,7 +120,7 @@
                     <DxFormLayout CssClass="razor-section-layout-owner">
     <DxFormLayoutItem ColSpanMd="12">
         <Template Context="formItemContext003">
-        <div class="converter-source-card" @ref="_sourceDropZone" @ondblclick="OpenSourcePicker"
+        <div id="media-converter-source-card" class="converter-source-card" @ondblclick="OpenSourcePicker"
                              @oncontextmenu="ShowConverterContextMenu" @oncontextmenu:preventDefault @oncontextmenu:stopPropagation>
                         <span class="pub-icon pub-icon-media"></span>
                         @if (HasSource)
@@ -198,6 +199,26 @@
 
                         <details open>
                             <summary>Trim, resolution and frame rate</summary>
+                            @if (SourceKind is "audio" or "video")
+                            {
+                                @if (SourceKind == "audio")
+                                {
+                                    <audio id="media-converter-trim-player" controls preload="metadata" aria-label="Audio source preview"></audio>
+                                }
+                                else
+                                {
+                                    <video id="media-converter-trim-player" controls preload="metadata" playsinline aria-label="Video source preview" style="max-width:100%;max-height:20rem"></video>
+                                }
+                                <div class="data-form-grid">
+                                    <DxButton Text="Mark start" Click="() => SetTrimMarkerAsync(false)" />
+                                    <DxButton Text="Mark end" Click="() => SetTrimMarkerAsync(true)" />
+                                    <DxButton Text="Preview selection" Click="PlayTrimAsync" Enabled="@(_options.DurationSeconds is > 0)" />
+                                </div>
+                                @if (!string.IsNullOrEmpty(_trimMessage))
+                                {
+                                    <p role="status">@_trimMessage</p>
+                                }
+                            }
                             <div class="data-form-grid">
                                 <label>Start seconds<input type="number" min="0" step="0.001" value="@NullableNumber(_options.StartSeconds)" @onchange="args => _options.StartSeconds = NullableDouble(args)" /></label>
                                 <label>Duration seconds<input type="number" min="0" step="0.001" value="@NullableNumber(_options.DurationSeconds)" @onchange="args => _options.DurationSeconds = NullableDouble(args)" /></label>
@@ -321,8 +342,8 @@
     </Template>
     </DxFormLayoutItem>
 </DxFormLayout>
-</div>
 }
+</div>
 
 
 @code {
@@ -424,10 +445,12 @@
     /// Stores the internal self state used by <see cref="MediaConverterStudio"/> while executing its surrounding workflow.
     /// </summary>
     private DotNetObjectReference<MediaConverterStudio>? _self;
-    /// <summary>
-    /// Stores the internal source drop zone state used by <see cref="MediaConverterStudio"/> while executing its surrounding workflow.
-    /// </summary>
-    private ElementReference _sourceDropZone;
+    private IJSObjectReference? _trimModule;
+    private object? _trimSource;
+    private Guid? _trimAssetId;
+    private string? _trimAssetUrl;
+    private readonly Guid _trimPreviewId = Guid.NewGuid();
+    private string _trimMessage = string.Empty;
     /// <summary>
     /// Stores the internal context menu state used by <see cref="MediaConverterStudio"/> while executing its surrounding workflow.
     /// </summary>
@@ -577,7 +600,7 @@
     {
         try
         {
-            if (!Visible) { _wasVisible = false; _dropBound = false; return; }
+            if (!Visible) { _wasVisible = false; return; }
             if (InitialSource is not null && !ReferenceEquals(InitialSource, _lastInitialSource))
             {
                 _memorySource = InitialSource;
@@ -619,16 +642,27 @@
     {
         try
         {
-            if (!Visible || _dropBound) return;
-            _self ??= DotNetObjectReference.Create(this);
             try
             {
-                await JS.InvokeVoidAsync("publisherStudio.bindMediaConverterDrop", _sourceDropZone, _self).ConfigureAwait(true);
-                _dropBound = true;
+                if (!Visible)
+                {
+                    await ReleaseMediaInteropAsync();
+                    return;
+                }
+                if (!_dropBound)
+                {
+                    _trimModule ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mediaTrimPreview.js");
+                    _self ??= DotNetObjectReference.Create(this);
+                    await _trimModule.InvokeVoidAsync("watchDropSurface", _trimPreviewId, _self);
+                    _dropBound = true;
+                }
+                await BindTrimPreviewAsync();
             }
+            catch (JSDisconnectedException) { }
             catch (JSException exception)
             {
-                _error = $"The media drop surface could not be initialized: {exception.Message}";
+                Logger.LogWarning(exception, "The media converter browser controls could not be initialized.");
+                Notifications.Error("Reopen Media Converter Studio to retry the browser controls.", "Media Converter Studio", nameof(MediaConverterStudio));
             }
     
         }
@@ -637,6 +671,85 @@
             Logger.LogError(__componentMethodException, $"Component method {nameof(MediaConverterStudio)}.{nameof(OnAfterRenderAsync)} failed.");
             throw;
         }
+    }
+
+    private async Task BindTrimPreviewAsync()
+    {
+        var source = SourceKind is "audio" or "video" ? (object?)_file ?? _memorySource : null;
+        var changed = !ReferenceEquals(source, _trimSource);
+        if (changed)
+        {
+            if (_trimAssetId is Guid previousId)
+                MediaAssets.Remove(previousId);
+            _trimAssetId = null;
+            _trimAssetUrl = null;
+            if (source is MediaConversionInsertRequest request)
+            {
+                _trimAssetId = Guid.NewGuid();
+                _trimAssetUrl = MediaAssets.RegisterBytes(_trimAssetId.Value, request.Content, EffectiveSourceMimeType);
+            }
+            _trimSource = source;
+        }
+
+        try
+        {
+            if (source is null)
+                await _trimModule!.InvokeVoidAsync("release", _trimPreviewId);
+            else
+                await _trimModule!.InvokeVoidAsync("bind", _trimPreviewId, _trimAssetUrl, changed);
+        }
+        catch (JSDisconnectedException) { }
+        catch (JSException exception)
+        {
+            Logger.LogDebug(exception, "The media trim preview could not be initialized.");
+        }
+    }
+
+    private async Task ReleaseMediaInteropAsync()
+    {
+        if (_trimAssetId is Guid id)
+            MediaAssets.Remove(id);
+        _trimAssetId = null;
+        _trimAssetUrl = null;
+        _trimSource = null;
+
+        if (!_dropBound || _trimModule is null) return;
+        _dropBound = false;
+        await _trimModule.InvokeVoidAsync("close", _trimPreviewId);
+    }
+
+    private async Task SetTrimMarkerAsync(bool isEnd)
+    {
+        if (_trimModule is null) return;
+        var position = await _trimModule.InvokeAsync<double?>("readPosition", _trimPreviewId);
+        if (position is null)
+        {
+            _trimMessage = "Wait for the source to load in the browser, or enter the range in seconds.";
+            return;
+        }
+        var start = _options.StartSeconds ?? 0;
+        if (isEnd)
+        {
+            if (position <= start)
+            {
+                _trimMessage = "Move playback after the start and mark the end again.";
+                return;
+            }
+            _options.DurationSeconds = position.Value - start;
+        }
+        else
+        {
+            _options.StartSeconds = position.Value;
+            _options.DurationSeconds = null;
+        }
+        _trimMessage = string.Empty;
+    }
+
+    private async Task PlayTrimAsync()
+    {
+        if (_trimModule is null || _options.DurationSeconds is not > 0) return;
+        var started = await _trimModule.InvokeAsync<bool>("playSelection", _trimPreviewId, _options.StartSeconds ?? 0, _options.DurationSeconds.Value);
+        _trimMessage = started ? string.Empty : "The browser could not play that selection. Check the range and source format.";
     }
 
     /// <summary>
@@ -2113,11 +2226,13 @@
             {
                 _polling?.Cancel();
             }
-            if (_dropBound)
+            try
             {
-                try { await JS.InvokeVoidAsync("publisherStudio.unbindMediaConverterDrop", _sourceDropZone).ConfigureAwait(true); } catch { }
-                _dropBound = false;
+                await ReleaseMediaInteropAsync();
+                if (_trimModule is not null)
+                    await _trimModule.DisposeAsync();
             }
+            catch (JSDisconnectedException) { }
             _self?.Dispose();
             _self = null;
     

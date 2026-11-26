@@ -26,6 +26,8 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         /// </summary>
         /// <value>The identifier value exposed by <see cref="JobState"/>.</value>
         public required Guid Id { get; init; }
+        /// <summary>Gets the directory that owns both the staged source and the converted output.</summary>
+        public required string JobDirectory { get; init; }
         /// <summary>
         /// Gets or sets the source file name used by this job instance to locate the associated file-system resource.
         /// </summary>
@@ -307,9 +309,12 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
                     ValidateRequestedEncoders(capabilities, normalizedOptions);
                     var id = Guid.NewGuid();
                     var directory = Path.Combine(_root, id.ToString("N"));
-                    Directory.CreateDirectory(directory);
+                    var sourceDirectory = Path.Combine(directory, "input");
+                    var outputDirectory = Path.Combine(directory, "output");
+                    Directory.CreateDirectory(sourceDirectory);
+                    Directory.CreateDirectory(outputDirectory);
                     var safeSourceName = SafeFileName(fileName, "source.bin");
-                    var sourcePath = Path.Combine(directory, safeSourceName);
+                    var sourcePath = Path.Combine(sourceDirectory, safeSourceName);
                     var output = new FileStream(sourcePath, FileMode.CreateNew, FileAccess.Write, FileShare.None, 1024 * 128, true);
                     await using (output.ConfigureAwait(false))
                         await source.CopyToAsync(output, cancellationToken).ConfigureAwait(false);
@@ -317,7 +322,7 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
                     var extension = NormalizeExtension(normalizedOptions.OutputExtension, preset.OutputExtension);
                     var outputName = SafeFileName(normalizedOptions.OutputFileName, Path.GetFileNameWithoutExtension(safeSourceName) + extension);
                     if (!outputName.EndsWith(extension, StringComparison.OrdinalIgnoreCase)) outputName += extension;
-                    var outputPath = Path.Combine(directory, outputName);
+                    var outputPath = Path.Combine(outputDirectory, outputName);
                     var outputMimeType = string.IsNullOrWhiteSpace(normalizedOptions.OutputMimeType) ? preset.OutputMimeType : normalizedOptions.OutputMimeType.Trim();
                     normalizedOptions.OutputExtension = extension;
                     normalizedOptions.OutputMimeType = outputMimeType;
@@ -326,6 +331,7 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
                     var job = new JobState
                     {
                         Id = id,
+                        JobDirectory = directory,
                         SourceFileName = safeSourceName,
                         SourcePath = sourcePath,
                         OutputPath = outputPath,
@@ -555,7 +561,7 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
             logger.LogTrace($"Entering MediaConversionService.Remove.");
                     if (!_jobs.TryRemove(id, out var job)) return false;
                     CancelState(job);
-                    try { Directory.Delete(Path.GetDirectoryName(job.SourcePath)!, true); } catch { }
+                    try { Directory.Delete(job.JobDirectory, true); } catch { }
                     return true;
     
         }

@@ -73,6 +73,10 @@ public sealed class OrganicConnectionState
     /// <summary>True only after both frontends participated: PublisherStudio initiated the link and LocalGPT approved it.</summary>
     /// <value>The is linked value exposed by <see cref="OrganicConnectionState"/>.</value>
     public bool IsLinked { get; set; }
+    /// <summary>Whether LocalGPT has requested approval for the current live link.</summary>
+    public bool IsLinkApprovalPending { get; set; }
+    /// <summary>The pending LocalGPT request, when the peer supplies its identifier.</summary>
+    public Guid? LinkApprovalRequestId { get; set; }
     /// <summary>
     /// Gets or sets the stable peer identifier used to identify or correlate this organic connection instance with related application state.
     /// </summary>

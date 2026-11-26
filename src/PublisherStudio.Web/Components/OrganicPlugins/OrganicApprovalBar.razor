@@ -14,9 +14,9 @@
         <Template Context="formItemContext001">
 @if (_visible && _pending.Count > 0)
 {
-    <aside class="organic-approval-bar" role="region" aria-label="Organic plugin approvals">
+    <aside class="organic-approval-bar" role="region" aria-label="AI Council approvals">
         <button type="button" class="organic-approval-toggle" @onclick="ToggleCollapsed" aria-expanded="@(!_collapsed)">
-            AI Council actions <span class="organic-approval-count">@_pending.Count</span>
+            AI Council approvals <span class="organic-approval-count">@_pending.Count</span>
         </button>
         @if (!_collapsed)
         {
@@ -39,11 +39,11 @@
                         <small>The value is returned through the exact 1-Wire request only after you approve it in this PublisherStudio frontend.</small>
                     </div>
                 }
-                <div class="organic-approval-actions">
-                    <button type="button" class="organic-primary" disabled="@_busy" @onclick="ApproveCurrentAsync">@ApproveButtonText(current.Request)</button>
-                    <button type="button" class="organic-danger" disabled="@_busy" @onclick="DeclineCurrentAsync">Decline</button>
-                    <button type="button" class="organic-secondary" @onclick="Hide">Hide bar</button>
-                </div>
+            </div>
+            <div class="organic-approval-actions">
+                <button type="button" class="organic-primary" disabled="@_busy" @onclick="ApproveCurrentAsync">@ApproveButtonText(current.Request)</button>
+                <button type="button" class="organic-danger" disabled="@_busy" @onclick="DeclineCurrentAsync">Decline</button>
+                <button type="button" class="organic-secondary" @onclick="Hide">Hide bar</button>
             </div>
         }
     </aside>
@@ -51,7 +51,7 @@
 else if (!_visible && _pending.Count > 0)
 {
     <button type="button" class="organic-approval-reopen" @onclick="Show">
-        Review AI actions <span>@_pending.Count</span>
+        Review AI approvals <span>@_pending.Count</span>
     </button>
 }
     </Template>

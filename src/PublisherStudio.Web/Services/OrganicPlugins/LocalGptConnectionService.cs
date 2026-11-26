@@ -246,7 +246,7 @@ public sealed class LocalGptConnectionService(
             State.PeerId = requestedPeerId;
             State.DisplayName = peer.DisplayName;
             State.ConnectedUtc = DateTimeOffset.UtcNow;
-            State.LastError = "Waiting for LocalGPT frontend link approval.";
+            State.LastError = string.Empty;
             discovery.SetConnected(requestedPeerId, true);
             readLoop = ReadLoopAsync(connectedId, requestedPeerId, connectedReader, connectedWriter, isLoopback, localSecurity.HasRuntimeSecret, connectionCancellation.Token);
             Changed?.Invoke();
@@ -259,6 +259,7 @@ public sealed class LocalGptConnectionService(
             var hello = new OrganicWireEnvelope
             {
                 MessageType = OrganicWireMessageType.Hello,
+                CorrelationId = connectedId,
                 SourcePeerId = localPeerId,
                 TargetPeerId = requestedPeerId,
                 Properties = new Dictionary<string, JsonElement>
@@ -542,6 +543,8 @@ public sealed class LocalGptConnectionService(
             {
                 State.IsConnected = false;
                 State.IsLinked = false;
+                State.IsLinkApprovalPending = false;
+                State.LinkApprovalRequestId = null;
                 discovery.SetConnected(connectedPeerId, false);
                 Changed?.Invoke();
             }
@@ -582,19 +585,23 @@ public sealed class LocalGptConnectionService(
                     recentResponses.TryRemove(stale, out _);
             }
 
-            if (envelope.MessageType == OrganicWireMessageType.ApprovalRequired &&
-                envelope.Properties is not null &&
-                envelope.Properties.TryGetValue("LinkApproval", out var linkApproval) &&
-                linkApproval.ValueKind is JsonValueKind.True)
-            {
-                State.IsLinked = false;
-                State.LastError = "Waiting for LocalGPT frontend link approval.";
-                Changed?.Invoke();
-            }
-
+            var isCurrentHandshake = connectionId == connectedId && envelope.CorrelationId == connectedId && !State.IsLinked;
             switch (envelope.MessageType)
             {
-                case OrganicWireMessageType.HelloAck:
+                case OrganicWireMessageType.ApprovalRequired when isCurrentHandshake && TryRead<bool>(envelope, "LinkApproval", out var linkApproval) && linkApproval:
+                    State.LinkApprovalRequestId = TryRead<Guid>(envelope, "ApprovalRequestId", out var requestId) && requestId != Guid.Empty ? requestId : null;
+                    State.IsLinkApprovalPending = true;
+                    Changed?.Invoke();
+                    break;
+                case OrganicWireMessageType.Error when isCurrentHandshake:
+                    State.IsLinkApprovalPending = false;
+                    State.LinkApprovalRequestId = null;
+                    State.LastError = string.IsNullOrWhiteSpace(envelope.Error) ? "LocalGPT did not open the 1-Wire link." : envelope.Error;
+                    Changed?.Invoke();
+                    break;
+                case OrganicWireMessageType.HelloAck when isCurrentHandshake:
+                    State.IsLinkApprovalPending = false;
+                    State.LinkApprovalRequestId = null;
                     State.IsLinked = true;
                     State.LastError = string.Empty;
                     // Re-check the local directory now that both frontends approved the link. Any catalog or
@@ -1011,6 +1018,8 @@ public sealed class LocalGptConnectionService(
         runtimeState.Reset(oldConnectionId);
         State.IsConnected = false;
         State.IsLinked = false;
+        State.IsLinkApprovalPending = false;
+        State.LinkApprovalRequestId = null;
         State.PeerId = string.Empty;
         State.DisplayName = string.Empty;
         State.ConnectedUtc = null;

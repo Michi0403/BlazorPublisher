@@ -179,7 +179,28 @@ public sealed class MediaConversionConvertOrganicHandler(IMediaConversionService
     {
         try
         {
-            var parameters = support.ReadParameters(envelope);
+            var job = await QueueConversionAsync(support.ReadParameters(envelope), cancellationToken).ConfigureAwait(false);
+            return new
+            {
+                JobId = job.Id, job.PresetId, job.Status, job.Progress, job.Message,
+                job.OutputFileName, job.OutputMimeType, NextCapability = "publisher.media.job"
+            };
+        }
+        catch (Exception exception)
+        {
+            if (exception is OperationCanceledException)
+                logger.LogDebug(exception, "Organic media conversion was canceled before it was queued.");
+            else
+                logger.LogError(exception, "Organic media conversion could not be queued.");
+            throw;
+        }
+    }
+
+    internal async Task<MediaConversionJobInfo> QueueConversionAsync(
+        JsonElement parameters, CancellationToken cancellationToken, bool useSourceFormatByDefault = false)
+    {
+        try
+        {
             var fileName = support.ReadString(parameters, "fileName");
             var mimeType = support.ReadString(parameters, "mimeType");
             var content = support.ReadString(parameters, "contentBase64");
@@ -191,7 +212,7 @@ public sealed class MediaConversionConvertOrganicHandler(IMediaConversionService
             if (!Convert.TryFromBase64String(content, buffer, out var written))
                 throw new ArgumentException($"contentBase64 is not valid Base64 or exceeds the 1-Wire file budget of {budget} bytes (OrganicPlugins:MaximumMessageBytes).");
 
-            var (presetId, conversionOptions) = ResolveConversion(parameters);
+            var (presetId, conversionOptions) = ResolveConversion(parameters, useSourceFormatByDefault);
             if (parameters.TryGetProperty("range", out var range))
             {
                 if (!mimeType.StartsWith("audio/", StringComparison.OrdinalIgnoreCase) &&
@@ -212,8 +233,10 @@ public sealed class MediaConversionConvertOrganicHandler(IMediaConversionService
             var capabilities = await media.GetCapabilitiesAsync(cancellationToken).ConfigureAwait(false);
             if (!capabilities.Available)
                 throw new InvalidOperationException("FFmpeg is not available in PublisherStudio. " + capabilities.InstallationHint);
-            var preset = capabilities.Presets.FirstOrDefault(item => string.Equals(item.Id, presetId, StringComparison.OrdinalIgnoreCase))
-                ?? throw new ArgumentException($"Unknown preset '{presetId}'. Read the preset ids from publisher.export.formats.");
+            var preset = presetId.Length == 0
+                ? SelectSourceFormatPreset(capabilities.Presets, fileName, mimeType)
+                : capabilities.Presets.FirstOrDefault(item => string.Equals(item.Id, presetId, StringComparison.OrdinalIgnoreCase))
+                    ?? throw new ArgumentException($"Unknown preset '{presetId}'. Read the preset ids from publisher.export.formats.");
             if (!preset.Available)
                 throw new InvalidOperationException($"Preset '{preset.Id}' is unavailable: {preset.UnavailableReason}");
 
@@ -222,26 +245,40 @@ public sealed class MediaConversionConvertOrganicHandler(IMediaConversionService
             using var source = new MemoryStream(buffer, 0, written, writable: false);
             var job = await media.QueueAsync(source, fileName, mimeType, preset.Id, conversionOptions, CancellationToken.None).ConfigureAwait(false);
             logger.LogInformation("Approved organic media conversion queued job {JobId} with preset {PresetId}.", job.Id, job.PresetId);
-            return new
-            {
-                JobId = job.Id, job.PresetId, job.Status, job.Progress, job.Message,
-                job.OutputFileName, job.OutputMimeType, NextCapability = "publisher.media.job"
-            };
+            return job;
         }
         catch (Exception exception)
         {
-            if (exception is OperationCanceledException)
-                logger.LogDebug(exception, "Organic media conversion was canceled before it was queued.");
-            else
-                logger.LogError(exception, "Organic media conversion could not be queued.");
+            logger.LogDebug(exception, "Queueing organic media conversion failed.");
+            throw;
+        }
+    }
+
+    /// <summary>Chooses an installed encoding preset that preserves the source's media type and container.</summary>
+    private MediaConversionPreset SelectSourceFormatPreset(
+        IReadOnlyList<MediaConversionPreset> presets, string fileName, string mimeType)
+    {
+        try
+        {
+            var extension = Path.GetExtension(fileName);
+            var mediaKind = mimeType.StartsWith("audio/", StringComparison.OrdinalIgnoreCase) ? "audio/" : "video/";
+            return presets.FirstOrDefault(item => item.Available
+                    && item.OutputMimeType.StartsWith(mediaKind, StringComparison.OrdinalIgnoreCase)
+                    && string.Equals(item.OutputExtension, extension, StringComparison.OrdinalIgnoreCase))
+                ?? throw new ArgumentException("No installed encoding preset matches the source container. Provide a presetId or profileId from publisher.export.formats.");
+        }
+        catch (Exception exception)
+        {
+            logger.LogDebug(exception, "Selecting an installed preset for the trim source format failed.");
             throw;
         }
     }
 
     /// <summary>Chooses the preset and options from an operator-saved profile or from the peer's preset and safe options.</summary>
     /// <param name="parameters">The Parameters object.</param>
+    /// <param name="useSourceFormatByDefault">Whether omitting a preset and profile selects an encoder from the source format.</param>
     /// <returns>The preset identifier and the options to apply.</returns>
-    private (string PresetId, MediaConversionOptions Options) ResolveConversion(JsonElement parameters)
+    private (string PresetId, MediaConversionOptions Options) ResolveConversion(JsonElement parameters, bool useSourceFormatByDefault)
     {
         try
         {
@@ -256,11 +293,13 @@ public sealed class MediaConversionConvertOrganicHandler(IMediaConversionService
             }
 
             var presetId = support.ReadString(parameters, "presetId");
-            if (presetId.Length == 0)
+            if (presetId.Length == 0 && !useSourceFormatByDefault)
                 throw new ArgumentException("presetId or profileId is required. Read both from publisher.export.formats.");
             var options = parameters.TryGetProperty("options", out var element) && element.ValueKind == JsonValueKind.Object
                 ? element.Deserialize<MediaConversionOptions>(support.JsonOptions) ?? new MediaConversionOptions()
                 : new MediaConversionOptions();
+            if (presetId.Length == 0 && !string.IsNullOrWhiteSpace(options.OutputExtension))
+                throw new ArgumentException("Provide a presetId or profileId from publisher.export.formats to specify an output extension.");
             if (!support.Settings.AllowPeerFilterAndAdvancedArguments &&
                 (!string.IsNullOrWhiteSpace(options.VideoFilter) || !string.IsNullOrWhiteSpace(options.AudioFilter) || !string.IsNullOrWhiteSpace(options.AdvancedArguments)))
                 throw new ArgumentException("Filter graphs and advanced FFmpeg arguments are not accepted from a linked peer (OrganicPlugins:MediaTools:AllowPeerFilterAndAdvancedArguments). Use a preset option or an operator-saved profile.");
@@ -269,6 +308,63 @@ public sealed class MediaConversionConvertOrganicHandler(IMediaConversionService
         catch (Exception exception)
         {
             logger.LogWarning(exception, "Organic media conversion parameters were rejected.");
+            throw;
+        }
+    }
+}
+
+/// <summary>Trims the approved upload and returns its converted bytes to the same peer under the same approval.</summary>
+/// <param name="media">Authoritative media conversion service.</param>
+/// <param name="support">Shared 1-Wire media tool support.</param>
+/// <param name="conversion">Validates the source and queues the conversion.</param>
+/// <param name="output">Offers the converted bytes through the file transfer store.</param>
+/// <param name="logger">Structured diagnostics for the trim operation.</param>
+public sealed class MediaConversionTrimOrganicHandler(
+    IMediaConversionService media,
+    OrganicMediaToolSupport support,
+    MediaConversionConvertOrganicHandler conversion,
+    MediaConversionOutputOrganicHandler output,
+    ILogger<MediaConversionTrimOrganicHandler> logger) : IOrganicExecutableCapabilityHandler
+{
+    /// <inheritdoc />
+    public string CapabilityKey => "publisher.media.trim";
+
+    /// <inheritdoc />
+    public async Task<object> ExecuteAsync(OrganicWireEnvelope envelope, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var parameters = support.ReadParameters(envelope);
+            if (!parameters.TryGetProperty("range", out _))
+                throw new ArgumentException("Provide startSeconds and endSeconds in range to trim the uploaded media.");
+
+            var job = await conversion.QueueConversionAsync(parameters, cancellationToken, useSourceFormatByDefault: true).ConfigureAwait(false);
+            using var wait = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            wait.CancelAfter(TimeSpan.FromSeconds(Math.Clamp(support.Settings.RemoteTrimTimeoutSeconds, 1, 3600)));
+            using var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(250));
+            try
+            {
+                while (job.Status is MediaConversionJobStatus.Queued or MediaConversionJobStatus.Running)
+                {
+                    await timer.WaitForNextTickAsync(wait.Token).ConfigureAwait(false);
+                    job = media.GetJob(job.Id) ?? throw new KeyNotFoundException("The trim job was removed.");
+                }
+            }
+            catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+            {
+                throw new TimeoutException($"The trim is still running. Check job {job.Id} in PublisherStudio Media Converter Studio.");
+            }
+            if (job.Status != MediaConversionJobStatus.Completed)
+                throw new InvalidOperationException($"The trim ended with status {job.Status}. Check job {job.Id} in PublisherStudio Media Converter Studio.");
+
+            return await output.OfferOutputAsync(envelope.SourcePeerId, job, cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception exception)
+        {
+            if (exception is OperationCanceledException)
+                logger.LogDebug(exception, "Organic media trim delivery was canceled.");
+            else
+                logger.LogError(exception, "Could not deliver the organic media trim.");
             throw;
         }
     }
@@ -335,24 +431,7 @@ public sealed class MediaConversionOutputOrganicHandler(IMediaConversionService 
             var job = media.GetJob(jobId) ?? throw new KeyNotFoundException("The conversion job does not exist or was removed.");
             if (job.Status != MediaConversionJobStatus.Completed)
                 throw new InvalidOperationException($"The conversion job is {job.Status}; read publisher.media.job until it is Completed.");
-            var maximumBytes = Math.Max(1, support.Settings.MaximumTransferFileBytes);
-            if (job.OutputSize > maximumBytes)
-                throw new InvalidOperationException($"The converted file has {job.OutputSize} bytes; the configured limit OrganicPlugins:MediaTools:MaximumTransferFileBytes is {maximumBytes}. Download it in PublisherStudio Media Converter Studio instead.");
-
-            var stream = await media.OpenOutputAsync(jobId, cancellationToken).ConfigureAwait(false)
-                ?? throw new FileNotFoundException("The converted file is no longer available.");
-            await using (stream.ConfigureAwait(false))
-            {
-                using var output = new MemoryStream();
-                await stream.CopyToAsync(output, cancellationToken).ConfigureAwait(false);
-                if (output.Length > maximumBytes)
-                    throw new InvalidOperationException($"The converted file exceeds the configured limit OrganicPlugins:MediaTools:MaximumTransferFileBytes ({maximumBytes} bytes).");
-                var result = transfers.Offer(envelope.SourcePeerId, output.ToArray(),
-                    Path.GetExtension(job.OutputFileName).TrimStart('.').ToLowerInvariant(), job.OutputMimeType, job.OutputFileName);
-                result["JobId"] = jobId;
-                logger.LogInformation("Returned converted media for job {JobId} ({Bytes} bytes) to an approved peer.", jobId, output.Length);
-                return result;
-            }
+            return await OfferOutputAsync(envelope.SourcePeerId, job, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception exception)
         {
@@ -360,6 +439,36 @@ public sealed class MediaConversionOutputOrganicHandler(IMediaConversionService 
                 logger.LogDebug(exception, "Reading converted media was canceled.");
             else
                 logger.LogError(exception, "Could not return converted media.");
+            throw;
+        }
+    }
+
+    internal async Task<Dictionary<string, object?>> OfferOutputAsync(string peerId, MediaConversionJobInfo job, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var maximumBytes = Math.Max(1, support.Settings.MaximumTransferFileBytes);
+            if (job.OutputSize > maximumBytes)
+                throw new InvalidOperationException($"The converted file has {job.OutputSize} bytes; the configured limit OrganicPlugins:MediaTools:MaximumTransferFileBytes is {maximumBytes}. Download it in PublisherStudio Media Converter Studio instead.");
+
+            var stream = await media.OpenOutputAsync(job.Id, cancellationToken).ConfigureAwait(false)
+                ?? throw new FileNotFoundException("The converted file is no longer available.");
+            await using (stream.ConfigureAwait(false))
+            {
+                using var output = new MemoryStream();
+                await stream.CopyToAsync(output, cancellationToken).ConfigureAwait(false);
+                if (output.Length > maximumBytes)
+                    throw new InvalidOperationException($"The converted file exceeds the configured limit OrganicPlugins:MediaTools:MaximumTransferFileBytes ({maximumBytes} bytes).");
+                var result = transfers.Offer(peerId, output.ToArray(),
+                    Path.GetExtension(job.OutputFileName).TrimStart('.').ToLowerInvariant(), job.OutputMimeType, job.OutputFileName);
+                result["JobId"] = job.Id;
+                logger.LogInformation("Returned converted media for job {JobId} ({Bytes} bytes) to an approved peer.", job.Id, output.Length);
+                return result;
+            }
+        }
+        catch (Exception exception)
+        {
+            logger.LogDebug(exception, "Preparing converted media for transfer failed.");
             throw;
         }
     }
@@ -413,6 +522,7 @@ public sealed class PublisherExportFormatsOrganicHandler(
                 Media = new
                 {
                     Capability = "publisher.media.convert",
+                    TrimCapability = "publisher.media.trim",
                     capabilities.Available,
                     capabilities.Version,
                     capabilities.LicenseNotice,

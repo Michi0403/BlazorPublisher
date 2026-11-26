@@ -186,9 +186,12 @@ public static class PublisherStudioServiceCollectionExtensions
         AddSingleton<OrganicMediaToolSupport, OrganicMediaToolSupport>(services);
         AddSingleton<OrganicFileTransferStore, OrganicFileTransferStore>(services);
         AddSingleton<IOrganicExecutableCapabilityHandler, PublisherFileReadOrganicHandler>(services);
-        AddSingleton<IOrganicExecutableCapabilityHandler, MediaConversionConvertOrganicHandler>(services);
+        AddSingleton<MediaConversionConvertOrganicHandler, MediaConversionConvertOrganicHandler>(services);
+        services.AddSingleton<IOrganicExecutableCapabilityHandler>(provider => provider.GetRequiredService<MediaConversionConvertOrganicHandler>());
+        AddSingleton<IOrganicExecutableCapabilityHandler, MediaConversionTrimOrganicHandler>(services);
         AddSingleton<IOrganicExecutableCapabilityHandler, MediaConversionJobOrganicHandler>(services);
-        AddSingleton<IOrganicExecutableCapabilityHandler, MediaConversionOutputOrganicHandler>(services);
+        AddSingleton<MediaConversionOutputOrganicHandler, MediaConversionOutputOrganicHandler>(services);
+        services.AddSingleton<IOrganicExecutableCapabilityHandler>(provider => provider.GetRequiredService<MediaConversionOutputOrganicHandler>());
         AddSingleton<IOrganicExecutableCapabilityHandler, PublisherExportFormatsOrganicHandler>(services);
         AddSingleton<IOrganicExecutableCapabilityHandler, PublisherPublicationExportOrganicHandler>(services);
         AddSingleton<PublicationPreparationService, PublicationPreparationService>(services);

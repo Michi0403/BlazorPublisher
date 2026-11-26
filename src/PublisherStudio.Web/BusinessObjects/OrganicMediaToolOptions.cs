@@ -29,6 +29,10 @@ public sealed class OrganicMediaToolOptions
     /// <value>Defaults to 256 MiB; files that fit one 1-Wire message are returned inline.</value>
     public int MaximumTransferFileBytes { get; set; } = 256 * 1024 * 1024;
 
+    /// <summary>Gets or sets how long an approved trim can wait for its file before reporting a timeout.</summary>
+    /// <value>The wait in seconds. The job remains available in Media Converter Studio.</value>
+    public int RemoteTrimTimeoutSeconds { get; set; } = 120;
+
     /// <summary>Gets or sets how many bytes of announced files may wait to be read at the same time.</summary>
     /// <value>Defaults to 512 MiB.</value>
     public long MaximumRetainedTransferBytes { get; set; } = 512L * 1024 * 1024;

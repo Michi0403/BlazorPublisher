@@ -1132,6 +1132,57 @@
       "source": "PublisherStudio object store"
     },
     {
+      "key": "publisher.media.trim",
+      "displayName": "Trim uploaded media and return the clip",
+      "description": "Cut the requested time range from an uploaded video or audio file and return the finished clip for preview and download. Use this operation when the user wants the clip back in Chat. Omit presetId and profileId to keep the source format when an installed preset supports it. Select a preset or profile from publisher.export.formats to change formats.",
+      "controller": "OrganicPlugins",
+      "method": "POST",
+      "route": "/api/organic/capabilities/publisher.media.trim",
+      "parameterSchemaJson": "{\"type\":\"object\",\"required\":[\"fileName\",\"mimeType\",\"contentBase64\",\"range\"],\"properties\":{\"presetId\":{\"type\":\"string\",\"description\":\"Installed encoding preset from publisher.export.formats. Omit presetId and profileId to preserve a supported source format.\"},\"profileId\":{\"type\":\"string\",\"format\":\"uuid\"},\"fileName\":{\"type\":\"string\"},\"mimeType\":{\"type\":\"string\"},\"contentBase64\":{\"type\":\"string\",\"contentEncoding\":\"base64\"},\"range\":{\"type\":\"object\",\"required\":[\"startSeconds\",\"endSeconds\"],\"properties\":{\"startSeconds\":{\"type\":\"number\",\"minimum\":0},\"endSeconds\":{\"type\":\"number\",\"exclusiveMinimum\":0}},\"additionalProperties\":false},\"options\":{\"type\":\"object\",\"description\":\"Optional conversion settings such as outputFileName.\"}},\"additionalProperties\":false}",
+      "organs": [
+        "hands"
+      ],
+      "skills": [
+        "ffmpeg",
+        "video",
+        "audio",
+        "conversion",
+        "export"
+      ],
+      "requiredSkillKeys": [
+        "ffmpeg",
+        "video",
+        "audio",
+        "conversion",
+        "export"
+      ],
+      "uiActivationKeys": [],
+      "isOnline": true,
+      "isEnabled": true,
+      "isReadOnly": false,
+      "requiresHumanConfirmation": true,
+      "supportsScheduling": false,
+      "supportsRecurringExecution": false,
+      "requiresHumanInteractionOnTargetSystem": true,
+      "requiresAutomatedInteractionOnTargetSystem": false,
+      "interactionValueSchemaJson": "{\"type\":\"object\",\"properties\":{}}",
+      "inputContract": "Source fileName, mimeType and contentBase64 within fileBudgetBytes, and a range with startSeconds and endSeconds. The end must be after the start. An installed encoding presetId or profileId is optional for a supported source format and required to change formats.",
+      "outputContract": "The trimmed file's kind, MIME type, file name and bytes or chunked transfer announcement, with the conversion job ID.",
+      "securityContract": "The linked peer and the PublisherStudio user must approve trimming the supplied file and returning its output to that same peer. File and transfer limits apply.",
+      "organicUseCase": "Return an approved timestamp clip for preview and download in the requesting chat.",
+      "suggestedCouncilRoles": [
+        "media converter",
+        "video editor",
+        "audio editor"
+      ],
+      "isExposedToPeer": true,
+      "allowPeerInvocation": true,
+      "requiresFrontendUserConfirmation": true,
+      "interactionEditor": 1,
+      "configurationKey": "publisher:publisher.media.trim",
+      "source": "PublisherStudio object store"
+    },
+    {
       "key": "publisher.media.job",
       "displayName": "Read media conversion job",
       "description": "Returns status, progress and output metadata of one PublisherStudio conversion job.",

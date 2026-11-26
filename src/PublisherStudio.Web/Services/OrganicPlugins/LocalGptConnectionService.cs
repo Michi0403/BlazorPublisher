@@ -45,6 +45,8 @@ public sealed class LocalGptConnectionService(
     IOrganicWireTrafficJournal traffic,
     ILogger<LocalGptConnectionService> logger) : ILocalGptConnectionService
 {
+    private const string PairingRequiredMessage = "Open 1-Wire security and trust in PublisherStudio and choose Create identity. Exchange pairing tickets with LocalGPT, then reconnect.";
+
     /// <summary>
     /// Stores the synchronization primitive that protects concurrent access to lifecycle gate state owned by <see cref="LocalGptConnectionService"/>.
     /// </summary>
@@ -211,9 +213,17 @@ public sealed class LocalGptConnectionService(
         try
         {
             await DisconnectCoreAsync().ConfigureAwait(false);
+            var peer = discovery.GetPeer(requestedPeerId) ?? throw new KeyNotFoundException("The selected LocalGPT discovery entry is no longer available.");
+            var localSecurity = await security.GetPublicDescriptorAsync(cancellationToken).ConfigureAwait(false);
+            if (peer.Security?.HasRuntimeSecret == true && !localSecurity.HasRuntimeSecret)
+            {
+                State.LastError = PairingRequiredMessage;
+                Changed?.Invoke();
+                return State;
+            }
+
             capabilities.Changed += SignalCapabilitySynchronization;
             permissions.Changed += SignalCapabilitySynchronization;
-            var peer = discovery.GetPeer(requestedPeerId) ?? throw new KeyNotFoundException("The selected LocalGPT discovery entry is no longer available.");
             var address = NormalizeAddress(peer.Address, peer.HostName);
             var tcp = new TcpClient();
             await tcp.ConnectAsync(address, peer.ServicePort, cancellationToken).ConfigureAwait(false);
@@ -238,7 +248,7 @@ public sealed class LocalGptConnectionService(
             State.ConnectedUtc = DateTimeOffset.UtcNow;
             State.LastError = "Waiting for LocalGPT frontend link approval.";
             discovery.SetConnected(requestedPeerId, true);
-            readLoop = ReadLoopAsync(connectedId, requestedPeerId, connectedReader, connectedWriter, isLoopback, connectionCancellation.Token);
+            readLoop = ReadLoopAsync(connectedId, requestedPeerId, connectedReader, connectedWriter, isLoopback, localSecurity.HasRuntimeSecret, connectionCancellation.Token);
             Changed?.Invoke();
 
             var localDirectory = await BuildLocalCapabilityDirectoryAsync(requestedPeerId, cancellationToken).ConfigureAwait(false);
@@ -246,7 +256,6 @@ public sealed class LocalGptConnectionService(
             var localSkills = localDirectory.Skills;
             var localUiFeatures = localDirectory.UiFeatures;
             var localHardware = localDirectory.Hardware;
-            var localSecurity = await security.GetPublicDescriptorAsync(cancellationToken).ConfigureAwait(false);
             var hello = new OrganicWireEnvelope
             {
                 MessageType = OrganicWireMessageType.Hello,
@@ -297,11 +306,10 @@ public sealed class LocalGptConnectionService(
         }
         catch (Exception ex) when (ex is SocketException or IOException or InvalidOperationException or KeyNotFoundException)
         {
-            State.IsConnected = false;
+            await DisconnectCoreAsync().ConfigureAwait(false);
             State.LastError = ex.Message;
             Changed?.Invoke();
             logger.LogError(ex, "Could not connect PublisherStudio to LocalGPT peer {PeerId}.", requestedPeerId);
-            await DisconnectCoreAsync().ConfigureAwait(false);
             return State;
         }
         finally { lifecycleGate.Release(); }
@@ -481,9 +489,10 @@ public sealed class LocalGptConnectionService(
     /// <param name="connectedReader">Connected reader value supplied to the LocalGPT connection operation and used when producing its result.</param>
     /// <param name="connectedWriter">Connected writer value supplied to the LocalGPT connection operation and used when producing its result.</param>
     /// <param name="isLoopback">Value indicating whether is loopback should apply to this operation.</param>
+    /// <param name="hasRuntimeIdentity">Whether PublisherStudio had a local runtime identity when it connected.</param>
     /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
     /// <returns>A task that completes when the operation has finished.</returns>
-    private async Task ReadLoopAsync(Guid connectedId, string connectedPeerId, StreamReader connectedReader, StreamWriter connectedWriter, bool isLoopback, CancellationToken cancellationToken)
+    private async Task ReadLoopAsync(Guid connectedId, string connectedPeerId, StreamReader connectedReader, StreamWriter connectedWriter, bool isLoopback, bool hasRuntimeIdentity, CancellationToken cancellationToken)
     {
         try
         {
@@ -495,6 +504,8 @@ public sealed class LocalGptConnectionService(
                 try
                 {
                     envelope = codec.DeserializeAndValidate(line);
+                    if (!hasRuntimeIdentity && transportSecurityPolicy.IsProtected(envelope))
+                        throw new CryptographicException(PairingRequiredMessage);
                     await security.UnprotectIncomingAsync(envelope, cancellationToken).ConfigureAwait(false);
                     if (!string.Equals(envelope.SourcePeerId, connectedPeerId, StringComparison.OrdinalIgnoreCase))
                         throw new InvalidDataException("The organic 1-Wire SourcePeerId does not match the peer identity owned by this connection.");

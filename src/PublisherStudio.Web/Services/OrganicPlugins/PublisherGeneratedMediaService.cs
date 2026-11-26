@@ -56,6 +56,8 @@ public sealed class PublisherGeneratedMediaService(ILocalGptConnectionService lo
                 payload.Deserialize<PublisherMediaReadResult>(codec.JsonOptions) is not { } chunk)
                 throw new InvalidDataException("LocalGPT returned an invalid generated media receipt.");
             if (chunk.Status == "Waiting" && stream.Length == 0) return null;
+            if (chunk.Status == "CompletedWithoutFile" && stream.Length == 0)
+                throw new InvalidOperationException("The LocalGPT Council ended without a generated file. Open the Council in LocalGPT Chat to see what blocked generation.");
             if (chunk.Status == "Unavailable") throw new InvalidOperationException("The generated media request has expired or is unavailable.");
             if (chunk.Status != "Ready" || chunk.ContentType != expectedType || chunk.Offset != stream.Length ||
                 chunk.Length <= 0 || chunk.Length > options.Value.MaximumGeneratedMediaBytes ||

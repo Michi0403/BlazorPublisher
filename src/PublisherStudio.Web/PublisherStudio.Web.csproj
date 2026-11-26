@@ -11,7 +11,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);1591</NoWarn>
     <ApplicationIcon>..\..\assets\PublisherStudio.ico</ApplicationIcon>
-    <DevExpressVersion>25.2.10</DevExpressVersion>
+    <DevExpressVersion>26.1.6</DevExpressVersion>
     <RuntimeIdentifiers>win-x64;win-x86;win-arm64;linux-x64;linux-arm64;osx-x64;osx-arm64</RuntimeIdentifiers>
     <SelfContained Condition="'$(RuntimeIdentifier)' != ''">true</SelfContained>
     <PublishTrimmed>false</PublishTrimmed>
@@ -23,6 +23,7 @@
     <DevExtremeRuntimeLicenseMetadata>$(MSBuildProjectDirectory)\wwwroot\vendor\devextreme-license.meta.json</DevExtremeRuntimeLicenseMetadata>
     <DevExtremeRuntimeKeyGeneratorVersionFile>$(MSBuildProjectDirectory)\wwwroot\vendor\devextreme-license.version</DevExtremeRuntimeKeyGeneratorVersionFile>
     <DevExtremeClientAssetMetadata>$(MSBuildProjectDirectory)\wwwroot\vendor\devextreme-assets.meta.json</DevExtremeClientAssetMetadata>
+    <PreparedDevExpressBrowserAssets>wwwroot\vendor\devextreme-dist\**;wwwroot\vendor\devexpress-aspnetcore-spreadsheet\**;wwwroot\vendor\devextreme-license.js;wwwroot\vendor\devextreme-license.meta.json;wwwroot\vendor\devextreme-license.version;wwwroot\vendor\devextreme-assets.meta.json</PreparedDevExpressBrowserAssets>
     <PublisherStudioPowerShellHost Condition="'$(OS)' == 'Windows_NT'">powershell</PublisherStudioPowerShellHost>
     <PublisherStudioPowerShellHost Condition="'$(OS)' != 'Windows_NT'">pwsh</PublisherStudioPowerShellHost>
     <PublisherStudioPrepareDevExpressAssetsScript>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)/../../Prepare-DevExpressAssets.ps1'))</PublisherStudioPrepareDevExpressAssetsScript>
@@ -44,10 +45,10 @@
     <PackageReference Include="DevExpress.Blazor.RichEdit.es" Version="$(DevExpressVersion)" />
     <PackageReference Include="DevExpress.Blazor.RichEdit.ja" Version="$(DevExpressVersion)" />
     <PackageReference Include="DevExpress.AspNetCore.Spreadsheet" Version="$(DevExpressVersion)" />
-    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="10.0.13" />
-    <PackageReference Include="System.CodeDom" Version="10.0.13" />
-    <PackageReference Include="System.Configuration.ConfigurationManager" Version="10.0.13" />
-    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.13" />
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="10.0.15" />
+    <PackageReference Include="System.CodeDom" Version="10.0.15" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="10.0.15" />
+    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.15" />
     <PackageReference Include="System.ServiceModel.Http" Version="10.0.652802" />
     <PackageReference Include="System.ServiceModel.NetTcp" Version="10.0.652802" />
     <PackageReference Include="System.ServiceModel.Primitives" Version="10.0.652802" />
@@ -67,7 +68,7 @@
   <!--
     Normal non-design-time builds ensure the licensed DevExpress browser payload is present and
     version-coherent with DevExpressVersion. Prepare-DevExpressAssets.ps1 performs a fast local
-    validation first and exits without npm/npx work when the prepared 25.2.10 payload is already
+    validation first and exits without npm/npx work when the prepared browser payload is already
     current. Missing, stale, mixed-version, or hash-invalid payloads trigger the maintained
     provisioning path automatically. Set PrepareSpreadsheetAssetsOnBuild=false only for an
     explicitly delegated build that is guaranteed to reuse already-prepared browser assets.
@@ -75,6 +76,11 @@
   -->
   <Target Name="PrepareSpreadsheetClientAssets" BeforeTargets="PrepareForBuild" Condition="'$(DesignTimeBuild)' != 'true' and '$(PrepareSpreadsheetAssetsOnBuild)' == 'true'">
     <Exec Command="$(PublisherStudioPowerShellHost) -NoProfile -ExecutionPolicy Bypass -File &quot;$(PublisherStudioPrepareDevExpressAssetsScript)&quot; -EnsureCurrent -ExpectedVersion &quot;$(DevExpressVersion)&quot;" WorkingDirectory="$(MSBuildProjectDirectory)" />
+    <!-- Package upgrades can replace files that the SDK enumerated before provisioning. -->
+    <ItemGroup>
+      <Content Remove="$(PreparedDevExpressBrowserAssets)" />
+      <Content Include="$(PreparedDevExpressBrowserAssets)" ExcludeFromSingleFile="true" CopyToPublishDirectory="PreserveNewest" />
+    </ItemGroup>
   </Target>
 
   <Target Name="SpreadsheetClientAssetBuildNotice" BeforeTargets="PrepareForBuild" Condition="'$(DesignTimeBuild)' != 'true' and '$(PrepareSpreadsheetAssetsOnBuild)' != 'true' and (!Exists('$(SpreadsheetClientAsset)') or !Exists('$(DevExtremeRuntimeLicenseAsset)') or !Exists('$(DevExtremeRuntimeLicenseMetadata)') or !Exists('$(DevExtremeRuntimeKeyGeneratorVersionFile)') or !Exists('$(DevExtremeClientAssetMetadata)'))">

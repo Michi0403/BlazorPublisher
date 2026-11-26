@@ -3622,9 +3622,10 @@ function sanitizeInlineColorFunctions(root) { try {
     }
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:sanitizeInlineColorFunctions@2973', __javascriptError); throw __javascriptError; }}
 
-function copyComputedStyles(source, clone) { try {
+function copyComputedStyles(source, clone, interactive = false) { try {
     if (!(source instanceof Element) || !(clone instanceof Element)) return;
     const computed = getComputedStyle(source);
+    const isPanelView = interactive && source.hasAttribute('data-panel-view');
     const important = [
         'position','display','left','top','right','bottom','width','height','min-width','max-width','min-height','max-height','box-sizing','overflow',
         'background','background-color','background-image','background-size','background-position','background-repeat','border','border-top','border-right','border-bottom','border-left',
@@ -3642,6 +3643,8 @@ function copyComputedStyles(source, clone) { try {
     let inline = normalizeCssColorFunctions(clone.getAttribute('style') || '').trim();
     if (inline && !inline.endsWith(';')) inline += ';';
     for (const property of important) {
+        // The standalone runtime changes the hidden attribute when a different panel view is selected.
+        if (isPanelView && property === 'display') continue;
         const value = normalizeCssColorFunctions(computed.getPropertyValue(property));
         if (value) inline += `${property}:${value};`;
     }
@@ -3649,7 +3652,7 @@ function copyComputedStyles(source, clone) { try {
     const sourceChildren = [...source.children];
     const cloneChildren = [...clone.children];
     for (let index = 0; index < Math.min(sourceChildren.length, cloneChildren.length); index++)
-        copyComputedStyles(sourceChildren[index], cloneChildren[index]);
+        copyComputedStyles(sourceChildren[index], cloneChildren[index], interactive);
  } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:copyComputedStyles@2985', __javascriptError); throw __javascriptError; }}
 
 function cleanPageClone(page) { try {
@@ -8355,7 +8358,7 @@ async function buildPublisherSingleHtml(mode, title, exportOptions = {}) { try {
     refreshContentFit(source);
     await new Promise(resolve => { try { return (requestAnimationFrame(resolve)); } catch (__javascriptError) { publisherStudioDiagnostics.report('js/publisherInterop.js:ArrowFunction@7372', __javascriptError); throw __javascriptError; } });
     const publication = source.cloneNode(true);
-    copyComputedStyles(source, publication);
+    copyComputedStyles(source, publication, true);
     publication.removeAttribute('aria-hidden');
     publication.removeAttribute('style');
     publication.className = 'website-publication';

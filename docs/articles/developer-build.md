@@ -13,7 +13,7 @@
 .\Build-LocalDevelopment.ps1 -Configuration Debug
 ```
 
-A normal non-design-time build automatically invokes the maintained DevExpress ensure-current preflight. When the browser payload is absent, stale, mixed-version, or hash-invalid, it runs the existing provisioning flow to restore and seed the exact DevExpress/DevExtreme 25.2.10 browser packages and generated public runtime license before compilation continues. The private DevExpress license remains on the build machine. `Prepare-DevExpressAssets.cmd` remains available for an explicit manual refresh.
+A normal non-design-time build automatically invokes the maintained DevExpress ensure-current preflight. When the browser payload is absent, stale, mixed-version, or hash-invalid, it runs the existing provisioning flow to restore and seed the exact DevExpress/DevExtreme 26.1.6 browser packages and generated public runtime license before compilation continues. The private DevExpress license remains on the build machine. `Prepare-DevExpressAssets.cmd` remains available for an explicit manual refresh.
 
 ## Release build
 

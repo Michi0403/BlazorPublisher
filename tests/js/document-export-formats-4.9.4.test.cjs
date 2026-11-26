@@ -3,6 +3,7 @@ const assert = require('node:assert/strict');
 const test = require('node:test');
 const fs = require('node:fs');
 const path = require('node:path');
+const vm = require('node:vm');
 const root = path.resolve(__dirname, '../..');
 const web = relative => fs.readFileSync(path.join(root, 'src/PublisherStudio.Web', relative), 'utf8');
 
@@ -74,4 +75,35 @@ test('Council PDF uses the same renderer as the Story preview and streams the re
     assert.match(browser, /event\.source !== frame\.contentWindow \|\| event\.origin !== location\.origin/);
     assert.match(browser, /resolve\(publisherStoryPdf\)/);
     assert.doesNotMatch(browser, /DotNet\.createJSStreamReference\(publisherStoryPdf\)/);
+});
+
+test('Standalone HTML lets DivStudio reveal views that were hidden in the editor', () => {
+    class Element {
+        constructor(attributes = {}, children = []) {
+            this.attributes = attributes;
+            this.children = children;
+        }
+
+        getAttribute(name) { return this.attributes[name]; }
+        hasAttribute(name) { return Object.hasOwn(this.attributes, name); }
+        setAttribute(name, value) { this.attributes[name] = value; }
+    }
+
+    const browser = web('wwwroot/js/publisherInterop.js');
+    const snapshot = browser.slice(browser.indexOf('function copyComputedStyles('), browser.indexOf('function cleanPageClone('));
+    const copyComputedStyles = vm.runInNewContext(`${snapshot}\ncopyComputedStyles`, {
+        Element,
+        getComputedStyle: () => ({ getPropertyValue: name => ({ display: 'none', color: 'red' })[name] ?? '' }),
+        normalizeCssColorFunctions: value => value
+    });
+    const source = new Element({}, [new Element({ 'data-panel-view': 'details' }), new Element()]);
+    const interactive = new Element({}, [new Element({ style: 'background:white' }), new Element()]);
+    copyComputedStyles(source, interactive, true);
+
+    assert.equal(interactive.children[0].getAttribute('style'), 'background:white;color:red;');
+    assert.match(interactive.children[1].getAttribute('style'), /display:none/);
+
+    const raster = new Element({}, [new Element(), new Element()]);
+    copyComputedStyles(source, raster);
+    assert.match(raster.children[0].getAttribute('style'), /display:none/);
 });

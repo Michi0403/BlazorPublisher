@@ -9,6 +9,7 @@ namespace PublisherStudio.Controllers;
 /// Exposes the publication application operations through PublisherStudio's web/API boundary and delegates domain work to the corresponding services.
 /// </summary>
 /// <param name="files">Publication file service dependency used by the publication workflow to provide the corresponding application capability.</param>
+/// <param name="preparation">Service that prepares and refines an independent native publication.</param>
 /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 [ApiController]
 [Route("api/publications")]
@@ -16,11 +17,20 @@ public sealed class PublicationController(PublicationFileService files, Publicat
 {
     /// <summary>Prepares a complete independent publication for download.</summary>
     [HttpPost("prepare")]
-    public IActionResult Prepare([FromBody] JsonElement publication)
+    public IActionResult Prepare([FromBody] JsonElement publication) => PrepareFile(publication);
+
+    /// <summary>Applies stable-ID element replacements to an independent publication.</summary>
+    [HttpPost("refine")]
+    public IActionResult Refine([FromBody] PublicationRefinementRequest request)
+        => request.Edits.ValueKind == JsonValueKind.Undefined
+            ? BadRequest("edits is required.")
+            : PrepareFile(request.Publication, request.Edits);
+
+    private IActionResult PrepareFile(JsonElement publication, JsonElement edits = default)
     {
         try
         {
-            var result = preparation.Prepare(publication);
+            var result = preparation.Prepare(publication, edits);
             return File(result.DocumentBytes!, result.MimeType, result.FileName);
         }
         catch (Exception exception) when (exception is ArgumentException or JsonException or InvalidDataException or NotSupportedException)
@@ -28,6 +38,11 @@ public sealed class PublicationController(PublicationFileService files, Publicat
             return BadRequest(exception.Message);
         }
     }
+
+    /// <summary>Identifies the independent publication and the element replacements to apply.</summary>
+    /// <param name="Publication">Complete native publication.</param>
+    /// <param name="Edits">Ordered element replacements identified by page and element ID.</param>
+    public sealed record PublicationRefinementRequest(JsonElement Publication, JsonElement Edits);
 
     /// <summary>
     /// Returns the download projection for the publication API surface, obtaining current application state from the controller's collaborators and translating it into the HTTP-facing result.

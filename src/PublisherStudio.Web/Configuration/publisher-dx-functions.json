@@ -1234,11 +1234,11 @@
     {
       "key": "publisher.publication.prepare",
       "displayName": "Build or refine an editable publication",
-      "description": "Normalizes a complete PublisherStudio document for download. Supply a new native publication or a revised copy of an existing file. The result is editable in PublisherStudio.",
+      "description": "Builds an editable PublisherStudio publication or replaces selected elements in a submitted copy by page and element ID.",
       "controller": "OrganicPlugins",
       "method": "POST",
       "route": "/api/organic/capabilities/publisher.publication.prepare",
-      "parameterSchemaJson": "{\"type\":\"object\",\"required\":[\"publication\"],\"properties\":{\"publication\":{\"type\":\"object\",\"required\":[\"name\",\"pages\"],\"properties\":{\"name\":{\"type\":\"string\",\"minLength\":1},\"pages\":{\"type\":\"array\",\"minItems\":1,\"items\":{\"type\":\"object\"}}},\"description\":\"Complete native PublisherStudio publication. Use $type first in polymorphic elements, such as text, image, shape, dataVisual, or panel. Preserve existing IDs when refining.\"}},\"additionalProperties\":false}",
+      "parameterSchemaJson": "{\"type\":\"object\",\"required\":[\"publication\"],\"properties\":{\"publication\":{\"type\":\"object\",\"required\":[\"name\",\"pages\"],\"properties\":{\"name\":{\"type\":\"string\",\"minLength\":1},\"pages\":{\"type\":\"array\",\"minItems\":1,\"items\":{\"type\":\"object\"}}},\"description\":\"Complete native PublisherStudio publication. Use $type first in polymorphic elements, such as text, image, shape, dataVisual, or panel. Omit machine-local streaming settings.\"},\"edits\":{\"type\":\"array\",\"minItems\":1,\"maxItems\":32,\"description\":\"Optional replacements for top-level elements. All other pages and elements are preserved.\",\"items\":{\"type\":\"object\",\"required\":[\"pageId\",\"elementId\",\"element\"],\"properties\":{\"pageId\":{\"type\":\"string\",\"format\":\"uuid\"},\"elementId\":{\"type\":\"string\",\"format\":\"uuid\"},\"element\":{\"type\":\"object\",\"required\":[\"$type\"],\"properties\":{\"$type\":{\"type\":\"string\",\"minLength\":1}},\"description\":\"Complete native replacement element. The previous element ID is preserved.\"}},\"additionalProperties\":false}}},\"additionalProperties\":false}",
       "organs": [
         "hands"
       ],
@@ -1260,7 +1260,7 @@
       "requiresHumanInteractionOnTargetSystem": true,
       "requiresAutomatedInteractionOnTargetSystem": false,
       "interactionValueSchemaJson": "{\"type\":\"object\",\"properties\":{}}",
-      "inputContract": "Complete native publication JSON with name and pages. A revised document can retain its IDs. Omit machine-local streaming settings.",
+      "inputContract": "Complete native publication JSON with name and pages, with optional edits containing pageId, elementId and a complete replacement element. Omit machine-local streaming settings.",
       "outputContract": "Editable .pubstudio.json file with page count and MIME type, delivered through the linked peer file transfer.",
       "securityContract": "Linked-peer permissions and PublisherStudio approval. Operates on the submitted copy without loading an editor session.",
       "organicUseCase": "Build, refine and deliver an editable PublisherStudio document.",

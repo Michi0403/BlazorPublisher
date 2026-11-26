@@ -22,7 +22,8 @@ public sealed class PublisherPublicationPrepareOrganicHandler(
             if (!parameters.TryGetProperty("publication", out var publication))
                 throw new ArgumentException("publication is required.");
 
-            var result = preparation.Prepare(publication);
+            parameters.TryGetProperty("edits", out var edits);
+            var result = preparation.Prepare(publication, edits);
             cancellationToken.ThrowIfCancellationRequested();
             var offered = transfers.Offer(envelope.SourcePeerId, result.DocumentBytes!, result.Kind, result.MimeType, result.FileName);
             offered["PageCount"] = result.PageCount;

@@ -289,6 +289,15 @@ public interface IOrganicCapabilityCatalog : LocalGPT.WireProtocol.IOneWireCapab
 /// </summary>
 public interface IOrganicPermissionStore
 {
+    /// <summary>Lists saved work approvals for review and revocation.</summary>
+    IReadOnlyList<OrganicSavedWorkApproval> GetSavedWorkApprovals();
+    /// <summary>Checks the approved request fingerprint and expires an approval when the request changes.</summary>
+    bool MatchesSavedWorkApproval(OrganicWireEnvelope envelope);
+    /// <summary>Saves the fingerprint of an explicitly approved request.</summary>
+    void SaveWorkApproval(OrganicWireEnvelope envelope);
+    /// <summary>Removes the saved approval for the peer and capability.</summary>
+    void RevokeWorkApproval(string peerId, string capabilityKey);
+
     /// <summary>
     /// Occurs when changed changes or completes in <see cref="IOrganicPermissionStore"/>, allowing interested callers to react without polling internal state.
     /// </summary>
@@ -346,6 +355,9 @@ public interface IOrganicPermissionStore
 /// </summary>
 public interface IOrganicWorkCoordinator
 {
+    /// <summary>Indicates whether the request can be approved again without a fresh browser interaction.</summary>
+    bool CanPersistApproval(OrganicWireEnvelope envelope);
+
     /// <summary>
     /// Occurs when changed changes or completes in <see cref="IOrganicWorkCoordinator"/>, allowing interested callers to react without polling internal state.
     /// </summary>
@@ -374,7 +386,8 @@ public interface IOrganicWorkCoordinator
     /// <param name="id">Identifier of the resource to use for this operation.</param>
     /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
     /// <returns>The organic plugin work item produced by the operation.</returns>
-    Task<OrganicPluginWorkItem?> ApproveAsync(Guid id, CancellationToken cancellationToken = default);
+    /// <param name="persist">Whether to remember approval for identical requests.</param>
+    Task<OrganicPluginWorkItem?> ApproveAsync(Guid id, CancellationToken cancellationToken = default, bool persist = false);
     /// <summary>
     /// Updates interaction value for <see cref="IOrganicWorkCoordinator"/>, keeping the operation consistent with the state and invariants of the surrounding organic work workflow.
     /// </summary>

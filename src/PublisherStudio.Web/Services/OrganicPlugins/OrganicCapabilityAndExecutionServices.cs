@@ -1247,15 +1247,20 @@ public sealed class OrganicWorkCoordinator(
                 envelope.ApprovalMode = OrganicApprovalMode.AskEveryTime;
                 envelope.NormalizeInteractionKind();
             }
+            var denied = !exposed || permissions.IsDenied(envelope);
+            var matchesSavedApproval = permissions.MatchesSavedWorkApproval(envelope);
+            var savedApproval = !denied && CanPersistApproval(envelope) && matchesSavedApproval;
+            if (savedApproval)
+                envelope.UserConfirmed = true;
             var item = new OrganicPluginWorkItem
             {
                 MessageId = envelope.MessageId, CorrelationId = envelope.CorrelationId, PeerId = envelope.SourcePeerId,
                 CapabilityKey = envelope.CapabilityKey, Request = envelope,
-                Status = !exposed || permissions.IsDenied(envelope)
+                Status = denied
                     ? OrganicWorkStatus.Declined
                     : (requiresFreshCaptureConsent || requiresFreshModuleConsent)
                         ? OrganicWorkStatus.PendingApproval
-                        : permissions.IsAllowed(envelope) ||
+                        : savedApproval || permissions.IsAllowed(envelope) ||
                           (permission is null && advertised is { IsReadOnly: true } && !envelope.RequiresHumanInteractionOnTargetSystem)
                             // A read-only capability that asks for no confirmation and has no saved rule runs without an approval nobody can give.
                             ? OrganicWorkStatus.Queued
@@ -1288,20 +1293,45 @@ public sealed class OrganicWorkCoordinator(
     }
 }
 
-    /// <summary>
-    /// Performs approve for <see cref="OrganicWorkCoordinator"/>, keeping the operation consistent with the state and invariants of the surrounding organic work workflow.
-    /// </summary>
-    /// <param name="id">Identifier of the resource to use for this operation.</param>
-    /// <param name="cancellationToken">Cancellation token that allows the caller to stop the asynchronous operation.</param>
-    /// <returns>The organic plugin work item produced by the operation.</returns>
-    public async Task<OrganicPluginWorkItem?> ApproveAsync(Guid id, CancellationToken cancellationToken = default)
+    /// <inheritdoc />
+    public bool CanPersistApproval(OrganicWireEnvelope envelope)
+    {
+        try
+        {
+            return envelope.CapabilityKey is not ("publisher.screen.capture" or "publisher.screen.record" or
+                       "publisher.panel.module.invoke" or "publisher.document.create" or "publisher.browser.view.inspect" or
+                       "publisher.input.execute") &&
+                   !envelope.RequiresAutomatedInteractionOnTargetSystem &&
+                   string.IsNullOrWhiteSpace(envelope.WorkflowJson) &&
+                   ReadInteractionEditor(envelope) is OrganicInteractionEditor.ConfirmationOnly or OrganicInteractionEditor.None;
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Could not evaluate the PublisherStudio work approval scope.");
+            throw;
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task<OrganicPluginWorkItem?> ApproveAsync(Guid id, CancellationToken cancellationToken = default, bool persist = false)
     {
     try
     {
-            if (!work.TryGetValue(id, out var item) || item.Status != OrganicWorkStatus.PendingApproval) return item;
-            item.Request.UserConfirmed = true;
-            item.Status = OrganicWorkStatus.Queued;
-            item.UpdatedUtc = DateTimeOffset.UtcNow;
+            if (!work.TryGetValue(id, out var item)) return null;
+            lock (item)
+            {
+                if (item.Status != OrganicWorkStatus.PendingApproval) return persist ? null : item;
+                if (persist)
+                {
+                    if (!CanPersistApproval(item.Request) || permissions.IsDenied(item.Request))
+                        throw new InvalidOperationException("This PublisherStudio action requires a one-time approval.");
+
+                    permissions.SaveWorkApproval(item.Request);
+                }
+                item.Request.UserConfirmed = true;
+                item.Status = OrganicWorkStatus.Queued;
+                item.UpdatedUtc = DateTimeOffset.UtcNow;
+            }
             Changed?.Invoke();
             await ExecuteAsync(item, cancellationToken).ConfigureAwait(false);
             return item;
@@ -1388,10 +1418,14 @@ public sealed class OrganicWorkCoordinator(
     {
     try
     {
-            if (!work.TryGetValue(id, out var item) || item.Status != OrganicWorkStatus.PendingApproval) return false;
-            item.Status = OrganicWorkStatus.Declined;
-            item.Error = string.IsNullOrWhiteSpace(reason) ? "Declined by PublisherStudio user." : reason;
-            item.UpdatedUtc = DateTimeOffset.UtcNow;
+            if (!work.TryGetValue(id, out var item)) return false;
+            lock (item)
+            {
+                if (item.Status != OrganicWorkStatus.PendingApproval) return false;
+                item.Status = OrganicWorkStatus.Declined;
+                item.Error = string.IsNullOrWhiteSpace(reason) ? "Declined by PublisherStudio user." : reason;
+                item.UpdatedUtc = DateTimeOffset.UtcNow;
+            }
             Changed?.Invoke();
             return true;
     

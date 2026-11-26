@@ -164,7 +164,7 @@
                 <DxMemo Rows="3" @bind-Text="_globalAiModelsDraft" BindValueMode="BindValueMode.OnInput" NullText="Leave empty to let LocalGPT choose models for the team" />
             </label>
             <DxButton Text="Save model preferences" Click="SaveGlobalAiModelsAsync" />
-            <p class="organic-note">Model IDs must match LocalGPT's configured provider/model inventory. PublisherStudio does not fabricate model availability. Leave blank for the normal Council team selection; saved model choices do not grant tools or approvals.</p>
+            <p class="organic-note">Copy the provider-qualified model entry from LocalGPT, including the host address. For example, <code>Ollama — gemma4:12b @@ http://127.0.0.1:11434</code>. Leave blank to use the default models for the Council team.</p>
             @if (_peers.Count == 0)
             {
                 <p class="organic-empty">No LocalGPT broadcast has been received yet. LocalGPT remains available on its normal application port; organic discovery is optional.</p>
@@ -438,6 +438,13 @@
         <Template Context="formItemContext012">
         <div class="organic-card">
             <h2>Pending and recent organ work</h2>
+            @foreach (var approval in PermissionStore.GetSavedWorkApprovals())
+            {
+                <div class="organic-actions" @key="approval">
+                    <span>@approval.CapabilityKey · @approval.PeerId · Approved until changed</span>
+                    <DxButton Text="Revoke" RenderStyle="ButtonRenderStyle.Danger" Click="() => PermissionStore.RevokeWorkApproval(approval.PeerId, approval.CapabilityKey)" />
+                </div>
+            }
             @if (_work.Count == 0)
             {
                 <p class="organic-empty">No external organ work has arrived.</p>
@@ -458,6 +465,10 @@
                             {
                                 <div class="organic-actions">
                                     <button type="button" class="organic-primary" @onclick="() => ApproveAsync(item.Id)">Approve once</button>
+                                    @if (WorkCoordinator.CanPersistApproval(item.Request))
+                                    {
+                                        <DxButton Text="Approve until changed" RenderStyle="ButtonRenderStyle.Secondary" Click="() => ApproveAsync(item.Id, true)" />
+                                    }
                                     <button type="button" class="organic-danger" @onclick="() => DeclineAsync(item.Id)">Decline</button>
                                 </div>
                             }
@@ -1454,14 +1465,16 @@
     /// </summary>
     /// <param name="id">Identifier of the resource to use for this operation.</param>
     /// <returns>A task that completes when the operation has finished.</returns>
-    private async Task ApproveAsync(Guid id)
+    private async Task ApproveAsync(Guid id, bool persist = false)
     {
         try
         {
-            var item = await WorkCoordinator.ApproveAsync(id).ConfigureAwait(true);
+            var item = await WorkCoordinator.ApproveAsync(id, persist: persist).ConfigureAwait(true);
             if (item is null) return;
             await Connection.SendWorkResultAsync(item).ConfigureAwait(true);
-            Notifications.Success($"{item.CapabilityKey} completed with one-time approval.", "Organic work", nameof(OrganicPlugins));
+            Notifications.Success(persist
+                ? $"{item.CapabilityKey} approved until the request changes."
+                : $"{item.CapabilityKey} approved once.", "Organic work", nameof(OrganicPlugins));
             Refresh();
     
         }

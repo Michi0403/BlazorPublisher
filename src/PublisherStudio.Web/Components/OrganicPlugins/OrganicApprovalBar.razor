@@ -41,7 +41,11 @@
                 }
             </div>
             <div class="organic-approval-actions">
-                <button type="button" class="organic-primary" disabled="@_busy" @onclick="ApproveCurrentAsync">@ApproveButtonText(current.Request)</button>
+                <button type="button" class="organic-primary" disabled="@_busy" @onclick="() => ApproveCurrentAsync(false)">@ApproveButtonText(current.Request)</button>
+                @if (WorkCoordinator.CanPersistApproval(current.Request))
+                {
+                    <DxButton Text="Approve until changed" Enabled="@(!_busy)" RenderStyle="ButtonRenderStyle.Secondary" Click="() => ApproveCurrentAsync(true)" />
+                }
                 <button type="button" class="organic-danger" disabled="@_busy" @onclick="DeclineCurrentAsync">Decline</button>
                 <button type="button" class="organic-secondary" @onclick="Hide">Hide bar</button>
             </div>
@@ -167,7 +171,8 @@ else if (!_visible && _pending.Count > 0)
     /// Approves current for <see cref="OrganicApprovalBar"/>, keeping the operation consistent with the state and invariants of the surrounding organic approval bar workflow.
     /// </summary>
     /// <returns>A task that completes when the operation has finished.</returns>
-    private async Task ApproveCurrentAsync()
+    /// <param name="persist">Whether the exact approval should be saved across matching requests.</param>
+    private async Task ApproveCurrentAsync(bool persist)
     {
         try
         {
@@ -192,10 +197,13 @@ else if (!_visible && _pending.Count > 0)
                 }
                 else if (NeedsEditor(pending.Request) && !WorkCoordinator.UpdateInteractionValue(pending.Id, _interactionValue))
                     throw new InvalidOperationException("The pending interaction value could not be attached to the current 1-Wire work item.");
-                var item = await WorkCoordinator.ApproveAsync(pending.Id).ConfigureAwait(true);
+                var item = await WorkCoordinator.ApproveAsync(pending.Id, persist: persist).ConfigureAwait(true);
                 if (item is not null && Connection.State.IsConnected)
                     await Connection.SendWorkResultAsync(item).ConfigureAwait(true);
-                Notifications.Success("The requested AI Council action was approved once.", "Organic approval", nameof(OrganicApprovalBar));
+                if (item is not null)
+                    Notifications.Success(persist
+                        ? "Approval saved until the request changes."
+                        : "The requested AI Council action was approved once.", "Organic approval", nameof(OrganicApprovalBar));
             }
             finally
             {

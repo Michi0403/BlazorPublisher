@@ -1,5 +1,6 @@
 using PublisherStudio.BusinessObjects;
 using System.Collections.Concurrent;
+using System.Security.Cryptography;
 using System.Text.Json;
 
 namespace PublisherStudio.Services.OrganicPlugins;
@@ -275,11 +276,167 @@ public sealed class LocalGptDiscoveryRegistry(ILogger<LocalGptDiscoveryRegistry>
 }
 }
 
+/// <summary>Records the approved request fingerprint for a peer and capability.</summary>
+public sealed record OrganicSavedWorkApproval(string PeerId, string CapabilityKey, string Fingerprint)
+{
+    internal (string PeerId, string CapabilityKey) Scope => (PeerId.ToUpperInvariant(), CapabilityKey.ToUpperInvariant());
+}
+
 /// <summary>
 /// Owns persistence and retrieval of organic permission state, keeping storage-specific behavior behind a focused application abstraction.
 /// </summary>
 public sealed class OrganicPermissionStore : IOrganicPermissionStore
 {
+    private List<OrganicSavedWorkApproval>? savedWorkApprovals;
+
+    private string SavedApprovalsPath => Path.Combine(Path.GetDirectoryName(filePath)!, "work-approvals.json");
+
+    /// <inheritdoc />
+    public IReadOnlyList<OrganicSavedWorkApproval> GetSavedWorkApprovals()
+    {
+        try
+        {
+            lock (gate)
+                return GetSavedApprovals().ToArray();
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Could not list PublisherStudio saved work approvals.");
+            throw;
+        }
+    }
+
+    /// <inheritdoc />
+    public bool MatchesSavedWorkApproval(OrganicWireEnvelope envelope)
+    {
+        try
+        {
+            lock (gate)
+            {
+                var scope = (envelope.SourcePeerId.ToUpperInvariant(), envelope.CapabilityKey.ToUpperInvariant());
+                var approval = GetSavedApprovals().FirstOrDefault(candidate => candidate.Scope == scope);
+                if (approval is null)
+                    return false;
+                if (approval.Fingerprint == Fingerprint(envelope))
+                    return true;
+
+                // A changed request ends the approval even if another request later returns to the old inputs.
+                RevokeWorkApproval(envelope.SourcePeerId, envelope.CapabilityKey);
+                return false;
+            }
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Could not match a PublisherStudio saved work approval.");
+            throw;
+        }
+    }
+
+    /// <inheritdoc />
+    public void SaveWorkApproval(OrganicWireEnvelope envelope)
+    {
+        try
+        {
+            lock (gate)
+            {
+                var approval = new OrganicSavedWorkApproval(envelope.SourcePeerId, envelope.CapabilityKey, Fingerprint(envelope));
+                var approvals = GetSavedApprovals().Where(candidate => candidate.Scope != approval.Scope).ToList();
+                approvals.Add(approval);
+                PersistSavedApprovals(approvals);
+            }
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Could not save a PublisherStudio work approval.");
+            throw;
+        }
+    }
+
+    /// <inheritdoc />
+    public void RevokeWorkApproval(string peerId, string capabilityKey)
+    {
+        try
+        {
+            lock (gate)
+            {
+                var scope = (peerId.ToUpperInvariant(), capabilityKey.ToUpperInvariant());
+                var approvals = GetSavedApprovals();
+                var remaining = approvals.Where(candidate => candidate.Scope != scope).ToList();
+                if (remaining.Count != approvals.Count)
+                    PersistSavedApprovals(remaining);
+            }
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Could not revoke a PublisherStudio saved work approval.");
+            throw;
+        }
+    }
+
+    private List<OrganicSavedWorkApproval> GetSavedApprovals()
+    {
+        if (savedWorkApprovals is not null)
+            return savedWorkApprovals;
+
+        try
+        {
+            savedWorkApprovals = File.Exists(SavedApprovalsPath)
+                ? JsonSerializer.Deserialize<List<OrganicSavedWorkApproval>>(File.ReadAllText(SavedApprovalsPath), codec.JsonOptions) ?? []
+                : [];
+        }
+        catch (Exception exception) when (exception is IOException or JsonException or UnauthorizedAccessException)
+        {
+            logger.LogWarning(exception, "Could not load PublisherStudio saved work approvals.");
+            savedWorkApprovals = [];
+        }
+        return savedWorkApprovals;
+    }
+
+    private void PersistSavedApprovals(List<OrganicSavedWorkApproval> approvals)
+    {
+        try
+        {
+            var path = SavedApprovalsPath;
+            Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+            var temporary = path + ".tmp";
+            File.WriteAllText(temporary, JsonSerializer.Serialize(approvals, codec.JsonOptions));
+            File.Move(temporary, path, overwrite: true);
+            savedWorkApprovals = approvals;
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Could not write PublisherStudio saved work approvals.");
+            throw;
+        }
+    }
+
+    private string Fingerprint(OrganicWireEnvelope envelope)
+    {
+        try
+        {
+            var rules = MatchingRules(envelope);
+            var request = new
+            {
+                envelope.ProtocolVersion, envelope.MessageType, envelope.SourcePeerId, envelope.TargetPeerId,
+                envelope.SecurityKeyId, envelope.CapabilityKey, envelope.Controller, envelope.Method, envelope.Route,
+                envelope.ExecutionMode, envelope.WorkOrderKey, envelope.NotBeforeUtc, envelope.WorkflowJson,
+                envelope.ApprovalMode, envelope.RequiresHumanInteractionOnTargetSystem,
+                envelope.RequiresAutomatedInteractionOnTargetSystem, envelope.InteractionKind,
+                envelope.InteractionValueJson, envelope.InteractionValueContentType,
+                envelope.Organs, envelope.Skills,
+                Properties = envelope.Properties is null ? null : new SortedDictionary<string, JsonElement>(envelope.Properties, StringComparer.Ordinal),
+                Rules = envelope.Organs.DefaultIfEmpty(string.Empty).Select(organ => ResolveRule(rules, organ))
+            };
+            return Convert.ToHexString(SHA256.HashData(JsonSerializer.SerializeToUtf8Bytes(request, codec.JsonOptions)));
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Could not fingerprint a PublisherStudio work approval.");
+            throw;
+        }
+    }
+
+
     /// <summary>
     /// Occurs when changed changes or completes in <see cref="OrganicPermissionStore"/>, allowing interested callers to react without polling internal state.
     /// </summary>

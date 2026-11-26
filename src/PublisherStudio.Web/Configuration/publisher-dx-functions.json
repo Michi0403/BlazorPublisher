@@ -1232,6 +1232,51 @@
       "source": "PublisherStudio object store"
     },
     {
+      "key": "publisher.publication.prepare",
+      "displayName": "Build or refine an editable publication",
+      "description": "Normalizes a complete PublisherStudio document for download. Supply a new native publication or a revised copy of an existing file. The result is editable in PublisherStudio.",
+      "controller": "OrganicPlugins",
+      "method": "POST",
+      "route": "/api/organic/capabilities/publisher.publication.prepare",
+      "parameterSchemaJson": "{\"type\":\"object\",\"required\":[\"publication\"],\"properties\":{\"publication\":{\"type\":\"object\",\"required\":[\"name\",\"pages\"],\"properties\":{\"name\":{\"type\":\"string\",\"minLength\":1},\"pages\":{\"type\":\"array\",\"minItems\":1,\"items\":{\"type\":\"object\"}}},\"description\":\"Complete native PublisherStudio publication. Use $type first in polymorphic elements, such as text, image, shape, dataVisual, or panel. Preserve existing IDs when refining.\"}},\"additionalProperties\":false}",
+      "organs": [
+        "hands"
+      ],
+      "skills": [
+        "document",
+        "publication",
+        "design"
+      ],
+      "requiredSkillKeys": [
+        "publication"
+      ],
+      "uiActivationKeys": [],
+      "isOnline": true,
+      "isEnabled": true,
+      "isReadOnly": true,
+      "requiresHumanConfirmation": true,
+      "supportsScheduling": false,
+      "supportsRecurringExecution": false,
+      "requiresHumanInteractionOnTargetSystem": true,
+      "requiresAutomatedInteractionOnTargetSystem": false,
+      "interactionValueSchemaJson": "{\"type\":\"object\",\"properties\":{}}",
+      "inputContract": "Complete native publication JSON with name and pages. A revised document can retain its IDs. Omit machine-local streaming settings.",
+      "outputContract": "Editable .pubstudio.json file with page count and MIME type, delivered through the linked peer file transfer.",
+      "securityContract": "Linked-peer permissions and PublisherStudio approval. Operates on the submitted copy without loading an editor session.",
+      "organicUseCase": "Build, refine and deliver an editable PublisherStudio document.",
+      "suggestedCouncilRoles": [
+        "publisher",
+        "designer",
+        "publication reviewer"
+      ],
+      "isExposedToPeer": true,
+      "allowPeerInvocation": true,
+      "requiresFrontendUserConfirmation": true,
+      "interactionEditor": 1,
+      "configurationKey": "publisher:publisher.publication.prepare",
+      "source": "PublisherStudio object store"
+    },
+    {
       "key": "publisher.publication.export",
       "displayName": "Export publication, page, object or website",
       "description": "Exports the open publication through the editor's own export path after the user approves it in PublisherStudio: one page or object as PNG, JPG or SVG, all pages as PNG/JPG (ZIP when several), a single-file HTML presentation or site, or a structured website ZIP.",

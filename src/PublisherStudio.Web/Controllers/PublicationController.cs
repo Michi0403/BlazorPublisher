@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using PublisherStudio.BusinessObjects;
 using PublisherStudio.Services;
@@ -11,8 +12,23 @@ namespace PublisherStudio.Controllers;
 /// <param name="logger">Logger used to record diagnostics produced while the operation runs.</param>
 [ApiController]
 [Route("api/publications")]
-public sealed class PublicationController(PublicationFileService files, ILogger<PublicationController> logger) : ControllerBase
+public sealed class PublicationController(PublicationFileService files, PublicationPreparationService preparation, ILogger<PublicationController> logger) : ControllerBase
 {
+    /// <summary>Prepares a complete independent publication for download.</summary>
+    [HttpPost("prepare")]
+    public IActionResult Prepare([FromBody] JsonElement publication)
+    {
+        try
+        {
+            var result = preparation.Prepare(publication);
+            return File(result.DocumentBytes!, result.MimeType, result.FileName);
+        }
+        catch (Exception exception) when (exception is ArgumentException or JsonException or InvalidDataException or NotSupportedException)
+        {
+            return BadRequest(exception.Message);
+        }
+    }
+
     /// <summary>
     /// Returns the download projection for the publication API surface, obtaining current application state from the controller's collaborators and translating it into the HTTP-facing result.
     /// </summary>

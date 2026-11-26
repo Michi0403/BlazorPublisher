@@ -52,7 +52,11 @@ public sealed class ObjectStoreOrganicCapabilityCatalog(
             if (mediaCapability is not null)
             {
                 mediaCapability.Description = $"{mediaCapability.Description.Trim()} FFmpeg available: {media.Available}.";
-                mediaCapability.IsOnline = media.Available;
+            }
+            if (!media.Available)
+            {
+                foreach (var capability in capabilities.Where(item => item.Key is "publisher.media.convert" or "publisher.media.trim"))
+                    capability.IsOnline = false;
             }
 
             logger.LogInformation($"Published {capabilities.Count} PublisherStudio DX function descriptor(s) from the serializable object store through the shared 1-Wire contract.");

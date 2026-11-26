@@ -204,18 +204,17 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
         try
         {
             logger.LogTrace($"Entering MediaConversionService.GetCapabilitiesAsync.");
-                    if (_capabilities is not null) return _capabilities;
                     await _capabilityLock.WaitAsync(cancellationToken).ConfigureAwait(false);
                     try
                     {
-                        if (_capabilities is not null) return _capabilities;
                         var configuredPath = string.IsNullOrWhiteSpace(_publisherConfiguration.FFmpegPath)
                             ? Environment.GetEnvironmentVariable(_runtimePolicy.FfmpegEnvironmentVariable)
                             : _publisherConfiguration.FFmpegPath;
                         var executable = _ffmpegLocator.Resolve(configuredPath);
                         if (executable is null)
                         {
-                            _capabilities = new MediaConversionCapabilities(
+                            _capabilities = null;
+                            return new MediaConversionCapabilities(
                                 false,
                                 string.Empty,
                                 string.Empty,
@@ -223,8 +222,10 @@ public sealed class MediaConversionService : IMediaConversionService, IDisposabl
                                 _runtimePolicy.MediaConversionPresets.Select(preset => preset with { Available = false, UnavailableReason = "FFmpeg was not found." }).ToArray(),
                                 "PublisherStudio does not bundle FFmpeg. The executable you install remains a separate program under its own LGPL/GPL build terms.",
                                 "Install FFmpeg with your operating-system package manager or vendor package, then refresh. PublisherStudio checks an explicit PublisherStudio:FFmpegPath / PUBLISHERSTUDIO_FFMPEG override first, bundled portable tools/ffmpeg paths next, platform-owned user/system locations (including ~/.local/bin and Homebrew/Linuxbrew/Nix locations on Unix), and finally PATH.");
-                            return _capabilities;
                         }
+
+                        if (_capabilities is { } cached && string.Equals(cached.Executable, executable, StringComparison.Ordinal))
+                            return cached;
 
                         var version = await _ffmpegLocator.ReadVersionAsync(executable, cancellationToken).ConfigureAwait(false) ?? "FFmpeg detected";
                         var encoders = await ReadEncodersAsync(executable, cancellationToken).ConfigureAwait(false);

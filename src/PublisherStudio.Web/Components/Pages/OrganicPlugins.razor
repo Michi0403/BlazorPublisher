@@ -161,8 +161,9 @@
             </label>
             <p class="organic-note">Saved for this browser and used by Story Editor, 3D/media AI and object AI. Select an advertised team or use Auto for workflow-specific routing.</p>
             <label>Specific LocalGPT models (optional, one full model identifier per line)
-                <DxMemo Rows="3" Text="@_globalAiModels" TextChanged="SaveGlobalAiModelsAsync" NullText="Leave empty to let LocalGPT choose models for the team" />
+                <DxMemo Rows="3" @bind-Text="_globalAiModelsDraft" BindValueMode="BindValueMode.OnInput" NullText="Leave empty to let LocalGPT choose models for the team" />
             </label>
+            <DxButton Text="Save model preferences" Click="SaveGlobalAiModelsAsync" />
             <p class="organic-note">Model IDs must match LocalGPT's configured provider/model inventory. PublisherStudio does not fabricate model availability. Leave blank for the normal Council team selection; saved model choices do not grant tools or approvals.</p>
             @if (_peers.Count == 0)
             {
@@ -564,6 +565,7 @@
     private const string AiTeamPreferenceStorageKey = "publisherstudio.localgpt.preferredCouncilTeam";
     private const string AiModelPreferenceStorageKey = "publisherstudio.localgpt.preferredModelNames";
     private string _globalAiModels = string.Empty;
+    private string _globalAiModelsDraft = string.Empty;
     private List<string> ConfiguredAiModels => EditorText.ParsePreferredAiModels(_globalAiModels);
     private string _globalAiTeamKey = "auto";
     /// <summary>
@@ -658,6 +660,7 @@
                 var team = await JS.InvokeAsync<string?>("localStorage.getItem", AiTeamPreferenceStorageKey).ConfigureAwait(true);
                 _globalAiTeamKey = string.IsNullOrWhiteSpace(team) ? "auto" : team.Trim();
                 _globalAiModels = await JS.InvokeAsync<string?>("localStorage.getItem", AiModelPreferenceStorageKey).ConfigureAwait(true) ?? string.Empty;
+                _globalAiModelsDraft = _globalAiModels;
                 _manualLocalGptUrls = await JS.InvokeAsync<string?>("localStorage.getItem", ManualUrlsStorageKey).ConfigureAwait(true) ?? string.Empty;
                 _autoConnectSavedUrl = string.Equals(await JS.InvokeAsync<string?>("localStorage.getItem", AutoConnectUrlsStorageKey).ConfigureAwait(true), "true", StringComparison.OrdinalIgnoreCase);
                 if (_globalAiTeamKey != "auto" && CouncilTeams.Any(item => string.Equals(item.Key, _globalAiTeamKey, StringComparison.OrdinalIgnoreCase)))
@@ -726,13 +729,15 @@
     }
 
     /// <summary>Persists explicitly selected model names without modifying LocalGPT capabilities or approvals.</summary>
-    private async Task SaveGlobalAiModelsAsync(string? value)
+    private async Task SaveGlobalAiModelsAsync()
     {
         try
         {
-            _globalAiModels = value ?? string.Empty;
-            await JS.InvokeVoidAsync("localStorage.setItem", AiModelPreferenceStorageKey, _globalAiModels).ConfigureAwait(true);
+            var value = _globalAiModelsDraft;
+            await JS.InvokeVoidAsync("localStorage.setItem", AiModelPreferenceStorageKey, value).ConfigureAwait(true);
+            _globalAiModels = value;
             _councilRequest.ModelNames = ConfiguredAiModels;
+            Notifications.Success("The preferred LocalGPT models were saved for this browser.", source: nameof(OrganicPlugins));
         }
         catch (Exception exception)
         {

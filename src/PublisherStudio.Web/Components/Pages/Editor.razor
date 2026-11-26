@@ -1382,7 +1382,10 @@
             if (kind is not ("picture" or "video" or "audio" or "template" or "blob3d"))
                 return Task.CompletedTask;
             _mediaAiKind = kind;
-            _mediaAiTeamKey = ResolveAiTeamKey(ResolvePublisherMediaTeamKey(kind));
+            var mediaTeam = ResolvePublisherMediaTeamKey(kind);
+            _mediaAiTeamKey = kind is "picture" or "video" && mediaTeam != "general"
+                ? mediaTeam
+                : ResolveAiTeamKey(mediaTeam);
             _mediaAiTitle = kind switch
             {
                 "picture" => LT("Create picture with AI"),
@@ -1527,16 +1530,30 @@
             _mediaAiResponse = string.Empty;
             try
             {
-                var instructions = kind == "blob3d"
-                    ? "The user requests an actual 3D object, not a generic model recommendation. Check advertised PublisherStudio 3D/OpenSCAD capabilities and request publisher.openscad.generate through the human-approval workflow where available. Never claim a file or geometry was generated without a verified receipt. If unavailable, explain what is missing; a default animated blob is NOT a model of the requested subject. Return any draft OpenSCAD as a reviewable proposal, never silently execute it."
-                    : "A text-only Council model cannot generate image/video bytes. First call localai.models.installed to verify the required specialized generation capability and its installation ID, then invoke localai.image.generate for pictures or localai.video.generate for video, using an installed, ready model with its verified modelInstallationId and normal approval gate. Other media require a corresponding real model or native PublisherStudio operation. Never substitute prose for a generated media artifact. Show a verifiable artifact receipt or explicitly report that no media was produced. Never silently mutate the publication or install models.";
+                var instructions = kind switch
+                {
+                    "picture" => "Use the available image generation capability with a ready, installed model and its normal approval workflow. Return the generated PNG receipt or explain which prerequisite is missing.",
+                    "video" => "Use the available video generation capability with a ready, installed model and its normal approval workflow. Return the generated MP4 receipt or explain which prerequisite is missing.",
+                    "blob3d" => "The user requests an actual 3D object, not a generic model recommendation. Check advertised PublisherStudio 3D/OpenSCAD capabilities and request publisher.openscad.generate through the human-approval workflow where available. Never claim a file or geometry was generated without a verified receipt. If unavailable, explain what is missing; a default animated blob is NOT a model of the requested subject. Return any draft OpenSCAD as a reviewable proposal, never silently execute it.",
+                    _ => "Use the corresponding available model or native PublisherStudio operation. Return a verifiable artifact receipt or explain which prerequisite is missing."
+                };
+                var canRetrieveMedia = kind is "picture" or "video";
                 var response = await AiBridge.ChatAsync(new PublisherStudio.Services.OrganicPlugins.PublisherAiChatRequest
                 {
                     TeamKey = _mediaAiTeamKey,
                     ModelNames = ConfiguredAiModels,
                     Prompt = prompt,
-                    PublisherMediaKind = kind is "picture" or "video" ? kind : string.Empty,
-                    SystemPrompt = $"PublisherStudio media workflow={kind}; publication={State.Document.Name}; page={State.CurrentPage.Name}; user-selected target={State.SelectedElement?.Name ?? "new object"}. {instructions}",
+                    PublisherMediaKind = canRetrieveMedia ? kind : string.Empty,
+                    RequestSentAsync = canRetrieveMedia ? correlationId => InvokeAsync(() =>
+                    {
+                        if (generation != _mediaAiGeneration || !_mediaAiVisible ||
+                            !LocalGptConnection.State.HasCapability("localgpt.media.delivery.read")) return;
+                        _generatedMediaRequest = correlationId;
+                        _generatedMediaPeer = peerId;
+                        _generatedMediaDocument = documentId;
+                        _generatedMediaPage = pageId;
+                    }) : null,
+                    SystemPrompt = $"PublisherStudio media workflow={kind}; publication={State.Document.Name}; page={State.CurrentPage.Name}; user-selected target={State.SelectedElement?.Name ?? "new object"}. {instructions} Ask before changing the publication or installing models.",
                     MaxRounds = 1,
                     MaxParallelModels = 1,
                     RequiredCapabilities = kind == "blob3d"
@@ -1548,18 +1565,17 @@
                     _mediaAiResponse = string.IsNullOrWhiteSpace(response.Text)
                         ? "LocalGPT did not return a verifiable result. Inspect the Council run before retrying."
                         : response.Text;
-                    if (kind is "picture" or "video" && LocalGptConnection.State.HasCapability("localgpt.media.delivery.read"))
-                    {
-                        _generatedMediaRequest = response.CorrelationId;
-                        _generatedMediaPeer = peerId;
-                        _generatedMediaDocument = documentId;
-                        _generatedMediaPage = pageId;
-                    }
                 }
             }
             catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
             {
                 // Closing a popup is an intentional cancellation; never reopen it from a late result.
+            }
+            catch (TimeoutException exception) when (_generatedMediaRequest != Guid.Empty)
+            {
+                if (generation == _mediaAiGeneration && _mediaAiVisible)
+                    _mediaAiResponse = "PublisherStudio stopped waiting for the reply. The Council may still be working in LocalGPT Chat. Use Retrieve and insert generated media to check this request again.";
+                Logger.LogInformation(exception, "PublisherStudio stopped waiting for media request {CorrelationId}.", _generatedMediaRequest);
             }
             catch (Exception exception)
             {

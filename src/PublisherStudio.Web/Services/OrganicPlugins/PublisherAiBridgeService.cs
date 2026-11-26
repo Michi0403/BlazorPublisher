@@ -45,6 +45,9 @@ public sealed class PublisherAiChatRequest
 
     /// <summary>PublisherStudio media format requested for authenticated return to the originating editor.</summary>
     public string PublisherMediaKind { get; set; } = string.Empty;
+
+    /// <summary>Lets the originating editor retain the request ID while the Council is still running.</summary>
+    internal Func<Guid, Task>? RequestSentAsync { get; init; }
 }
 
 /// <summary>
@@ -194,6 +197,8 @@ public sealed class PublisherAiBridgeService(
                 : string.Concat(systemPrompt, "\n\n", prompt);
 
             var correlationId = await localGpt.SendCouncilRequestAsync(councilRequest, cancellationToken).ConfigureAwait(false);
+            if (request.RequestSentAsync is { } requestSent)
+                await requestSent(correlationId).ConfigureAwait(false);
             var deadline = DateTimeOffset.UtcNow.AddMinutes(10);
             while (true)
             {

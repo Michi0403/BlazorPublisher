@@ -75,7 +75,8 @@
                             }
                             <label for="publisher-media-team">Council team</label>
                             <DxComboBox TData="string" TValue="string" InputId="publisher-media-team" Data="@AvailableAiTeamKeys" @bind-Value="_mediaAiTeamKey" />
-                            <DxMemo Rows="5" @bind-Text="_mediaAiPrompt" NullText='@LT("Describe the picture, video, audio or panel you want")' />
+                            <DxMemo Rows="5" @bind-Text="_mediaAiPrompt" BindValueMode="BindValueMode.OnInput"
+                                    NullText='@LT("Describe the picture, video, audio or panel you want")' />
                             @if (_mediaAiBusy) { <p role="status">@LT("LocalGPT Council is thinking...")</p> }
                             @if (!string.IsNullOrWhiteSpace(_mediaAiResponse))
                             {

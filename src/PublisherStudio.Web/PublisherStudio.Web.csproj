@@ -6,7 +6,7 @@
     <InvariantGlobalization>false</InvariantGlobalization>
     <RootNamespace>PublisherStudio</RootNamespace>
     <AssemblyName>PublisherStudio.Web</AssemblyName>
-    <Version>4.9.9</Version>
+    <Version>4.9.10</Version>
     <Product>PublisherStudio</Product>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);1591</NoWarn>
@@ -45,6 +45,7 @@
     <PackageReference Include="DevExpress.Blazor.RichEdit.es" Version="$(DevExpressVersion)" />
     <PackageReference Include="DevExpress.Blazor.RichEdit.ja" Version="$(DevExpressVersion)" />
     <PackageReference Include="DevExpress.AspNetCore.Spreadsheet" Version="$(DevExpressVersion)" />
+    <PackageReference Include="DevExpress.Drawing.Skia" Version="$(DevExpressVersion)" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="10.0.15" />
     <PackageReference Include="System.CodeDom" Version="10.0.15" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="10.0.15" />

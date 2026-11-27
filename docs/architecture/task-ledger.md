@@ -51,3 +51,8 @@
 ## 4.8.2 - Document creation settings
 
 - **Closed (source implementation, compiler and runtime not executed):** the fixed content limit, title length and editor timeouts of 4.8.1 moved to `OrganicPlugins:DocumentCreation` (`OrganicDocumentCreationOptions`); no constant remains in the handler or registry.
+
+## 5.0.1 — Second-rate Salamander
+
+- Aligned the PublisherStudio web and installer versions for testing with LocalGPT 7.8.10.
+- Pending live verification on the target systems: generated images display and generated video plays on the PublisherStudio canvas, with previews and downloads available in LocalGPT Chat.

@@ -1464,6 +1464,7 @@
     /// Performs approve for <see cref="OrganicPlugins"/>, keeping the operation consistent with the state and invariants of the surrounding organic plugins workflow.
     /// </summary>
     /// <param name="id">Identifier of the resource to use for this operation.</param>
+    /// <param name="persist">Whether to approve matching actions until the approval scope changes.</param>
     /// <returns>A task that completes when the operation has finished.</returns>
     private async Task ApproveAsync(Guid id, bool persist = false)
     {

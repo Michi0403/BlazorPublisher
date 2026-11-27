@@ -49,7 +49,29 @@ function Initialize-BuildConsoleEncoding {
 }
 Initialize-BuildConsoleEncoding
 
+function Resolve-ProjectVersion {
+    param([Parameter(Mandatory)][string]$ProjectPath)
+
+    [xml]$project = Get-Content -LiteralPath $ProjectPath -Raw
+    $versions = @($project.SelectNodes('/Project/PropertyGroup/Version') |
+        ForEach-Object { $_.InnerText.Trim() })
+    if ($versions.Count -ne 1) {
+        throw "${ProjectPath}(1,1): error PSREL1001: Declare one PublisherStudio release version in the project file."
+    }
+    $version = $versions[0]
+    if ($version -cnotmatch '^(?:0|[1-9][0-9]*)\.[0-9]\.[0-9]$') {
+        throw "${ProjectPath}(1,1): error PSREL1001: Version '$version' must use a single digit for minor and patch. Roll 4.9.9 forward to 5.0.0."
+    }
+    return $version
+}
+
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
+$webProject = Join-Path $root "src/PublisherStudio.Web/PublisherStudio.Web.csproj"
+$setupProject = Join-Path $root "src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj"
+$appVersion = Resolve-ProjectVersion -ProjectPath $webProject
+$setupVersion = Resolve-ProjectVersion -ProjectPath $setupProject
+# Every publish below passes these versions explicitly, so a csproj edit during a long release run cannot mix versions between RIDs.
+if ($appVersion -ne $setupVersion) { throw "PublisherStudio application version $appVersion does not match setup version $setupVersion." }
 $buildStorageScript = Join-Path $root 'build/RepositoryBuildStorage.Common.ps1'
 if (-not (Test-Path -LiteralPath $buildStorageScript -PathType Leaf)) { throw "Repository build-storage helper is missing: $buildStorageScript" }
 . $buildStorageScript
@@ -102,9 +124,7 @@ Write-Host "Cleared $clearedBuildStateCount repository-local bin/obj director$(i
 $configuredReleaseOutputRoot = if (-not [string]::IsNullOrWhiteSpace($ReleaseOutputRoot)) { $ReleaseOutputRoot } else { [string]$env:FUTURE2_RELEASE_OUTPUT_ROOT }
 $artifacts = if (-not [string]::IsNullOrWhiteSpace($configuredReleaseOutputRoot)) { [IO.Path]::GetFullPath($configuredReleaseOutputRoot) } else { Join-Path $root "artifacts/release" }
 $packageDirectory = Join-Path $root "packages"
-$webProject = Join-Path $root "src/PublisherStudio.Web/PublisherStudio.Web.csproj"
 $webDirectory = Split-Path -Parent $webProject
-$setupProject = Join-Path $root "src/PublisherStudio.InstallerConsole/PublisherStudio.InstallerConsole.csproj"
 $documentationScript = Join-Path $root "build/Build-Documentation.ps1"
 $pagesSnapshotScript = Join-Path $root "build/Update-GitHubPagesSnapshot.ps1"
 $pagesSnapshotArchive = Join-Path $root ".github/pages/publisherstudio-kawaii-docs.zip"
@@ -142,19 +162,6 @@ function Get-HostDefaultRuntimes {
         'Linux'   { return @('linux-x64', 'linux-arm64') }
         'macOS'   { return @('osx-x64', 'osx-arm64', 'linux-x64', 'linux-arm64', 'win-x64', 'win-x86', 'win-arm64') }
     }
-}
-
-function Resolve-ProjectVersion {
-    param([Parameter(Mandatory)][string]$ProjectPath)
-
-    [xml]$project = Get-Content -LiteralPath $ProjectPath -Raw
-    $versions = @(
-        $project.Project.PropertyGroup |
-            ForEach-Object { [string]$_.Version } |
-            Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
-    )
-    if ($versions.Count -eq 0) { throw "Project version was not found in $ProjectPath" }
-    return $versions[0]
 }
 
 function Resolve-PublishProfilePath {
@@ -529,10 +536,6 @@ function New-PublisherStudioReleaseArchive {
     }
 }
 
-$appVersion = Resolve-ProjectVersion -ProjectPath $webProject
-$setupVersion = Resolve-ProjectVersion -ProjectPath $setupProject
-# Every publish below passes these versions explicitly, so a csproj edit during a long release run cannot mix versions between RIDs.
-if ($appVersion -ne $setupVersion) { throw "PublisherStudio application version $appVersion does not match setup version $setupVersion." }
 
 
 function Get-ReleaseSourceFingerprint {

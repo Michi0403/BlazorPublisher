@@ -33,6 +33,8 @@ pwsh ./Build-Release.ps1
 
 The development and release scripts restore the pinned .NET tools from both the root and application manifests before compilation. To refresh the workloads for the active SDK as part of a build, pass `-DotNetWorkloads Update`. If your SDK installation requires administrator access on macOS or Linux, use `-DotNetWorkloads UpdateWithSudo`. Only the workload update runs through `sudo`.
 
+After builds finish, run `pwsh ./Clean-Build.ps1 -WhatIf` to preview removal of generated docs, checkout-local caches, and project `bin`/`obj` folders. Run it without `-WhatIf` to clean. The script preserves packaged releases, package feeds, and published documentation snapshots. Pass `-ReleaseOutputRoot` with any custom release output path inside a cleanup folder.
+
 The PowerShell entry points run the repository's architecture and Pages maintenance checks and invoke the managed release-packaging helper. Normal builds validate and provision the pinned DevExpress/DevExtreme browser assets and runtime key before compilation. A licensed development/build environment is required for the maintained DevExpress-based UI. Current .NET package restore uses NuGet.org plus the repository-local LocalGPT wire-protocol cache where applicable; the private DevExpress developer license is a separate build-time identity and is not included in source ZIPs or end-user installations.
 
 ## Documentation

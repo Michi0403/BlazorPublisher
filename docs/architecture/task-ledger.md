@@ -16,7 +16,7 @@
 
 ## 4.5.1 — Application tooltip appearance delay
 
-- **Closed (source, offline checked):** tripled PublisherStudio-owned hover/focus tooltip delays; captured native HTML `title` hints through the same runtime; preserved existing dismissal behavior. Evidence: `wwwroot/js/tooltipRuntime.js`, `tests/js/tooltip-delay-4.5.1.test.cjs` and `CHANGELOG-4.5.1-TOOLTIP-DELAY.md`.
+- **Closed (source, offline checked):** tripled PublisherStudio-owned hover/focus tooltip delays; captured native HTML `title` hints through the same runtime; preserved existing dismissal behavior. Evidence: `wwwroot/js/tooltipRuntime.js`, `tests/js/tooltip-delay-4.5.1.test.cjs` and `maintenance/changelogs/CHANGELOG-4.5.1-TOOLTIP-DELAY.md`.
 - **Deferred:** verify browser-native and DevExpress-vendor tooltip timing live in the installed application. Separate vendor-owned tooltip widgets may not follow the PublisherStudio runtime delay.
 
 ## 4.7.2 — Manual LocalGPT link build follow-up

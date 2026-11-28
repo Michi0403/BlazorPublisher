@@ -1578,7 +1578,7 @@ exit 0
         # Installer pages (welcome, read me, license, background) come from repository files, as in LocalGPT.
         New-Item -ItemType Directory -Path $pkgResources -Force | Out-Null
         $repositoryRoot = Split-Path -Parent $PSScriptRoot
-        $readmeSource = Join-Path $repositoryRoot 'README.md'
+        $readmeSource = Join-Path $PSScriptRoot 'macpkg/README.txt'
         $licenseSource = Join-Path $repositoryRoot 'LICENSE.MD'
         if (-not (Test-Path -LiteralPath $licenseSource -PathType Leaf)) { $licenseSource = Join-Path $repositoryRoot 'LICENSE' }
         $noticesSource = Join-Path $repositoryRoot 'THIRD-PARTY-NOTICES.md'
@@ -1591,13 +1591,13 @@ exit 0
                 throw "Missing or empty macOS Installer resource: $resourceSource"
             }
         }
-        Write-Utf8NoBom (Join-Path $pkgResources 'README.txt') ([IO.File]::ReadAllText($readmeSource))
+        $distributionTitle = "$ProductName $Version"
+        Write-Utf8NoBom (Join-Path $pkgResources 'README.txt') ("$distributionTitle`n`n" + [IO.File]::ReadAllText($readmeSource))
         Write-Utf8NoBom (Join-Path $pkgResources 'LICENSE.txt') (([IO.File]::ReadAllText($licenseSource)) + [Environment]::NewLine + [Environment]::NewLine + ([IO.File]::ReadAllText($noticesSource)))
         Copy-Item -LiteralPath $backgroundSource -Destination (Join-Path $pkgResources 'background.png') -Force
         Assert-PublisherMacPackageResources -ResourcesDirectory $pkgResources
 
         $componentPackageName = [IO.Path]::GetFileName($componentPackage)
-        $distributionTitle = "$ProductName $Version"
         $escapedDistributionTitle = [Security.SecurityElement]::Escape($distributionTitle)
         $escapedIdentifier = [Security.SecurityElement]::Escape($identifier)
         $escapedComponentPackageName = [Security.SecurityElement]::Escape($componentPackageName)

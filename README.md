@@ -2,6 +2,14 @@
 
 PublisherStudio is an open-source, local-first .NET 10 and Blazor publishing environment for documents, stories, pictures, spreadsheets, presentations, websites, video, streaming, and reusable interactive panels. It is designed to remain useful as a standalone application while optionally cooperating with LocalGPT and organic 1-Wire peers.
 
+[Latest release](https://github.com/Michi0403/BlazorPublisher/releases/latest) · [User guide](https://michi0403.github.io/BlazorPublisher/) · [Release history](maintenance/changelogs/)
+
+## Install and update
+
+Download the package for your platform from the [latest release](https://github.com/Michi0403/BlazorPublisher/releases/latest). On macOS, open the `.pkg` and follow Installer, or open the DMG and drag PublisherStudio to Applications. Launch it from Applications. See the [installation guide](docs/articles/installer-and-updates.md) for platform-specific steps.
+
+PublisherStudio can be used on its own. See [LocalGPT and 1-Wire](docs/articles/localgpt-and-onewire.md) to connect the applications and use PublisherStudio tools from LocalGPT.
+
 ## Future2 role
 
 PublisherStudio is the creative/productivity side of the broader **Future2** direction: user-owned software and AI infrastructure that does not require a centralized corporate or government service to own the user's data, tools, or workflow. Cloud and web services can be integrated where useful, but local operation and human authority remain first-class.
@@ -25,17 +33,13 @@ pwsh ./Build-Release.ps1
 
 The development and release scripts restore the pinned .NET tools from both the root and application manifests before compilation. To refresh the workloads for the active SDK as part of a build, pass `-DotNetWorkloads Update`. If your SDK installation requires administrator access on macOS or Linux, use `-DotNetWorkloads UpdateWithSudo`. Only the workload update runs through `sudo`.
 
-PublisherStudio 4.2.0 uses the PowerShell-only architecture and Pages maintenance checks, and consumes the LocalGPT 6.0.2 release-packaging helper (1.1.2) directly as a managed tool without `dotnet tool install`. Debug/Release own dependency resolution through their existing one-command entrypoints. Normal non-design-time builds automatically run the maintained DevExpress asset ensure-current preflight. If the generated browser payload is missing, stale, mixed-version, or hash-invalid, the existing PowerShell provisioning flow restores and seeds the exact DevExpress/DevExtreme 26.1.6 assets and runtime key before compilation continues. A licensed development/build environment is required for the maintained DevExpress-based UI. Current .NET package restore uses NuGet.org plus the repository-local LocalGPT wire-protocol cache where applicable; the private DevExpress developer license is a separate build-time identity and is not included in source ZIPs or end-user installations.
+The PowerShell entry points run the repository's architecture and Pages maintenance checks and invoke the managed release-packaging helper. Normal builds validate and provision the pinned DevExpress/DevExtreme browser assets and runtime key before compilation. A licensed development/build environment is required for the maintained DevExpress-based UI. Current .NET package restore uses NuGet.org plus the repository-local LocalGPT wire-protocol cache where applicable; the private DevExpress developer license is a separate build-time identity and is not included in source ZIPs or end-user installations.
 
 ## Documentation
 
 The maintained Markdown is under `docs/`. A normal owner build creates one Kawaii DocFX tree in `wwwroot/help-docs`, including the complete XML-generated API reference and the versioned HTML-backed PDF. `Update-GitHubPagesSnapshot.cmd` / its PowerShell counterpart validates that generated tree and refreshes `.github/pages/publisherstudio-kawaii-docs.zip`. GitHub Pages publishes that exact validated snapshot; the authored `docs/` directory is never overwritten with generated output.
 
 The in-app Help page opens the same HTML, PDF, API reference, and status routes in the focus-managed documentation viewer.
-
-## Install and update
-
-The release setup uses the canonical per-user PublisherStudio root, exact runtime assets, wrapper validation, writable user-data locations, and maintained Install/Update/Start/Folder shortcuts. macOS builds native `.app`, DMG and PKG forms; Linux/Windows package lanes remain part of the same release coordinator. LocalGPT and organic 1-Wire integration remain optional.
 
 ## License
 

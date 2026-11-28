@@ -14,9 +14,9 @@ Baseline: `PublisherStudio-4.1.8-source`. New source: `PublisherStudio-4.1.9-sou
 
 ## New release documentation
 
-- `CHANGELOG-v4.1.9-NET10-SECURITY.md`
+- [4.1.9 release notes](maintenance/changelogs/CHANGELOG-v4.1.9-NET10-SECURITY.md)
 - `RELEASE-CHECKLIST-v4.1.9-NET10-SECURITY.md`
-- `VALIDATION-v4.1.9-NET10-SECURITY.md`
+- [4.1.9 validation record](maintenance/validation/VALIDATION-v4.1.9-NET10-SECURITY.md)
 
 ## Maintained invariants
 

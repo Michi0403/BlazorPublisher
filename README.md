@@ -23,6 +23,8 @@ pwsh ./Build-LocalDevelopment.ps1
 pwsh ./Build-Release.ps1
 ```
 
+The development and release scripts restore the pinned .NET tools from both the root and application manifests before compilation. To refresh the workloads for the active SDK as part of a build, pass `-DotNetWorkloads Update`. If your SDK installation requires administrator access on macOS or Linux, use `-DotNetWorkloads UpdateWithSudo`. Only the workload update runs through `sudo`.
+
 PublisherStudio 4.2.0 uses the PowerShell-only architecture and Pages maintenance checks, and consumes the LocalGPT 6.0.2 release-packaging helper (1.1.2) directly as a managed tool without `dotnet tool install`. Debug/Release own dependency resolution through their existing one-command entrypoints. Normal non-design-time builds automatically run the maintained DevExpress asset ensure-current preflight. If the generated browser payload is missing, stale, mixed-version, or hash-invalid, the existing PowerShell provisioning flow restores and seeds the exact DevExpress/DevExtreme 26.1.6 assets and runtime key before compilation continues. A licensed development/build environment is required for the maintained DevExpress-based UI. Current .NET package restore uses NuGet.org plus the repository-local LocalGPT wire-protocol cache where applicable; the private DevExpress developer license is a separate build-time identity and is not included in source ZIPs or end-user installations.
 
 ## Documentation

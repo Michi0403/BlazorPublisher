@@ -7,7 +7,8 @@ param(
     [string]$LocalGptRepository = "",
     [switch]$RefreshWireProtocolPackage,
     [switch]$UseBundledWireProtocolPackage,
-    [switch]$UseContainerPackaging
+    [switch]$UseContainerPackaging,
+    [ValidateSet('None', 'Update', 'UpdateWithSudo')][string]$DotNetWorkloads = 'None'
 )
 
 $ErrorActionPreference = "Stop"
@@ -34,6 +35,7 @@ $arguments = @{
     WireProtocolVersion = $WireProtocolVersion
     WireProtocolPackageUrl = $WireProtocolPackageUrl
     LocalGptRepository = $LocalGptRepository
+    DotNetWorkloads = $DotNetWorkloads
 }
 if ($RefreshWireProtocolPackage) { $arguments.RefreshWireProtocolPackage = $true }
 if ($UseBundledWireProtocolPackage) { $arguments.UseBundledWireProtocolPackage = $true }

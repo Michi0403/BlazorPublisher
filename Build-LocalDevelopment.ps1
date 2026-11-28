@@ -6,7 +6,8 @@ param(
     [string]$LocalGptRepository = "",
     [switch]$RefreshWireProtocolPackage,
     [switch]$UseWireProtocolPackage,
-    [switch]$Clean
+    [switch]$Clean,
+    [ValidateSet('None', 'Update', 'UpdateWithSudo')][string]$DotNetWorkloads = 'None'
 )
 
 $ErrorActionPreference = "Stop"
@@ -26,6 +27,7 @@ $root = Split-Path -Parent $MyInvocation.MyCommand.Path
 & (Join-Path $root 'build/Assert-PowerShellCompatibility.ps1')
 & (Join-Path $root ([IO.Path]::Combine('build', 'Assert-SourcePackagePrerequisites.ps1'))) -RepositoryRoot $root
 & (Join-Path $root ([IO.Path]::Combine('build', 'Assert-CrossPlatformBoundaries.ps1'))) -RepositoryRoot $root
+& (Join-Path $root 'build/Initialize-DotNetBuildTools.ps1') -ToolManifest @('.config/dotnet-tools.json', 'src/PublisherStudio.Web/dotnet-tools.json') -DotNetWorkloads $DotNetWorkloads
 Write-Host "Refreshing reviewed PublisherStudio frontend SHA-256 inventory before the ordered CLI build..." -ForegroundColor DarkCyan
 & (Join-Path $root 'build/Update-JavaScriptDiagnosticsManifest.ps1')
 & (Join-Path $root 'build/Assert-JavaScriptDiagnostics.ps1')

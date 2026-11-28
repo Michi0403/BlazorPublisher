@@ -30,7 +30,8 @@ param(
     [switch]$WslChildBuild,
     [switch]$SkipReleaseBundle,
     [string]$PreparedDocumentationRoot = "",
-    [switch]$UsePreparedClientAssets
+    [switch]$UsePreparedClientAssets,
+    [ValidateSet('None', 'Update', 'UpdateWithSudo')][string]$DotNetWorkloads = 'None'
 )
 
 $ErrorActionPreference = "Stop"
@@ -78,7 +79,7 @@ if (-not (Test-Path -LiteralPath $buildStorageScript -PathType Leaf)) { throw "R
 $buildStorage = Initialize-Future2RepositoryBuildStorage -RepositoryRoot $root -DocumentationCacheRoot $DocumentationCacheRoot
 Write-Host "[Build stage: preflight] PublisherStudio: configuration=$Configuration; runtime=$Runtime; compileOnly=$CompileOnly." -ForegroundColor Cyan
 if ($CompileOnly) {
-    & (Join-Path $root 'build/Invoke-ReleaseCompileValidation.ps1') -Solution 'src/PublisherStudio.sln' -Configuration $Configuration
+    & (Join-Path $root 'build/Invoke-ReleaseCompileValidation.ps1') -Solution 'src/PublisherStudio.sln' -Configuration $Configuration -DotNetWorkloads $DotNetWorkloads
     return
 }
 $nodeRuntimeCommonScript = Join-Path $root 'build/NodeRuntime.Common.ps1'
@@ -90,6 +91,7 @@ if (-not (Test-Path -LiteralPath $wslCommonScript -PathType Leaf)) { throw "WSL 
 & (Join-Path $root 'build/Assert-PowerShellCompatibility.ps1')
 & (Join-Path $root ([IO.Path]::Combine('build', 'Assert-SourcePackagePrerequisites.ps1'))) -RepositoryRoot $root -SkipNodeRuntime:($WslChildBuild -and $UsePreparedClientAssets -and -not [string]::IsNullOrWhiteSpace($PreparedDocumentationRoot))
 & (Join-Path $root ([IO.Path]::Combine('build', 'Assert-CrossPlatformBoundaries.ps1'))) -RepositoryRoot $root
+& (Join-Path $root 'build/Initialize-DotNetBuildTools.ps1') -ToolManifest @('.config/dotnet-tools.json', 'src/PublisherStudio.Web/dotnet-tools.json') -DotNetWorkloads $DotNetWorkloads
 Write-Host "Refreshing reviewed PublisherStudio frontend SHA-256 inventory before the ordered CLI build..." -ForegroundColor DarkCyan
 & (Join-Path $root 'build/Update-JavaScriptDiagnosticsManifest.ps1')
 & (Join-Path $root 'build/Assert-ReciprocalOneWireTrustUI.ps1')

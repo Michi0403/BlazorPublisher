@@ -1,6 +1,7 @@
 param(
     [Parameter(Mandatory)][string]$Solution,
-    [ValidateSet('Release', 'Debug')][string]$Configuration = 'Release'
+    [ValidateSet('Release', 'Debug')][string]$Configuration = 'Release',
+    [ValidateSet('None', 'Update', 'UpdateWithSudo')][string]$DotNetWorkloads = 'None'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -24,6 +25,7 @@ $env:NUGET_HTTP_CACHE_PATH = Join-Path $logRoot 'nuget-http-cache'
 & (Join-Path $PSScriptRoot 'Assert-OneWireTrafficFile.ps1')
 & (Join-Path $PSScriptRoot 'Update-JavaScriptDiagnosticsManifest.ps1')
 & (Join-Path $PSScriptRoot 'Assert-JavaScriptDiagnostics.ps1')
+& (Join-Path $repositoryRoot 'build/Initialize-DotNetBuildTools.ps1') -ToolManifest @('.config/dotnet-tools.json', 'src/PublisherStudio.Web/dotnet-tools.json') -DotNetWorkloads $DotNetWorkloads
 
 # Build targets retain every normal maintenance guard. This path deliberately stops
 # before documentation generation, native packaging, setup or application launch.
